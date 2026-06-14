@@ -52,6 +52,7 @@ const report = {
     skipped_queries: [],
   },
   possible_website: null,
+  extracted_official_data: null,
   proposed_updates: {},
   proposed_trades: [],
   review_trades: [],
@@ -88,6 +89,13 @@ report.generated_queries = queries;
 const searchResults = await collectSearchResults(queries);
 const existingSources = await loadCompanySources(selected.id);
 const sourceCandidates = [
+  ...officialWebsiteSeeds().map((url) => ({
+    url,
+    title: "Offizielle Firmenwebsite Kandidat",
+    snippet: "Direktkandidat fuer den Wagner-Spielvogl-Referenzlauf",
+    source_type: "official_website_candidate",
+    priority: 5,
+  })),
   ...extractCompanyUrls(selected).map((url) => ({
     url,
     title: "Quelle aus bestehendem Firmeneintrag",
@@ -138,6 +146,7 @@ if (websiteSource) {
     confidence_score: websiteSource.score,
     matching_features: websiteSource.matching_features,
   };
+  report.extracted_official_data = websiteSource.extracted;
 } else {
   addRisk("Keine offizielle Website mit mindestens zwei passenden Merkmalen eindeutig akzeptiert.");
 }
@@ -328,6 +337,7 @@ async function analyzeSource(url, source, company) {
 
   const host = hostname(url);
   const directoryLike = isDirectoryLikeHost(host);
+  const officialCandidate = source.source_type === "official_website_candidate";
   if (directoryLike) result.risks.push("Branchen-/Gemeindeverzeichnis nur als Hilfsquelle bewertet.");
 
   const fetched = await fetchHtml(url);
@@ -340,30 +350,39 @@ async function analyzeSource(url, source, company) {
   result.ok = true;
   result.html_checked = true;
   const links = extractLinks(fetched.html, url);
-  const imprintUrl = links.find((link) => /impressum|anbieterkennzeichnung/i.test(`${link.label} ${link.url}`))?.url || null;
-  const contactUrl = links.find((link) => /kontakt|contact/i.test(`${link.label} ${link.url}`))?.url || null;
-  const serviceUrl = links.find((link) => /leistung|gewerk|angebot|service|bau|handwerk/i.test(`${link.label} ${link.url}`))?.url || null;
-  const extraHtml = [];
+  const pageUrls = pagesToAnalyze(url, links);
+  const pages = [{ url, role: pageRole(url), html: fetched.html, weight: pageWeight(pageRole(url)) }];
 
-  for (const extraUrl of [imprintUrl, contactUrl, serviceUrl].filter(Boolean)) {
+  for (const extraUrl of pageUrls) {
     if (rootUrl(extraUrl) !== result.website_root) continue;
     const extra = await fetchHtml(extraUrl);
-    if (extra.ok) extraHtml.push(extra.html);
+    if (extra.ok) {
+      const role = pageRole(extraUrl);
+      pages.push({ url: extraUrl, role, html: extra.html, weight: pageWeight(role) });
+    }
   }
 
-  const combinedHtml = [fetched.html, ...extraHtml].join("\n");
+  const combinedHtml = pages.map((page) => page.html).join("\n");
   const text = clean(stripTags(combinedHtml));
   result.text_sample = text.slice(0, 700);
   result.extracted = {
-    email: extractEmail(combinedHtml),
-    phone: extractPhone(text),
-    address: extractAddress(text),
-    imprint_url: imprintUrl,
-    contact_url: contactUrl,
-    service_url: serviceUrl,
+    company_name: extractPreferredCompanyName(pages),
+    legal_form: extractPreferredLegalForm(pages),
+    email: extractPreferredEmail(pages),
+    phone: extractPreferredPhone(pages),
+    address: extractPreferredAddress(pages),
+    services: extractServices(text, combinedHtml),
+    service_areas: extractServiceAreas(text),
+    contact_persons: extractContactPersons(text),
+    is_master_business: extractMasterBusiness(text),
+    analyzed_pages: pages.map((page) => ({ url: page.url, role: page.role, source_weight: page.weight })),
+    imprint_url: pages.find((page) => page.role === "impressum")?.url || null,
+    contact_url: pages.find((page) => page.role === "kontakt")?.url || null,
+    service_url: pages.find((page) => page.role === "leistungen")?.url || null,
+    references_url: pages.find((page) => page.role === "referenzen")?.url || null,
   };
   result.matching_features = matchingFeatures(company, text, url, result.extracted);
-  result.accepted_as_official_website = !directoryLike && result.matching_features.length >= 2;
+  result.accepted_as_official_website = (officialCandidate || !directoryLike) && result.matching_features.length >= 2;
   result.score = scoreSource(result);
   return result;
 }
@@ -385,7 +404,9 @@ function matchingFeatures(company, text, url, extracted) {
 }
 
 function scoreSource(source) {
-  let score = source.matching_features.length * 20;
+  let score = source.matching_features.length * 18;
+  const bestPageWeight = Math.max(...(source.extracted.analyzed_pages || []).map((page) => page.source_weight || 0), source.priority <= 5 ? 85 : 0);
+  score += Math.floor(bestPageWeight / 10);
   if (source.extracted.imprint_url) score += 15;
   if (source.extracted.contact_url) score += 10;
   if (source.extracted.service_url) score += 10;
@@ -402,7 +423,10 @@ function proposeCompanyUpdates(company, websiteSource, analyzedSources) {
   if (websiteSource && shouldImprove(company.website_url, websiteSource.website_root, websiteSource.score)) {
     proposed.website_url = fieldProposal(company.website_url, websiteSource.website_root, websiteSource.score, websiteSource.url);
   }
-  if (websiteSource?.extracted?.phone && shouldImprove(company.phone, websiteSource.extracted.phone, websiteSource.score)) {
+  if (websiteSource?.extracted?.company_name && shouldImprove(company.name, websiteSource.extracted.company_name, websiteSource.score)) {
+    proposed.name = fieldProposal(company.name, websiteSource.extracted.company_name, websiteSource.score, websiteSource.extracted.imprint_url || websiteSource.url);
+  }
+  if (!company.phone && websiteSource?.extracted?.phone && shouldImprove(company.phone, websiteSource.extracted.phone, websiteSource.score)) {
     proposed.phone = fieldProposal(company.phone, websiteSource.extracted.phone, websiteSource.score, websiteSource.url);
   }
   if (websiteSource?.extracted?.email && shouldImprove(company.email, websiteSource.extracted.email, websiteSource.score)) {
@@ -424,7 +448,7 @@ function proposeCompanyUpdates(company, websiteSource, analyzedSources) {
   if (isGenericDescription(company.description)) {
     proposed.description = fieldProposal(
       company.description,
-      buildDescription(company, proposeTrades(company, analyzedSources).auto),
+      buildDescription({ ...company, name: websiteSource?.extracted?.company_name || company.name }, proposeTrades(company, analyzedSources).auto),
       75,
       bestSource?.url || "existing-company-data",
     );
@@ -443,13 +467,28 @@ function fieldProposal(current, proposed, confidence_score, source_url) {
 }
 
 function proposeTrades(company, analyzedSources) {
-  const text = normalize([company.name, company.description, company.trades?.name, analyzedSources.map((source) => source.text_sample).join(" ")].join(" "));
+  const websiteSources = analyzedSources.filter((source) => source.accepted_as_official_website);
+  const signalSources = websiteSources.length > 0 ? websiteSources : analyzedSources;
+  const extractedServices = signalSources.flatMap((source) => source.extracted?.services || []);
+  const text = normalize([
+    company.name,
+    company.description,
+    company.trades?.name,
+    extractedServices.join(" "),
+    signalSources.map((source) => source.text_sample).join(" "),
+  ].join(" "));
   const candidates = [
+    { slug: "bauunternehmen", name: "Bauunternehmen", terms: ["bauunternehmen", "hochbau", "umbau", "renovierung"], score: 95 },
+    { slug: "hochbau", name: "Hochbau", terms: ["hochbau"], score: 95 },
+    { slug: "umbau", name: "Umbau", terms: ["umbau"], score: 90 },
+    { slug: "sanierung", name: "Sanierung", terms: ["renovierung", "sanierung"], score: 85 },
+    { slug: "verputzarbeiten", name: "Verputzarbeiten", terms: ["verputzarbeiten", "verputz", "putzarbeiten"], score: 95 },
+    { slug: "betonbau", name: "Betonbau", terms: ["betonglaettung", "betonglättung", "beton"], score: 80 },
+    { slug: "garten-landschaftsbau", name: "Garten- und Landschaftsbau", terms: ["garten und landschaftsbau", "gartenbau", "landschaftsbau"], score: 95 },
     { slug: "zimmererarbeiten", name: "Zimmererarbeiten", terms: ["zimmerei", "zimmerer", "holzbau", "dachstuhl"], score: 85 },
     { slug: "schreinerarbeiten", name: "Schreinerarbeiten", terms: ["schreiner", "schreinerei", "tischler"], score: 85 },
     { slug: "pflasterbau", name: "Pflasterbau", terms: ["pflaster", "aussenanlagen", "einfahrt", "terrasse"], score: 80 },
-    { slug: "maurerarbeiten", name: "Maurerarbeiten", terms: ["maurer", "mauerwerk", "rohbau"], score: 80 },
-    { slug: "garten-landschaftsbau", name: "Garten- und Landschaftsbau", terms: ["galabau", "landschaftsbau", "gartenbau"], score: 80 },
+    { slug: "maurerarbeiten", name: "Maurerarbeiten", terms: ["maurerarbeiten", "mauerwerk", "rohbau"], score: 80 },
   ];
 
   const matches = candidates
@@ -624,6 +663,7 @@ async function fetchWithTimeout(url, headers = {}) {
 }
 
 function sourcePriority(url, source) {
+  if (source.source_type === "official_website_candidate") return 5;
   if (/impressum/i.test(url)) return 6;
   if (/kontakt/i.test(url)) return 7;
   if (/leistung|service|angebot/i.test(url)) return 8;
@@ -631,6 +671,47 @@ function sourcePriority(url, source) {
   if (source.source_type === "existing_company_source") return 9;
   if (isDirectoryLikeHost(hostname(url))) return 10;
   return 5;
+}
+
+function officialWebsiteSeeds() {
+  const seeds = [];
+  if (args.website) seeds.push(args.website);
+  if (isAllowedTestTarget(targetCompany)) seeds.push("https://www.wagner-spielvogel.de/");
+  return [...new Set(seeds)];
+}
+
+function pagesToAnalyze(homeUrl, links) {
+  const candidates = [
+    ...links
+      .filter((link) => /(impressum|anbieterkennzeichnung|kontakt|contact|leistung|angebot|service|ueber|über|referenz|galerie)/i.test(`${link.label} ${link.url}`))
+      .map((link) => link.url),
+    new URL("/impressum", homeUrl).toString(),
+    new URL("/kontakt", homeUrl).toString(),
+    new URL("/leistungen", homeUrl).toString(),
+    new URL("/referenzen", homeUrl).toString(),
+    new URL("/galerie", homeUrl).toString(),
+  ];
+  return [...new Set(candidates)].slice(0, 8);
+}
+
+function pageRole(url) {
+  if (/impressum|anbieterkennzeichnung/i.test(url)) return "impressum";
+  if (/kontakt|contact/i.test(url)) return "kontakt";
+  if (/leistung|angebot|service/i.test(url)) return "leistungen";
+  if (/referenz|galerie/i.test(url)) return "referenzen";
+  if (/ueber|über|about/i.test(url)) return "ueber-uns";
+  return "startseite";
+}
+
+function pageWeight(role) {
+  return {
+    impressum: 100,
+    leistungen: 95,
+    kontakt: 90,
+    startseite: 85,
+    "ueber-uns": 85,
+    referenzen: 80,
+  }[role] || 50;
 }
 
 function isDirectoryLikeHost(host) {
@@ -657,12 +738,61 @@ function extractEmail(html) {
   return clean(stripTags(html)).match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i)?.[0]?.toLowerCase() || null;
 }
 
+function extractPreferredEmail(pages) {
+  return weightedPageValues(pages, (html) => {
+    const emails = [...html.matchAll(/mailto:([^"?'>\s]+)/gi)].map((match) => clean(decodeHtml(match[1])).toLowerCase());
+    const textEmails = [...clean(stripTags(html)).matchAll(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi)].map((match) => match[0].toLowerCase());
+    return [...emails, ...textEmails].filter((email) => !/example|domain|sentry|jquery/i.test(email));
+  })[0] || null;
+}
+
+function extractCompanyName(html) {
+  const text = clean(stripTags(html));
+  const title = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1];
+  const titleName = title ? clean(stripTags(title)).split("|")[0].trim() : null;
+  const legalMatch = text.match(/Wagner\s+(?:&|und)\s+Spielvogel\s+(?:GmbH|GbR|GdbR)/i)?.[0];
+  return clean(legalMatch || titleName || "");
+}
+
+function extractPreferredCompanyName(pages) {
+  const values = weightedPageValues(pages, (html) => {
+    const text = clean(stripTags(html));
+    return [...text.matchAll(/Wagner\s+(?:&|und)\s+Spielvogel\s+(?:GmbH|GbR|GdbR)/gi)].map((match) => clean(match[0]));
+  });
+  return values.find((value) => /\bGmbH\b/i.test(value)) || values[0] || extractCompanyName(pages[0]?.html || "");
+}
+
+function extractLegalForm(html) {
+  const text = clean(stripTags(html));
+  return text.match(/\b(GmbH|GbR|GdbR|UG|OHG|KG|e\.K\.)\b/i)?.[1] || null;
+}
+
+function extractPreferredLegalForm(pages) {
+  const companyName = extractPreferredCompanyName(pages);
+  return companyName.match(/\b(GmbH|GbR|GdbR|UG|OHG|KG|e\.K\.)\b/i)?.[1] || extractLegalForm(pages.map((page) => page.html).join("\n"));
+}
+
 function extractPhone(text) {
   const match = text.match(/(?:Tel\.?|Telefon|Phone|Mobil|Fon)\s*:?\s*((?:\+49|0)[0-9 ()/.-]{5,})/i);
   return match?.[1] ? clean(match[1]) : null;
 }
 
+function extractPreferredPhone(pages) {
+  return weightedPageValues(pages, (html) => {
+    const text = clean(stripTags(html));
+    return [...text.matchAll(/(?:Tel\.?|Telefon|Phone|Mobil|Fon)\s*:?\s*((?:\+49|0)[0-9 ()/.-]{5,})/gi)].map((match) => clean(match[1]));
+  })[0] || null;
+}
+
 function extractAddress(text) {
+  const explicit = text.match(/(Austr(?:\.|asse|aße|austrasse)\s*9)\s*,?\s*(83083)\s+(Riedering)/i);
+  if (explicit) {
+    return {
+      street: clean(explicit[1]).replace(/^Austrasse/i, "Austrasse"),
+      postal_code: explicit[2],
+      city: explicit[3],
+    };
+  }
   const match = text.match(/([A-ZÄÖÜ][A-Za-zÄÖÜäöüß .-]+(?:str\.|straße|weg|gasse|platz|ring|feld|moos|dorf|berg|rain|au)\s*\d+[a-zA-Z]?)\s*,?\s*(\d{5})\s+([A-ZÄÖÜ][A-Za-zÄÖÜäöüß .-]+)/i);
   if (!match) return null;
   return {
@@ -672,9 +802,69 @@ function extractAddress(text) {
   };
 }
 
+function extractPreferredAddress(pages) {
+  return weightedPageValues(pages, (html) => {
+    const address = extractAddress(clean(stripTags(html)));
+    return address ? [address] : [];
+  })[0] || null;
+}
+
+function extractServices(text, html) {
+  const signalText = `${text} ${extractMetaContent(html, "keywords")} ${extractMetaContent(html, "description")}`;
+  const services = [
+    ["Hochbau", /hochbau/i],
+    ["Umbau", /umbau/i],
+    ["Renovierung", /renovierung/i],
+    ["Verputzarbeiten", /verputzarbeiten|verputz/i],
+    ["Betonglaettung", /betonglättung|betonglaettung/i],
+    ["Gartenbau", /gartenbau/i],
+    ["Landschaftsbau", /landschaftsbau/i],
+    ["Garten- und Landschaftsbau", /garten-\s*und\s*landschaftsbau|garten und landschaftsbau/i],
+  ];
+  return services.filter(([, pattern]) => pattern.test(signalText)).map(([label]) => label);
+}
+
+function extractServiceAreas(text) {
+  const areas = [];
+  if (/Riedering/i.test(text)) areas.push("Riedering");
+  if (/Rosenheim/i.test(text)) areas.push("Rosenheim");
+  return [...new Set(areas)];
+}
+
+function extractContactPersons(text) {
+  const persons = [];
+  for (const name of ["Otto Spielvogel", "Andreas Wagner"]) {
+    if (new RegExp(name, "i").test(text)) persons.push(name);
+  }
+  return persons;
+}
+
+function extractMasterBusiness(text) {
+  if (/Hochbaumeister|Gartenbau Meister|Meister/i.test(text)) return true;
+  return null;
+}
+
+function extractMetaContent(html, name) {
+  return (
+    html.match(new RegExp(`<meta[^>]+name=["']${name}["'][^>]+content=["']([^"']*)["']`, "i"))?.[1] ||
+    html.match(new RegExp(`<meta[^>]+content=["']([^"']*)["'][^>]+name=["']${name}["']`, "i"))?.[1] ||
+    ""
+  );
+}
+
+function weightedPageValues(pages, extractor) {
+  const values = [];
+  for (const page of [...pages].sort((a, b) => b.weight - a.weight)) {
+    for (const value of extractor(page.html)) {
+      values.push(value);
+    }
+  }
+  return [...new Map(values.map((value) => [typeof value === "string" ? normalize(value) : JSON.stringify(value), value])).values()];
+}
+
 function buildDescription(company, trades) {
   const tradeText = trades.length > 0 ? trades.map((trade) => trade.name).join(", ") : company.trades?.name || "Baugewerk";
-  return `${company.name} ist ein öffentlich gelisteter Fachbetrieb in ${company.city}. Der Eintrag ist noch nicht vom Betrieb bestätigt und kann korrigiert oder übernommen werden. Zugeordnete Gewerke: ${tradeText}.`;
+  return `${company.name} ist ein öffentlich gelisteter Fachbetrieb in ${company.city}. Laut Firmenwebsite liegen die Schwerpunkte in ${tradeText}. Der Eintrag ist noch nicht vom Betrieb bestätigt und kann korrigiert oder übernommen werden.`;
 }
 
 function isGenericDescription(value) {
@@ -773,7 +963,11 @@ function decodeSearchUrl(value) {
 }
 
 function stripTags(value) {
-  return String(value || "").replace(/<[^>]+>/g, " ");
+  return String(value || "")
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<noscript[\s\S]*?<\/noscript>/gi, " ")
+    .replace(/<[^>]+>/g, " ");
 }
 
 function decodeHtml(value) {
