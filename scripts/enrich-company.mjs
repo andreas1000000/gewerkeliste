@@ -2,9 +2,15 @@
 
 import { createClient } from "@supabase/supabase-js";
 import { execFile } from "node:child_process";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
+import { pathToFileURL } from "node:url";
 import { promisify } from "node:util";
+import ts from "typescript";
 
 const execFileAsync = promisify(execFile);
+const searchModule = await importSearchModule();
 
 const args = parseArgs(process.argv.slice(2));
 const targetCompany = String(args.company || args.name || "").trim();
@@ -51,6 +57,9 @@ const report = {
     search_api_available: false,
     executed_queries: [],
     skipped_queries: [],
+    result_count: 0,
+    ranked_results: [],
+    rejected_directory_results: [],
     note: null,
   },
   possible_website: null,
@@ -141,6 +150,7 @@ report.found_sources = analyzedSources
     priority: source.priority,
     accepted_as_official_website: source.accepted_as_official_website,
     matching_features: source.matching_features,
+    ranking_reasons: source.ranking_reasons,
     confidence_score: source.score,
     risks: source.risks,
   }));
@@ -264,40 +274,24 @@ async function loadCompanySources(companyId) {
 }
 
 function buildQueries(company) {
-  const name = targetCompany || company.name;
-  const city = targetCity || company.city || "";
-  const tradeHint = inferTradeHint(company);
-  const terms = [
-    `${name}`.trim(),
-    `${name} ${city}`.trim(),
-    `${name} Impressum`,
-    `${name} ${tradeHint} ${city}`.trim(),
-    `${name} Handwerk ${city}`.trim(),
-    `${name} Kontakt`,
-    `${name} ${company.postal_code || ""}`.trim(),
-    `${name} Leistungen`,
-    `${name} Referenzen`,
-    `${name} Bau`,
-    `${name} Firma`,
-    `${name} ${city} Impressum`.trim(),
-  ];
-
-  if (company.phone) terms.push(`"${name}" "${company.phone}"`);
-  if (company.street) terms.push(`"${name}" "${company.street}"`);
-  if (company.postal_code) terms.push(`"${name}" "${company.postal_code}"`);
-  return [...new Set(terms)];
+  return searchModule.buildCompanySearchQueries({
+    companyName: targetCompany || company.name,
+    city: targetCity || company.city || "",
+    postalCode: company.postal_code || "",
+    tradeHint: inferTradeHint(company),
+  });
 }
 
 async function collectSearchResults(queries) {
-  const provider = detectSearchProvider();
+  const provider = createSearchProvider();
   report.search_execution.provider = provider?.name || null;
-  report.search_execution.search_api_available = Boolean(provider);
+  report.search_execution.search_api_available = Boolean(provider?.available);
 
-  if (!provider) {
+  if (!provider?.available) {
     report.search_execution.executed_queries = [];
     report.search_execution.skipped_queries = queries;
     report.search_execution.note =
-      "Keine echte Search-API konfiguriert. Es wurde keine Websuche ausgefuehrt; nur direkte Domain-Kandidaten und vorhandene Quellen werden geprueft.";
+      "Kein BRAVE_SEARCH_API_KEY konfiguriert. Es wurde keine echte Websuche ausgefuehrt; nur direkte Domain-Kandidaten und vorhandene Quellen werden geprueft.";
     addRisk("Keine echte Search-API konfiguriert. Der Agent fuehrt deshalb keine Websuche aus und gibt das im Report offen aus.");
     return [];
   }
@@ -307,69 +301,58 @@ async function collectSearchResults(queries) {
   report.search_execution.executed_queries = executableQueries;
   report.search_execution.skipped_queries = queries.slice(maxSearchQueries);
   for (const query of executableQueries) {
-    const search = await provider.search(query);
-    for (const item of search.slice(0, maxResultsPerQuery)) {
-      results.push({ ...item, query });
+    try {
+      const search = await provider.search(query);
+      for (const item of search.slice(0, maxResultsPerQuery)) {
+        results.push({ ...item, query });
+      }
+    } catch (error) {
+      addRisk(`${provider.name} fehlgeschlagen fuer "${query}": ${error.message}`);
     }
   }
-  return results;
+  const ranked = searchModule.rankCompanyWebsiteResults(results, {
+    companyName: targetCompany || report.current_data?.name || "",
+    city: targetCity || report.current_data?.city || "",
+    postalCode: report.current_data?.postal_code || "",
+    tradeHint: inferTradeHint(report.current_data || {}),
+  });
+  report.search_execution.result_count = results.length;
+  report.search_execution.ranked_results = ranked.slice(0, 20).map((item) => ({
+    query: item.query,
+    title: item.title,
+    url: item.url,
+    snippet: item.snippet,
+    source: item.source,
+    rank: item.rank,
+    score: item.score,
+    reasons: item.reasons,
+    rejected: item.rejected,
+  }));
+  report.search_execution.rejected_directory_results = ranked
+    .filter((item) => item.rejected)
+    .slice(0, 10)
+    .map((item) => ({ title: item.title, url: item.url, score: item.score, reasons: item.reasons }));
+
+  return ranked.map((item) => ({
+    url: item.url,
+    title: item.title,
+    snippet: item.snippet,
+    source_type: item.rejected ? "search_directory_result" : "search_api_result",
+    priority: item.rejected ? 10 : 6,
+    search_score: item.score,
+    ranking_reasons: item.reasons,
+  }));
 }
 
-function detectSearchProvider() {
+function createSearchProvider() {
   if (process.env.BRAVE_SEARCH_API_KEY) {
-    return { name: "brave_search_api", search: searchBrave };
-  }
-  if (process.env.SERPAPI_API_KEY) {
-    return { name: "serpapi_google", search: searchSerpApi };
+    return new searchModule.BraveSearchProvider({
+      apiKey: process.env.BRAVE_SEARCH_API_KEY,
+      maxResults: maxResultsPerQuery,
+      userAgent,
+    });
   }
   return null;
-}
-
-async function searchBrave(query) {
-  const url = `https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(query)}&count=${Math.min(maxResultsPerQuery, 10)}&country=de&search_lang=de`;
-  try {
-    const response = await fetchWithTimeout(url, {
-      accept: "application/json",
-      "x-subscription-token": process.env.BRAVE_SEARCH_API_KEY,
-    });
-    if (!response.ok) {
-      addRisk(`Brave Search API fehlgeschlagen fuer "${query}": HTTP ${response.status}`);
-      return [];
-    }
-    const json = await response.json();
-    return (json.web?.results || []).map((item) => ({
-      url: item.url,
-      title: clean(item.title || ""),
-      snippet: clean(item.description || ""),
-      source_type: "search_api_result",
-      priority: 10,
-    }));
-  } catch (error) {
-    addRisk(`Brave Search API fehlgeschlagen fuer "${query}": ${error.message}`);
-    return [];
-  }
-}
-
-async function searchSerpApi(query) {
-  const url = `https://serpapi.com/search.json?engine=google&google_domain=google.de&hl=de&gl=de&q=${encodeURIComponent(query)}&api_key=${encodeURIComponent(process.env.SERPAPI_API_KEY)}`;
-  try {
-    const response = await fetchWithTimeout(url, { accept: "application/json" });
-    if (!response.ok) {
-      addRisk(`SerpAPI fehlgeschlagen fuer "${query}": HTTP ${response.status}`);
-      return [];
-    }
-    const json = await response.json();
-    return (json.organic_results || []).map((item) => ({
-      url: item.link,
-      title: clean(item.title || ""),
-      snippet: clean(item.snippet || ""),
-      source_type: "search_api_result",
-      priority: 10,
-    }));
-  } catch (error) {
-    addRisk(`SerpAPI fehlgeschlagen fuer "${query}": ${error.message}`);
-    return [];
-  }
 }
 
 async function analyzeSource(url, source, company) {
@@ -384,6 +367,7 @@ async function analyzeSource(url, source, company) {
     html_checked: false,
     text_sample: "",
     matching_features: [],
+    ranking_reasons: source.ranking_reasons || [],
     extracted: {},
     accepted_as_official_website: false,
     score: 0,
@@ -770,6 +754,8 @@ async function fetchWithTimeout(url, headers = {}) {
 function sourcePriority(url, source) {
   if (source.source_type === "official_website_candidate") return 5;
   if (source.source_type === "direct_domain_candidate") return 5;
+  if (source.source_type === "search_api_result") return source.search_score >= 70 ? 6 : 8;
+  if (source.source_type === "search_directory_result") return 10;
   if (/impressum/i.test(url)) return 6;
   if (/kontakt/i.test(url)) return 7;
   if (/leistung|service|angebot/i.test(url)) return 8;
@@ -1221,6 +1207,36 @@ function escapePostgrestLike(value) {
 function isAllowedTestTarget(value) {
   const text = normalize(value);
   return text.includes("wagner") && (text.includes("spielvogl") || text.includes("spielvogel"));
+}
+
+async function importSearchModule() {
+  const files = ["search-provider.ts", "brave-search-provider.ts", "mock-search-provider.ts", "rank-company-website.ts"];
+  const dir = path.join(tmpdir(), "gewerkeliste-search-provider");
+  await mkdir(dir, { recursive: true });
+
+  for (const file of files) {
+    const sourcePath = path.join(process.cwd(), "lib/search", file);
+    const source = await readFile(sourcePath, "utf8");
+    const compiled = ts.transpileModule(source, {
+      compilerOptions: {
+        module: ts.ModuleKind.ES2022,
+        target: ts.ScriptTarget.ES2022,
+      },
+    }).outputText;
+    await writeFile(path.join(dir, file.replace(/\.ts$/, ".mjs")), compiled);
+  }
+
+  const indexPath = path.join(dir, `index-${Date.now()}.mjs`);
+  await writeFile(
+    indexPath,
+    [
+      'export * from "./search-provider.mjs";',
+      'export * from "./brave-search-provider.mjs";',
+      'export * from "./mock-search-provider.mjs";',
+      'export * from "./rank-company-website.mjs";',
+    ].join("\n"),
+  );
+  return import(pathToFileURL(indexPath).href);
 }
 
 function parseArgs(argv) {
