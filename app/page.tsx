@@ -1,0 +1,504 @@
+import type { Metadata } from "next";
+import type { Route } from "next";
+import Link from "next/link";
+import { SiteHeader } from "@/components/site-header";
+import { getPublicCompanies } from "@/lib/data";
+import { isSupabaseConfigured } from "@/lib/supabase";
+import { tradeTaxonomy } from "@/lib/trade-taxonomy";
+
+export const dynamic = "force-dynamic";
+
+export const metadata: Metadata = {
+  title: "GewerkeListe.com – Fachbetriebe nach Gewerk und Ort finden",
+  description:
+    "Finden Sie Baugewerke und Fachbetriebe nach Leistung, Ort und Tätigkeitsgebiet. Betriebe können ihren Eintrag übernehmen, verifizieren und Leistungen strukturiert darstellen.",
+  alternates: {
+    canonical: "/",
+  },
+};
+
+const benefits = [
+  {
+    title: "Fachbetrieb gezielt suchen",
+    text: "Finden Sie Betriebe nach konkreter Leistung – nicht nur nach Firmennamen.",
+  },
+  {
+    title: "Region prüfen",
+    text: "Sehen Sie Standort, Einsatzradius und Tätigkeitsgebiet auf einen Blick.",
+  },
+  {
+    title: "Daten besser einordnen",
+    text: "Betriebseinträge zeigen Leistungen, Kontaktwege und Verifizierungsstatus.",
+  },
+];
+
+const registerFields = [
+  "Gewerk",
+  "Ort und Region",
+  "angebotene Leistungen",
+  "Tätigkeitsgebiet",
+  "Kontakt",
+  "Verifizierungsstatus",
+  "Referenzen, soweit vorhanden",
+];
+
+const comparisons = [
+  {
+    title: "Allgemeine Suchmaschinen",
+    items: ["viele Treffer", "wenig fachliche Struktur", "Spezialisierungen oft schwer erkennbar", "Tätigkeitsgebiet unklar"],
+  },
+  {
+    title: "Klassische Auftragsportale",
+    items: ["einzelne Anfragen", "oft Preisdruck", "begrenzte Betriebsdarstellung", "wenig Registercharakter"],
+  },
+  {
+    title: "GewerkeListe.com",
+    items: [
+      "strukturierte Gewerkeliste",
+      "Leistungen sichtbar",
+      "Region und Tätigkeitsgebiet",
+      "verifizierbare Betriebseinträge",
+      "direkte Kontaktaufnahme",
+      "langfristiger Fachbetriebseintrag",
+    ],
+    positive: true,
+  },
+];
+
+export default async function HomePage() {
+  const companies = isSupabaseConfigured() ? await getPublicCompanies() : [];
+  const preferredTradeSlugs = [
+    "pflasterbau",
+    "bauwerksabdichtung",
+    "metallbau",
+    "trockenbau",
+    "dachdecker",
+    "elektroinstallation",
+    "sanitaer",
+    "heizung",
+    "malerarbeiten",
+    "fliesenarbeiten",
+    "garten-landschaftsbau",
+    "maurerarbeiten",
+  ];
+  const visibleTrades = preferredTradeSlugs
+    .map((slug) => tradeTaxonomy.find((trade) => trade.slug === slug))
+    .filter((trade): trade is (typeof tradeTaxonomy)[number] => Boolean(trade));
+  const latestCompanies = companies.slice(0, 3);
+  const verifiedCount = companies.filter((company) => company.verified).length;
+  const regionCount = new Set(companies.map((company) => company.city)).size;
+  const showRealMetrics = companies.length > 0 || tradeTaxonomy.length > 0;
+
+  return (
+    <main className="min-h-screen bg-[#f7f8fb] text-ink">
+      <SiteHeader />
+
+      <section className="relative overflow-hidden border-b border-line bg-white">
+        <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(18,58,111,0.05),rgba(47,143,91,0.04)_42%,rgba(255,255,255,0)_70%)]" />
+
+        <div className="relative mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.95fr)] lg:items-center lg:px-8 lg:py-16">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-normal text-brand">Professionelles Fachbetriebsregister</p>
+            <h1 className="mt-4 text-4xl font-semibold tracking-normal text-brand sm:text-5xl">
+              Fachbetriebe nach Gewerk, Ort und Tätigkeitsgebiet finden.
+            </h1>
+            <p className="mt-6 text-lg leading-8 text-ink">
+              GewerkeListe.com ist ein professionelles Verzeichnis für Baugewerke. Finden Sie regionale Fachbetriebe,
+              prüfen Sie Leistungen und sehen Sie, in welchem Gebiet ein Betrieb tätig ist.
+            </p>
+
+            <div className="mt-6 flex flex-wrap gap-4 text-sm font-semibold text-brand">
+              <TrustItem text="Strukturierte Betriebsdaten" />
+              <TrustItem text="Verifizierbare Einträge" />
+              <TrustItem text="Direkte Kontaktaufnahme" />
+            </div>
+
+            <form action="/suche" className="mt-8 rounded-lg border border-line bg-white p-4 shadow-soft">
+              <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
+                <label className="grid gap-1.5 text-xs font-semibold text-brand">
+                  Was suchen Sie?
+                  <input
+                    name="q"
+                    className="h-12 rounded-md border border-line px-3 text-sm font-normal outline-none focus:border-action"
+                    placeholder="z. B. Pflasterbau, Abdichtung, Metallbau"
+                  />
+                </label>
+                <label className="grid gap-1.5 text-xs font-semibold text-brand">
+                  Wo suchen Sie?
+                  <input
+                    name="ort"
+                    className="h-12 rounded-md border border-line px-3 text-sm font-normal outline-none focus:border-action"
+                    placeholder="Ort oder PLZ"
+                  />
+                </label>
+                <button className="mt-auto h-12 rounded-md bg-action px-6 text-sm font-semibold text-white hover:bg-brand">
+                  Fachbetrieb suchen
+                </button>
+              </div>
+              <div className="mt-4 flex flex-wrap gap-2 text-xs font-medium text-muted">
+                <span>Strukturierte Betriebsdaten</span>
+                <span>·</span>
+                <span>Leistungen</span>
+                <span>·</span>
+                <span>Einsatzgebiet</span>
+                <span>·</span>
+                <span>Verifizierungsstatus</span>
+              </div>
+              <div className="mt-4 flex flex-wrap gap-3">
+                <OutlineLink href="/betrieb-eintragen">Betrieb eintragen</OutlineLink>
+                <OutlineLink href="/eintrag-beanspruchen">Eintrag beanspruchen</OutlineLink>
+              </div>
+            </form>
+          </div>
+
+          <div className="relative overflow-hidden rounded-lg border border-line bg-[#07173d] shadow-soft">
+            <video
+              className="aspect-[4/3] h-full w-full object-cover opacity-95 lg:aspect-[5/4]"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              aria-label="Baugewerke und Baustellensituation als Hintergrundvideo"
+            >
+              <source src="/videos/gewerkeliste-homepage-background.mp4" type="video/mp4" />
+            </video>
+            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,23,61,0)_48%,rgba(7,23,61,0.74))]" />
+            <div className="absolute bottom-0 left-0 right-0 p-5 text-white">
+              <p className="text-xs font-semibold uppercase tracking-normal text-blue-100">Aus der Baupraxis</p>
+              <p className="mt-2 max-w-md text-sm leading-6 text-blue-50">
+                GewerkeListe.com ordnet Fachbetriebe nach Gewerk, Region und Tätigkeitsgebiet.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <h2 className="text-2xl font-semibold text-[#07173d]">Schneller zum passenden Fachbetrieb.</h2>
+        <div className="mt-5 grid gap-4 lg:grid-cols-3">
+          {benefits.map((benefit) => (
+            <Card key={benefit.title}>
+              <h3 className="text-lg font-semibold text-ink">{benefit.title}</h3>
+              <p className="mt-3 text-sm leading-6 text-muted">{benefit.text}</p>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      <section className="mx-auto grid max-w-7xl gap-5 px-4 py-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_420px] lg:px-8">
+        <Card>
+          <h2 className="text-2xl font-semibold text-[#07173d]">
+            Die passenden Betriebe sind da. Sie müssen nur besser auffindbar sein.
+          </h2>
+          <p className="mt-4 text-base leading-7 text-ink">
+            In der Baupraxis geht viel Zeit verloren, weil Informationen zu Fachbetrieben verstreut sind: Website,
+            Empfehlung, Branchenbuch, Suchmaschine oder persönlicher Kontakt. GewerkeListe.com bringt diese Informationen
+            in eine klare Struktur.
+          </p>
+        </Card>
+        <Card>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {registerFields.map((field) => (
+              <CheckLine key={field}>{field}</CheckLine>
+            ))}
+          </div>
+        </Card>
+      </section>
+
+      <section className="mx-auto grid max-w-7xl gap-5 px-4 py-4 sm:px-6 lg:grid-cols-2 lg:px-8">
+        <Card>
+          <h2 className="text-2xl font-semibold text-[#07173d]">Für Auftraggeber</h2>
+          <Step number="1" text="Gewerk und Ort eingeben" />
+          <Step number="2" text="passende Betriebe vergleichen" />
+          <Step number="3" text="direkt Kontakt aufnehmen" />
+          <div className="mt-6">
+            <BlueLink href="/suche">Fachbetrieb suchen</BlueLink>
+          </div>
+        </Card>
+        <Card>
+          <h2 className="text-2xl font-semibold text-[#07173d]">Für Fachbetriebe</h2>
+          <Step number="1" text="Fachbetrieb suchen" />
+          <Step number="2" text="Eintrag übernehmen" />
+          <Step number="3" text="Leistungen und Tätigkeitsgebiet bestätigen" />
+          <p className="mt-5 rounded-md border border-[#b9dec8] bg-[#eef9f2] px-4 py-3 text-sm font-semibold text-brand">
+            Gründungsphase: Die ersten 500 Fachbetriebe werden ohne Verifizierungsgebühr aufgenommen.
+          </p>
+          <div className="mt-6">
+            <BlueLink href="/eintrag-beanspruchen">Eintrag beanspruchen</BlueLink>
+          </div>
+        </Card>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+          <div>
+            <h2 className="text-2xl font-semibold text-[#07173d]">Gewerke entdecken</h2>
+            <p className="mt-2 text-sm text-muted">Wichtige Baugewerke als strukturierter Einstieg in die Suche.</p>
+          </div>
+          <Link className="text-sm font-semibold text-[#1f5fd4] hover:underline" href={"/gewerke" as Route}>
+            Alle Gewerke anzeigen
+          </Link>
+        </div>
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {visibleTrades.map((trade) => (
+            <Link
+              key={trade.slug}
+              className="rounded-lg border border-line bg-white p-5 text-sm font-semibold text-[#07173d] shadow-soft hover:border-[#1f5fd4]"
+              href={`/suche?gewerk=${trade.slug}` as Route}
+            >
+              {trade.name}
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className="mx-auto grid max-w-7xl gap-5 px-4 py-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_420px] lg:px-8">
+        <Card>
+          <h2 className="text-2xl font-semibold text-[#07173d]">Fachbetriebe in Ihrer Region finden.</h2>
+          <p className="mt-4 text-base leading-7 text-ink">
+            GewerkeListe.com ordnet Betriebe nicht nur nach Gewerk, sondern auch nach Standort, Umkreis und
+            Tätigkeitsgebiet. So wird sichtbar, welche Betriebe für eine Region tatsächlich relevant sind.
+          </p>
+          <div className="mt-6">
+            <BlueLink href="/suche">Regionale Suche starten</BlueLink>
+          </div>
+        </Card>
+        <div className="rounded-lg border border-line bg-white p-5 shadow-soft">
+          <div className="relative h-64 overflow-hidden rounded-md border border-line bg-[#eef4fb]">
+            <div className="absolute left-10 top-10 h-36 w-36 rounded-full border border-[#1f5fd4]/35 bg-[#1f5fd4]/10" />
+            <div className="absolute right-10 top-14 h-24 w-24 rounded-full border border-brand/35 bg-brand/10" />
+            <div className="absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#1f5fd4] shadow-[0_0_0_10px_rgba(31,95,212,0.12)]" />
+            <div className="absolute bottom-5 left-5 rounded-md border border-line bg-white px-4 py-3 text-sm font-semibold text-[#07173d]">
+              Beispielregion Rosenheim / Chiemgau
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <div className="rounded-lg bg-[#082a63] p-6 text-white shadow-soft sm:p-8 lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-8">
+          <div>
+            <h2 className="text-2xl font-semibold">Ihr Betrieb. Ihre Leistungen. Ihr Tätigkeitsgebiet.</h2>
+            <p className="mt-4 max-w-3xl text-sm leading-6 text-blue-50">
+              Ein Betriebseintrag zeigt sachlich, welche Leistungen Ihr Betrieb anbietet, wo Sie tätig sind und wie
+              Auftraggeber Sie erreichen können. Wenn Ihr Betrieb bereits gelistet ist, können Sie den Eintrag übernehmen
+              und die Daten bestätigen.
+            </p>
+            <div className="mt-5 grid gap-2 sm:grid-cols-2">
+              <WhiteCheck>Betriebsdaten bestätigen</WhiteCheck>
+              <WhiteCheck>Leistungen strukturieren</WhiteCheck>
+              <WhiteCheck>Tätigkeitsgebiet festlegen</WhiteCheck>
+              <WhiteCheck>Kontaktwege aktuell halten</WhiteCheck>
+            </div>
+            <p className="mt-5 text-sm leading-6 text-blue-50">
+              GewerkeListe.com ist kein System für Preiskampf und verkauft keine einzelnen Anfragen. Ziel ist ein
+              professionelles Verzeichnis echter Baugewerke mit klaren Betriebseinträgen.
+            </p>
+          </div>
+          <div className="mt-6 rounded-lg bg-white p-5 text-ink lg:mt-0">
+            <h3 className="text-lg font-semibold text-[#07173d]">Ist Ihr Betrieb schon gelistet?</h3>
+            <p className="mt-3 text-sm leading-6 text-muted">
+              Suchen Sie Ihren Betrieb und übernehmen Sie den Eintrag, wenn die Daten bestätigt werden sollen.
+            </p>
+            <div className="mt-5 grid gap-3">
+              <BlueLink href="/eintrag-beanspruchen">Eintrag beanspruchen</BlueLink>
+              <OutlineLink href="/betrieb-eintragen">Betrieb eintragen</OutlineLink>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+        <h2 className="text-2xl font-semibold text-[#07173d]">Was GewerkeListe.com anders macht</h2>
+        <div className="mt-5 grid gap-4 lg:grid-cols-3">
+          {comparisons.map((item) => (
+            <Card key={item.title}>
+              <h3 className="text-lg font-semibold text-ink">{item.title}</h3>
+              <ul className="mt-4 grid gap-2 text-sm text-muted">
+                {item.items.map((point) => (
+                  <li key={point}>
+                    <span className={`mr-2 font-semibold ${item.positive ? "text-brand" : "text-accent"}`}>
+                      {item.positive ? "✓" : "×"}
+                    </span>
+                    {point}
+                  </li>
+                ))}
+              </ul>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      <section className="mx-auto grid max-w-7xl gap-5 px-4 py-10 sm:px-6 lg:grid-cols-3 lg:px-8">
+        <Card>
+          <h2 className="text-xl font-semibold text-[#07173d]">Bestätigte Betriebsdaten schaffen Vertrauen.</h2>
+          <p className="mt-4 text-sm leading-6 text-muted">
+            Ein verifizierter Eintrag zeigt, dass Betriebsdaten übernommen und bestätigt wurden. So können Auftraggeber
+            besser einschätzen, ob ein Betrieb zum gesuchten Gewerk und zur Region passt.
+          </p>
+        </Card>
+        <Card>
+          <h2 className="text-xl font-semibold text-[#07173d]">Aus echter Baupraxis entstanden.</h2>
+          <p className="mt-4 text-sm leading-6 text-muted">
+            GewerkeListe.com wurde von Andreas Moser gegründet. Er ist gelernter Maurer, Bauingenieur und kennt die Suche
+            nach passenden Fachbetrieben aus der Baupraxis.
+          </p>
+          <Link className="mt-5 inline-flex text-sm font-semibold text-[#1f5fd4] hover:underline" href={"/ueber-gewerkeliste" as Route}>
+            Mehr über GewerkeListe.com
+          </Link>
+        </Card>
+        <Card>
+          <h2 className="text-xl font-semibold text-[#07173d]">Aufbauphase</h2>
+          {latestCompanies.length > 0 ? (
+            <div className="mt-4 grid gap-3">
+              {latestCompanies.map((company) => (
+                <Link key={company.id} className="block rounded-md border border-line p-3 hover:border-[#1f5fd4]" href={`/firma/${company.slug}` as Route}>
+                  <span className="text-sm font-semibold text-ink">{company.name}</span>
+                  <span className="mt-1 block text-xs text-muted">
+                    {company.trades?.name} · {company.city}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-4 text-sm leading-6 text-muted">
+              Aufbau startet im Raum Rosenheim/Chiemgau. Das Register wächst Region für Region, Gewerk für Gewerk und
+              Betrieb für Betrieb.
+            </p>
+          )}
+          {showRealMetrics ? (
+            <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+              {companies.length > 0 ? <Metric label="Betriebe" value={companies.length} /> : null}
+              {verifiedCount > 0 ? <Metric label="Bestätigt" value={verifiedCount} /> : null}
+              {regionCount > 0 ? <Metric label="Regionen" value={regionCount} /> : null}
+              <Metric label="Gewerke" value={tradeTaxonomy.length} />
+            </div>
+          ) : null}
+        </Card>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
+        <div className="rounded-lg border border-line bg-white p-6 text-center shadow-soft sm:p-8">
+          <h2 className="text-3xl font-semibold text-[#07173d]">Suchen, finden, einordnen.</h2>
+          <p className="mx-auto mt-4 max-w-2xl text-sm leading-6 text-muted">
+            Starten Sie mit Gewerk und Ort – oder übernehmen Sie den Eintrag Ihres Betriebs.
+          </p>
+          <div className="mt-6 flex flex-wrap justify-center gap-3">
+            <BlueLink href="/suche">Fachbetrieb suchen</BlueLink>
+            <OutlineLink href="/eintrag-beanspruchen">Eintrag beanspruchen</OutlineLink>
+            <OutlineLink href="/betrieb-eintragen">Betrieb eintragen</OutlineLink>
+          </div>
+        </div>
+      </section>
+
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData()) }}
+      />
+    </main>
+  );
+}
+
+function Card({ children }: { children: React.ReactNode }) {
+  return <section className="rounded-lg border border-line bg-white p-5 shadow-soft sm:p-6">{children}</section>;
+}
+
+function TrustItem({ text }: { text: string }) {
+  return (
+    <span className="inline-flex items-center gap-2">
+      <span className="h-2.5 w-2.5 rounded-full bg-action" />
+      {text}
+    </span>
+  );
+}
+
+function CheckLine({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="rounded-md border border-line bg-[#fbfaf7] px-4 py-3 text-sm font-medium text-ink">
+      <span className="mr-2 font-semibold text-brand">✓</span>
+      {children}
+    </div>
+  );
+}
+
+function WhiteCheck({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="text-sm font-medium text-blue-50">
+      <span className="mr-2 font-semibold text-white">✓</span>
+      {children}
+    </div>
+  );
+}
+
+function Step({ number, text }: { number: string; text: string }) {
+  return (
+    <div className="mt-4 flex gap-3">
+      <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#e8f3ef] text-sm font-semibold text-brand">
+        {number}
+      </span>
+      <p className="pt-1 text-sm font-medium text-ink">{text}</p>
+    </div>
+  );
+}
+
+function Metric({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-md bg-[#fbfaf7] px-3 py-2">
+      <div className="text-lg font-semibold text-[#07173d]">{value}</div>
+      <div className="text-xs text-muted">{label}</div>
+    </div>
+  );
+}
+
+function BlueLink({ href, children }: { href: Route; children: React.ReactNode }) {
+  return (
+    <Link className="inline-flex min-h-11 items-center justify-center rounded-md bg-[#1f5fd4] px-5 text-sm font-semibold text-white hover:bg-[#174eb2]" href={href}>
+      {children}
+    </Link>
+  );
+}
+
+function OutlineLink({ href, children }: { href: Route; children: React.ReactNode }) {
+  return (
+    <Link className="inline-flex min-h-11 items-center justify-center rounded-md border border-line bg-white px-5 text-sm font-semibold text-[#1f5fd4] hover:border-[#1f5fd4]" href={href}>
+      {children}
+    </Link>
+  );
+}
+
+function structuredData() {
+  const baseUrl = "https://gewerkeliste.com";
+
+  return {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        name: "GewerkeListe.com",
+        url: baseUrl,
+        potentialAction: {
+          "@type": "SearchAction",
+          target: `${baseUrl}/suche?ort={search_term_string}`,
+          "query-input": "required name=search_term_string",
+        },
+      },
+      {
+        "@type": "Organization",
+        name: "GewerkeListe.com",
+        url: baseUrl,
+      },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "Start",
+            item: baseUrl,
+          },
+        ],
+      },
+    ],
+  };
+}

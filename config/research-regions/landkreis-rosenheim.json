@@ -1,0 +1,53 @@
+{
+  "id": "landkreis-rosenheim",
+  "name": "Landkreis Rosenheim",
+  "phase": "phase-1-quality",
+  "targetQualityPercent": 90,
+  "qualityGates": {
+    "autoImportMinScore": 70,
+    "reviewMinScore": 50,
+    "requiredForPublicCandidate": ["company_name", "trade_name", "street", "postal_code", "city", "source_url", "source_label"]
+  },
+  "scope": {
+    "country": "Deutschland",
+    "state": "Bayern",
+    "region": "Oberbayern"
+  },
+  "municipalities": [
+    { "name": "Rosenheim", "type": "kreisfreie-stadt" },
+    { "name": "Riedering", "postalCode": "83083" },
+    { "name": "Prien am Chiemsee" },
+    { "name": "Bad Endorf" },
+    { "name": "Stephanskirchen" },
+    { "name": "Raubling" },
+    { "name": "Kolbermoor" },
+    { "name": "Bad Aibling" },
+    { "name": "Rohrdorf" },
+    { "name": "Brannenburg" },
+    { "name": "Frasdorf" },
+    { "name": "Samerberg" },
+    { "name": "Söchtenau" },
+    { "name": "Schechen" },
+    { "name": "Tuntenhausen" },
+    { "name": "Großkarolinenfeld" },
+    { "name": "Bruckmühl" },
+    { "name": "Feldkirchen-Westerham" },
+    { "name": "Wasserburg am Inn" }
+  ],
+  "sourcePriority": [
+    "company_website",
+    "imprint",
+    "handwerkskammer",
+    "innung",
+    "kreishandwerkerschaft",
+    "municipal_directory",
+    "manufacturer_partner_list",
+    "public_directory_allowed",
+    "osm"
+  ],
+  "notes": [
+    "Nicht auf Deutschland skalieren, bevor Landkreis Rosenheim mindestens 90 Prozent Datenqualitaet erreicht.",
+    "Kommunale Verzeichnisse sind gute Discovery-Quellen, aber ohne Website/Impressum meist Review-Faelle.",
+    "OSM bleibt Nebenquelle und darf vorhandene Datensaetze ergaenzen, nicht ersetzen."
+  ]
+}

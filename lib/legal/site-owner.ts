@@ -1,0 +1,15 @@
+export const siteOwner = {
+  operatorName: "Andreas Moser",
+  projectName: "GewerkeListe.com",
+  legalForm: "Einzelunternehmer / Andreas Moser Baugewerbe",
+  businessName: "Andreas Moser Baugewerbe",
+  street: "Untermoosen 3",
+  postalCode: "83083",
+  city: "Riedering",
+  country: "Deutschland",
+  email: "kontakt@gewerkeliste.com",
+  phone: "0151 10765170",
+  vatId: "DE324877153",
+  authorizedRepresentative: "Andreas Moser",
+  isEditorialResponsible: false,
+} as const;

@@ -1,0 +1,34 @@
+[
+  {
+    "id": "riedering-open2c",
+    "type": "open2c",
+    "url": "https://www.riedering.de/index.php?id=0,46&literal=ALLE",
+    "sourceLabel": "Gemeinde Riedering Unternehmensverzeichnis"
+  },
+  {
+    "id": "samerberg-open2c",
+    "type": "open2c",
+    "url": "https://samerberg.de/Unternehmensverzeichnis.n46.html?literal=ALLE",
+    "sourceLabel": "Gemeinde Samerberg Unternehmensverzeichnis"
+  },
+  {
+    "id": "soechtenau-open2c",
+    "type": "open2c",
+    "url": "https://soechtenau.de/Unternehmensverzeichnis.n46.html?literal=ALLE",
+    "sourceLabel": "Gemeinde Söchtenau Unternehmensverzeichnis"
+  },
+  {
+    "id": "riedering-osm",
+    "type": "osm",
+    "area": "Riedering",
+    "city": "Riedering",
+    "postalCode": "83083",
+    "country": "Deutschland"
+  },
+  {
+    "id": "rosenheim-osm",
+    "type": "osm",
+    "area": "Rosenheim",
+    "country": "Deutschland"
+  }
+]

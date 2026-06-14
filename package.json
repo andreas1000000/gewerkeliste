@@ -1,0 +1,40 @@
+{
+  "name": "gewerkeliste-os",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "research:import": "node scripts/research-import.mjs",
+    "research:agent": "node scripts/research-agent.mjs",
+    "research:web": "node scripts/public-web-research-agent.mjs",
+    "research:osm": "node scripts/osm-research-agent.mjs",
+    "research:open2c": "node scripts/open2c-directory-agent.mjs",
+    "research:sources": "node scripts/research-source-runner.mjs",
+    "research:quality": "node scripts/research-quality-audit.mjs",
+    "research:enrich:web": "node scripts/website-enrichment-agent.mjs",
+    "research:publish:basis": "node scripts/publish-public-basis-entries.mjs",
+    "research:map:trades": "node scripts/map-companies-to-trades.mjs",
+    "supabase:apply-sql": "node scripts/apply-supabase-sql.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.4",
+    "next": "^15.3.2",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.3",
+    "@types/react": "^19.0.10",
+    "@types/react-dom": "^19.0.4",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^5.8.3",
+    "vercel": "^54.11.1"
+  }
+}
