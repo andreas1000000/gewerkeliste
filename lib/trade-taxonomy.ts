@@ -38,6 +38,7 @@ export const tradeSlugAliases: Record<string, string> = {
   putzarbeiten: "verputzarbeiten",
   sanitaer: "sanitaerinstallation",
   heizung: "heizungsbau",
+  elektrotechnik: "elektrotechnik",
   estrich: "estricharbeiten",
   bodenbelag: "bodenlegerarbeiten",
   gartenbau: "garten-und-landschaftsbau",
@@ -63,7 +64,7 @@ export const tradeSelectionGroups = [
   },
   {
     name: "TGA",
-    slugs: ["elektroinstallation", "sanitaerinstallation", "heizungsbau", "waermepumpen", "lueftung", "kaelte-klima", "photovoltaik"],
+    slugs: ["elektroinstallation", "elektrotechnik", "sanitaerinstallation", "heizungsbau", "waermepumpen", "lueftung", "kaelte-klima", "photovoltaik"],
   },
   {
     name: "Ausbau",
@@ -536,6 +537,16 @@ export const tradeTaxonomy: TaxonomyTrade[] = [
     projectTypes: ["Neubau", "Sanierung", "Gewerbe", "Wohnbau", "Wartung"],
     relatedTrades: ["Photovoltaik", "Sicherheitstechnik", "TGA", "Trockenbau"],
     typicalBusinessTypes: ["Elektrobetrieb", "Elektroinstallateur", "TGA-Betrieb"],
+  }),
+  trade("elektrotechnik", "Elektrotechnik", "TGA / Technische Gebäudeausrüstung", {
+    shortDescription: "Elektrotechnik umfasst elektrische Anlagen, Steuerungen, Gebäudetechnik und technische Anschlüsse im Gebäude.",
+    synonyms: ["Elektrotechnik", "Elektrofachbetrieb", "Elektrotechniker", "Gebäudetechnik", "Elektroanlagen"],
+    subTrades: ["Gebäudetechnik", "Steuerungstechnik", "Elektroanlagen", "Beleuchtungstechnik", "Schaltschrankbau"],
+    coreServices: ["Anlagen anschließen", "Verteilungen aufbauen", "Steuerungen verdrahten", "Beleuchtung installieren", "Anlagen prüfen"],
+    specializations: ["Gewerbeanlagen", "Gebäudeautomation", "Steuerungstechnik", "Beleuchtung", "Wartung"],
+    projectTypes: ["Neubau", "Bestandssanierung", "Gewerbebau", "Wohnbau", "Wartung"],
+    relatedTrades: ["Elektroinstallation", "Photovoltaik", "Sicherheitstechnik", "TGA"],
+    typicalBusinessTypes: ["Elektrotechnikbetrieb", "Elektrobetrieb", "TGA-Betrieb"],
   }),
   trade("sanitaer", "Sanitär", "TGA / Technische Gebäudeausrüstung", {
     shortDescription: "Sanitärinstallation, Bad, Wasserleitungen, Abwasser und Armaturen.",

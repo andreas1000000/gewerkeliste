@@ -47,8 +47,11 @@ const report = {
   generated_queries: [],
   found_sources: [],
   search_execution: {
+    provider: null,
+    search_api_available: false,
     executed_queries: [],
     skipped_queries: [],
+    note: null,
   },
   possible_website: null,
   extracted_official_data: null,
@@ -93,6 +96,13 @@ const sourceCandidates = [
     title: "Offizielle Firmenwebsite Kandidat",
     snippet: "Direktkandidat fuer den Company-Enrichment-Agenten",
     source_type: "official_website_candidate",
+    priority: 5,
+  })),
+  ...directWebsiteCandidates(selected).map((url) => ({
+    url,
+    title: "Direkter Firmen-Domain-Kandidat",
+    snippet: "Aus Firmenname und Ort abgeleiteter Website-Kandidat. Keine Websuche.",
+    source_type: "direct_domain_candidate",
     priority: 5,
   })),
   ...extractCompanyUrls(selected).map((url) => ({
@@ -256,15 +266,18 @@ async function loadCompanySources(companyId) {
 function buildQueries(company) {
   const name = targetCompany || company.name;
   const city = targetCity || company.city || "";
+  const tradeHint = inferTradeHint(company);
   const terms = [
+    `${name}`.trim(),
     `${name} ${city}`.trim(),
-    `${name} ${company.postal_code || ""}`.trim(),
     `${name} Impressum`,
+    `${name} ${tradeHint} ${city}`.trim(),
+    `${name} Handwerk ${city}`.trim(),
     `${name} Kontakt`,
+    `${name} ${company.postal_code || ""}`.trim(),
     `${name} Leistungen`,
     `${name} Referenzen`,
     `${name} Bau`,
-    `${name} Handwerk`,
     `${name} Firma`,
     `${name} ${city} Impressum`.trim(),
   ];
@@ -276,12 +289,25 @@ function buildQueries(company) {
 }
 
 async function collectSearchResults(queries) {
+  const provider = detectSearchProvider();
+  report.search_execution.provider = provider?.name || null;
+  report.search_execution.search_api_available = Boolean(provider);
+
+  if (!provider) {
+    report.search_execution.executed_queries = [];
+    report.search_execution.skipped_queries = queries;
+    report.search_execution.note =
+      "Keine echte Search-API konfiguriert. Es wurde keine Websuche ausgefuehrt; nur direkte Domain-Kandidaten und vorhandene Quellen werden geprueft.";
+    addRisk("Keine echte Search-API konfiguriert. Der Agent fuehrt deshalb keine Websuche aus und gibt das im Report offen aus.");
+    return [];
+  }
+
   const results = [];
   const executableQueries = queries.slice(0, maxSearchQueries);
   report.search_execution.executed_queries = executableQueries;
   report.search_execution.skipped_queries = queries.slice(maxSearchQueries);
   for (const query of executableQueries) {
-    const search = await searchDuckDuckGo(query);
+    const search = await provider.search(query);
     for (const item of search.slice(0, maxResultsPerQuery)) {
       results.push({ ...item, query });
     }
@@ -289,24 +315,59 @@ async function collectSearchResults(queries) {
   return results;
 }
 
-async function searchDuckDuckGo(query) {
-  const url = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
+function detectSearchProvider() {
+  if (process.env.BRAVE_SEARCH_API_KEY) {
+    return { name: "brave_search_api", search: searchBrave };
+  }
+  if (process.env.SERPAPI_API_KEY) {
+    return { name: "serpapi_google", search: searchSerpApi };
+  }
+  return null;
+}
+
+async function searchBrave(query) {
+  const url = `https://api.search.brave.com/res/v1/web/search?q=${encodeURIComponent(query)}&count=${Math.min(maxResultsPerQuery, 10)}&country=de&search_lang=de`;
   try {
-    const response = await fetchWithTimeout(url, { accept: "text/html,application/xhtml+xml" });
+    const response = await fetchWithTimeout(url, {
+      accept: "application/json",
+      "x-subscription-token": process.env.BRAVE_SEARCH_API_KEY,
+    });
     if (!response.ok) {
-      addRisk(`Suche fehlgeschlagen fuer "${query}": HTTP ${response.status}`);
+      addRisk(`Brave Search API fehlgeschlagen fuer "${query}": HTTP ${response.status}`);
       return [];
     }
-    const html = await response.text();
-    return [...html.matchAll(/<a[^>]+class="result__a"[^>]+href="([^"]+)"[^>]*>([\s\S]*?)<\/a>/gi)].map((match) => ({
-      url: decodeSearchUrl(decodeHtml(match[1])),
-      title: clean(stripTags(match[2])),
-      snippet: "",
-      source_type: "search_result",
+    const json = await response.json();
+    return (json.web?.results || []).map((item) => ({
+      url: item.url,
+      title: clean(item.title || ""),
+      snippet: clean(item.description || ""),
+      source_type: "search_api_result",
       priority: 10,
     }));
   } catch (error) {
-    addRisk(`Suche fehlgeschlagen fuer "${query}": ${error.message}`);
+    addRisk(`Brave Search API fehlgeschlagen fuer "${query}": ${error.message}`);
+    return [];
+  }
+}
+
+async function searchSerpApi(query) {
+  const url = `https://serpapi.com/search.json?engine=google&google_domain=google.de&hl=de&gl=de&q=${encodeURIComponent(query)}&api_key=${encodeURIComponent(process.env.SERPAPI_API_KEY)}`;
+  try {
+    const response = await fetchWithTimeout(url, { accept: "application/json" });
+    if (!response.ok) {
+      addRisk(`SerpAPI fehlgeschlagen fuer "${query}": HTTP ${response.status}`);
+      return [];
+    }
+    const json = await response.json();
+    return (json.organic_results || []).map((item) => ({
+      url: item.link,
+      title: clean(item.title || ""),
+      snippet: clean(item.snippet || ""),
+      source_type: "search_api_result",
+      priority: 10,
+    }));
+  } catch (error) {
+    addRisk(`SerpAPI fehlgeschlagen fuer "${query}": ${error.message}`);
     return [];
   }
 }
@@ -331,7 +392,7 @@ async function analyzeSource(url, source, company) {
 
   const host = hostname(url);
   const directoryLike = isDirectoryLikeHost(host);
-  const officialCandidate = source.source_type === "official_website_candidate";
+  const officialCandidate = ["official_website_candidate", "direct_domain_candidate"].includes(source.source_type);
   if (directoryLike) result.risks.push("Branchen-/Gemeindeverzeichnis nur als Hilfsquelle bewertet.");
 
   const fetched = await fetchHtml(url);
@@ -376,9 +437,24 @@ async function analyzeSource(url, source, company) {
     references_url: pages.find((page) => page.role === "referenzen")?.url || null,
   };
   result.matching_features = matchingFeatures(company, text, url, result.extracted);
-  result.accepted_as_official_website = (officialCandidate || !directoryLike) && result.matching_features.length >= 2;
+  result.accepted_as_official_website = !directoryLike && hasOfficialWebsiteEvidence(company, result, officialCandidate);
+  if (!result.accepted_as_official_website && officialCandidate && result.matching_features.includes("Firmenname")) {
+    result.risks.push("Direkter Domain-Kandidat wurde nicht als offizielle Website akzeptiert, weil Ort, PLZ, Adresse oder Telefonnummer nicht bestaetigt wurden.");
+  }
   result.score = scoreSource(result);
   return result;
+}
+
+function hasOfficialWebsiteEvidence(company, source, officialCandidate) {
+  const features = new Set(source.matching_features);
+  if (!features.has("Firmenname")) return false;
+
+  const hasLocationOrContact = ["Adresse", "Ort", "PLZ", "Telefonnummer"].some((feature) => features.has(feature));
+  const hasStoredIdentity = Boolean(company.street || company.city || company.postal_code || company.phone);
+  if (hasStoredIdentity) return hasLocationOrContact;
+
+  if (officialCandidate) return features.has("Leistungsangebot");
+  return features.size >= 2;
 }
 
 function matchingFeatures(company, text, url, extracted) {
@@ -400,7 +476,14 @@ function matchingFeatures(company, text, url, extracted) {
 }
 
 function scoreSource(source) {
-  let score = source.matching_features.length * 18;
+  const features = new Set(source.matching_features);
+  let score = 0;
+  if (features.has("Firmenname")) score += 25;
+  if (features.has("Adresse")) score += 25;
+  if (features.has("Ort")) score += 16;
+  if (features.has("PLZ")) score += 16;
+  if (features.has("Telefonnummer")) score += 20;
+  if (features.has("Leistungsangebot")) score += 10;
   const bestPageWeight = Math.max(...(source.extracted.analyzed_pages || []).map((page) => page.source_weight || 0), source.priority <= 5 ? 85 : 0);
   score += Math.floor(bestPageWeight / 10);
   if (source.extracted.imprint_url) score += 15;
@@ -409,6 +492,7 @@ function scoreSource(source) {
   if (source.extracted.email) score += 5;
   if (source.extracted.phone) score += 5;
   if (source.priority <= 6) score += 10;
+  if (!source.accepted_as_official_website) score -= 35;
   if (source.risks.length > 0) score -= 10;
   return Math.max(0, Math.min(100, score));
 }
@@ -470,6 +554,7 @@ function proposeTrades(company, analyzedSources) {
   }
   const signalSources = websiteSources;
   const extractedServices = signalSources.flatMap((source) => source.extracted?.services || []);
+  const electricalContext = extractedServices.some((service) => /elektro|photovoltaik|knx|smart|netzwerk/i.test(service));
   const text = normalize([
     company.name,
     company.description,
@@ -487,8 +572,13 @@ function proposeTrades(company, analyzedSources) {
     { slug: "garten-und-landschaftsbau", name: "Garten- und Landschaftsbau", terms: ["garten und landschaftsbau", "gartenbau", "landschaftsbau", "galabau"], score: 95 },
     { slug: "zimmererarbeiten", name: "Zimmererarbeiten", terms: ["zimmerei", "zimmerer", "holzbau", "dachstuhl"], score: 85 },
     { slug: "schreinerarbeiten", name: "Schreinerarbeiten", terms: ["schreiner", "schreinerei", "tischler"], score: 85 },
-    { slug: "pflasterarbeiten", name: "Pflasterarbeiten", terms: ["pflaster", "pflasterbau", "aussenanlagen", "einfahrt", "terrasse"], score: 80 },
+    { slug: "pflasterarbeiten", name: "Pflasterarbeiten", terms: ["pflasterbau", "pflasterarbeiten", "natursteinpflaster"], score: 80 },
     { slug: "maurerarbeiten", name: "Maurerarbeiten", terms: ["maurerarbeiten", "mauerwerk", "rohbau"], score: 80 },
+    { slug: "elektroinstallation", name: "Elektroinstallation", terms: ["elektroinstallation", "elektriker", "elektrofachbetrieb", "elektrobetrieb"], score: 95 },
+    { slug: "elektrotechnik", name: "Elektrotechnik", terms: ["elektrotechnik", "elektroanlagen", "gebaeudetechnik", "gebäudetechnik", "steuerungstechnik"], score: 90 },
+    { slug: "photovoltaik", name: "Photovoltaik", terms: ["photovoltaik", "pv anlage", "pv-anlage", "solaranlage"], score: 85 },
+    { slug: "knx-smart-home", name: "KNX / Smart Home", terms: ["knx", "smart home", "smart-home", "gebaeudeautomation", "gebäudeautomation"], score: 85 },
+    { slug: "netzwerktechnik", name: "Netzwerktechnik", terms: ["netzwerktechnik", "netzwerkverkabelung", "datentechnik"], score: 85 },
   ];
 
   const matches = candidates
@@ -496,7 +586,8 @@ function proposeTrades(company, analyzedSources) {
       const matchedTerm = trade.terms.find((term) => contains(text, term));
       return matchedTerm ? { ...trade, confidence_score: trade.score, evidence: `Textsignal: ${matchedTerm}` } : null;
     })
-    .filter(Boolean);
+    .filter(Boolean)
+    .filter((match) => !electricalContext || isAllowedElectricalContextTrade(match.slug, text));
 
   return {
     auto: matches.filter((match) => match.confidence_score >= 75),
@@ -504,12 +595,17 @@ function proposeTrades(company, analyzedSources) {
   };
 }
 
+function isAllowedElectricalContextTrade(slug, text) {
+  if (["elektroinstallation", "elektrotechnik", "photovoltaik", "knx-smart-home", "netzwerktechnik"].includes(slug)) return true;
+  return false;
+}
+
 function buildLiveWritePlan(company, updates, autoTrades, reviewTrades, sources) {
   const plan = [];
   for (const [field, proposal] of Object.entries(updates)) {
     plan.push({ action: "update_company_field", company_id: company.id, field, ...proposal });
   }
-  for (const source of sources.filter((item) => item.ok).slice(0, 10)) {
+  for (const source of sources.filter(shouldPersistSource).slice(0, 10)) {
     plan.push({
       action: "insert_company_source",
       company_id: company.id,
@@ -527,6 +623,14 @@ function buildLiveWritePlan(company, updates, autoTrades, reviewTrades, sources)
   }
   plan.push({ action: "assert_invariants", verified: false, claim_status: "unclaimed", public_visible: company.public_visible });
   return plan;
+}
+
+function shouldPersistSource(source) {
+  if (!source.ok) return false;
+  if (source.accepted_as_official_website) return true;
+  if (source.source_type === "existing_company_source") return true;
+  if (source.source_type === "existing_company_text") return true;
+  return isDirectoryLikeHost(hostname(source.url));
 }
 
 async function applyLiveChanges(company, plan, sources) {
@@ -665,6 +769,7 @@ async function fetchWithTimeout(url, headers = {}) {
 
 function sourcePriority(url, source) {
   if (source.source_type === "official_website_candidate") return 5;
+  if (source.source_type === "direct_domain_candidate") return 5;
   if (/impressum/i.test(url)) return 6;
   if (/kontakt/i.test(url)) return 7;
   if (/leistung|service|angebot/i.test(url)) return 8;
@@ -677,8 +782,77 @@ function sourcePriority(url, source) {
 function officialWebsiteSeeds() {
   const seeds = [];
   if (args.website) seeds.push(args.website);
-  if (isAllowedTestTarget(targetCompany)) seeds.push("https://www.wagner-spielvogel.de/");
   return [...new Set(seeds)];
+}
+
+function directWebsiteCandidates(company) {
+  const domains = new Set();
+  const name = targetCompany || company.name || "";
+  const tokenSets = domainTokenSets(name);
+  for (const tokens of tokenSets) {
+    if (tokens.length < 2) continue;
+    const hyphenated = tokens.join("-");
+    const compact = tokens.join("");
+    for (const base of [hyphenated, compact]) {
+      for (const tld of ["de", "net", "com"]) {
+        domains.add(`${base}.${tld}`);
+      }
+    }
+  }
+
+  return [...domains].flatMap((domain) => [`https://${domain}/`, `https://www.${domain}/`]).slice(0, 36);
+}
+
+function domainTokenSets(name) {
+  const baseTokens = domainTokens(name);
+  const sets = [baseTokens];
+  const expanded = baseTokens.flatMap((token) => domainTokenVariants(token));
+  if (expanded.join("-") !== baseTokens.join("-")) sets.push(expanded);
+
+  if (baseTokens.includes("elektro") && baseTokens.length >= 2) {
+    sets.push(baseTokens);
+  }
+  if (baseTokens.includes("wagner") && baseTokens.some((token) => /^spielvog/.test(token))) {
+    sets.push(["wagner", "spielvogel"]);
+    sets.push(["wagner", "spielvogl"]);
+  }
+
+  return uniqueTokenSets(sets);
+}
+
+function domainTokens(name) {
+  return normalize(name)
+    .replace(/\b(gmbh|ug|ag|kg|ohg|eg|mbh|bauunternehmen|firma|elektrotechnik|elektroinstallation)\b/g, " ")
+    .split(/\s+/)
+    .map((token) => token.replace(/[^a-z0-9]/g, ""))
+    .filter((token) => token.length >= 3 && !["und", "der", "die", "das"].includes(token));
+}
+
+function domainTokenVariants(token) {
+  if (token === "spielvogl") return ["spielvogel"];
+  return [token];
+}
+
+function uniqueTokenSets(sets) {
+  const seen = new Set();
+  const unique = [];
+  for (const set of sets) {
+    const cleanSet = [...new Set(set)].filter(Boolean);
+    const key = cleanSet.join("-");
+    if (cleanSet.length < 2 || seen.has(key)) continue;
+    seen.add(key);
+    unique.push(cleanSet);
+  }
+  return unique;
+}
+
+function inferTradeHint(company) {
+  const text = normalize(`${company.name || ""} ${company.description || ""} ${company.trades?.name || ""}`);
+  if (contains(text, "elektro")) return "Elektro";
+  if (contains(text, "zimmerei") || contains(text, "holzbau")) return "Zimmerei";
+  if (contains(text, "dach")) return "Dachdecker";
+  if (contains(text, "pflaster") || contains(text, "garten")) return "Bau";
+  return "Handwerk";
 }
 
 function pagesToAnalyze(homeUrl, links) {
@@ -832,6 +1006,10 @@ function extractServices(text, html) {
     ["Dachdeckerarbeiten", /dachdecker|bedachung|steildach|flachdach|dachsanierung/i],
     ["Spenglerarbeiten", /spengler|blechner|klempner|dachrinne|blechdach/i],
     ["Elektroinstallation", /elektroinstallation|elektrotechnik|elektriker/i],
+    ["Elektrotechnik", /elektrotechnik|elektroanlagen|gebäudetechnik|gebaeudetechnik|steuerungstechnik/i],
+    ["Photovoltaik", /photovoltaik|pv-anlage|pv anlage|solaranlage/i],
+    ["KNX / Smart Home", /knx|smart home|smart-home|gebäudeautomation|gebaeudeautomation/i],
+    ["Netzwerktechnik", /netzwerktechnik|netzwerkverkabelung|datentechnik/i],
     ["Sanitaerinstallation", /sanitär|sanitaer|badinstallation|heizung/i],
     ["Metallbau", /metallbau|schlosserei|stahlbau/i],
     ["Gartenbau", /gartenbau/i],
