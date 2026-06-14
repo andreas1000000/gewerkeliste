@@ -2,6 +2,8 @@
 
 Der Company-Enrichment-Agent macht aus schwachen Basis-Firmeneintraegen hochwertige GewerkeListe-Profile.
 
+Fuer alle Research-, Import- und Enrichment-Laeufe gilt die zentrale Richtlinie `AGENT_DATA_ACQUISITION_POLICY.md`.
+
 ## Mission
 
 Workflow:
@@ -20,6 +22,10 @@ Der Agent wird dauerhaft genutzt:
 - keine E-Mails versenden
 - keine Logos oder Bilder uebernehmen
 - keine fremden Texte kopieren
+- keine fremden Datenbanken oder Verzeichnisse kopieren
+- keine Bewertungen anderer Plattformen uebernehmen
+- keine Daten aus Hinweisquellen automatisiert als Profilinhalt uebernehmen
+- keine robots.txt, Logins, Paywalls oder technischen Schutzmassnahmen umgehen
 - keine privaten Daten speichern
 - keine unsicheren Daten blind uebernehmen
 - keine Betriebe loeschen
@@ -39,7 +45,7 @@ Der Agent wird dauerhaft genutzt:
 7. Gemeinde-Websites
 8. OSM
 
-Gemeinde-Websites, OSM und Branchenverzeichnisse sind Entdeckungsquellen. Die Firmenwebsite ist die Primaerquelle.
+Gemeinde-Websites, OSM, Suchmaschinen, Kartendienste und Branchenverzeichnisse sind Entdeckungs- oder Hinweisquellen. Die Firmenwebsite ist die Primaerquelle.
 
 ## Qualitaetsregeln
 

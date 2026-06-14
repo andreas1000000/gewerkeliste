@@ -1,10 +1,15 @@
 # Company Enrichment Rules
 
+- Es gilt zusaetzlich die zentrale Richtlinie `AGENT_DATA_ACQUISITION_POLICY.md`.
 - Firmenwebsite ist Primaerquelle.
 - Gemeindeverzeichnis ist nur Lead.
 - OSM ist nur Hilfsquelle.
+- Suchmaschinen, Kartendienste und Branchenverzeichnisse sind nur Hinweisquellen zur Identifikation und Website-Findung.
+- Keine Datenbanken oder Verzeichnisse kopieren.
 - Keine fremden Texte kopieren.
 - Keine Logos oder Bilder uebernehmen.
+- Keine Bewertungen uebernehmen.
+- robots.txt, Logins, Paywalls und technische Schutzmassnahmen respektieren.
 - Keine E-Mails versenden.
 - Keine privaten Daten speichern.
 - `verified` bleibt `false`.

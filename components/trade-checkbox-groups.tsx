@@ -8,15 +8,16 @@ type TradeCheckboxGroupsProps = {
   name: string;
   onToggle: (slug: string) => void;
   max?: number;
+  defaultOpen?: boolean;
 };
 
-export function TradeCheckboxGroups({ selected, name, onToggle, max }: TradeCheckboxGroupsProps) {
+export function TradeCheckboxGroups({ selected, name, onToggle, max, defaultOpen = true }: TradeCheckboxGroupsProps) {
   const groups = groupedTradeSelection();
 
   return (
     <div className="grid gap-3">
       {groups.map((group) => (
-        <details key={group.name} className="overflow-hidden rounded-lg border border-line bg-white" open>
+        <details key={group.name} className="overflow-hidden rounded-lg border border-line bg-white" open={defaultOpen}>
           <summary className="cursor-pointer bg-[#fbfcff] px-4 py-3 text-sm font-semibold text-brand">
             {group.name}
           </summary>

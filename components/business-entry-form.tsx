@@ -170,7 +170,7 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
         {selectedTrades.slice(1).map((slug) => (
           <input key={slug} name="secondaryTrades" type="hidden" value={slug} />
         ))}
-        <TradeCheckboxGroups max={5} name="tradeSelection" onToggle={toggleTrade} selected={selectedTrades} />
+        <TradeCheckboxGroups defaultOpen={false} max={5} name="tradeSelection" onToggle={toggleTrade} selected={selectedTrades} />
         {errors.primaryTrade ? <p className="mt-2 text-xs font-semibold text-[#a4442b]">{errors.primaryTrade}</p> : null}
         {errors.secondaryTrades ? <p className="mt-2 text-xs font-semibold text-[#a4442b]">{errors.secondaryTrades}</p> : null}
       </FormSection>

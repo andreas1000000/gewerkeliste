@@ -50,6 +50,13 @@ Vor folgenden Aktionen muss der Agent explizit fragen:
 - Keine E-Mails ohne ausdrueckliche Freigabe.
 - Keine Massenimporte ohne ausdrueckliche Freigabe.
 - Keine Verifizierungsstatus-Aenderung ohne ausdrueckliche Freigabe.
+- Fuer Research-, Import- und Enrichment-Laeufe gilt zusaetzlich `AGENT_DATA_ACQUISITION_POLICY.md`.
+- Keine Datenbanken oder Verzeichnisse kopieren.
+- Hinweisquellen wie Suchmaschinen, Kartendienste oder Branchenverzeichnisse nur zur Identifikation und Website-Findung nutzen.
+- Unternehmensprofile bevorzugt aus offiziellen Unternehmensquellen erstellen.
+- Keine fremden Texte, Bewertungen, Bilder oder Logos uebernehmen.
+- robots.txt, Logins, Paywalls und technische Schutzmassnahmen muessen respektiert werden.
+- Qualitaet geht vor Menge.
 
 ## Abschlussbericht
 
