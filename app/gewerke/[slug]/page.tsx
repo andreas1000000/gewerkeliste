@@ -67,10 +67,6 @@ export default async function TradeDetailPage({ params }: PageProps) {
             <p className="text-sm font-semibold uppercase tracking-normal text-brand">{trade.category}</p>
             <h1 className="mt-3 text-4xl font-semibold text-[#07173d]">{headlineForTrade(trade)}</h1>
             <p className="mt-5 max-w-3xl text-base leading-7 text-muted">{trade.shortDescription}</p>
-            <p className="mt-4 max-w-3xl text-sm leading-6 text-muted">
-              Typische Leistungsbereiche sind {trade.coreServices.slice(0, 3).join(", ")}. Verwandte
-              Suchbegriffe sind {trade.synonyms.slice(0, 4).join(", ")}.
-            </p>
 
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
