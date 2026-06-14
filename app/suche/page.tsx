@@ -4,8 +4,9 @@ import type { Route } from "next";
 import { SiteHeader } from "@/components/site-header";
 import { ClaimBadge } from "@/components/status-badge";
 import { getPublicCompanies } from "@/lib/data";
+import { createTradeSearchEntry, normalizeSearchTerm, rankTradeEntries } from "@/lib/trade-search";
 import { isSupabaseConfigured } from "@/lib/supabase";
-import { findTaxonomyTrade, publicTradeTaxonomy } from "@/lib/trade-taxonomy";
+import { canonicalTradeSlug, publicTradeTaxonomy } from "@/lib/trade-taxonomy";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +23,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const q = stringParam(params.q);
   const trade = stringParam(params.gewerk);
+  const selectedTrades = stringArrayParam(params.trades).map(canonicalTradeSlug);
   const location = stringParam(params.ort);
   const radiusKm = stringParam(params.umkreis) || "50";
   const tradeOptions = publicTradeTaxonomy()
@@ -29,11 +31,19 @@ export default async function SearchPage({ searchParams }: PageProps) {
     .map((item) => ({ key: item.slug, slug: item.slug, name: item.name, category: item.category }))
     .sort((a, b) => a.name.localeCompare(b.name, "de"));
   const selectedTrade = tradeOptions.some((item) => item.slug === trade) ? trade : undefined;
-  const queryTradeSlug = q ? tradeSlugForQuery(q) : undefined;
+  const selectedTradeSet = selectedTrades.filter((slug) => tradeOptions.some((item) => item.slug === slug));
+  const queryTradeSlugs = q ? tradeSlugsForQuery(q) : [];
   const companies = isSupabaseConfigured()
-    ? await getPublicCompanies({ query: queryTradeSlug ? undefined : q, tradeSlug: selectedTrade || queryTradeSlug, location, radiusKm })
+    ? await getCompaniesForSearch({
+        location,
+        q,
+        queryTradeSlugs,
+        radiusKm,
+        selectedTrade,
+        selectedTradeSet,
+      })
     : [];
-  const hasActiveSearch = Boolean(q || selectedTrade || location);
+  const hasActiveSearch = Boolean(q || selectedTrade || selectedTradeSet.length || location);
   const groupedTradeOptions = tradeOptions.reduce<Array<{ category: string; trades: typeof tradeOptions }>>(
     (groups, item) => {
       const group = groups.find((entry) => entry.category === item.category);
@@ -64,7 +74,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
             className="rounded-md border border-line px-3 py-2 outline-none focus:border-brand"
           />
           <select name="gewerk" defaultValue={selectedTrade || ""} className="rounded-md border border-line px-3 py-2 outline-none focus:border-brand">
-            <option value="">Alle Gewerke</option>
+            <option value="">{selectedTradeSet.length ? `${selectedTradeSet.length} Gewerke vorausgewählt` : "Alle Gewerke"}</option>
             {groupedTradeOptions.map((group) => (
               <optgroup key={group.category} label={group.category}>
                 {group.trades.map((item) => (
@@ -88,11 +98,47 @@ export default async function SearchPage({ searchParams }: PageProps) {
             <option value="100">100 km</option>
           </select>
           <button className="rounded-md bg-brand px-5 py-2 font-semibold text-white hover:bg-[#265a4d]">Suchen</button>
+          {selectedTradeSet.map((slug) => (
+            <input key={slug} name="trades" type="hidden" value={slug} />
+          ))}
         </form>
+        {selectedTradeSet.length ? (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {selectedTradeSet.map((slug) => {
+              const option = tradeOptions.find((item) => item.slug === slug);
+              return (
+                <span key={slug} className="rounded-md border border-line bg-white px-3 py-1 text-xs font-semibold text-muted">
+                  {option?.name || slug}
+                </span>
+              );
+            })}
+          </div>
+        ) : null}
         <p className="mt-3 text-sm leading-6 text-muted">
           Die Umkreisauswahl wird für Betriebseinträge mit hinterlegtem Tätigkeitsgebiet berücksichtigt. Ohne
           hinterlegte Radiusdaten werden passende Treffer nach Gewerk, Ort und PLZ angezeigt.
         </p>
+
+        {queryTradeSlugs.length ? (
+          <section className="mt-6 rounded-lg border border-line bg-white p-4 shadow-soft">
+            <h2 className="text-lg font-semibold text-ink">Passende Gewerke</h2>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {queryTradeSlugs.slice(0, 14).map((slug) => {
+                const option = tradeOptions.find((item) => item.slug === slug);
+                if (!option) return null;
+                return (
+                  <Link
+                    key={slug}
+                    className="inline-flex min-h-9 items-center rounded-md border border-line px-3 text-sm font-semibold text-action hover:border-action"
+                    href={`/gewerke/${slug}` as Route}
+                  >
+                    {option.name}
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+        ) : null}
 
         <section className="mt-8 grid gap-4">
           {companies.length === 0 ? (
@@ -143,22 +189,47 @@ function stringParam(value: string | string[] | undefined) {
   return typeof value === "string" && value.trim() ? value.trim() : undefined;
 }
 
-function tradeSlugForQuery(query: string) {
-  const normalizedQuery = normalizeSearchTerm(query);
-  if (!normalizedQuery) return undefined;
-
-  return publicTradeTaxonomy().find((trade) => {
-    const terms = [trade.slug, trade.name, ...trade.synonyms, ...trade.subTrades, ...trade.coreServices].map(normalizeSearchTerm);
-    return terms.some((term) => term === normalizedQuery || term.includes(normalizedQuery) || normalizedQuery.includes(term));
-  })?.slug;
+function stringArrayParam(value: string | string[] | undefined) {
+  if (Array.isArray(value)) return value.flatMap((item) => item.split(",")).map((item) => item.trim()).filter(Boolean);
+  if (typeof value === "string" && value.trim()) return value.split(",").map((item) => item.trim()).filter(Boolean);
+  return [];
 }
 
-function normalizeSearchTerm(value: string) {
-  return value
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/ß/g, "ss")
-    .replace(/[^a-z0-9]+/g, " ")
-    .trim();
+async function getCompaniesForSearch({
+  location,
+  q,
+  queryTradeSlugs,
+  radiusKm,
+  selectedTrade,
+  selectedTradeSet,
+}: {
+  location?: string;
+  q?: string;
+  queryTradeSlugs: string[];
+  radiusKm: string;
+  selectedTrade?: string;
+  selectedTradeSet: string[];
+}) {
+  const tradeSlugs = selectedTradeSet.length ? selectedTradeSet : selectedTrade ? [selectedTrade] : queryTradeSlugs;
+
+  if (!tradeSlugs.length) {
+    return getPublicCompanies({ query: q, location, radiusKm });
+  }
+
+  const results = await Promise.all(
+    tradeSlugs.map((tradeSlug) =>
+      getPublicCompanies({ query: selectedTradeSet.length || selectedTrade || queryTradeSlugs.length ? undefined : q, tradeSlug, location, radiusKm }),
+    ),
+  );
+  const unique = new Map<string, Awaited<ReturnType<typeof getPublicCompanies>>[number]>();
+  results.flat().forEach((company) => {
+    if (!unique.has(company.id)) unique.set(company.id, company);
+  });
+  return Array.from(unique.values());
+}
+
+function tradeSlugsForQuery(query: string) {
+  const normalizedQuery = normalizeSearchTerm(query);
+  if (!normalizedQuery) return [];
+  return rankTradeEntries(publicTradeTaxonomy().map((trade) => createTradeSearchEntry(trade)), normalizedQuery).map((entry) => entry.trade.slug);
 }

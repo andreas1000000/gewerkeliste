@@ -96,8 +96,29 @@ export default async function HomePage() {
       <section className="relative overflow-hidden border-b border-line bg-white">
         <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(18,58,111,0.05),rgba(47,143,91,0.04)_42%,rgba(255,255,255,0)_70%)]" />
 
-        <div className="relative mx-auto grid max-w-7xl gap-8 px-4 py-12 sm:px-6 lg:grid-cols-[minmax(0,1.05fr)_minmax(360px,0.95fr)] lg:items-center lg:px-8 lg:py-16">
-          <div>
+        <div className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
+          <div className="relative mb-10 overflow-hidden rounded-lg border border-line bg-[#07173d] shadow-soft">
+            <video
+              className="aspect-[16/7] w-full object-cover opacity-95"
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              aria-label="Baugewerke und Baustellensituation als Hintergrundvideo"
+            >
+              <source src="/videos/gewerkeliste-homepage-background.mp4" type="video/mp4" />
+            </video>
+            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,23,61,0)_48%,rgba(7,23,61,0.68))]" />
+            <div className="absolute bottom-0 left-0 right-0 p-5 text-white">
+              <p className="text-xs font-semibold uppercase tracking-normal text-blue-100">Aus der Baupraxis</p>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-blue-50">
+                GewerkeListe.com ordnet Fachbetriebe nach Gewerk, Region und Tätigkeitsgebiet.
+              </p>
+            </div>
+          </div>
+
+          <div className="max-w-5xl">
             <p className="text-sm font-semibold uppercase tracking-normal text-brand">Professionelles Fachbetriebsregister</p>
             <h1 className="mt-4 text-4xl font-semibold tracking-normal text-brand sm:text-5xl">
               Fachbetriebe nach Gewerk, Ort und Tätigkeitsgebiet finden.
@@ -149,27 +170,6 @@ export default async function HomePage() {
                 <OutlineLink href="/eintrag-beanspruchen">Eintrag beanspruchen</OutlineLink>
               </div>
             </form>
-          </div>
-
-          <div className="relative overflow-hidden rounded-lg border border-line bg-[#07173d] shadow-soft">
-            <video
-              className="aspect-[4/3] h-full w-full object-cover opacity-95 lg:aspect-[5/4]"
-              autoPlay
-              muted
-              loop
-              playsInline
-              preload="metadata"
-              aria-label="Baugewerke und Baustellensituation als Hintergrundvideo"
-            >
-              <source src="/videos/gewerkeliste-homepage-background.mp4" type="video/mp4" />
-            </video>
-            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,23,61,0)_48%,rgba(7,23,61,0.74))]" />
-            <div className="absolute bottom-0 left-0 right-0 p-5 text-white">
-              <p className="text-xs font-semibold uppercase tracking-normal text-blue-100">Aus der Baupraxis</p>
-              <p className="mt-2 max-w-md text-sm leading-6 text-blue-50">
-                GewerkeListe.com ordnet Fachbetriebe nach Gewerk, Region und Tätigkeitsgebiet.
-              </p>
-            </div>
           </div>
         </div>
       </section>

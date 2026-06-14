@@ -58,7 +58,7 @@ export default function ForCompaniesPage() {
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <BlueLink href="/betrieb-eintragen">Betrieb eintragen</BlueLink>
-              <OutlineLink href="/eintrag-beanspruchen">Eintrag beanspruchen</OutlineLink>
+              <OutlineLink href="/gewerke?view=alphabetisch&claimIntent=true">Eintrag beanspruchen</OutlineLink>
               <OutlineLink href="/gewerke">Gewerkeliste ansehen</OutlineLink>
             </div>
           </section>
