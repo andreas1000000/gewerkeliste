@@ -16,6 +16,7 @@
     "research:sources": "node scripts/research-source-runner.mjs",
     "research:quality": "node scripts/research-quality-audit.mjs",
     "research:enrich:web": "node scripts/website-enrichment-agent.mjs",
+    "research:enrich:company": "node scripts/enrich-company.mjs",
     "research:publish:basis": "node scripts/publish-public-basis-entries.mjs",
     "research:map:trades": "node scripts/map-companies-to-trades.mjs",
     "supabase:apply-sql": "node scripts/apply-supabase-sql.mjs"
