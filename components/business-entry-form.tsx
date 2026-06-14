@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useActionState } from "react";
+import { TradeCheckboxGroups } from "@/components/trade-checkbox-groups";
 import { submitBusinessEntry } from "@/lib/actions";
 import type { CompanyFormState } from "@/lib/types";
 import type { TaxonomyTrade } from "@/lib/trade-taxonomy";
@@ -19,8 +20,8 @@ const supportOptions = [
 export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
   const [state, formAction, pending] = useActionState(submitBusinessEntry, initialState);
   const [primaryTrade, setPrimaryTrade] = useState(trades[0]?.slug ?? "");
+  const [selectedTrades, setSelectedTrades] = useState<string[]>(trades[0]?.slug ? [trades[0].slug] : []);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
-  const [secondaryTrades, setSecondaryTrades] = useState<string[]>([]);
   const [founderVerification, setFounderVerification] = useState(true);
   const [supportContribution, setSupportContribution] = useState("none");
   const errors = state.fieldErrors || {};
@@ -41,9 +42,10 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
     if (!state.values) return;
     const restoredValues = state.values;
     const restoredPrimaryTrade = textValue(restoredValues, "primaryTrade", trades[0]?.slug ?? "");
+    const restoredSecondary = arrayValue(restoredValues, "secondaryTrades");
     setPrimaryTrade(restoredPrimaryTrade);
+    setSelectedTrades([restoredPrimaryTrade, ...restoredSecondary].filter(Boolean));
     setSelectedServices(arrayValue(restoredValues, "selectedServices"));
-    setSecondaryTrades(arrayValue(restoredValues, "secondaryTrades"));
     setFounderVerification(booleanValue(restoredValues, "wantsFounderVerification", true));
     setSupportContribution(textValue(restoredValues, "supportContribution", "none"));
   }, [state.values, trades]);
@@ -54,11 +56,13 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
     );
   }
 
-  function toggleSecondaryTrade(slug: string) {
-    setSecondaryTrades((current) => {
-      if (current.includes(slug)) return current.filter((item) => item !== slug);
-      if (current.length >= 2) return current;
-      return [...current, slug];
+  function toggleTrade(slug: string) {
+    setSelectedTrades((current) => {
+      const next = current.includes(slug) ? current.filter((item) => item !== slug) : [...current, slug].slice(0, 5);
+      const nextPrimary = next[0] || "";
+      setPrimaryTrade(nextPrimary);
+      setSelectedServices([]);
+      return next;
     });
   }
 
@@ -160,45 +164,15 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
       <FormSection
         number="4"
         title="Gewerke auswählen"
-        help="Wählen Sie zuerst Ihr Hauptgewerk. Weitere Gewerke und Spezialisierungen können ergänzt werden."
+        help="Wählen Sie die passenden Gewerke. Im kostenlosen Basis-Eintrag werden maximal 5 relevante Gewerke übernommen."
       >
-        <Field label="Hauptgewerk" error={errors.primaryTrade} required>
-          <select
-            className={inputClass}
-            name="primaryTrade"
-            onChange={(event) => {
-              setPrimaryTrade(event.target.value);
-              setSelectedServices([]);
-            }}
-            value={primaryTrade}
-          >
-            {trades.map((trade) => (
-              <option key={trade.slug} value={trade.slug}>
-                {trade.name}
-              </option>
-            ))}
-          </select>
-        </Field>
-        <fieldset className="mt-5">
-          <legend className="text-sm font-semibold text-ink">Nebengewerke, maximal 2 im Basis-Eintrag</legend>
-          <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-            {trades
-              .filter((trade) => trade.slug !== primaryTrade)
-              .slice(0, 18)
-              .map((trade) => (
-                <CheckCard
-                  key={trade.slug}
-                  checked={secondaryTrades.includes(trade.slug)}
-                  disabled={!secondaryTrades.includes(trade.slug) && secondaryTrades.length >= 2}
-                  label={trade.name}
-                  name="secondaryTrades"
-                  onChange={() => toggleSecondaryTrade(trade.slug)}
-                  value={trade.slug}
-                />
-              ))}
-          </div>
-          {errors.secondaryTrades ? <p className="mt-2 text-xs font-semibold text-[#a4442b]">{errors.secondaryTrades}</p> : null}
-        </fieldset>
+        <input name="primaryTrade" type="hidden" value={primaryTrade} />
+        {selectedTrades.slice(1).map((slug) => (
+          <input key={slug} name="secondaryTrades" type="hidden" value={slug} />
+        ))}
+        <TradeCheckboxGroups max={5} name="tradeSelection" onToggle={toggleTrade} selected={selectedTrades} />
+        {errors.primaryTrade ? <p className="mt-2 text-xs font-semibold text-[#a4442b]">{errors.primaryTrade}</p> : null}
+        {errors.secondaryTrades ? <p className="mt-2 text-xs font-semibold text-[#a4442b]">{errors.secondaryTrades}</p> : null}
       </FormSection>
 
       <FormSection number="5" title="Leistungen auswählen" help="Im Basis-Eintrag können Sie Ihre wichtigsten Kernleistungen angeben.">

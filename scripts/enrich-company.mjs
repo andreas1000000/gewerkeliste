@@ -7,9 +7,10 @@ import { promisify } from "node:util";
 const execFileAsync = promisify(execFile);
 
 const args = parseArgs(process.argv.slice(2));
-const targetCompany = String(args.company || "Wagner Spielvogl").trim();
-const targetCity = String(args.city || "Riedering").trim();
+const targetCompany = String(args.company || args.name || "").trim();
+const targetCity = String(args.city || "").trim();
 const live = Boolean(args.live);
+const dryRun = !live;
 const maxResultsPerQuery = Number(args["max-results-per-query"] || 5);
 const maxSearchQueries = Number(args["max-search-queries"] || 8);
 const timeoutMs = Number(args["timeout-ms"] || 8000);
@@ -17,9 +18,7 @@ const userAgent =
   args["user-agent"] ||
   "GewerkeListeResearchBot/0.1 (+https://gewerkeliste.com; contact: kontakt@gewerkeliste.com)";
 
-if (!isAllowedTestTarget(targetCompany)) {
-  fail("Dieser Testlauf ist hart auf Wagner Spielvogl/Spielvogel begrenzt. Keine andere Firma wird bearbeitet.");
-}
+if (!targetCompany && !args["company-id"]) fail("--name/--company oder --company-id ist erforderlich.");
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
@@ -35,7 +34,7 @@ const report = {
   mode: live ? "live" : "dry_run",
   target: { company: targetCompany, city: targetCity },
   guardrails: {
-    only_test_company: "Wagner Spielvogl/Spielvogel",
+    default_mode: dryRun ? "dry_run" : "live",
     sends_email: false,
     copies_logos_or_images: false,
     copies_foreign_text: false,
@@ -92,7 +91,7 @@ const sourceCandidates = [
   ...officialWebsiteSeeds().map((url) => ({
     url,
     title: "Offizielle Firmenwebsite Kandidat",
-    snippet: "Direktkandidat fuer den Wagner-Spielvogl-Referenzlauf",
+    snippet: "Direktkandidat fuer den Company-Enrichment-Agenten",
     source_type: "official_website_candidate",
     priority: 5,
   })),
@@ -198,11 +197,16 @@ async function findCandidateCompanies() {
     return (data || []).map((company) => scoreCandidate(company));
   }
 
-  const { data, error } = await supabase
+  const nameTokens = meaningfulTokens(targetCompany);
+  const query = supabase
     .from("companies")
     .select("id,name,description,email,phone,website_url,street,city,postal_code,public_visible,claim_status,verified,trade_id,trades(id,name,slug)")
-    .or("name.ilike.%Wagner%,name.ilike.%Spielvogl%,name.ilike.%Spielvogel%")
     .limit(30);
+  if (nameTokens[0]) query.ilike("name", `%${escapePostgrestLike(nameTokens[0])}%`);
+  else if (targetCity) query.ilike("city", `%${escapePostgrestLike(targetCity)}%`);
+  else fail("Keine brauchbaren Suchsignale fuer company lookup.");
+
+  const { data, error } = await query;
 
   if (error) fail(error.message);
   return (data || [])
@@ -215,21 +219,20 @@ function scoreCandidate(company) {
   const text = normalize(`${company.name} ${company.city} ${company.postal_code} ${company.street || ""}`);
   let score = 0;
   const reasons = [];
-  if (contains(text, "wagner")) {
-    score += 35;
-    reasons.push("Name enthaelt Wagner");
+  const tokens = meaningfulTokens(targetCompany);
+  for (const token of tokens) {
+    if (contains(text, token)) {
+      score += Math.max(10, Math.floor(70 / Math.max(tokens.length, 1)));
+      reasons.push(`Name enthaelt ${token}`);
+    }
   }
-  if (contains(text, "spielvogl") || contains(text, "spielvogel")) {
-    score += 45;
-    reasons.push("Name enthaelt Spielvogl/Spielvogel");
-  }
-  if (normalize(company.city) === normalize(targetCity)) {
+  if (targetCity && normalize(company.city) === normalize(targetCity)) {
     score += 15;
     reasons.push(`Ort ist ${targetCity}`);
   }
-  if (company.postal_code === "83083") {
+  if (args.postal_code && company.postal_code === String(args.postal_code)) {
     score += 5;
-    reasons.push("PLZ 83083");
+    reasons.push(`PLZ ${args.postal_code}`);
   }
   return { ...company, match_score: Math.min(score, 100), match_reason: reasons.join("; ") || "schwacher Namenshinweis" };
 }
@@ -251,33 +254,24 @@ async function loadCompanySources(companyId) {
 }
 
 function buildQueries(company) {
+  const name = targetCompany || company.name;
+  const city = targetCity || company.city || "";
   const terms = [
-    "Wagner Spielvogl Riedering",
-    "Wagner Spielvogel Riedering",
-    "Wagner Spielvogl 83083",
-    "Wagner Spielvogel 83083",
-    "Wagner Spielvogl Impressum",
-    "Wagner Spielvogel Impressum",
-    "Wagner Spielvogl Bau",
-    "Wagner Spielvogel Bau",
-    "Wagner Spielvogl Handwerk",
-    "Wagner Spielvogel Handwerk",
-    "Wagner Spielvogl Leistungen",
-    "Wagner Spielvogel Leistungen",
-    "Wagner Spielvogl Rosenheim",
-    "Wagner Spielvogel Rosenheim",
-    "Wagner Spielvogl Untermoosen",
-    "Wagner Spielvogel Untermoosen",
-    "Wagner Spielvogl Firma",
-    "Wagner Spielvogel Firma",
+    `${name} ${city}`.trim(),
+    `${name} ${company.postal_code || ""}`.trim(),
+    `${name} Impressum`,
+    `${name} Kontakt`,
+    `${name} Leistungen`,
+    `${name} Referenzen`,
+    `${name} Bau`,
+    `${name} Handwerk`,
+    `${name} Firma`,
+    `${name} ${city} Impressum`.trim(),
   ];
 
-  if (company.phone) terms.push(`"Wagner Spielvogl" "${company.phone}"`);
-  if (company.phone) terms.push(`"Wagner Spielvogel" "${company.phone}"`);
-  if (company.street) terms.push(`"Wagner Spielvogl" "${company.street}"`);
-  if (company.street) terms.push(`"Wagner Spielvogel" "${company.street}"`);
-  if (company.postal_code) terms.push(`"Wagner Spielvogl" "${company.postal_code}"`);
-  if (company.postal_code) terms.push(`"Wagner Spielvogel" "${company.postal_code}"`);
+  if (company.phone) terms.push(`"${name}" "${company.phone}"`);
+  if (company.street) terms.push(`"${name}" "${company.street}"`);
+  if (company.postal_code) terms.push(`"${name}" "${company.postal_code}"`);
   return [...new Set(terms)];
 }
 
@@ -390,7 +384,9 @@ async function analyzeSource(url, source, company) {
 function matchingFeatures(company, text, url, extracted) {
   const normalizedText = normalize(`${text} ${url}`);
   const features = [];
-  if (contains(normalizedText, "wagner") && (contains(normalizedText, "spielvogl") || contains(normalizedText, "spielvogel"))) {
+  const tokens = meaningfulTokens(targetCompany || company.name);
+  const matchedNameTokens = tokens.filter((token) => contains(normalizedText, token));
+  if (matchedNameTokens.length >= Math.min(2, tokens.length) || normalize(extracted.company_name) === normalize(company.name)) {
     features.push("Firmenname");
   }
   if (company.street && contains(normalizedText, normalize(company.street))) features.push("Adresse");
@@ -445,13 +441,13 @@ function proposeCompanyUpdates(company, websiteSource, analyzedSources) {
   if (!websiteSource && bestSource?.extracted && Object.keys(bestSource.extracted).length > 0) {
     addRisk("Kontakt-/Adressdaten aus Verzeichnisquelle wurden bewusst nicht zur Uebernahme vorgeschlagen.");
   }
-  if (isGenericDescription(company.description)) {
-    proposed.description = fieldProposal(
-      company.description,
-      buildDescription({ ...company, name: websiteSource?.extracted?.company_name || company.name }, proposeTrades(company, analyzedSources).auto),
-      75,
-      bestSource?.url || "existing-company-data",
-    );
+  if (websiteSource && isGenericDescription(company.description)) {
+    const description = buildDescription({ ...company, name: websiteSource?.extracted?.company_name || company.name }, proposeTrades(company, analyzedSources).auto);
+    if (normalize(description) !== normalize(company.description)) {
+      proposed.description = fieldProposal(company.description, description, 75, bestSource?.url || "existing-company-data");
+    }
+  } else if (!websiteSource && isGenericDescription(company.description)) {
+    addRisk("Beschreibung wurde nicht angereichert, weil keine offizielle Firmenwebsite eindeutig akzeptiert wurde.");
   }
   return proposed;
 }
@@ -468,7 +464,11 @@ function fieldProposal(current, proposed, confidence_score, source_url) {
 
 function proposeTrades(company, analyzedSources) {
   const websiteSources = analyzedSources.filter((source) => source.accepted_as_official_website);
-  const signalSources = websiteSources.length > 0 ? websiteSources : analyzedSources;
+  if (websiteSources.length === 0) {
+    addRisk("Gewerke wurden nicht neu zugeordnet, weil keine offizielle Firmenwebsite eindeutig akzeptiert wurde.");
+    return { auto: [], review: [] };
+  }
+  const signalSources = websiteSources;
   const extractedServices = signalSources.flatMap((source) => source.extracted?.services || []);
   const text = normalize([
     company.name,
@@ -484,10 +484,10 @@ function proposeTrades(company, analyzedSources) {
     { slug: "sanierung", name: "Sanierung", terms: ["renovierung", "sanierung"], score: 85 },
     { slug: "verputzarbeiten", name: "Verputzarbeiten", terms: ["verputzarbeiten", "verputz", "putzarbeiten"], score: 95 },
     { slug: "betonbau", name: "Betonbau", terms: ["betonglaettung", "betonglättung", "beton"], score: 80 },
-    { slug: "garten-landschaftsbau", name: "Garten- und Landschaftsbau", terms: ["garten und landschaftsbau", "gartenbau", "landschaftsbau"], score: 95 },
+    { slug: "garten-und-landschaftsbau", name: "Garten- und Landschaftsbau", terms: ["garten und landschaftsbau", "gartenbau", "landschaftsbau", "galabau"], score: 95 },
     { slug: "zimmererarbeiten", name: "Zimmererarbeiten", terms: ["zimmerei", "zimmerer", "holzbau", "dachstuhl"], score: 85 },
     { slug: "schreinerarbeiten", name: "Schreinerarbeiten", terms: ["schreiner", "schreinerei", "tischler"], score: 85 },
-    { slug: "pflasterbau", name: "Pflasterbau", terms: ["pflaster", "aussenanlagen", "einfahrt", "terrasse"], score: 80 },
+    { slug: "pflasterarbeiten", name: "Pflasterarbeiten", terms: ["pflaster", "pflasterbau", "aussenanlagen", "einfahrt", "terrasse"], score: 80 },
     { slug: "maurerarbeiten", name: "Maurerarbeiten", terms: ["maurerarbeiten", "mauerwerk", "rohbau"], score: 80 },
   ];
 
@@ -567,6 +567,7 @@ async function applyLiveChanges(company, plan, sources) {
         trade_id: dbTrade.id,
         confidence_score: trade.confidence_score,
         source: "single-company-enrichment",
+        status: "agent_suggested",
         evidence: trade.evidence,
       },
       { onConflict: "company_id,trade_id" },
@@ -750,16 +751,22 @@ function extractCompanyName(html) {
   const text = clean(stripTags(html));
   const title = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1];
   const titleName = title ? clean(stripTags(title)).split("|")[0].trim() : null;
-  const legalMatch = text.match(/Wagner\s+(?:&|und)\s+Spielvogel\s+(?:GmbH|GbR|GdbR)/i)?.[0];
-  return clean(legalMatch || titleName || "");
+  const legalMatch = text.match(/[A-ZÄÖÜ][A-Za-zÄÖÜäöüß0-9 .&-]{2,80}\s(?:GmbH|GbR|GdbR|UG|OHG|KG|e\.K\.)/i)?.[0];
+  return cleanCompanyName(legalMatch || titleName || "");
 }
 
 function extractPreferredCompanyName(pages) {
   const values = weightedPageValues(pages, (html) => {
     const text = clean(stripTags(html));
-    return [...text.matchAll(/Wagner\s+(?:&|und)\s+Spielvogel\s+(?:GmbH|GbR|GdbR)/gi)].map((match) => clean(match[0]));
+    return [...text.matchAll(/[A-ZÄÖÜ][A-Za-zÄÖÜäöüß0-9 .&-]{2,80}\s(?:GmbH|GbR|GdbR|UG|OHG|KG|e\.K\.)/gi)].map((match) => clean(match[0]));
   });
-  return values.find((value) => /\bGmbH\b/i.test(value)) || values[0] || extractCompanyName(pages[0]?.html || "");
+  const targetTokens = meaningfulTokens(targetCompany);
+  return cleanCompanyName(
+    values.find((value) => targetTokens.every((token) => contains(value, token))) ||
+    values.find((value) => /\bGmbH\b/i.test(value)) ||
+    values[0] ||
+    extractCompanyName(pages[0]?.html || ""),
+  );
 }
 
 function extractLegalForm(html) {
@@ -814,9 +821,19 @@ function extractServices(text, html) {
   const services = [
     ["Hochbau", /hochbau/i],
     ["Umbau", /umbau/i],
-    ["Renovierung", /renovierung/i],
-    ["Verputzarbeiten", /verputzarbeiten|verputz/i],
+    ["Sanierung", /sanierung|renovierung|modernisierung/i],
+    ["Verputzarbeiten", /verputzarbeiten|verputz|putzarbeiten/i],
     ["Betonglaettung", /betonglättung|betonglaettung/i],
+    ["Betonbau", /betonbau|betonarbeiten/i],
+    ["Maurerarbeiten", /maurerarbeiten|mauerwerk|rohbau/i],
+    ["Pflasterbau", /pflasterbau|pflasterarbeiten|natursteinpflaster|einfahrt|hofeinfahrt/i],
+    ["Zimmererarbeiten", /zimmerei|zimmerer|holzbau|dachstuhl|holzrahmenbau/i],
+    ["Schreinerarbeiten", /schreinerei|schreiner|tischler|innenausbau/i],
+    ["Dachdeckerarbeiten", /dachdecker|bedachung|steildach|flachdach|dachsanierung/i],
+    ["Spenglerarbeiten", /spengler|blechner|klempner|dachrinne|blechdach/i],
+    ["Elektroinstallation", /elektroinstallation|elektrotechnik|elektriker/i],
+    ["Sanitaerinstallation", /sanitär|sanitaer|badinstallation|heizung/i],
+    ["Metallbau", /metallbau|schlosserei|stahlbau/i],
     ["Gartenbau", /gartenbau/i],
     ["Landschaftsbau", /landschaftsbau/i],
     ["Garten- und Landschaftsbau", /garten-\s*und\s*landschaftsbau|garten und landschaftsbau/i],
@@ -832,16 +849,19 @@ function extractServiceAreas(text) {
 }
 
 function extractContactPersons(text) {
-  const persons = [];
-  for (const name of ["Otto Spielvogel", "Andreas Wagner"]) {
-    if (new RegExp(name, "i").test(text)) persons.push(name);
-  }
-  return persons;
+  return [];
 }
 
 function extractMasterBusiness(text) {
   if (/Hochbaumeister|Gartenbau Meister|Meister/i.test(text)) return true;
   return null;
+}
+
+function cleanCompanyName(value) {
+  return clean(value)
+    .replace(/^(TMG|DDG|Impressum|Angaben gemaess|Angaben gemäß)\s+/i, "")
+    .replace(/\s+(Impressum|Kontakt|Startseite).*$/i, "")
+    .trim();
 }
 
 function extractMetaContent(html, name) {
@@ -1007,6 +1027,17 @@ function normalize(value) {
 
 function contains(text, term) {
   return normalize(text).includes(normalize(term));
+}
+
+function meaningfulTokens(value) {
+  return normalize(value)
+    .split(" ")
+    .filter((token) => token.length >= 3)
+    .filter((token) => !["gmbh", "gbr", "gdbr", "und", "kg", "ohg", "firma", "bau", "der", "die", "das"].includes(token));
+}
+
+function escapePostgrestLike(value) {
+  return String(value).replace(/[%,]/g, "");
 }
 
 function isAllowedTestTarget(value) {

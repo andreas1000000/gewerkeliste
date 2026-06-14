@@ -6,7 +6,7 @@ import { SiteHeader } from "@/components/site-header";
 import { ClaimBadge } from "@/components/status-badge";
 import { getPublicCompaniesByTrade } from "@/lib/data";
 import { isSupabaseConfigured } from "@/lib/supabase";
-import { tradeTaxonomy, type TaxonomyTrade } from "@/lib/trade-taxonomy";
+import { canonicalTradeSlug, findTaxonomyTrade, tradeTaxonomy, type TaxonomyTrade } from "@/lib/trade-taxonomy";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -263,9 +263,9 @@ function tradeMatchFor(company: unknown) {
 }
 
 function findTrade(slug: string): TaxonomyTrade | undefined {
-  return tradeTaxonomy.find((trade) => trade.slug === slug);
+  return findTaxonomyTrade(canonicalTradeSlug(slug));
 }
 
 function findRelatedTrade(value: string): TaxonomyTrade | undefined {
-  return tradeTaxonomy.find((trade) => trade.slug === value || trade.name === value);
+  return findTaxonomyTrade(value);
 }

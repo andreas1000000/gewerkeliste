@@ -1,6 +1,6 @@
 import { z } from "zod";
 import type { ClaimStatus, CompanyFormState } from "@/lib/types";
-import { tradeTaxonomy } from "@/lib/trade-taxonomy";
+import { canonicalTradeSlug, publicTradeTaxonomy } from "@/lib/trade-taxonomy";
 
 export type CompanyInput = {
   trade_id: string;
@@ -26,7 +26,7 @@ const emptyToNull = (value: unknown) => {
 };
 
 const requiredString = z.string().trim().min(1);
-const validTradeSlugs = new Set(tradeTaxonomy.map((trade) => trade.slug));
+const validTradeSlugs = new Set(publicTradeTaxonomy().map((trade) => trade.slug));
 const phonePattern = /^[+()0-9\s/-]{6,30}$/;
 
 const optionalString = z.preprocess(emptyToNull, z.string().trim().min(1).nullable());
@@ -108,7 +108,7 @@ export const businessSubmissionSchema = z
     region: optionalString,
     country: z.string().trim().min(2, "Land ist erforderlich."),
     primaryTrade: z.string().trim().refine((slug) => validTradeSlugs.has(slug), "Bitte Hauptgewerk auswaehlen."),
-    secondaryTrades: z.array(z.string()).max(2, "Im Basis-Eintrag sind bis zu 2 Nebengewerke moeglich."),
+    secondaryTrades: z.array(z.string()).max(4, "Im Basis-Eintrag sind bis zu 5 Gewerke moeglich."),
     selectedServices: z.array(z.string()).min(1, "Bitte mindestens eine Kernleistung auswaehlen."),
     specializations: z.array(z.string()),
     additionalSpecializations: optionalString,
@@ -223,8 +223,8 @@ export function parseBusinessSubmissionForm(formData: FormData) {
     city: getString(formData, "city"),
     region: getString(formData, "region"),
     country: getString(formData, "country") || "Deutschland",
-    primaryTrade: getString(formData, "primaryTrade"),
-    secondaryTrades: getStringArray(formData, "secondaryTrades"),
+    primaryTrade: canonicalTradeSlug(getString(formData, "primaryTrade")),
+    secondaryTrades: getStringArray(formData, "secondaryTrades").map(canonicalTradeSlug).filter((slug, index, values) => values.indexOf(slug) === index),
     selectedServices: getStringArray(formData, "selectedServices"),
     specializations: getStringArray(formData, "specializations"),
     additionalSpecializations: getString(formData, "additionalSpecializations"),

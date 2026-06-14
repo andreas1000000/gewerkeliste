@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { getAllPublicCompanySlugs } from "@/lib/data";
 import { isSupabaseConfigured } from "@/lib/supabase";
-import { tradeTaxonomy } from "@/lib/trade-taxonomy";
+import { publicTradeTaxonomy } from "@/lib/trade-taxonomy";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://gewerkeliste.com";
@@ -23,7 +23,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "weekly",
       priority: 0.7,
     },
-    ...tradeTaxonomy.map((trade) => ({
+    ...publicTradeTaxonomy().map((trade) => ({
       url: `${baseUrl}/gewerke/${trade.slug}`,
       changeFrequency: "monthly" as const,
       priority: 0.55,

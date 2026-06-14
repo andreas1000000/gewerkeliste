@@ -3,7 +3,7 @@ import type { Route } from "next";
 import Link from "next/link";
 import { BusinessEntryForm } from "@/components/business-entry-form";
 import { SiteHeader } from "@/components/site-header";
-import { tradeTaxonomy } from "@/lib/trade-taxonomy";
+import { publicTradeTaxonomy } from "@/lib/trade-taxonomy";
 
 export const metadata: Metadata = {
   title: "Betrieb eintragen | GewerkeListe.com",
@@ -48,7 +48,7 @@ export default function RegisterCompanyPage() {
         </div>
 
         <div id="eintrag-starten" className="mt-8 scroll-mt-6">
-          <BusinessEntryForm trades={tradeTaxonomy} />
+          <BusinessEntryForm trades={publicTradeTaxonomy()} />
         </div>
       </section>
     </main>

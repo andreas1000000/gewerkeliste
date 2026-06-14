@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useActionState } from "react";
+import { TradeCheckboxGroups } from "@/components/trade-checkbox-groups";
 import { submitClaim } from "@/lib/actions";
 import type { CompanyFormState } from "@/lib/types";
 
@@ -14,14 +15,26 @@ const supportOptions = [
   { value: "custom", label: "Eigenen Betrag wählen" },
 ];
 
-export function ClaimForm({ companyId }: { companyId: string }) {
+export function ClaimForm({ companyId, initialTrades }: { companyId: string; initialTrades: string[] }) {
   const [state, formAction, pending] = useActionState(submitClaim, initialState);
   const [supportContribution, setSupportContribution] = useState("none");
+  const [selectedTrades, setSelectedTrades] = useState(initialTrades.slice(0, 5));
   const errors = state.fieldErrors || {};
+
+  function toggleTrade(slug: string) {
+    setSelectedTrades((current) => {
+      if (current.includes(slug)) return current.filter((item) => item !== slug);
+      return [...current, slug].slice(0, 5);
+    });
+  }
 
   return (
     <form action={formAction} className="rounded-lg border border-line bg-white p-5 shadow-soft">
       <input name="company_id" type="hidden" value={companyId} />
+      <input name="primaryTrade" type="hidden" value={selectedTrades[0] || ""} />
+      {selectedTrades.slice(1).map((slug) => (
+        <input key={slug} name="secondaryTrades" type="hidden" value={slug} />
+      ))}
       <h2 className="text-lg font-semibold text-ink">Eintrag beanspruchen</h2>
       <p className="mt-3 text-sm leading-6 text-muted">
         Wenn dieser Betrieb zu Ihnen gehört, können Sie die Übernahme des Betriebseintrags anfragen. Die Anfrage wird
@@ -45,6 +58,17 @@ export function ClaimForm({ companyId }: { companyId: string }) {
           />
         </Field>
       </div>
+
+      <section className="mt-6 rounded-lg border border-line bg-[#fbfcff] p-4">
+        <h3 className="text-sm font-semibold text-brand">Gewerke bestätigen</h3>
+        <p className="mt-2 text-sm leading-6 text-muted">
+          Vorausgewählte Gewerke basieren auf dem vorhandenen Eintrag. Sie können Haken entfernen oder ergänzen.
+          Im kostenlosen Basis-Eintrag werden maximal 5 relevante Gewerke übernommen.
+        </p>
+        <div className="mt-4">
+          <TradeCheckboxGroups max={5} name="claimTradeSelection" onToggle={toggleTrade} selected={selectedTrades} />
+        </div>
+      </section>
 
       <section className="mt-6 rounded-lg border border-line bg-[#fbfaf7] p-4">
         <p className="text-sm font-semibold text-[#07173d]">Gründungsphase: Verifizierung ohne Gebühr</p>

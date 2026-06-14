@@ -17,8 +17,12 @@
     "research:quality": "node scripts/research-quality-audit.mjs",
     "research:enrich:web": "node scripts/website-enrichment-agent.mjs",
     "research:enrich:company": "node scripts/enrich-company.mjs",
+    "enrich:company": "node scripts/enrich-company.mjs",
+    "enrich:queue": "node scripts/enrich-queue.mjs",
+    "enrich:create-jobs": "node scripts/enrich-create-jobs.mjs",
     "research:publish:basis": "node scripts/publish-public-basis-entries.mjs",
     "research:map:trades": "node scripts/map-companies-to-trades.mjs",
+    "taxonomy:sync": "node scripts/sync-trade-taxonomy.mjs",
     "supabase:apply-sql": "node scripts/apply-supabase-sql.mjs"
   },
   "dependencies": {

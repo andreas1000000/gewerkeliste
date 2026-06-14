@@ -212,7 +212,7 @@ export default async function CompanyPublicPage({ params }: PageProps) {
 
             {canClaim ? (
               <section id="eintrag-beanspruchen">
-                <ClaimForm companyId={company.id} />
+                <ClaimForm companyId={company.id} initialTrades={[company.trades?.slug].filter((slug): slug is string => Boolean(slug))} />
               </section>
             ) : (
               <section className="rounded-lg border border-line bg-white p-5 shadow-soft">

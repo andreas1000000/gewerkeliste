@@ -5,7 +5,7 @@ import { SiteHeader } from "@/components/site-header";
 import { getPublicCompanyTradeCounts } from "@/lib/data";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { frequentTradeSlugs, tradeHierarchy, type TradeHierarchyItem } from "@/lib/trade-hierarchy";
-import { tradeTaxonomy, type TaxonomyTrade } from "@/lib/trade-taxonomy";
+import { publicTradeTaxonomy, type TaxonomyTrade } from "@/lib/trade-taxonomy";
 
 export const dynamic = "force-dynamic";
 
@@ -31,7 +31,7 @@ export default async function TradesPage({ searchParams }: PageProps) {
   const query = normalizeSearch(params?.q || "");
   const location = params?.ort?.trim() || "";
   const companyCounts = isSupabaseConfigured() ? await getPublicCompanyTradeCounts() : {};
-  const searchableTrades = tradeTaxonomy.filter((trade) => trade.isActive !== false);
+  const searchableTrades = publicTradeTaxonomy();
   const filteredHierarchy = filterHierarchy(query);
   const alphabeticTrades = searchableTrades
     .filter((trade) => tradeMatchesQuery(trade, query))

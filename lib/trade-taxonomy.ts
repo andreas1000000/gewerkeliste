@@ -32,6 +32,53 @@ export type TaxonomyTrade = {
   isActive?: boolean;
 };
 
+export const tradeSlugAliases: Record<string, string> = {
+  dachdecker: "dachdeckerarbeiten",
+  "spengler-klempner": "spenglerarbeiten",
+  putzarbeiten: "verputzarbeiten",
+  sanitaer: "sanitaerinstallation",
+  heizung: "heizungsbau",
+  estrich: "estricharbeiten",
+  bodenbelag: "bodenlegerarbeiten",
+  gartenbau: "garten-und-landschaftsbau",
+  landschaftsbau: "garten-und-landschaftsbau",
+  "garten-landschaftsbau": "garten-und-landschaftsbau",
+  pflasterbau: "pflasterarbeiten",
+  brandschutzabschottungen: "brandschutzabschottung",
+  architektur: "architekt",
+};
+
+export const tradeSelectionGroups = [
+  {
+    name: "Planung",
+    slugs: ["architekt", "tragwerksplanung", "tga-planung", "energieberatung", "brandschutzplanung", "vermessung"],
+  },
+  {
+    name: "Rohbau",
+    slugs: ["bauunternehmen", "hochbau", "maurerarbeiten", "betonbau", "stahlbetonbau", "umbau", "sanierung", "abbrucharbeiten"],
+  },
+  {
+    name: "Dach / Fassade",
+    slugs: ["dachdeckerarbeiten", "zimmererarbeiten", "spenglerarbeiten", "fassadenbau", "geruestbau", "verputzarbeiten"],
+  },
+  {
+    name: "TGA",
+    slugs: ["elektroinstallation", "sanitaerinstallation", "heizungsbau", "waermepumpen", "lueftung", "kaelte-klima", "photovoltaik"],
+  },
+  {
+    name: "Ausbau",
+    slugs: ["trockenbau", "malerarbeiten", "fliesenarbeiten", "estricharbeiten", "bodenlegerarbeiten", "schreinerarbeiten", "metallbau", "glaserarbeiten"],
+  },
+  {
+    name: "Außenanlagen",
+    slugs: ["garten-und-landschaftsbau", "pflasterarbeiten", "naturstein", "erdarbeiten", "tiefbau", "kanalbau", "entwaesserung", "zaunbau"],
+  },
+  {
+    name: "Spezial",
+    slugs: ["kernbohrungen", "bauwerksabdichtung", "betonsanierung", "bautrocknung", "leckortung", "schadstoffsanierung", "brandschutzabschottung"],
+  },
+] as const;
+
 const supplementalTradeTaxonomy: TaxonomyTrade[] = [
   ...clusters("Rohbau / Tragwerk", [
     ["abbrucharbeiten", "Abbrucharbeiten"],
@@ -190,6 +237,176 @@ const supplementalTradeTaxonomy: TaxonomyTrade[] = [
 ];
 
 export const tradeTaxonomy: TaxonomyTrade[] = [
+  trade("bauunternehmen", "Bauunternehmen", "Rohbau / Tragwerk", {
+    shortDescription: "Bauunternehmen bündeln Rohbau-, Umbau- und Sanierungsleistungen mit eigener Bauausführung.",
+    synonyms: ["Baufirma", "Baugeschäft", "Rohbauunternehmen", "Hochbauunternehmen"],
+    subTrades: ["Hochbau", "Rohbau", "Umbau", "Sanierung", "Massivbau"],
+    coreServices: ["Baustellen einrichten", "Rohbau herstellen", "Umbauten ausführen", "Bestandsbauteile ändern", "Bauleistungen koordinieren"],
+    specializations: ["Wohnbau", "Gewerbebau", "Bestandsumbau", "Massivbau"],
+    projectTypes: ["Einfamilienhaus", "Mehrfamilienhaus", "Gewerbebau", "Umbau", "Sanierung"],
+    relatedTrades: ["hochbau", "maurerarbeiten", "betonbau", "umbau", "sanierung"],
+    typicalBusinessTypes: ["Bauunternehmen", "Baufirma", "Rohbaubetrieb"],
+  }),
+  trade("hochbau", "Hochbau", "Rohbau / Tragwerk", {
+    shortDescription: "Hochbau umfasst die Errichtung und Änderung oberirdischer Bauwerke in Massiv- oder Mischbauweise.",
+    synonyms: ["Rohbau", "Massivbau", "Neubau", "Mauerarbeiten"],
+    subTrades: ["Rohbau", "Massivbau", "Mauerwerksbau", "Betonarbeiten"],
+    coreServices: ["Rohbau erstellen", "Mauerwerk herstellen", "Betonbauteile herstellen", "Bauteile anschließen", "Bestand umbauen"],
+    specializations: ["Wohngebäude", "Gewerbegebäude", "Anbauten", "Bestandsumbau"],
+    projectTypes: ["Neubau", "Umbau", "Anbau", "Gewerbebau", "Bestand"],
+    relatedTrades: ["bauunternehmen", "maurerarbeiten", "betonbau", "stahlbetonbau"],
+    typicalBusinessTypes: ["Hochbauunternehmen", "Bauunternehmen", "Rohbaubetrieb"],
+  }),
+  trade("stahlbetonbau", "Stahlbetonbau", "Rohbau / Tragwerk", {
+    shortDescription: "Stahlbetonbau verbindet Schalung, Bewehrung und Betonage tragender Bauteile.",
+    synonyms: ["Betonarbeiten", "Bewehrungsarbeiten", "Schalungsarbeiten", "Betonieren"],
+    subTrades: ["Schalung", "Bewehrung", "Betonage", "Sichtbeton", "Fertigteile"],
+    coreServices: ["Schalung herstellen", "Bewehrung einbauen", "Beton einbringen", "Bauteile nachbehandeln", "Anschlüsse ausbilden"],
+    specializations: ["Bodenplatten", "Decken", "Wände", "Stützen", "Gewerbebau"],
+    projectTypes: ["Neubau", "Gewerbebau", "Mehrfamilienhaus", "Infrastruktur", "Bestand"],
+    relatedTrades: ["betonbau", "hochbau", "schalungsarbeiten", "bewehrungsarbeiten"],
+    typicalBusinessTypes: ["Stahlbetonbauer", "Betonbauunternehmen", "Rohbaubetrieb"],
+  }),
+  trade("umbau", "Umbau", "Sanierung / Bestand / Spezial", {
+    shortDescription: "Umbau umfasst bauliche Änderungen an bestehenden Gebäuden und Grundrissen.",
+    synonyms: ["Bestandsumbau", "Modernisierung", "Anbau", "Ausbau"],
+    subTrades: ["Wanddurchbrüche", "Grundrissänderungen", "Anbauten", "Bestandsanschlüsse"],
+    coreServices: ["Bestand öffnen", "Bauteile zurückbauen", "Neue Bauteile einfügen", "Anschlüsse herstellen", "Bestand sichern"],
+    specializations: ["Altbau", "Wohnungsumbau", "Gewerbeumbau", "Anbau"],
+    projectTypes: ["Bestand", "Wohnbau", "Gewerbe", "Anbau", "Modernisierung"],
+    relatedTrades: ["sanierung", "bauunternehmen", "maurerarbeiten", "trockenbau"],
+    typicalBusinessTypes: ["Bauunternehmen", "Sanierungsbetrieb", "Ausbaubetrieb"],
+  }),
+  trade("sanierung", "Sanierung", "Sanierung / Bestand / Spezial", {
+    shortDescription: "Sanierung ordnet Instandsetzung, Modernisierung und Schadensbehebung an Bestandsgebäuden ein.",
+    synonyms: ["Renovierung", "Modernisierung", "Bestandssanierung", "Altbausanierung"],
+    subTrades: ["Altbausanierung", "Feuchtesanierung", "Betonsanierung", "Energetische Sanierung"],
+    coreServices: ["Schäden aufnehmen", "Bauteile instand setzen", "Untergründe vorbereiten", "Feuchteschutz herstellen", "Oberflächen erneuern"],
+    specializations: ["Altbau", "Keller", "Fassade", "Balkon", "Wohnung"],
+    projectTypes: ["Bestandssanierung", "Altbau", "Wohnbau", "Gewerbe", "Schadensanierung"],
+    relatedTrades: ["umbau", "bauwerksabdichtung", "verputzarbeiten", "malerarbeiten"],
+    typicalBusinessTypes: ["Sanierungsbetrieb", "Bauunternehmen", "Fachbetrieb Bestand"],
+  }),
+  trade("verputzarbeiten", "Verputzarbeiten", "Gebäudehülle / Dach / Fassade", {
+    shortDescription: "Verputzarbeiten umfassen Innenputz, Außenputz, Sockelputz und Putzsanierung.",
+    synonyms: ["Putzarbeiten", "Innenputz", "Außenputz", "Aussenputz", "Verputzer", "Stuckateur"],
+    subTrades: ["Innenputz", "Außenputz", "Sockelputz", "Sanierputz", "Armierungsputz"],
+    coreServices: ["Untergrund vorbereiten", "Putz auftragen", "Gewebe einbetten", "Oberflächen abziehen", "Anschlüsse ausbilden"],
+    specializations: ["Fassade", "Innenräume", "Altbau", "Sockel", "Sanierputz"],
+    projectTypes: ["Neubau", "Fassadensanierung", "Innenausbau", "Bestand", "Gewerbe"],
+    relatedTrades: ["fassadenbau", "malerarbeiten", "maurerarbeiten", "sanierung"],
+    typicalBusinessTypes: ["Verputzerbetrieb", "Stuckateurbetrieb", "Fassadenbetrieb"],
+  }),
+  trade("dachdeckerarbeiten", "Dachdeckerarbeiten", "Gebäudehülle / Dach / Fassade", {
+    shortDescription: "Dachdeckerarbeiten betreffen Steildach, Flachdach, Dachsanierung, Dämmung und Anschlüsse.",
+    synonyms: ["Dachdecker", "Bedachungen", "Dachsanierung", "Flachdach", "Steildach", "Dachabdichtung", "Dachfenster"],
+    subTrades: ["Steildach", "Flachdach", "Dachabdichtung", "Dachdämmung", "Dachfenster"],
+    coreServices: ["Dach eindecken", "Dach abdichten", "Dämmung einbauen", "Anschlüsse herstellen", "Dachfenster einbauen"],
+    specializations: ["Ziegeldach", "Flachdach", "Dachsanierung", "Dachreparatur"],
+    projectTypes: ["Neubau", "Sanierung", "Reparatur", "Wohnbau", "Gewerbe"],
+    relatedTrades: ["spenglerarbeiten", "zimmererarbeiten", "fassadenbau"],
+    typicalBusinessTypes: ["Dachdeckerbetrieb", "Bedachungsbetrieb", "Dachbauunternehmen"],
+  }),
+  trade("spenglerarbeiten", "Spenglerarbeiten", "Gebäudehülle / Dach / Fassade", {
+    shortDescription: "Spenglerarbeiten umfassen Blechanschlüsse, Dachrinnen, Fallrohre und Blechverkleidungen.",
+    synonyms: ["Blechner", "Klempner", "Bauspengler", "Dachrinne", "Blechdach", "Blechfassade", "Kaminverkleidung"],
+    subTrades: ["Dachrinnen", "Fallrohre", "Attika", "Kamineinfassungen", "Blechfassaden"],
+    coreServices: ["Bleche kanten", "Dachrinnen montieren", "Fallrohre anschließen", "Anschlüsse herstellen", "Verkleidungen montieren"],
+    specializations: ["Zink", "Kupfer", "Aluminium", "Edelstahl", "Metalldach"],
+    projectTypes: ["Dachsanierung", "Neubau", "Fassade", "Reparatur", "Bestand"],
+    relatedTrades: ["dachdeckerarbeiten", "fassadenbau", "metallbau"],
+    typicalBusinessTypes: ["Spenglerbetrieb", "Blechnerbetrieb", "Dachdeckerbetrieb"],
+  }),
+  trade("sanitaerinstallation", "Sanitärinstallation", "TGA / Technische Gebäudeausrüstung", {
+    shortDescription: "Sanitärinstallation umfasst Wasserleitungen, Abwasser, Bäder, Armaturen und Vorwandtechnik.",
+    synonyms: ["Sanitär", "Sanitaer", "SHK", "Badinstallation", "Installateur"],
+    subTrades: ["Badinstallation", "Trinkwasser", "Abwasser", "Vorwandinstallation", "Armaturen"],
+    coreServices: ["Leitungen verlegen", "Sanitärobjekte montieren", "Anschlüsse herstellen", "Armaturen einbauen", "Dichtheit prüfen"],
+    specializations: ["Badsanierung", "Neubau", "Gewerbesanitär", "barrierefreie Bäder"],
+    projectTypes: ["Neubau", "Sanierung", "Bad", "Wohnbau", "Gewerbe"],
+    relatedTrades: ["heizungsbau", "fliesenarbeiten", "trockenbau"],
+    typicalBusinessTypes: ["SHK-Betrieb", "Sanitärbetrieb", "Installateurbetrieb"],
+  }),
+  trade("heizungsbau", "Heizungsbau", "TGA / Technische Gebäudeausrüstung", {
+    shortDescription: "Heizungsbau betrifft Wärmeerzeuger, Heizflächen, Rohrnetze, Regelung und Wartung.",
+    synonyms: ["Heizung", "Heizungsinstallation", "SHK", "Wärmeerzeuger", "Fussbodenheizung"],
+    subTrades: ["Wärmepumpe", "Fußbodenheizung", "Heizkörper", "Rohrnetz", "Regelung"],
+    coreServices: ["Heizung installieren", "Rohrleitungen verlegen", "Wärmeerzeuger anschließen", "Anlage einregulieren", "Wartung durchführen"],
+    specializations: ["Wärmepumpen", "Sanierung", "Fußbodenheizung", "Gewerbeanlagen"],
+    projectTypes: ["Neubau", "Sanierung", "Wartung", "Wohnbau", "Gewerbe"],
+    relatedTrades: ["sanitaerinstallation", "waermepumpen", "lueftung", "elektroinstallation"],
+    typicalBusinessTypes: ["Heizungsbauer", "SHK-Betrieb", "TGA-Betrieb"],
+  }),
+  trade("estricharbeiten", "Estricharbeiten", "Ausbau / Innenausbau", {
+    shortDescription: "Estricharbeiten betreffen Fußbodenaufbauten, Dämmung, Heizestrich und Untergründe.",
+    synonyms: ["Estrich", "Estrichleger", "Zementestrich", "Fließestrich", "Heizestrich"],
+    subTrades: ["Zementestrich", "Fließestrich", "Heizestrich", "Verbundestrich"],
+    coreServices: ["Untergrund vorbereiten", "Dämmung verlegen", "Randstreifen setzen", "Estrich einbringen", "Oberfläche nachbearbeiten"],
+    specializations: ["Fußbodenheizung", "Schnellestrich", "Industrieboden", "Sanierung"],
+    projectTypes: ["Neubau", "Sanierung", "Wohnbau", "Gewerbe", "Industrie"],
+    relatedTrades: ["fliesenarbeiten", "bodenlegerarbeiten", "heizungsbau"],
+    typicalBusinessTypes: ["Estrichbetrieb", "Estrichlegerbetrieb", "Bodenbauunternehmen"],
+  }),
+  trade("bodenlegerarbeiten", "Bodenlegerarbeiten", "Ausbau / Innenausbau", {
+    shortDescription: "Bodenlegerarbeiten umfassen Parkett, Vinyl, Teppich, Linoleum und Untergrundvorbereitung.",
+    synonyms: ["Bodenbelag", "Bodenleger", "Parkett", "Vinylboden", "Fußboden"],
+    subTrades: ["Parkett", "Vinyl", "Teppich", "Linoleum", "Designboden"],
+    coreServices: ["Untergrund prüfen", "Altbelag entfernen", "Ausgleich aufbringen", "Belag verlegen", "Sockelleisten montieren"],
+    specializations: ["Parkett", "Designbelag", "Gewerbeflächen", "Treppen", "Sanierung"],
+    projectTypes: ["Renovierung", "Innenausbau", "Wohnbau", "Gewerbe", "Bestand"],
+    relatedTrades: ["estricharbeiten", "malerarbeiten", "trockenbau"],
+    typicalBusinessTypes: ["Bodenlegerbetrieb", "Parkettleger", "Ausbaubetrieb"],
+  }),
+  trade("pflasterarbeiten", "Pflasterarbeiten", "Außenanlagen / Garten / Landschaft", {
+    shortDescription: "Pflasterarbeiten betreffen Einfahrten, Wege, Terrassen, Unterbau und Entwässerung.",
+    synonyms: ["Pflasterbau", "Pflasterer", "Natursteinpflaster", "Betonsteinpflaster", "Hofeinfahrten", "Außenanlagen"],
+    subTrades: ["Natursteinpflaster", "Betonsteinpflaster", "Bordsteine", "Rinnen", "Unterbau"],
+    coreServices: ["Unterbau herstellen", "Pflaster verlegen", "Bordsteine setzen", "Rinnen einbauen", "Fugen herstellen"],
+    specializations: ["Hofeinfahrten", "Terrassen", "Naturstein", "Gewerbeflächen", "Sanierung"],
+    projectTypes: ["Privat", "Gewerbe", "Außenanlage", "Sanierung", "Kommunal"],
+    relatedTrades: ["garten-und-landschaftsbau", "erdarbeiten", "tiefbau", "entwaesserung"],
+    typicalBusinessTypes: ["Pflasterbetrieb", "GaLaBau-Betrieb", "Tiefbauunternehmen"],
+  }),
+  trade("naturstein", "Naturstein", "Außenanlagen / Garten / Landschaft", {
+    shortDescription: "Naturstein umfasst Beläge, Mauern, Stufen und Einfassungen aus Naturstein im Bau- und Außenbereich.",
+    synonyms: ["Natursteinarbeiten", "Granit", "Natursteinpflaster", "Natursteinmauer"],
+    subTrades: ["Natursteinpflaster", "Natursteinmauern", "Blockstufen", "Terrassenplatten"],
+    coreServices: ["Steine setzen", "Platten verlegen", "Mauern herstellen", "Stufen einbauen", "Fugen ausbilden"],
+    specializations: ["Granit", "Kalkstein", "Trockenmauern", "Außenanlagen"],
+    projectTypes: ["Außenanlage", "Garten", "Terrasse", "Sanierung", "Privat"],
+    relatedTrades: ["pflasterarbeiten", "garten-und-landschaftsbau", "erdarbeiten"],
+    typicalBusinessTypes: ["Natursteinbetrieb", "GaLaBau-Betrieb", "Steinmetzbetrieb"],
+  }),
+  trade("entwaesserung", "Entwässerung", "Außenanlagen / Garten / Landschaft", {
+    shortDescription: "Entwässerung umfasst Rinnen, Drainagen, Leitungen und Regenwasserführung an Gebäuden und Außenanlagen.",
+    synonyms: ["Entwaesserung", "Drainage", "Regenwasser", "Grundstücksentwässerung"],
+    subTrades: ["Drainage", "Rinnen", "Regenwasserleitungen", "Sickerschächte"],
+    coreServices: ["Rinnen einbauen", "Leitungen verlegen", "Drainagen herstellen", "Gefälle ausbilden", "Schächte setzen"],
+    specializations: ["Außenanlagen", "Hofentwässerung", "Kellerdrainage", "Regenwassermanagement"],
+    projectTypes: ["Neubau", "Sanierung", "Außenanlage", "Gewerbe", "Bestand"],
+    relatedTrades: ["kanalbau", "tiefbau", "pflasterarbeiten"],
+    typicalBusinessTypes: ["Tiefbaubetrieb", "GaLaBau-Betrieb", "Entwässerungsbetrieb"],
+  }),
+  trade("brandschutzabschottung", "Brandschutzabschottung", "Brandschutz / Sicherheit / Prüfung", {
+    shortDescription: "Brandschutzabschottung schließt Leitungs- und Kabeldurchführungen in feuerwiderstandsfähigen Bauteilen.",
+    synonyms: ["Brandschutzabschottungen", "Abschottung", "Kabelabschottung", "Rohrabschottung"],
+    subTrades: ["Kabelabschottung", "Rohrabschottung", "Kombischott", "Dokumentation"],
+    coreServices: ["Durchführungen schließen", "Schotts einbauen", "Bauteile kennzeichnen", "Ausführung dokumentieren", "Mängel beheben"],
+    specializations: ["TGA-Durchführungen", "Bestand", "Gewerbeobjekte", "Sonderbau"],
+    projectTypes: ["Gewerbebau", "Sonderbau", "Bestand", "Umbau", "Wartung"],
+    relatedTrades: ["brandschutz", "trockenbau", "elektroinstallation", "lueftung"],
+    typicalBusinessTypes: ["Brandschutzbetrieb", "Spezialbetrieb", "TGA-Betrieb"],
+  }),
+  trade("architekt", "Architekt", "Planung / Gutachten / Fachberatung", {
+    shortDescription: "Architekten planen Gebäude, koordinieren Entwurf, Genehmigung, Ausführung und Bauüberwachung.",
+    synonyms: ["Architektur", "Architekturbüro", "Entwurfsplanung", "Bauantrag"],
+    subTrades: ["Entwurf", "Genehmigungsplanung", "Ausführungsplanung", "Bauüberwachung"],
+    coreServices: ["Bestand aufnehmen", "Entwurf erstellen", "Bauantrag vorbereiten", "Leistungen ausschreiben", "Ausführung überwachen"],
+    specializations: ["Wohnbau", "Gewerbebau", "Umbau", "Sanierung"],
+    projectTypes: ["Neubau", "Umbau", "Sanierung", "Gewerbebau", "Bestand"],
+    relatedTrades: ["tragwerksplanung", "tga-planung", "energieberatung"],
+    typicalBusinessTypes: ["Architekturbüro", "Planungsbüro"],
+  }),
   trade("maurerarbeiten", "Maurerarbeiten", "Rohbau / Tragwerk", {
     shortDescription: "Mauerwerk, Rohbau, Umbau im Bestand und kleinere Betonarbeiten.",
     synonyms: ["Maurer", "Mauerer", "Rohbauer", "Mauerwerksbau", "Bauunternehmen"],
@@ -422,6 +639,35 @@ export const tradeTaxonomy: TaxonomyTrade[] = [
   }),
   ...supplementalTradeTaxonomy,
 ];
+
+export function canonicalTradeSlug(slugOrName: string) {
+  const normalized = slugOrName.trim().toLowerCase();
+  return tradeSlugAliases[normalized] || normalized;
+}
+
+export function findTaxonomyTrade(slugOrName: string) {
+  const canonical = canonicalTradeSlug(slugOrName);
+  return tradeTaxonomy.find((trade) => trade.slug === canonical || trade.name === slugOrName);
+}
+
+export function publicTradeTaxonomy() {
+  const seen = new Set<string>();
+  return tradeTaxonomy.filter((trade) => {
+    const canonical = canonicalTradeSlug(trade.slug);
+    if (canonical !== trade.slug) return false;
+    if (seen.has(trade.slug)) return false;
+    seen.add(trade.slug);
+    return trade.isActive !== false;
+  });
+}
+
+export function groupedTradeSelection() {
+  const tradesBySlug = new Map(publicTradeTaxonomy().map((trade) => [trade.slug, trade]));
+  return tradeSelectionGroups.map((group) => ({
+    name: group.name,
+    trades: group.slugs.map((slug) => tradesBySlug.get(canonicalTradeSlug(slug))).filter((trade): trade is TaxonomyTrade => Boolean(trade)),
+  }));
+}
 
 function trade(
   slug: string,

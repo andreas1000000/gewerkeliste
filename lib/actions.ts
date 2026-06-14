@@ -6,7 +6,7 @@ import { getSupabaseAdmin } from "@/lib/supabase";
 import type { CompanyFormState, ImportReport } from "@/lib/types";
 import { companySlug, slugify } from "@/lib/slug";
 import { getCompany, getCompanySubmission, getResearchCandidate, getUniqueCompanySlug } from "@/lib/data";
-import { tradeTaxonomy } from "@/lib/trade-taxonomy";
+import { canonicalTradeSlug, findTaxonomyTrade, tradeTaxonomy } from "@/lib/trade-taxonomy";
 import {
   claimSchema,
   csvCompanySchema,
@@ -101,7 +101,13 @@ export async function submitClaim(_prevState: CompanyFormState, formData: FormDa
   if (error) return { ok: false, message: error.message };
 
   const company = await getCompany(parsed.data.company_id);
-  const companyTradeSlug = company.trades?.slug || slugify(company.trades?.name || "fachbetrieb");
+  const requestedPrimaryTrade = canonicalTradeSlug(String(formData.get("primaryTrade") || company.trades?.slug || ""));
+  const requestedSecondaryTrades = formData
+    .getAll("secondaryTrades")
+    .map((value) => canonicalTradeSlug(String(value)))
+    .filter((slug) => slug && slug !== requestedPrimaryTrade && findTaxonomyTrade(slug))
+    .slice(0, 4);
+  const companyTradeSlug = findTaxonomyTrade(requestedPrimaryTrade)?.slug || canonicalTradeSlug(company.trades?.slug || slugify(company.trades?.name || "fachbetrieb"));
   const { error: submissionError } = await supabase.from("company_submissions").insert({
     status: "submitted",
     company_name: company.name,
@@ -122,7 +128,7 @@ export async function submitClaim(_prevState: CompanyFormState, formData: FormDa
     region: null,
     country: "Deutschland",
     primary_trade: companyTradeSlug,
-    secondary_trades: [],
+    secondary_trades: requestedSecondaryTrades,
     selected_services: [],
     specializations: [],
     service_radius_km: 50,
@@ -406,14 +412,14 @@ export async function approveSubmission(formData: FormData) {
     redirect(`/admin/submissions/${id}?approved=${company.slug}`);
   }
 
-  const tradeName = tradeNameFromSlug(submission.primary_trade);
+  const submissionTradeSlug = canonicalTradeSlug(submission.primary_trade);
   const { data: trade, error: tradeError } = await supabase
     .from("trades")
-    .upsert({ name: tradeName, slug: submission.primary_trade }, { onConflict: "slug" })
     .select("id")
+    .eq("slug", submissionTradeSlug)
     .single();
 
-  if (tradeError || !trade) throw tradeError || new Error("Gewerk konnte nicht angelegt werden.");
+  if (tradeError || !trade) throw tradeError || new Error(`Gewerk fehlt in Supabase: ${submissionTradeSlug}`);
 
   const slug = await getUniqueCompanySlug(companySlug(submission.company_name, submission.postal_code, submission.city));
   const description = [
@@ -512,15 +518,15 @@ export async function approveResearchCandidate(formData: FormData) {
     redirect(`/admin/research-imports/${id}?duplicate=1`);
   }
 
-  const tradeSlug = slugify(candidate.trade_slug || candidate.trade_name);
-  const tradeName = candidate.trade_name || tradeNameFromSlug(tradeSlug);
+  const tradeSlug = canonicalTradeSlug(slugify(candidate.trade_slug || candidate.trade_name));
+  const tradeName = tradeNameFromSlug(tradeSlug);
   const { data: trade, error: tradeError } = await supabase
     .from("trades")
-    .upsert({ name: tradeName, slug: tradeSlug }, { onConflict: "slug" })
     .select("id")
+    .eq("slug", tradeSlug)
     .single();
 
-  if (tradeError || !trade) throw tradeError || new Error("Gewerk konnte nicht angelegt werden.");
+  if (tradeError || !trade) throw tradeError || new Error(`Gewerk fehlt in Supabase: ${tradeSlug}`);
 
   const slug = await getUniqueCompanySlug(companySlug(candidate.company_name, candidate.postal_code, candidate.city));
   const description = [
@@ -617,15 +623,16 @@ export async function importCompanies(_prevState: ImportReport, formData: FormDa
       continue;
     }
 
-    const tradeSlug = slugify(input.trade);
+    const tradeSlug = canonicalTradeSlug(slugify(input.trade));
+    const tradeName = tradeNameFromSlug(tradeSlug);
     const { data: trade, error: tradeError } = await supabase
       .from("trades")
-      .upsert({ name: input.trade, slug: tradeSlug }, { onConflict: "slug" })
       .select("id")
+      .eq("slug", tradeSlug)
       .single();
 
     if (tradeError || !trade) {
-      errors.push(`Zeile ${rowNumber}: ${tradeError?.message || "Gewerk konnte nicht gespeichert werden."}`);
+      errors.push(`Zeile ${rowNumber}: Gewerk fehlt in zentraler Taxonomie/Supabase (${tradeSlug}).`);
       continue;
     }
 
@@ -634,7 +641,7 @@ export async function importCompanies(_prevState: ImportReport, formData: FormDa
       trade_id: trade.id,
       name: input.name,
       slug,
-      description: `${input.trade} in ${input.city}`,
+      description: `${tradeName} in ${input.city}`,
       email: input.email,
       phone: input.phone,
       website_url: website,

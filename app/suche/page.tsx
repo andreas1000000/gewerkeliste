@@ -5,7 +5,7 @@ import { SiteHeader } from "@/components/site-header";
 import { ClaimBadge } from "@/components/status-badge";
 import { getPublicCompanies } from "@/lib/data";
 import { isSupabaseConfigured } from "@/lib/supabase";
-import { tradeTaxonomy } from "@/lib/trade-taxonomy";
+import { findTaxonomyTrade, publicTradeTaxonomy } from "@/lib/trade-taxonomy";
 
 export const dynamic = "force-dynamic";
 
@@ -24,7 +24,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
   const trade = stringParam(params.gewerk);
   const location = stringParam(params.ort);
   const radiusKm = stringParam(params.umkreis) || "50";
-  const tradeOptions = tradeTaxonomy
+  const tradeOptions = publicTradeTaxonomy()
     .filter((item) => item.isActive !== false)
     .map((item) => ({ key: item.slug, slug: item.slug, name: item.name, category: item.category }))
     .sort((a, b) => a.name.localeCompare(b.name, "de"));
@@ -147,7 +147,7 @@ function tradeSlugForQuery(query: string) {
   const normalizedQuery = normalizeSearchTerm(query);
   if (!normalizedQuery) return undefined;
 
-  return tradeTaxonomy.find((trade) => {
+  return publicTradeTaxonomy().find((trade) => {
     const terms = [trade.slug, trade.name, ...trade.synonyms, ...trade.subTrades, ...trade.coreServices].map(normalizeSearchTerm);
     return terms.some((term) => term === normalizedQuery || term.includes(normalizedQuery) || normalizedQuery.includes(term));
   })?.slug;

@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import { getPublicCompanies } from "@/lib/data";
 import { isSupabaseConfigured } from "@/lib/supabase";
-import { tradeTaxonomy, type TaxonomyTrade } from "@/lib/trade-taxonomy";
+import { findTaxonomyTrade, type TaxonomyTrade } from "@/lib/trade-taxonomy";
 
 type PageProps = {
   params: Promise<{ slug: string; ort: string }>;
@@ -130,7 +130,7 @@ export default async function TradeLocationPage({ params }: PageProps) {
 }
 
 function findTrade(slug: string): TaxonomyTrade | undefined {
-  return tradeTaxonomy.find((trade) => trade.slug === slug);
+  return findTaxonomyTrade(slug);
 }
 
 function displayLocation(value: string) {

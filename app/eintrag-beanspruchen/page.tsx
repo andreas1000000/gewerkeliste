@@ -60,7 +60,7 @@ export default async function ClaimEntryPage({ searchParams }: PageProps) {
 
         <div className="mt-6">
           {company ? (
-            <ClaimForm companyId={company.id} />
+            <ClaimForm companyId={company.id} initialTrades={[company.trades?.slug].filter((slug): slug is string => Boolean(slug))} />
           ) : (
             <div className="grid gap-3 rounded-lg border border-line bg-white p-6 shadow-soft sm:grid-cols-2">
               <Link
