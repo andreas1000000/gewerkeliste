@@ -19,6 +19,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
             <Link className="rounded-md px-3 py-2 font-medium text-muted hover:bg-panel hover:text-ink" href="/admin/research-imports">
               Recherche
             </Link>
+            <Link className="rounded-md px-3 py-2 font-medium text-muted hover:bg-panel hover:text-ink" href="/admin/agents">
+              Agenten
+            </Link>
             <Link className="rounded-md px-3 py-2 font-medium text-muted hover:bg-panel hover:text-ink" href="/admin/claims">
               Claims
             </Link>
