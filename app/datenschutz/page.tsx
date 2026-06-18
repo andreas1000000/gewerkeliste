@@ -292,7 +292,7 @@ Rechtsgrundlage ist Art. 6 Abs. 1 lit. f DSGVO. Unser berechtigtes Interesse lie
 
 ## 14. Rechnungsstellung und Buchhaltung
 
-Wenn kostenpflichtige Leistungen beauftragt werden, verarbeiten wir die für Angebot, Vertrag, Rechnung und Buchhaltung erforderlichen Daten.
+Wenn separat angebotene Zusatzdienste oder freiwillige Förderbeiträge beauftragt werden, verarbeiten wir die für Angebot, Vertrag, Rechnung und Buchhaltung erforderlichen Daten.
 
 Dazu können gehören:
 
@@ -301,7 +301,7 @@ Dazu können gehören:
 * Rechnungsadresse
 * E-Mail-Adresse
 * Leistungsdaten
-* Zahlungsstatus
+* Bearbeitungsstatus
 * Rechnungsnummer
 * steuerlich relevante Angaben
 * Umsatzsteuer-ID, soweit angegeben
@@ -311,7 +311,7 @@ Zwecke der Verarbeitung sind:
 * Angebotserstellung
 * Vertragserfüllung
 * Rechnungsstellung
-* Zahlungszuordnung
+* Zuordnung von Eingängen, sofern relevant
 * Buchhaltung
 * Erfüllung gesetzlicher Aufbewahrungspflichten
 
@@ -319,9 +319,9 @@ Rechtsgrundlagen sind Art. 6 Abs. 1 lit. b DSGVO für Vertragserfüllung und Art
 
 Soweit Rechnungs- oder Buchhaltungsdienstleister eingesetzt werden, erhalten diese nur die für die jeweilige Leistung erforderlichen Daten.
 
-## 15. Online-Zahlungen
+## 15. Online-Abwicklung separat angebotener Zusatzdienste
 
-Soweit künftig direkte Online-Zahlungen auf der Website angeboten werden, werden die für die Zahlungsabwicklung erforderlichen Daten an den jeweiligen Zahlungsdienstleister übermittelt.
+Soweit künftig eine direkte Online-Abwicklung separat angebotener Zusatzdienste auf der Website angeboten wird, werden die dafür erforderlichen Daten an den jeweiligen Dienstleister übermittelt.
 
 Dazu können gehören:
 
@@ -329,16 +329,16 @@ Dazu können gehören:
 * Firma
 * Rechnungsadresse
 * E-Mail-Adresse
-* Zahlungsbetrag
-* Zahlungsstatus
-* gewählte Zahlungsmethode
+* Betrag
+* Bearbeitungsstatus
+* gewählte Abwicklungsmethode
 * Transaktionsdaten
 
-Zweck ist die Abwicklung der Zahlung für kostenpflichtige Leistungen.
+Zweck ist die Abwicklung separat beauftragter Zusatzdienste oder freiwilliger Förderbeiträge.
 
 Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO.
 
-Der konkrete Zahlungsdienstleister wird im Rahmen des Zahlungsvorgangs benannt. Zahlungsdaten wie Kreditkartendaten werden grundsätzlich nicht durch uns selbst gespeichert, sondern durch den jeweiligen Zahlungsdienstleister verarbeitet.
+Der konkrete Dienstleister wird im Rahmen des Vorgangs benannt. Sensible Abwicklungsdaten wie Kreditkartendaten werden grundsätzlich nicht durch uns selbst gespeichert, sondern durch den jeweiligen Dienstleister verarbeitet.
 
 ## 16. Newsletter und werbliche Kommunikation
 

@@ -62,7 +62,7 @@ export function LegalFooter() {
           <h2 className="font-semibold">Kontakt</h2>
           <div className="mt-3 grid gap-2 text-blue-100">
             <span>GewerkeListe.com</span>
-            <span>Riedering, Bayern</span>
+            <span>Deutschland</span>
             <a className="break-words hover:text-white" href={`mailto:${siteConfig.publicContactEmail}`}>
               {siteConfig.publicContactEmail}
             </a>
