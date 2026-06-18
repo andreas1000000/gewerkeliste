@@ -3,6 +3,7 @@
 import { readFile } from "node:fs/promises";
 import { basename, extname } from "node:path";
 import { createClient } from "@supabase/supabase-js";
+import { requireLiveConfirmation } from "./safety-gates.mjs";
 
 const args = parseArgs(process.argv.slice(2));
 const filePath = args.file || args._[0];
@@ -10,6 +11,11 @@ const filePath = args.file || args._[0];
 if (!filePath) {
   fail("Datei fehlt. Nutzung: npm run research:import -- --file ./betriebe.csv --batch \"Rosenheim Test\" --source-note \"öffentliche Firmenwebsites\"");
 }
+requireLiveConfirmation({
+  args,
+  action: "research-import-live",
+  reason: "Research Import schreibt Batches und Kandidaten in die Datenbank.",
+});
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;

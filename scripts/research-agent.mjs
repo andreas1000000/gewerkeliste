@@ -3,6 +3,7 @@
 import { readFile, writeFile } from "node:fs/promises";
 import { basename, extname, join } from "node:path";
 import { createClient } from "@supabase/supabase-js";
+import { requireLiveConfirmation } from "./safety-gates.mjs";
 
 const args = parseArgs(process.argv.slice(2));
 const filePath = args.file || args._[0];
@@ -20,6 +21,13 @@ if (!filePath) {
 
 if (!Number.isFinite(chunkSize) || chunkSize < 1 || chunkSize > 1000) {
   fail("--chunk-size muss zwischen 1 und 1000 liegen.");
+}
+if (!dryRun) {
+  requireLiveConfirmation({
+    args,
+    action: "research-agent-live",
+    reason: "Research Agent schreibt Import-Batches und Kandidaten in Supabase.",
+  });
 }
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;

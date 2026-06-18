@@ -8,6 +8,7 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { promisify } from "node:util";
 import ts from "typescript";
+import { requireExternalApiConfirmation, requireLiveConfirmation } from "./safety-gates.mjs";
 
 const execFileAsync = promisify(execFile);
 const searchModule = await importSearchModule();
@@ -28,6 +29,16 @@ if (!targetCompany && !args["company-id"]) fail("--name/--company oder --company
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
+if (live) {
+  requireLiveConfirmation({
+    args,
+    action: "enrich-company-live",
+    reason: "Company Enrichment kann Firmenfelder, Quellen, Gewerke und Change Logs schreiben.",
+  });
+}
+if (process.env.BRAVE_SEARCH_API_KEY) {
+  requireExternalApiConfirmation({ args, provider: "brave-search", estimatedRequests: maxSearchQueries });
+}
 
 if (!supabaseUrl || !serviceRoleKey) {
   fail("NEXT_PUBLIC_SUPABASE_URL/SUPABASE_URL und SUPABASE_SERVICE_ROLE_KEY/SUPABASE_KEY muessen gesetzt sein.");

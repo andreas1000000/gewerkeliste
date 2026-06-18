@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { readFile } from "node:fs/promises";
+import { requireRemoteSqlConfirmation } from "./safety-gates.mjs";
 
 const args = parseArgs(process.argv.slice(2));
 const filePath = args.file || args._[0];
@@ -8,6 +9,7 @@ const projectRef = args.project || process.env.SUPABASE_PROJECT_REF;
 const accessToken = process.env.SUPABASE_ACCESS_TOKEN;
 
 if (!filePath) fail("SQL-Datei fehlt. Nutzung: npm run supabase:apply-sql -- --file ./supabase/migrations/datei.sql");
+requireRemoteSqlConfirmation({ args });
 if (!projectRef) fail("SUPABASE_PROJECT_REF fehlt.");
 if (!accessToken) fail("SUPABASE_ACCESS_TOKEN fehlt. Erforderlich ist ein Supabase Personal Access Token.");
 

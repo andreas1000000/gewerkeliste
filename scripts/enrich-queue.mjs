@@ -3,6 +3,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
+import { requireLiveConfirmation } from "./safety-gates.mjs";
 
 const execFileAsync = promisify(execFile);
 const args = parseArgs(process.argv.slice(2));
@@ -10,6 +11,13 @@ const limit = Number(args.limit || 20);
 const live = Boolean(args.live);
 const maxSearchQueries = Number(args["max-search-queries"] || 8);
 const timeoutMs = Number(args["timeout-ms"] || 8000);
+if (live) {
+  requireLiveConfirmation({
+    args,
+    action: "enrich-queue-live",
+    reason: "Enrichment Queue kann Jobs markieren und Child-Enrichment im Live-Modus ausfuehren.",
+  });
+}
 
 const supabase = createSupabaseClient();
 

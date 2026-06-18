@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { createClient } from "@supabase/supabase-js";
+import { requireLiveConfirmation } from "./safety-gates.mjs";
 
 const args = parseArgs(process.argv.slice(2));
 const city = String(args.city || "").trim();
@@ -10,6 +11,13 @@ const priority = Number(args.priority || 50);
 const dryRun = !args.live;
 
 if (!city) fail("--city ist erforderlich.");
+if (!dryRun) {
+  requireLiveConfirmation({
+    args,
+    action: "enrich-create-jobs-live",
+    reason: "Enrichment Jobs werden in die Queue geschrieben.",
+  });
+}
 
 const supabase = createSupabaseClient();
 

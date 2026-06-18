@@ -6,6 +6,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import ts from "typescript";
+import { requireLiveConfirmation } from "./safety-gates.mjs";
 
 const args = parseArgs(process.argv.slice(2));
 const live = Boolean(args.live);
@@ -13,6 +14,13 @@ const supabase = createSupabaseClient();
 const taxonomyModule = await importTaxonomyModule();
 const { publicTradeTaxonomy, tradeSlugAliases } = taxonomyModule;
 const trades = publicTradeTaxonomy();
+if (live) {
+  requireLiveConfirmation({
+    args,
+    action: "sync-trade-taxonomy-live",
+    reason: "Taxonomie-Sync schreibt trades, trade_synonyms und trade_slug_aliases.",
+  });
+}
 
 const duplicateSlugs = findDuplicates(trades.map((trade) => trade.slug));
 const report = {

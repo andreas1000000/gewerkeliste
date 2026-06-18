@@ -1,13 +1,21 @@
 #!/usr/bin/env node
 
 import { createClient } from "@supabase/supabase-js";
+import { requireLiveConfirmation } from "./safety-gates.mjs";
 
 const args = parseArgs(process.argv.slice(2));
-const dryRun = Boolean(args["dry-run"]);
+const dryRun = !args.live;
 const minAutoScore = Number(args["min-auto-score"] || 70);
 const minReviewScore = Number(args["min-review-score"] || 50);
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
+if (!dryRun) {
+  requireLiveConfirmation({
+    args,
+    action: "map-companies-to-trades-live",
+    reason: "Company-to-trade Mapping schreibt company_trades, Reviews und Synonyme.",
+  });
+}
 
 if (!supabaseUrl || !serviceRoleKey) fail("NEXT_PUBLIC_SUPABASE_URL/SUPABASE_URL und SUPABASE_SERVICE_ROLE_KEY/SUPABASE_KEY muessen gesetzt sein.");
 

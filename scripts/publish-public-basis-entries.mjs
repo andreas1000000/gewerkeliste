@@ -2,6 +2,7 @@
 
 import { readFile } from "node:fs/promises";
 import { createClient } from "@supabase/supabase-js";
+import { requireLiveConfirmation } from "./safety-gates.mjs";
 
 const args = parseArgs(process.argv.slice(2));
 const filePath = args.file || args._[0];
@@ -11,6 +12,13 @@ const defaultLatitude = numberArg("default-latitude", 47.8389);
 const defaultLongitude = numberArg("default-longitude", 12.2071);
 
 if (!filePath) fail("Datei fehlt. Nutzung: node scripts/publish-public-basis-entries.mjs --file work/candidates.jsonl --city Riedering");
+if (!dryRun) {
+  requireLiveConfirmation({
+    args,
+    action: "publish-public-basis-entries-live",
+    reason: "Basis-Eintraege werden oeffentlich sichtbar in companies angelegt.",
+  });
+}
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
