@@ -122,8 +122,8 @@ export default async function AdminSubmissionsPage({ searchParams }: PageProps) 
                   <StatusBadge status={submission.status} />
                 </td>
                 <td className="px-4 py-4 text-sm text-muted">
-                  <div>Verifizierung: {submission.wants_founder_verification ? "ja" : "nein"}</div>
-                  <div>Aufbau-Beitrag: {supportLabel(submission)}</div>
+                  <div>Basiseintrag prüfen: {submission.wants_founder_verification ? "ja" : "nein"}</div>
+                  <div>Förderbeitrag: {supportLabel(submission)}</div>
                 </td>
                 <td className="px-4 py-4 text-right">
                   <Link className="rounded-md bg-brand px-3 py-2 text-xs font-semibold text-white" href={`/admin/submissions/${submission.id}` as Route}>

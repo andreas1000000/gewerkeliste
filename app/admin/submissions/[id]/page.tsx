@@ -49,7 +49,7 @@ export default async function SubmissionDetailPage({ params, searchParams }: Pag
 
         <section className="mb-6 grid gap-4 lg:grid-cols-4">
           <InfoCard title="Status" value={statusLabel(submission.status)} />
-          <InfoCard title="Hauptgewerk" value={tradeLabel(submission.primary_trade)} />
+          <InfoCard title="Erstes Gewerk" value={tradeLabel(submission.primary_trade)} />
           <InfoCard title="Leistungen" value={`${submission.selected_services.length} ausgewählt`} />
           <InfoCard title="Gründungsbetrieb" value={submission.wants_founder_verification ? "angefragt" : "nein"} />
         </section>
@@ -102,8 +102,8 @@ export default async function SubmissionDetailPage({ params, searchParams }: Pag
             </ReadSection>
 
             <ReadSection title="Gewerke und Leistungen">
-              <Data label="Hauptgewerk" value={tradeLabel(submission.primary_trade)} />
-              <TagList label="Nebengewerke" items={submission.secondary_trades.map(tradeLabel)} />
+              <Data label="Erstes Gewerk" value={tradeLabel(submission.primary_trade)} />
+              <TagList label="Weitere Gewerke" items={submission.secondary_trades.map(tradeLabel)} />
               <TagList label="Leistungen" items={submission.selected_services} />
               <TagList label="Spezialisierungen" items={submission.specializations} />
             </ReadSection>
@@ -126,12 +126,12 @@ export default async function SubmissionDetailPage({ params, searchParams }: Pag
           </div>
 
           <aside className="grid gap-6 content-start">
-            <ReadSection title="Verifizierung / Gründungsphase">
-              <Data label="Verifizierung ohne Gebühr" value={submission.wants_founder_verification ? "ja" : "nein"} />
-              <Data label="Aufbau-Beitrag angefragt" value={supportLabel(submission)} />
+            <ReadSection title="Basiseintrag / Fördermodell">
+              <Data label="Basiseintrag prüfen" value={submission.wants_founder_verification ? "ja" : "nein"} />
+              <Data label="Förderbeitrag angefragt" value={supportLabel(submission)} />
               <Data label="Rechnung auf Wunsch" value={submission.support_invoice_requested ? "ja" : "nein"} />
               <p className="text-xs leading-5 text-muted">
-                Der freiwillige Aufbau-Beitrag hat keinen Einfluss auf Freigabe, Darstellung oder Verifizierung.
+                Der freiwillige Förderbeitrag hat keinen Einfluss auf Freigabe, Darstellung oder Verifizierung des Basiseintrags.
               </p>
             </ReadSection>
 
@@ -165,7 +165,7 @@ export default async function SubmissionDetailPage({ params, searchParams }: Pag
                 <div><strong>Firma:</strong> {submission.company_name}</div>
                 <div><strong>Ort:</strong> {submission.postal_code} {submission.city}</div>
                 <div><strong>Gewerk:</strong> {tradeLabel(submission.primary_trade)}</div>
-                <div><strong>Leistungen:</strong> {submission.selected_services.slice(0, 5).join(", ") || "keine"}</div>
+                <div><strong>Leistungen:</strong> {submission.selected_services.join(", ") || "keine"}</div>
               </div>
               <form action={approveSubmission} className="mt-4 grid gap-3">
                 <input name="id" type="hidden" value={submission.id} />
@@ -201,7 +201,7 @@ export default async function SubmissionDetailPage({ params, searchParams }: Pag
             <Field label="Region" name="region" value={submission.region} />
             <Field label="Land" name="country" value={submission.country} />
             <label className="grid gap-1.5 text-sm font-semibold text-ink">
-              Hauptgewerk
+              Erstes Gewerk
               <select className="rounded-md border border-line px-3 py-2 text-sm" name="primary_trade" defaultValue={submission.primary_trade}>
                 {tradeTaxonomy.map((trade) => (
                   <option key={trade.slug} value={trade.slug}>
@@ -210,7 +210,7 @@ export default async function SubmissionDetailPage({ params, searchParams }: Pag
                 ))}
               </select>
             </label>
-            <TextArea label="Nebengewerke" name="secondary_trades" value={submission.secondary_trades.join("\n")} />
+            <TextArea label="Weitere Gewerke" name="secondary_trades" value={submission.secondary_trades.join("\n")} />
             <TextArea label="Leistungen" name="selected_services" value={submission.selected_services.join("\n")} />
             <Field label="Einsatzradius km" name="service_radius_km" value={String(submission.service_radius_km)} />
             <TextArea label="Orte / Regionen" name="service_regions" value={submission.service_regions.join("\n")} />
