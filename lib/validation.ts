@@ -107,9 +107,9 @@ export const businessSubmissionSchema = z
     city: z.string().trim().min(2, "Ort ist erforderlich."),
     region: optionalString,
     country: z.string().trim().min(2, "Land ist erforderlich."),
-    primaryTrade: z.string().trim().refine((slug) => validTradeSlugs.has(slug), "Bitte Hauptgewerk auswaehlen."),
-    secondaryTrades: z.array(z.string()).max(4, "Im Basis-Eintrag sind bis zu 5 Gewerke moeglich."),
-    selectedServices: z.array(z.string()).min(1, "Bitte mindestens eine Kernleistung auswaehlen."),
+    primaryTrade: z.string().trim().refine((slug) => validTradeSlugs.has(slug), "Bitte mindestens ein Gewerk auswaehlen."),
+    secondaryTrades: z.array(z.string()),
+    selectedServices: z.array(z.string()).min(1, "Bitte mindestens eine Leistung auswaehlen."),
     specializations: z.array(z.string()),
     additionalSpecializations: optionalString,
     serviceRadiusKm: z.coerce.number().int().min(1, "Radius muss mindestens 1 km betragen.").max(500, "Radius wirkt zu gross."),
@@ -143,14 +143,6 @@ export const businessSubmissionSchema = z
         code: "custom",
         message: "Bitte mindestens E-Mail oder Telefon angeben.",
         path: ["email"],
-      });
-    }
-
-    if (!value.wantsFounderVerification && value.selectedServices.length > 5) {
-      ctx.addIssue({
-        code: "custom",
-        message: "Im Basis-Eintrag koennen bis zu 5 Kernleistungen ausgewaehlt werden.",
-        path: ["selectedServices"],
       });
     }
 

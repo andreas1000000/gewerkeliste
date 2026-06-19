@@ -8,23 +8,23 @@ import type { CompanyFormState } from "@/lib/types";
 
 const initialState: CompanyFormState = { ok: false, message: "" };
 const supportOptions = [
-  { value: "none", label: "Ohne Beitrag abschließen" },
-  { value: "49", label: "49 € beitragen" },
-  { value: "99", label: "99 € beitragen" },
-  { value: "199", label: "199 € beitragen" },
+  { value: "none", label: "Ohne Förderbeitrag abschließen" },
+  { value: "49", label: "49 € Förderbeitrag" },
+  { value: "99", label: "99 € Förderbeitrag" },
+  { value: "199", label: "199 € Förderbeitrag" },
   { value: "custom", label: "Eigenen Betrag wählen" },
 ];
 
 export function ClaimForm({ companyId, initialTrades }: { companyId: string; initialTrades: string[] }) {
   const [state, formAction, pending] = useActionState(submitClaim, initialState);
   const [supportContribution, setSupportContribution] = useState("none");
-  const [selectedTrades, setSelectedTrades] = useState(initialTrades.slice(0, 5));
+  const [selectedTrades, setSelectedTrades] = useState(initialTrades);
   const errors = state.fieldErrors || {};
 
   function toggleTrade(slug: string) {
     setSelectedTrades((current) => {
       if (current.includes(slug)) return current.filter((item) => item !== slug);
-      return [...current, slug].slice(0, 5);
+      return [...current, slug];
     });
   }
 
@@ -62,27 +62,26 @@ export function ClaimForm({ companyId, initialTrades }: { companyId: string; ini
       <section className="mt-6 rounded-lg border border-line bg-[#fbfcff] p-4">
         <h3 className="text-sm font-semibold text-brand">Gewerke bestätigen</h3>
         <p className="mt-2 text-sm leading-6 text-muted">
-          Vorausgewählte Gewerke basieren auf dem vorhandenen Eintrag. Sie können Haken entfernen oder ergänzen.
-          Im kostenlosen Basis-Eintrag werden maximal 5 relevante Gewerke übernommen.
+          Vorausgewählte Gewerke basieren auf dem vorhandenen Eintrag. Sie können Haken entfernen oder alle passenden
+          Gewerke ergänzen, die Ihr Betrieb tatsächlich anbietet.
         </p>
         <div className="mt-4">
-          <TradeCheckboxGroups max={5} name="claimTradeSelection" onToggle={toggleTrade} selected={selectedTrades} />
+          <TradeCheckboxGroups name="claimTradeSelection" onToggle={toggleTrade} selected={selectedTrades} />
         </div>
       </section>
 
       <section className="mt-6 rounded-lg border border-line bg-[#fbfaf7] p-4">
-        <p className="text-sm font-semibold text-[#07173d]">Gründungsphase: Verifizierung ohne Gebühr</p>
+        <p className="text-sm font-semibold text-[#07173d]">Startphase: kostenloser Basiseintrag</p>
         <p className="mt-3 text-sm leading-6 text-muted">
-          Die ersten 500 Fachbetriebe können ihren Betriebseintrag ohne Verifizierungsgebühr übernehmen und bestätigen.
-          GewerkeListe.com befindet sich im Aufbau. Wer die Entwicklung eines professionellen Gewerkeregisters
-          unterstützen möchte, kann freiwillig einen Aufbau-Beitrag leisten.
+          Fachbetriebe können ihren Betriebseintrag kostenlos übernehmen und bestätigen. GewerkeListe.com befindet sich
+          im Aufbau und wächst mit Unterstützung regionaler Betriebe.
         </p>
         <p className="mt-3 text-sm leading-6 text-muted">
-          Der Beitrag ist freiwillig und hat keinen Einfluss auf die Prüfung, Darstellung oder Verifizierung des Eintrags.
+          Ein freiwilliger Förderbeitrag hat keinen Einfluss auf die Prüfung, Darstellung oder Verifizierung des Eintrags.
         </p>
 
         <fieldset className="mt-5">
-          <legend className="text-sm font-semibold text-ink">GewerkeListe.com unterstützen</legend>
+          <legend className="text-sm font-semibold text-ink">GewerkeListe.com freiwillig unterstützen</legend>
           <div className="mt-3 grid gap-3">
             {supportOptions.map((option) => (
               <label
@@ -125,7 +124,7 @@ export function ClaimForm({ companyId, initialTrades }: { companyId: string; ini
 
         <p className="mt-4 rounded-md border border-line bg-white px-4 py-3 text-xs leading-5 text-muted">
           Es handelt sich nicht um einen steuerbegünstigten Beitrag. Auf Wunsch kann eine Rechnung über den freiwilligen
-          Unterstützungsbeitrag ausgestellt werden. Es wird an dieser Stelle keine Zahlung ausgelöst.
+          Förderbeitrag ausgestellt werden. An dieser Stelle wird automatisch nichts berechnet.
         </p>
       </section>
 

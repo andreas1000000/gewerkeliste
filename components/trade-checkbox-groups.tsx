@@ -11,7 +11,7 @@ type TradeCheckboxGroupsProps = {
   defaultOpen?: boolean;
 };
 
-export function TradeCheckboxGroups({ selected, name, onToggle, max, defaultOpen = true }: TradeCheckboxGroupsProps) {
+export function TradeCheckboxGroups({ selected, name, onToggle, defaultOpen = true }: TradeCheckboxGroupsProps) {
   const groups = groupedTradeSelection();
 
   return (
@@ -26,7 +26,6 @@ export function TradeCheckboxGroups({ selected, name, onToggle, max, defaultOpen
               <TradeCheckRow
                 key={trade.slug}
                 checked={selected.includes(trade.slug)}
-                disabled={!selected.includes(trade.slug) && max != null && selected.length >= max}
                 name={name}
                 onToggle={() => onToggle(trade.slug)}
                 trade={trade}
@@ -41,13 +40,11 @@ export function TradeCheckboxGroups({ selected, name, onToggle, max, defaultOpen
 
 function TradeCheckRow({
   checked,
-  disabled,
   name,
   onToggle,
   trade,
 }: {
   checked: boolean;
-  disabled?: boolean;
   name: string;
   onToggle: () => void;
   trade: TaxonomyTrade;
@@ -56,12 +53,11 @@ function TradeCheckRow({
     <label
       className={`flex w-full cursor-pointer items-start gap-3 px-4 py-3 text-sm transition ${
         checked ? "bg-[#eef4ff] text-brand" : "bg-white text-ink hover:bg-[#fbfcff]"
-      } ${disabled ? "opacity-50" : ""}`}
+      }`}
     >
       <input
         checked={checked}
         className="mt-1 h-5 w-5 shrink-0 rounded-none accent-action"
-        disabled={disabled}
         name={name}
         onChange={onToggle}
         type="checkbox"
@@ -70,7 +66,6 @@ function TradeCheckRow({
       <span className="min-w-0">
         <span className="block font-semibold leading-6">{trade.name}</span>
         <span className="mt-1 block text-xs leading-5 text-muted">{trade.shortDescription}</span>
-        {disabled ? <span className="mt-1 block text-xs font-semibold text-muted">Maximal 5 Gewerke im Basis-Eintrag.</span> : null}
       </span>
     </label>
   );

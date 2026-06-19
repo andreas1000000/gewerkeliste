@@ -10,38 +10,38 @@ import type { TaxonomyTrade } from "@/lib/trade-taxonomy";
 
 const initialState: CompanyFormState = { ok: false, message: "" };
 const supportOptions = [
-  { value: "none", label: "Ohne Aufbau-Beitrag einreichen" },
-  { value: "49", label: "49 € beitragen" },
-  { value: "99", label: "99 € beitragen" },
-  { value: "199", label: "199 € beitragen" },
+  { value: "none", label: "Ohne Förderbeitrag einreichen" },
+  { value: "49", label: "49 € Förderbeitrag" },
+  { value: "99", label: "99 € Förderbeitrag" },
+  { value: "199", label: "199 € Förderbeitrag" },
   { value: "custom", label: "Eigenen Betrag wählen" },
 ];
 
 export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
   const [state, formAction, pending] = useActionState(submitBusinessEntry, initialState);
-  const [primaryTrade, setPrimaryTrade] = useState(trades[0]?.slug ?? "");
-  const [selectedTrades, setSelectedTrades] = useState<string[]>(trades[0]?.slug ? [trades[0].slug] : []);
+  const [primaryTrade, setPrimaryTrade] = useState("");
+  const [selectedTrades, setSelectedTrades] = useState<string[]>([]);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [founderVerification, setFounderVerification] = useState(true);
   const [supportContribution, setSupportContribution] = useState("none");
+  const [contactProfileImageSelected, setContactProfileImageSelected] = useState(false);
   const errors = state.fieldErrors || {};
   const values = state.values || {};
   const formKey = JSON.stringify(values);
 
   const selectedTrade = useMemo(
-    () => trades.find((trade) => trade.slug === primaryTrade) || trades[0],
+    () => trades.find((trade) => trade.slug === primaryTrade),
     [primaryTrade, trades],
   );
   const serviceOptions = useMemo(() => {
     if (!selectedTrade) return [];
     return Array.from(new Set([...selectedTrade.subTrades, ...selectedTrade.coreServices, ...selectedTrade.specializations]));
   }, [selectedTrade]);
-  const basisLimitReached = !founderVerification && selectedServices.length > 5;
 
   useEffect(() => {
     if (!state.values) return;
     const restoredValues = state.values;
-    const restoredPrimaryTrade = textValue(restoredValues, "primaryTrade", trades[0]?.slug ?? "");
+    const restoredPrimaryTrade = textValue(restoredValues, "primaryTrade");
     const restoredSecondary = arrayValue(restoredValues, "secondaryTrades");
     setPrimaryTrade(restoredPrimaryTrade);
     setSelectedTrades([restoredPrimaryTrade, ...restoredSecondary].filter(Boolean));
@@ -58,7 +58,7 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
 
   function toggleTrade(slug: string) {
     setSelectedTrades((current) => {
-      const next = current.includes(slug) ? current.filter((item) => item !== slug) : [...current, slug].slice(0, 5);
+      const next = current.includes(slug) ? current.filter((item) => item !== slug) : [...current, slug];
       const nextPrimary = next[0] || "";
       setPrimaryTrade(nextPrimary);
       setSelectedServices([]);
@@ -138,6 +138,51 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
         </div>
       </FormSection>
 
+      <FormSection
+        number="2a"
+        title="Logo und persönlicher Ansprechpartner"
+        help="Menschen kaufen von Menschen. Ein persönliches Bild und ein professionelles Logo schaffen Vertrauen."
+      >
+        <div className="grid gap-4 lg:grid-cols-2">
+          <div className="rounded-lg border border-line bg-[#fbfcff] p-4">
+            <label className="grid gap-2 text-sm font-semibold text-ink">
+              Firmenlogo hochladen
+              <input className="rounded-md border border-line bg-white px-3 py-2 text-sm" name="companyLogo" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" />
+            </label>
+            <p className="mt-3 text-sm leading-6 text-muted">
+              Ein professionelles Firmenlogo erhöht den Wiedererkennungswert und macht dein Profil vertrauenswürdiger.
+            </p>
+          </div>
+          <div className="rounded-lg border border-line bg-[#fbfcff] p-4">
+            <label className="grid gap-2 text-sm font-semibold text-ink">
+              Profilbild des Ansprechpartners
+              <input
+                className="rounded-md border border-line bg-white px-3 py-2 text-sm"
+                name="contactProfileImage"
+                type="file"
+                accept="image/png,image/jpeg,image/webp"
+                onChange={(event) => setContactProfileImageSelected(Boolean(event.target.files?.length))}
+              />
+            </label>
+            <p className="mt-3 text-sm font-semibold text-brand">Menschen kaufen von Menschen.</p>
+            <p className="mt-2 text-sm leading-6 text-muted">
+              Ein persönliches Bild schafft Vertrauen und erhöht die Wahrscheinlichkeit, dass Auftraggeber Kontakt aufnehmen.
+              Geeignet sind Geschäftsführer, Inhaber, Meister, Bauleiter oder Ansprechpartner.
+            </p>
+            <p className="mt-2 text-xs leading-5 text-muted">
+              Keine privaten Bilder, keine Urlaubsbilder, keine Gruppenbilder und keine unscharfen Bilder.
+            </p>
+            <label className="mt-4 flex items-start gap-3 text-sm font-medium leading-6 text-ink">
+              <input className="mt-1 h-4 w-4 accent-action" name="imageConsentGiven" type="checkbox" required={contactProfileImageSelected} />
+              Ich bestätige, dass ich berechtigt bin, dieses Bild hochzuladen und die abgebildete Person der Veröffentlichung zugestimmt hat.
+            </label>
+          </div>
+        </div>
+        <p className="mt-3 rounded-md border border-line bg-white px-4 py-3 text-xs leading-5 text-muted">
+          Medien werden erst nach Prüfung und technischer Freigabe der Profilverwaltung veröffentlicht.
+        </p>
+      </FormSection>
+
       <FormSection number="3" title="Standort" help="Der Standort hilft Auftraggebern, Betriebe regional einzuordnen.">
         <div className="grid gap-4 md:grid-cols-2">
           <Field label="Straße" error={errors.street}>
@@ -164,21 +209,27 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
       <FormSection
         number="4"
         title="Gewerke auswählen"
-        help="Wählen Sie die passenden Gewerke. Im kostenlosen Basis-Eintrag werden maximal 5 relevante Gewerke übernommen."
+        help="Wählen Sie alle Gewerke aus, die Ihr Betrieb tatsächlich anbietet. Das Leistungsspektrum soll klar und vollständig sichtbar werden."
       >
         <input name="primaryTrade" type="hidden" value={primaryTrade} />
         {selectedTrades.slice(1).map((slug) => (
           <input key={slug} name="secondaryTrades" type="hidden" value={slug} />
         ))}
-        <TradeCheckboxGroups defaultOpen={false} max={5} name="tradeSelection" onToggle={toggleTrade} selected={selectedTrades} />
+        <TradeCheckboxGroups defaultOpen={false} name="tradeSelection" onToggle={toggleTrade} selected={selectedTrades} />
         {errors.primaryTrade ? <p className="mt-2 text-xs font-semibold text-[#a4442b]">{errors.primaryTrade}</p> : null}
         {errors.secondaryTrades ? <p className="mt-2 text-xs font-semibold text-[#a4442b]">{errors.secondaryTrades}</p> : null}
       </FormSection>
 
-      <FormSection number="5" title="Leistungen auswählen" help="Im Basis-Eintrag können Sie Ihre wichtigsten Kernleistungen angeben.">
+      <FormSection number="5" title="Leistungen auswählen" help="Benennen Sie die Leistungen und Spezialisierungen, die Auftraggeber bei Ihrem Betrieb erkennen sollen.">
         <div className="rounded-md border border-line bg-[#fbfcff] p-4 text-sm leading-6 text-muted">
-          Aktuelles Hauptgewerk: <span className="font-semibold text-ink">{selectedTrade?.name}</span>. Im Basis-Eintrag
-          können bis zu 5 Kernleistungen ausgewählt werden.
+          {selectedTrade ? (
+            <>
+              Strukturierendes Gewerk: <span className="font-semibold text-ink">{selectedTrade.name}</span>. Wählen Sie
+              die passenden Leistungen aus und ergänzen Sie weitere Spezialisierungen im Freitext.
+            </>
+          ) : (
+            "Wählen Sie zuerst oben ein Gewerk aus. Danach erscheinen hier passende Leistungen und Spezialisierungen."
+          )}
         </div>
         <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {serviceOptions.map((service) => (
@@ -192,28 +243,6 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
             />
           ))}
         </div>
-        {basisLimitReached ? (
-          <div className="mt-4 rounded-md border border-[#f1d08a] bg-[#fff8e8] p-4 text-sm leading-6 text-[#6d4a00]">
-            Im Basis-Eintrag können bis zu 5 Kernleistungen ausgewählt werden. Mit einem verifizierten
-            Fachbetriebseintrag können Sie Ihr Leistungsprofil vollständiger darstellen.
-            <div className="mt-3 flex flex-wrap gap-2">
-              <button
-                className="rounded-md border border-[#d6b661] bg-white px-3 py-2 text-xs font-semibold"
-                onClick={() => setSelectedServices((current) => current.slice(0, 5))}
-                type="button"
-              >
-                Bei 5 Kernleistungen bleiben
-              </button>
-              <button
-                className="rounded-md bg-action px-3 py-2 text-xs font-semibold text-white"
-                onClick={() => setFounderVerification(true)}
-                type="button"
-              >
-                Als Gründungsbetrieb verifizieren lassen
-              </button>
-            </div>
-          </div>
-        ) : null}
         {errors.selectedServices ? <p className="mt-2 text-xs font-semibold text-[#a4442b]">{errors.selectedServices}</p> : null}
         <Field label="Spezialisierungen ergänzen" error={errors.additionalSpecializations}>
           <input className={inputClass} defaultValue={textValue(values, "additionalSpecializations")} name="additionalSpecializations" placeholder="z. B. Altbausanierung, Naturstein, Gewerbeflächen" />
@@ -286,14 +315,14 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
             onChange={(event) => setFounderVerification(event.target.checked)}
             type="checkbox"
           />
-          Ich möchte als Gründungsbetrieb ohne Verifizierungsgebühr geprüft werden.
+          Ich möchte meinen kostenlosen Basiseintrag prüfen und bestätigen lassen.
         </label>
 
         <section className="mt-5 rounded-lg border border-line bg-[#fbfcff] p-4">
-          <h3 className="text-sm font-semibold text-brand">GewerkeListe.com unterstützen</h3>
+          <h3 className="text-sm font-semibold text-brand">GewerkeListe.com freiwillig unterstützen</h3>
           <p className="mt-2 text-sm leading-6 text-muted">
-            Der freiwillige Aufbau-Beitrag hat keinen Einfluss auf Prüfung, Darstellung oder Verifizierung. Es wird keine
-            Zahlung ausgelöst.
+            Der freiwillige Förderbeitrag hilft beim Aufbau des regionalen Verzeichnisses. Er hat keinen Einfluss auf
+            Prüfung, Darstellung oder Verifizierung des Basiseintrags.
           </p>
           <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
             {supportOptions.map((option) => (
@@ -323,7 +352,7 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
           </label>
           <p className="mt-3 text-xs leading-5 text-muted">
             Es handelt sich nicht um einen steuerbegünstigten Beitrag. Auf Wunsch kann eine Rechnung über den freiwilligen
-            Unterstützungsbeitrag ausgestellt werden.
+            Förderbeitrag ausgestellt werden. An dieser Stelle wird automatisch nichts berechnet.
           </p>
         </section>
 
@@ -353,7 +382,7 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
         <div className="mt-5 flex flex-wrap gap-3">
           <button
             className="inline-flex min-h-11 items-center justify-center rounded-md bg-action px-5 text-sm font-semibold text-white hover:bg-brand disabled:opacity-60"
-            disabled={pending || basisLimitReached}
+            disabled={pending}
           >
             {pending ? "Einreichung wird gespeichert..." : "Betriebseintrag zur Prüfung einreichen"}
           </button>
