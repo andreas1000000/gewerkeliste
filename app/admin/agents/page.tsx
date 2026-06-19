@@ -236,6 +236,11 @@ export default async function AdminAgentsPage() {
                 <div className="mt-1 text-xs text-muted">
                   {review.review_type} · {review.severity} · {review.status}
                 </div>
+                {review.review_type === "company_discovery_candidate" ? (
+                  <p className="mt-3 rounded-md border border-line bg-white p-3 text-xs font-semibold leading-5 text-muted">
+                    Internes Review Item. Keine Firma wurde veröffentlicht.
+                  </p>
+                ) : null}
                 <div className="mt-3 flex flex-wrap gap-2">
                   <StatusFormButton action={setAgentReviewStatus} id={review.id} status="in_review" label="In Review" />
                   <StatusFormButton action={setAgentReviewStatus} id={review.id} status="resolved" label="Gelöst" />
