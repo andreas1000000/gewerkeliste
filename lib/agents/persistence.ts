@@ -77,12 +77,16 @@ export type AgentCostEventRecord = {
 export type AgentApprovalRecord = {
   id: string;
   agent_run_id: string | null;
+  agent_task_id: string | null;
   agent_id: string;
   action_type: string;
   risk_level: string;
   title: string;
   description: string | null;
+  proposed_payload: Record<string, unknown>;
   status: "pending" | "approved" | "rejected" | "expired" | "executed";
+  requested_by: string | null;
+  decided_by: string | null;
   created_at: string;
   decided_at: string | null;
 };

@@ -1,6 +1,7 @@
 import { Shell } from "@/components/shell";
 import type { Route } from "next";
 import Link from "next/link";
+import { AgentApprovalCard } from "@/components/agent-approval-card";
 import { agentRegistry } from "@/lib/agents/agent-registry";
 import { agentOsTablesAvailableError, getAgentCockpitData } from "@/lib/agents/persistence";
 import { runRegionalCoverageDryRun } from "@/lib/agents/regional-coverage";
@@ -199,17 +200,7 @@ export default async function AdminAgentsPage() {
         <Panel title="Approvals">
           <div className="grid gap-3">
             {(cockpit.persisted?.approvals || []).map((approval) => (
-              <div key={approval.id} className="rounded-md border border-line bg-panel p-4">
-                <div className="font-semibold text-ink">{approval.title}</div>
-                <div className="mt-1 text-xs text-muted">
-                  {approval.action_type} · {approval.risk_level} · {approval.status}
-                </div>
-                <div className="mt-3 flex flex-wrap gap-2">
-                  <StatusFormButton action={setAgentApprovalStatus} id={approval.id} status="approved" label="Status: freigegeben" />
-                  <StatusFormButton action={setAgentApprovalStatus} id={approval.id} status="rejected" label="Status: abgelehnt" />
-                  <StatusFormButton action={setAgentApprovalStatus} id={approval.id} status="expired" label="Status: abgelaufen" />
-                </div>
-              </div>
+              <AgentApprovalCard key={approval.id} approval={approval} setStatusAction={setAgentApprovalStatus} />
             ))}
             {empty(cockpit.persisted?.approvals, "Keine offenen Freigaben.")}
           </div>

@@ -2,6 +2,7 @@ import type { Route } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Shell } from "@/components/shell";
+import { AgentApprovalCard } from "@/components/agent-approval-card";
 import { getAgentRunDetail } from "@/lib/agents/persistence";
 import { setAgentApprovalStatus, setAgentOutboxStatus, setAgentReviewStatus, setAgentTaskStatus } from "../../actions";
 
@@ -166,17 +167,7 @@ export default async function AgentRunDetailPage({ params }: PageProps) {
           <Panel title="Approvals">
             <div className="grid gap-3">
               {detail.approvals.map((approval) => (
-                <div key={approval.id} className="rounded-md border border-line bg-panel p-4">
-                  <div className="font-semibold text-ink">{approval.title}</div>
-                  <div className="mt-1 text-xs text-muted">
-                    {approval.action_type} · {approval.risk_level} · {approval.status}
-                  </div>
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    <StatusFormButton action={setAgentApprovalStatus} id={approval.id} status="approved" label="Freigeben" />
-                    <StatusFormButton action={setAgentApprovalStatus} id={approval.id} status="rejected" label="Ablehnen" />
-                    <StatusFormButton action={setAgentApprovalStatus} id={approval.id} status="expired" label="Abgelaufen" />
-                  </div>
-                </div>
+                <AgentApprovalCard key={approval.id} approval={approval} setStatusAction={setAgentApprovalStatus} />
               ))}
               {empty(detail.approvals, "Keine Approvals fuer diesen Run.")}
             </div>
