@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Route } from "next";
 import { Shell } from "@/components/shell";
+import { requestAcceptRegionalCandidateApproval, requestDeleteRegionalCandidateApproval } from "@/lib/actions/coverage-approvals";
 import { rejectRegionalCandidate, updateRegionalCandidate } from "@/lib/actions/coverage";
 import { getRegionalCoverageOverview } from "@/lib/data/coverage";
 import { tradeTaxonomy } from "@/lib/trade-taxonomy";
@@ -210,16 +211,19 @@ function CandidateReviewCard({ candidate }: { candidate: RegionalCompanyCandidat
         <button className="rounded-md border border-line px-4 py-2 text-sm font-semibold text-ink hover:bg-panel disabled:cursor-not-allowed disabled:opacity-50" disabled={locked} type="submit">
           Korrektur speichern
         </button>
-        <button className="rounded-md border border-line bg-panel px-4 py-2 text-sm font-semibold text-muted" disabled type="button">
-          Basis-Eintrag anlegen: Approval-Gate erforderlich
+        <button className="rounded-md border border-brand bg-white px-4 py-2 text-sm font-semibold text-brand hover:bg-panel disabled:cursor-not-allowed disabled:opacity-50" disabled={locked} formAction={requestAcceptRegionalCandidateApproval}>
+          Anlegen anfragen
         </button>
         <button className="rounded-md border border-yellow-300 px-4 py-2 text-sm font-semibold text-yellow-900 hover:bg-yellow-50 disabled:cursor-not-allowed disabled:opacity-50" disabled={locked} formAction={rejectRegionalCandidate}>
           Verwerfen
         </button>
-        <button className="rounded-md border border-line bg-panel px-4 py-2 text-sm font-semibold text-muted" disabled type="button">
-          Löschen: Approval-Gate erforderlich
+        <button className="rounded-md border border-red-300 bg-white px-4 py-2 text-sm font-semibold text-red-800 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50" disabled={locked} formAction={requestDeleteRegionalCandidateApproval}>
+          Löschen anfragen
         </button>
       </div>
+      <p className="mt-3 text-xs text-muted">
+        Anlegen und Löschen erzeugen nur eine Freigabeanforderung im Founder Cockpit. Es wird nichts automatisch ausgeführt.
+      </p>
     </form>
   );
 }
