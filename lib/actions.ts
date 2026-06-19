@@ -4,9 +4,16 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import type { CompanyFormState, ImportReport } from "@/lib/types";
+import type { PlannerImportState } from "@/lib/types/planner";
 import { companySlug, slugify } from "@/lib/slug";
 import { getCompany, getCompanySubmission, getResearchCandidate, getUniqueCompanySlug } from "@/lib/data";
 import { canonicalTradeSlug, findTaxonomyTrade, tradeTaxonomy } from "@/lib/trade-taxonomy";
+import {
+  importPlannerContacts as importPlannerContactsAction,
+  markPlannerContactPrivate as markPlannerContactPrivateAction,
+  suggestPlannerContact as suggestPlannerContactAction,
+  updatePlannerProfile as updatePlannerProfileAction,
+} from "@/lib/actions/planner";
 import {
   claimSchema,
   csvCompanySchema,
@@ -15,6 +22,25 @@ import {
   parseCompanyForm,
   parseTradeName,
 } from "@/lib/validation";
+
+export async function importPlannerContacts(
+  prevState: PlannerImportState,
+  formData: FormData,
+): Promise<PlannerImportState> {
+  return importPlannerContactsAction(prevState, formData);
+}
+
+export async function markPlannerContactPrivate(formData: FormData) {
+  return markPlannerContactPrivateAction(formData);
+}
+
+export async function suggestPlannerContact(formData: FormData) {
+  return suggestPlannerContactAction(formData);
+}
+
+export async function updatePlannerProfile(formData: FormData) {
+  return updatePlannerProfileAction(formData);
+}
 
 export async function createCompany(_prevState: CompanyFormState, formData: FormData): Promise<CompanyFormState> {
   const parsed = parseCompanyForm(formData);
