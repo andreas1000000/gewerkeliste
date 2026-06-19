@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import { ClaimBadge } from "@/components/status-badge";
+import { publicResultDescription, publicResultImage } from "@/lib/company-display";
 import { getPublicCompaniesByTrade } from "@/lib/data";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { canonicalTradeSlug, findTaxonomyTrade, tradeTaxonomy, type TaxonomyTrade } from "@/lib/trade-taxonomy";
@@ -119,57 +120,73 @@ export default async function TradeDetailPage({ params }: PageProps) {
           </div>
           <div className="divide-y divide-line">
             {companies.length > 0 ? (
-              companies.map((company) => (
-                <article key={company.id} className="py-5">
-                  <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto]">
-                    <div>
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="text-lg font-semibold text-[#07173d]">{company.name}</h3>
-                        {company.verified ? (
-                          <span className="rounded-md border border-[#b9e2c2] bg-[#effaf2] px-2.5 py-1 text-xs font-semibold text-[#1f6b3d]">
-                            Betriebsdaten bestätigt
-                          </span>
-                        ) : (
-                          <span className="rounded-md border border-line bg-[#fbfcff] px-2.5 py-1 text-xs font-semibold text-muted">
-                            unbestätigt
-                          </span>
-                        )}
-                        <ClaimBadge status={company.claim_status} />
+              companies.map((company) => {
+                const description = publicResultDescription(company.description);
+                const imageUrl = publicResultImage(company);
+
+                return (
+                  <article key={company.id} className="py-5">
+                    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto]">
+                      <div className="flex min-w-0 gap-4">
+                        {imageUrl ? (
+                          <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-line bg-[#fbfcff]">
+                            <img
+                              alt={`${company.name} Profilbild`}
+                              className="h-full w-full object-cover"
+                              src={imageUrl}
+                            />
+                          </div>
+                        ) : null}
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="text-lg font-semibold text-[#07173d]">{company.name}</h3>
+                            {company.verified ? (
+                              <span className="rounded-md border border-[#b9e2c2] bg-[#effaf2] px-2.5 py-1 text-xs font-semibold text-[#1f6b3d]">
+                                Betriebsdaten bestätigt
+                              </span>
+                            ) : (
+                              <span className="rounded-md border border-line bg-[#fbfcff] px-2.5 py-1 text-xs font-semibold text-muted">
+                                unbestätigt
+                              </span>
+                            )}
+                            <ClaimBadge status={company.claim_status} />
+                          </div>
+                          <p className="mt-2 text-sm text-muted">
+                            {company.postal_code} {company.city}
+                          </p>
+                          {description ? <p className="mt-3 max-w-3xl text-sm leading-6 text-ink">{description}</p> : null}
+                          <div className="mt-3 flex flex-wrap gap-2">
+                            <span className="rounded-md border border-line bg-white px-2.5 py-1 text-xs text-muted">{trade.name}</span>
+                            {company.trades?.name && company.trades.slug !== trade.slug ? (
+                              <span className="rounded-md border border-line bg-white px-2.5 py-1 text-xs text-muted">{company.trades.name}</span>
+                            ) : null}
+                            {tradeMatchFor(company)?.confidence_score ? (
+                              <span className="rounded-md border border-line bg-white px-2.5 py-1 text-xs text-muted">
+                                Score {tradeMatchFor(company)?.confidence_score}
+                              </span>
+                            ) : null}
+                          </div>
+                        </div>
                       </div>
-                      <p className="mt-2 text-sm text-muted">
-                        {company.postal_code} {company.city}
-                      </p>
-                      <p className="mt-3 max-w-3xl text-sm leading-6 text-ink">{company.description}</p>
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        <span className="rounded-md border border-line bg-white px-2.5 py-1 text-xs text-muted">{trade.name}</span>
-                        {company.trades?.name && company.trades.slug !== trade.slug ? (
-                          <span className="rounded-md border border-line bg-white px-2.5 py-1 text-xs text-muted">{company.trades.name}</span>
+                      <div className="flex flex-wrap gap-2 lg:justify-end">
+                        {company.phone ? (
+                          <a className="inline-flex min-h-10 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-action hover:border-action" href={`tel:${company.phone}`}>
+                            Anrufen
+                          </a>
                         ) : null}
-                        {tradeMatchFor(company)?.confidence_score ? (
-                          <span className="rounded-md border border-line bg-white px-2.5 py-1 text-xs text-muted">
-                            Score {tradeMatchFor(company)?.confidence_score}
-                          </span>
+                        {company.website_url ? (
+                          <a className="inline-flex min-h-10 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-action hover:border-action" href={company.website_url} rel="nofollow noopener noreferrer" target="_blank">
+                            Website
+                          </a>
                         ) : null}
+                        <Link className="inline-flex min-h-10 items-center justify-center rounded-md bg-action px-4 text-sm font-semibold text-white hover:bg-brand" href={`/firma/${company.slug}` as Route}>
+                          Profil ansehen
+                        </Link>
                       </div>
                     </div>
-                    <div className="flex flex-wrap gap-2 lg:justify-end">
-                      {company.phone ? (
-                        <a className="inline-flex min-h-10 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-action hover:border-action" href={`tel:${company.phone}`}>
-                          Anrufen
-                        </a>
-                      ) : null}
-                      {company.website_url ? (
-                        <a className="inline-flex min-h-10 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-action hover:border-action" href={company.website_url} rel="nofollow noopener noreferrer" target="_blank">
-                          Website
-                        </a>
-                      ) : null}
-                      <Link className="inline-flex min-h-10 items-center justify-center rounded-md bg-action px-4 text-sm font-semibold text-white hover:bg-brand" href={`/firma/${company.slug}` as Route}>
-                        Profil ansehen
-                      </Link>
-                    </div>
-                  </div>
-                </article>
-              ))
+                  </article>
+                );
+              })
             ) : (
               <EmptyCompanies trade={trade} />
             )}

@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import type { Route } from "next";
 import { SiteHeader } from "@/components/site-header";
 import { ClaimBadge } from "@/components/status-badge";
+import { publicResultDescription, publicResultImage } from "@/lib/company-display";
 import { getPublicCompanies } from "@/lib/data";
 import { createTradeSearchEntry, normalizeSearchTerm, rankTradeEntries } from "@/lib/trade-search";
 import { isSupabaseConfigured } from "@/lib/supabase";
@@ -148,36 +149,52 @@ export default async function SearchPage({ searchParams }: PageProps) {
                 : "Noch keine öffentlichen Betriebseinträge sichtbar. Sobald die ersten Einträge freigegeben sind, erscheinen sie hier."}
             </div>
           ) : (
-            companies.map((company) => (
-              <Link
-                key={company.id}
-                href={`/firma/${company.slug}` as Route}
-                className="rounded-lg border border-line bg-white p-5 shadow-soft transition hover:border-brand"
-              >
-                <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
-                  <div>
-                    <div className="text-sm font-semibold text-brand">{company.trades?.name}</div>
-                    <h2 className="mt-1 text-xl font-semibold text-ink">{company.name}</h2>
-                    <p className="mt-2 text-sm text-muted">
-                      {company.postal_code} {company.city}
-                    </p>
-                    <p className="mt-3 max-w-3xl text-sm leading-6 text-ink">{company.description}</p>
+            companies.map((company) => {
+              const description = publicResultDescription(company.description);
+              const imageUrl = publicResultImage(company);
+
+              return (
+                <Link
+                  key={company.id}
+                  href={`/firma/${company.slug}` as Route}
+                  className="rounded-lg border border-line bg-white p-5 shadow-soft transition hover:border-brand"
+                >
+                  <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
+                    <div className="flex min-w-0 gap-4">
+                      {imageUrl ? (
+                        <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-line bg-[#fbfcff]">
+                          <img
+                            alt={`${company.name} Profilbild`}
+                            className="h-full w-full object-cover"
+                            src={imageUrl}
+                          />
+                        </div>
+                      ) : null}
+                      <div className="min-w-0">
+                        <div className="text-sm font-semibold text-brand">{company.trades?.name}</div>
+                        <h2 className="mt-1 text-xl font-semibold text-ink">{company.name}</h2>
+                        <p className="mt-2 text-sm text-muted">
+                          {company.postal_code} {company.city}
+                        </p>
+                        {description ? <p className="mt-3 max-w-3xl text-sm leading-6 text-ink">{description}</p> : null}
+                      </div>
+                    </div>
+                    <div className="flex shrink-0 flex-wrap gap-2">
+                      {company.verified ? (
+                        <span className="rounded-md border border-[#b9e2c2] bg-[#effaf2] px-3 py-1 text-xs font-semibold text-[#1f6b3d]">
+                          Betriebsdaten bestätigt
+                        </span>
+                      ) : (
+                        <span className="rounded-md border border-line bg-white px-3 py-1 text-xs font-semibold text-muted">
+                          Basis-Eintrag
+                        </span>
+                      )}
+                      <ClaimBadge status={company.claim_status} />
+                    </div>
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    {company.verified ? (
-                      <span className="rounded-md border border-[#b9e2c2] bg-[#effaf2] px-3 py-1 text-xs font-semibold text-[#1f6b3d]">
-                        Betriebsdaten bestätigt
-                      </span>
-                    ) : (
-                      <span className="rounded-md border border-line bg-white px-3 py-1 text-xs font-semibold text-muted">
-                        Basis-Eintrag
-                      </span>
-                    )}
-                    <ClaimBadge status={company.claim_status} />
-                  </div>
-                </div>
-              </Link>
-            ))
+                </Link>
+              );
+            })
           )}
         </section>
       </div>

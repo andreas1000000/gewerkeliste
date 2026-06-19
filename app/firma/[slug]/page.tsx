@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import type { Route } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ClaimForm } from "@/components/claim-form";
 import { SiteHeader } from "@/components/site-header";
+import { publicResultDescription } from "@/lib/company-display";
 import { getCompanyBySlug, getCompanyBySlugForMetadata } from "@/lib/data";
 import { siteConfig } from "@/lib/site-config";
 import type { ClaimStatus, CompanyWithTrade } from "@/lib/types";
@@ -18,6 +18,20 @@ type ProfileStatus = {
   label: string;
   note: string;
   tone: "verified" | "claimed" | "unverified";
+};
+
+type PublicCompanyProfile = CompanyWithTrade & {
+  logo_url?: string | null;
+  profile_image_url?: string | null;
+  profile_image_alt?: string | null;
+  contact_person_name?: string | null;
+  contact_person_role?: string | null;
+  company_trades?: Array<{
+    confidence_score: number | null;
+    source?: string | null;
+    evidence?: string | null;
+    trades: { id: string; name: string; slug: string } | null;
+  }> | null;
 };
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -43,11 +57,14 @@ export default async function CompanyPublicPage({ params }: PageProps) {
 
   try {
     const company = await getCompanyBySlug(slug);
+    const publicCompany = company as PublicCompanyProfile;
     const trade = company.trades?.name || "Gewerk";
     const status = getProfileStatus(company);
     const canClaim = company.claim_status === "unclaimed" || company.claim_status === "rejected";
     const websiteHref = normalizeWebsiteUrl(company.website_url);
     const location = `${company.postal_code} ${company.city}`;
+    const visibleDescription = publicResultDescription(company.description);
+    const executedTrades = getExecutedTrades(publicCompany);
     const hasCoordinates =
       Number.isFinite(company.latitude) &&
       Number.isFinite(company.longitude) &&
@@ -78,15 +95,17 @@ export default async function CompanyPublicPage({ params }: PageProps) {
             <section className="rounded-lg border border-line bg-white p-5 shadow-soft sm:p-6">
               <div className="grid gap-6 md:grid-cols-[180px_minmax(0,1fr)]">
                 <div className="flex aspect-square items-center justify-center rounded-lg border border-line bg-[#fbfaf7] p-5">
-                  <div className="grid h-full w-full place-items-center rounded-md border border-line bg-white text-center">
-                    <div>
+                  {publicCompany.logo_url ? (
+                    <img alt={`${company.name} Firmenlogo`} className="h-full w-full rounded-md object-contain" src={publicCompany.logo_url} />
+                  ) : (
+                    <div className="grid h-full w-full place-items-center rounded-md border border-line bg-white text-center">
                       <div className="mx-auto grid h-16 w-16 place-items-center rounded-md bg-brand text-2xl font-semibold text-white">
                         {company.name.slice(0, 1).toUpperCase()}
                       </div>
                       <p className="mt-4 text-sm font-semibold leading-5 text-ink">{company.name}</p>
                       <p className="mt-1 text-xs text-muted">Fachbetriebseintrag</p>
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 <div>
@@ -102,7 +121,7 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                     <StatusPill status={status} />
                   </div>
 
-                  <p className="mt-6 max-w-3xl text-base leading-7 text-ink">{company.description}</p>
+                  {visibleDescription ? <p className="mt-6 max-w-3xl text-base leading-7 text-ink">{visibleDescription}</p> : null}
 
                   <div className="mt-6 grid gap-3 sm:grid-cols-3">
                     <Fact label="Gewerk" value={trade} />
@@ -125,41 +144,111 @@ export default async function CompanyPublicPage({ params }: PageProps) {
 
             <aside className="grid gap-5">
               <section className="rounded-lg border border-line bg-white p-5 shadow-soft">
-                <h2 className="text-lg font-semibold text-ink">Betriebsdaten</h2>
+                <h2 className="text-lg font-semibold text-ink">Kontakt</h2>
                 <dl className="mt-5 grid gap-4">
                   <DataRow label="Standort" value={location} />
-                  <DataRow label="Gewerk" value={trade} />
                   <DataRow label="Website" value={company.website_url || ""} href={websiteHref} external />
                   <DataRow label="Telefon" value={company.phone || ""} href={company.phone ? `tel:${company.phone}` : undefined} />
                   <DataRow label="E-Mail" value={company.email || ""} href={company.email ? `mailto:${company.email}` : undefined} />
                   <DataRow label="Eintragsstatus" value={claimStatusLabel(company.claim_status)} />
                   <DataRow label="Verifizierung" value={company.verified ? "Betriebsdaten bestätigt" : "Nicht verifiziert"} />
-                  {hasCoordinates ? (
-                    <DataRow label="Geokoordinaten" value={`${company.latitude.toFixed(6)}, ${company.longitude.toFixed(6)}`} />
-                  ) : null}
                 </dl>
               </section>
 
-              <section className={`rounded-lg border p-5 ${statusBoxClass(status.tone)}`}>
-                <h2 className="text-lg font-semibold">{status.label}</h2>
-                <p className="mt-3 text-sm leading-6">{status.note}</p>
-                {canClaim ? (
-                  <Link
-                    className="mt-5 inline-flex w-full items-center justify-center rounded-md bg-brand px-4 py-3 text-sm font-semibold text-white hover:bg-[#265a4d]"
-                    href={`/eintrag-beanspruchen?companyId=${company.id}&firma=${company.slug}` as Route}
-                  >
-                    Diesen Eintrag beanspruchen
-                  </Link>
-                ) : null}
+              <section className="rounded-lg border border-line bg-white p-5 shadow-soft">
+                <h2 className="text-lg font-semibold text-ink">Ausgeführte Gewerke</h2>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {executedTrades.map((item) => (
+                    <span key={item} className="rounded-md border border-line bg-[#fbfcff] px-3 py-1.5 text-sm font-semibold text-ink">
+                      {item}
+                    </span>
+                  ))}
+                </div>
+                <p className="mt-4 text-xs leading-5 text-muted">
+                  {company.verified
+                    ? "Vom Betrieb bestätigt."
+                    : "Aus bestehendem Basisdatensatz übernommen – noch nicht vom Betrieb bestätigt."}
+                </p>
               </section>
+
+              <section className="rounded-lg border border-line bg-white p-5 shadow-soft">
+                <h2 className="text-lg font-semibold text-ink">Einsatzgebiet</h2>
+                <p className="mt-3 text-sm leading-6 text-muted">
+                  {hasCoordinates
+                    ? `${location}. Einsatzradius wird angezeigt, sobald er vom Betrieb bestätigt wurde.`
+                    : "Noch kein Einsatzgebiet hinterlegt."}
+                </p>
+              </section>
+
+              <section className="rounded-lg border border-line bg-white p-5 shadow-soft">
+                <h2 className="text-lg font-semibold text-ink">Ansprechpartner</h2>
+                <div className="mt-4 flex gap-4">
+                  {publicCompany.profile_image_url ? (
+                    <img
+                      alt={publicCompany.profile_image_alt || publicCompany.contact_person_name || "Ansprechpartner"}
+                      className="h-20 w-20 shrink-0 rounded-lg object-cover"
+                      src={publicCompany.profile_image_url}
+                    />
+                  ) : (
+                    <div className="grid h-20 w-20 shrink-0 place-items-center rounded-lg border border-line bg-[#eef4fb] text-xl font-semibold text-brand">
+                      {publicCompany.contact_person_name?.slice(0, 1).toUpperCase() || "?"}
+                    </div>
+                  )}
+                  <div>
+                    <div className="font-semibold text-ink">
+                      {publicCompany.contact_person_name || "Hier könnte dein Ansprechpartner sichtbar sein."}
+                    </div>
+                    <div className="mt-1 text-sm text-muted">{publicCompany.contact_person_role || "Ansprechpartner im Betrieb"}</div>
+                    <p className="mt-3 text-sm font-semibold text-brand">Menschen kaufen von Menschen.</p>
+                    <p className="mt-2 text-sm leading-6 text-muted">
+                      Auftraggeber möchten wissen, mit wem sie sprechen. Betriebe mit persönlichem Ansprechpartner wirken
+                      vertrauenswürdiger.
+                    </p>
+                    {canClaim ? (
+                      <Link
+                        className="mt-3 inline-flex min-h-10 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-action hover:border-action"
+                        href={`/betriebe/${company.slug}/claim` as Route}
+                      >
+                        Profilbild ergänzen
+                      </Link>
+                    ) : null}
+                  </div>
+                </div>
+              </section>
+
+              {canClaim ? (
+                <section className="rounded-lg border border-[#b9dec8] bg-[#f1fbf5] p-5 shadow-soft">
+                  <h2 className="text-xl font-semibold text-[#07173d]">Ist das Ihr Betrieb?</h2>
+                  <p className="mt-3 text-sm leading-6 text-[#24523a]">
+                    Übernehmen Sie Ihr kostenloses Basisprofil, korrigieren Sie Ihre Angaben und zeigen Sie Auftraggebern
+                    klar, welche Leistungen Sie anbieten.
+                  </p>
+                  <Link
+                    className="mt-5 inline-flex w-full min-h-11 items-center justify-center rounded-md bg-action px-4 text-sm font-semibold text-white hover:bg-brand"
+                    href={`/betriebe/${company.slug}/claim` as Route}
+                  >
+                    Profil kostenlos übernehmen
+                  </Link>
+                  <a
+                    className="mt-3 inline-flex w-full min-h-10 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-action hover:border-action"
+                    href={`mailto:${siteConfig.publicContactEmail}?subject=Datenkorrektur ${encodeURIComponent(company.name)}`}
+                  >
+                    Datenkorrektur melden
+                  </a>
+                  <p className="mt-3 text-xs leading-5 text-muted">
+                    Die Übernahme wird geprüft, bevor Änderungen veröffentlicht werden.
+                  </p>
+                </section>
+              ) : null}
             </aside>
           </div>
 
           <section className="mt-5 rounded-lg border border-line bg-white p-5 shadow-soft sm:p-6">
-            <h2 className="text-lg font-semibold text-ink">Angebotene Leistungen</h2>
+            <h2 className="text-lg font-semibold text-ink">Ausgeführte Gewerke</h2>
             <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-              <CheckFact value={trade} />
-              <CheckFact value="Leistungsbeschreibung hinterlegt" />
+              {executedTrades.map((item) => (
+                <CheckFact key={item} value={item} />
+              ))}
               <CheckFact value={`Standort ${company.city}`} />
               <CheckFact value={company.verified ? "Betriebsdaten bestätigt" : "Betriebsdaten nicht bestätigt"} />
             </div>
@@ -180,7 +269,13 @@ export default async function CompanyPublicPage({ params }: PageProps) {
           <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_420px]">
             <section className="rounded-lg border border-line bg-white p-5 shadow-soft sm:p-6">
               <h2 className="text-lg font-semibold text-ink">Über den Betrieb</h2>
-              <p className="mt-4 max-w-3xl text-base leading-7 text-ink">{company.description}</p>
+              {visibleDescription ? (
+                <p className="mt-4 max-w-3xl text-base leading-7 text-ink">{visibleDescription}</p>
+              ) : (
+                <p className="mt-4 max-w-3xl text-sm leading-6 text-muted">
+                  Für diesen Betrieb ist noch keine bestätigte Kurzbeschreibung hinterlegt.
+                </p>
+              )}
             </section>
 
             <section className="rounded-lg border border-line bg-white p-5 shadow-soft">
@@ -210,20 +305,40 @@ export default async function CompanyPublicPage({ params }: PageProps) {
               </p>
             </section>
 
-            {canClaim ? (
-              <section id="eintrag-beanspruchen">
-                <ClaimForm companyId={company.id} initialTrades={[company.trades?.slug].filter((slug): slug is string => Boolean(slug))} />
-              </section>
-            ) : (
-              <section className="rounded-lg border border-line bg-white p-5 shadow-soft">
-                <h2 className="text-lg font-semibold text-ink">Eintrag verwalten</h2>
-                <p className="mt-3 text-sm leading-6 text-muted">
-                  Dieser Betriebseintrag ist bereits übernommen oder befindet sich in Prüfung. Änderungen werden über die
-                  Betreiberverwaltung bearbeitet.
-                </p>
-              </section>
-            )}
+            <section className="rounded-lg border border-line bg-white p-5 shadow-soft">
+              <h2 className="text-lg font-semibold text-ink">{canClaim ? "Ist das Ihr Betrieb?" : "Eintrag verwalten"}</h2>
+              <p className="mt-3 text-sm leading-6 text-muted">
+                {canClaim
+                  ? "Sichern Sie das kostenlose Basisprofil und reichen Sie Korrekturen zur Prüfung ein."
+                  : "Dieser Betriebseintrag ist bereits übernommen oder befindet sich in Prüfung."}
+              </p>
+              {canClaim ? (
+                <Link
+                  className="mt-5 inline-flex min-h-11 items-center justify-center rounded-md bg-action px-5 text-sm font-semibold text-white hover:bg-brand"
+                  href={`/betriebe/${company.slug}/claim` as Route}
+                >
+                  Profil kostenlos übernehmen
+                </Link>
+              ) : null}
+            </section>
           </div>
+
+          <section className="mt-5 rounded-lg border border-line bg-white p-5 shadow-soft sm:p-6">
+            <p className="text-sm font-semibold uppercase tracking-normal text-brand">Förderprofil</p>
+            <h2 className="mt-2 text-2xl font-semibold text-[#07173d]">Zusätzliche Möglichkeiten für Fördermitglieder</h2>
+            <p className="mt-3 text-sm leading-6 text-muted">
+              Der Basiseintrag bleibt kostenlos. Fördermitglieder können das Projekt freiwillig unterstützen und ihr
+              Profil schrittweise ausführlicher darstellen.
+            </p>
+            <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {plannedProfileExtensions.map((item) => (
+                <div key={item} className="rounded-md border border-line bg-[#fbfcff] px-4 py-3 text-sm font-semibold text-ink">
+                  <span className="mr-2 text-brand" aria-hidden="true">✓</span>
+                  {item}
+                </div>
+              ))}
+            </div>
+          </section>
         </div>
       </main>
     );
@@ -261,12 +376,30 @@ function getProfileStatus(company: CompanyWithTrade): ProfileStatus {
 
 function StatusPill({ status }: { status: ProfileStatus }) {
   return (
-    <div className={`rounded-md border px-4 py-3 text-sm font-semibold ${statusPillClass(status.tone)}`}>
+    <div
+      className={`rounded-md border px-4 py-3 text-sm font-semibold ${statusPillClass(status.tone)}`}
+      title={status.tone === "verified" ? "Die Unternehmensdaten wurden geprüft und bestätigt." : undefined}
+    >
       <div>{status.label}</div>
       <p className="mt-1 text-xs font-medium">{status.note}</p>
     </div>
   );
 }
+
+const plannedProfileExtensions = [
+  "Referenzprojekte",
+  "Projektgalerie",
+  "Titelbild",
+  "Mehrere Ansprechpartner",
+  "Teamvorstellung",
+  "Zertifikate und Nachweise",
+  "Verfügbarkeitsanzeige",
+  "Direkte Anfragefunktion",
+  "Ausführlichere Leistungsdarstellung",
+  "Persönliche Vorstellung",
+  "Bilder und Referenzen",
+  "Ausführlichere Unternehmensseite",
+];
 
 function Fact({ label, value }: { label: string; value: string }) {
   return (
@@ -284,6 +417,18 @@ function CheckFact({ value }: { value: string }) {
       {value}
     </div>
   );
+}
+
+function getExecutedTrades(company: PublicCompanyProfile) {
+  const tradeNames = [
+    ...(company.company_trades || [])
+      .filter((match) => (match.confidence_score || 0) >= 70)
+      .sort((a, b) => (b.confidence_score || 0) - (a.confidence_score || 0))
+      .map((match) => match.trades?.name),
+    company.trades?.name,
+  ].filter((name): name is string => Boolean(name));
+
+  return [...new Set(tradeNames)].slice(0, 10);
 }
 
 function DataRow({
