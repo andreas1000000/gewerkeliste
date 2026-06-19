@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import type { CompanyFormState, CompanyWithTrade, Trade } from "@/lib/types";
+import { canonicalTradeSlug, groupedTradeSelection } from "@/lib/trade-taxonomy";
 
 type Props = {
   trades: Trade[];
@@ -15,6 +16,8 @@ const initialState: CompanyFormState = { ok: false, message: "" };
 export function CompanyForm({ trades, company, action, submitLabel }: Props) {
   const [state, formAction, pending] = useActionState(action, initialState);
   const errors = state.fieldErrors || {};
+  const tradeBySlug = new Map(trades.map((trade) => [canonicalTradeSlug(trade.slug), trade]));
+  const selectedTradeId = company?.trade_id || "";
 
   return (
     <form action={formAction} className="grid gap-6">
@@ -38,19 +41,31 @@ export function CompanyForm({ trades, company, action, submitLabel }: Props) {
           <Field label="Gewerk" error={errors.trade_id}>
             <select
               name="trade_id"
-              defaultValue={company?.trade_id || ""}
+              defaultValue={selectedTradeId}
               className="w-full rounded-md border border-line bg-white px-3 py-2 outline-none focus:border-brand"
               required
             >
               <option value="" disabled>
-                Gewerk waehlen
+                Gewerk wählen
               </option>
-              {trades.map((trade) => (
-                <option key={trade.id} value={trade.id}>
-                  {trade.name}
-                </option>
+              {groupedTradeSelection().map((group) => (
+                <optgroup key={group.name} label={group.name}>
+                  {group.trades.map((taxonomyTrade) => {
+                    const dbTrade = tradeBySlug.get(canonicalTradeSlug(taxonomyTrade.slug));
+                    return (
+                      <option key={taxonomyTrade.slug} disabled={!dbTrade} value={dbTrade?.id || taxonomyTrade.slug}>
+                        {taxonomyTrade.name}
+                        {dbTrade ? "" : " (Stammdaten-Sync nötig)"}
+                      </option>
+                    );
+                  })}
+                </optgroup>
               ))}
             </select>
+            <span className="text-xs leading-5 text-muted">
+              Die Auswahl folgt der zentralen Gewerke-Taxonomie. Mehrere Gewerke pro Betrieb werden über
+              die strukturierte Zuordnung vorbereitet.
+            </span>
           </Field>
           <Field className="md:col-span-2" label="Beschreibung" error={errors.description}>
             <textarea

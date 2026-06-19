@@ -34,6 +34,11 @@ export type TaxonomyTrade = {
 
 export const tradeSlugAliases: Record<string, string> = {
   dachdecker: "dachdeckerarbeiten",
+  elektriker: "elektroinstallation",
+  fliesenleger: "fliesenarbeiten",
+  gaertner: "garten-landschaftsbau",
+  maler: "malerarbeiten",
+  tischler: "schreinerarbeiten",
   "spengler-klempner": "spenglerarbeiten",
   putzarbeiten: "verputzarbeiten",
   sanitaer: "sanitaerinstallation",
@@ -41,9 +46,8 @@ export const tradeSlugAliases: Record<string, string> = {
   elektrotechnik: "elektrotechnik",
   estrich: "estricharbeiten",
   bodenbelag: "bodenlegerarbeiten",
-  gartenbau: "garten-und-landschaftsbau",
-  landschaftsbau: "garten-und-landschaftsbau",
-  "garten-landschaftsbau": "garten-und-landschaftsbau",
+  gartenbau: "garten-landschaftsbau",
+  landschaftsbau: "garten-landschaftsbau",
   pflasterbau: "pflasterarbeiten",
   brandschutzabschottungen: "brandschutzabschottung",
   architektur: "architekt",
@@ -72,7 +76,7 @@ export const tradeSelectionGroups = [
   },
   {
     name: "Außenanlagen",
-    slugs: ["garten-und-landschaftsbau", "pflasterarbeiten", "naturstein", "erdarbeiten", "tiefbau", "kanalbau", "entwaesserung", "zaunbau"],
+    slugs: ["garten-landschaftsbau", "pflasterarbeiten", "naturstein", "erdarbeiten", "tiefbau", "kanalbau", "entwaesserung", "zaunbau"],
   },
   {
     name: "Spezial",
