@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import { ClaimBadge } from "@/components/status-badge";
 import { publicResultDescription, publicResultImage } from "@/lib/company-display";
-import { getPublicCompaniesByTrade } from "@/lib/data";
+import { getPublicCompaniesByTrade } from "@/lib/data/public-directory";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { canonicalTradeSlug, findTaxonomyTrade, tradeTaxonomy, type TaxonomyTrade } from "@/lib/trade-taxonomy";
 

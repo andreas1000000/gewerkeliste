@@ -4,7 +4,7 @@ import type { Route } from "next";
 import { SiteHeader } from "@/components/site-header";
 import { ClaimBadge } from "@/components/status-badge";
 import { publicResultDescription, publicResultImage } from "@/lib/company-display";
-import { getPublicCompanies } from "@/lib/data";
+import { getPublicCompanies } from "@/lib/data/public-directory";
 import { createTradeSearchEntry, normalizeSearchTerm, rankTradeEntries } from "@/lib/trade-search";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { canonicalTradeSlug, publicTradeTaxonomy } from "@/lib/trade-taxonomy";

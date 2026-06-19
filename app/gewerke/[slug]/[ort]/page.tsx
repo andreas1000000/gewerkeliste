@@ -3,7 +3,7 @@ import type { Route } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
-import { getPublicCompanies } from "@/lib/data";
+import { getPublicCompanies } from "@/lib/data/public-directory";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { findTaxonomyTrade, type TaxonomyTrade } from "@/lib/trade-taxonomy";
 

@@ -4,9 +4,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import { publicResultDescription } from "@/lib/company-display";
-import { getCompanyBySlug, getCompanyBySlugForMetadata } from "@/lib/data";
+import { getCompanyBySlug, getCompanyBySlugForMetadata } from "@/lib/data/public-directory";
 import { siteConfig } from "@/lib/site-config";
-import type { ClaimStatus, CompanyWithTrade } from "@/lib/types";
+import type { PublicCompanyWithTrade, PublicClaimStatus } from "@/lib/types/public-directory";
 
 export const dynamic = "force-dynamic";
 
@@ -18,20 +18,6 @@ type ProfileStatus = {
   label: string;
   note: string;
   tone: "verified" | "claimed" | "unverified";
-};
-
-type PublicCompanyProfile = CompanyWithTrade & {
-  logo_url?: string | null;
-  profile_image_url?: string | null;
-  profile_image_alt?: string | null;
-  contact_person_name?: string | null;
-  contact_person_role?: string | null;
-  company_trades?: Array<{
-    confidence_score: number | null;
-    source?: string | null;
-    evidence?: string | null;
-    trades: { id: string; name: string; slug: string } | null;
-  }> | null;
 };
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -57,14 +43,13 @@ export default async function CompanyPublicPage({ params }: PageProps) {
 
   try {
     const company = await getCompanyBySlug(slug);
-    const publicCompany = company as PublicCompanyProfile;
     const trade = company.trades?.name || "Gewerk";
     const status = getProfileStatus(company);
     const canClaim = company.claim_status === "unclaimed" || company.claim_status === "rejected";
     const websiteHref = normalizeWebsiteUrl(company.website_url);
     const location = `${company.postal_code} ${company.city}`;
     const visibleDescription = publicResultDescription(company.description);
-    const executedTrades = getExecutedTrades(publicCompany);
+    const executedTrades = getExecutedTrades(company);
     const hasCoordinates =
       Number.isFinite(company.latitude) &&
       Number.isFinite(company.longitude) &&
@@ -95,8 +80,8 @@ export default async function CompanyPublicPage({ params }: PageProps) {
             <section className="rounded-lg border border-line bg-white p-5 shadow-soft sm:p-6">
               <div className="grid gap-6 md:grid-cols-[180px_minmax(0,1fr)]">
                 <div className="flex aspect-square items-center justify-center rounded-lg border border-line bg-[#fbfaf7] p-5">
-                  {publicCompany.logo_url ? (
-                    <img alt={`${company.name} Firmenlogo`} className="h-full w-full rounded-md object-contain" src={publicCompany.logo_url} />
+                  {company.logo_url ? (
+                    <img alt={`${company.name} Firmenlogo`} className="h-full w-full rounded-md object-contain" src={company.logo_url} />
                   ) : (
                     <div className="grid h-full w-full place-items-center rounded-md border border-line bg-white text-center">
                       <div className="mx-auto grid h-16 w-16 place-items-center rounded-md bg-brand text-2xl font-semibold text-white">
@@ -183,22 +168,22 @@ export default async function CompanyPublicPage({ params }: PageProps) {
               <section className="rounded-lg border border-line bg-white p-5 shadow-soft">
                 <h2 className="text-lg font-semibold text-ink">Ansprechpartner</h2>
                 <div className="mt-4 flex gap-4">
-                  {publicCompany.profile_image_url ? (
+                  {company.profile_image_url ? (
                     <img
-                      alt={publicCompany.profile_image_alt || publicCompany.contact_person_name || "Ansprechpartner"}
+                      alt={company.profile_image_alt || company.contact_person_name || "Ansprechpartner"}
                       className="h-20 w-20 shrink-0 rounded-lg object-cover"
-                      src={publicCompany.profile_image_url}
+                      src={company.profile_image_url}
                     />
                   ) : (
                     <div className="grid h-20 w-20 shrink-0 place-items-center rounded-lg border border-line bg-[#eef4fb] text-xl font-semibold text-brand">
-                      {publicCompany.contact_person_name?.slice(0, 1).toUpperCase() || "?"}
+                      {company.contact_person_name?.slice(0, 1).toUpperCase() || "?"}
                     </div>
                   )}
                   <div>
                     <div className="font-semibold text-ink">
-                      {publicCompany.contact_person_name || "Hier könnte dein Ansprechpartner sichtbar sein."}
+                      {company.contact_person_name || "Hier könnte dein Ansprechpartner sichtbar sein."}
                     </div>
-                    <div className="mt-1 text-sm text-muted">{publicCompany.contact_person_role || "Ansprechpartner im Betrieb"}</div>
+                    <div className="mt-1 text-sm text-muted">{company.contact_person_role || "Ansprechpartner im Betrieb"}</div>
                     <p className="mt-3 text-sm font-semibold text-brand">Menschen kaufen von Menschen.</p>
                     <p className="mt-2 text-sm leading-6 text-muted">
                       Auftraggeber möchten wissen, mit wem sie sprechen. Betriebe mit persönlichem Ansprechpartner wirken
@@ -347,7 +332,7 @@ export default async function CompanyPublicPage({ params }: PageProps) {
   }
 }
 
-function getProfileStatus(company: CompanyWithTrade): ProfileStatus {
+function getProfileStatus(company: PublicCompanyWithTrade): ProfileStatus {
   if (company.verified) {
     return {
       label: "Betriebsdaten bestätigt",
@@ -419,7 +404,7 @@ function CheckFact({ value }: { value: string }) {
   );
 }
 
-function getExecutedTrades(company: PublicCompanyProfile) {
+function getExecutedTrades(company: PublicCompanyWithTrade) {
   const tradeNames = [
     ...(company.company_trades || [])
       .filter((match) => (match.confidence_score || 0) >= 70)
@@ -494,8 +479,8 @@ function ContactButton({
   );
 }
 
-function claimStatusLabel(status: ClaimStatus) {
-  const labels: Record<ClaimStatus, string> = {
+function claimStatusLabel(status: PublicClaimStatus) {
+  const labels: Record<PublicClaimStatus, string> = {
     unclaimed: "Nicht beansprucht",
     pending: "Übernahme angefragt",
     claimed: "Eintrag übernommen",

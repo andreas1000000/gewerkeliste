@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { SiteHeader } from "@/components/site-header";
 import { TradeBrowser, type TradeViewMode } from "@/components/trade-browser";
-import { getPublicCompanyTradeCounts } from "@/lib/data";
+import { getPublicCompanyTradeCounts } from "@/lib/data/public-directory";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { frequentTradeSlugs, tradeHierarchy } from "@/lib/trade-hierarchy";
 import { publicTradeTaxonomy } from "@/lib/trade-taxonomy";

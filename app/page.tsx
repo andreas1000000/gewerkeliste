@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import type { Route } from "next";
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
-import { getPublicCompanies } from "@/lib/data";
+import { getPublicCompanies } from "@/lib/data/public-directory";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { tradeTaxonomy } from "@/lib/trade-taxonomy";
 

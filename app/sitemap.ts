@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { getAllPublicCompanySlugs } from "@/lib/data";
+import { getAllPublicCompanySlugs } from "@/lib/data/public-directory";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { publicTradeTaxonomy } from "@/lib/trade-taxonomy";
 
