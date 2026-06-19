@@ -1,6 +1,6 @@
 import { agentRegistry, getAgentDefinition } from "@/lib/agents/agent-registry";
 import { getSupabaseAdmin } from "@/lib/supabase";
-import type { AgentTaskStatus, RegionalCoverageDryRunResult } from "./types";
+import type { AgentTaskStatus, CompanyDiscoveryDryRunResult, RegionalCoverageDryRunResult } from "./types";
 
 export type AgentRunRecord = {
   id: string;
@@ -311,6 +311,191 @@ export async function persistRegionalCoverageDryRun(result: RegionalCoverageDryR
     estimated_cost: 0,
     actual_cost: 0,
     metadata: { note: "No paid API used" },
+  });
+  if (costError) throw costError;
+
+  return run.id as string;
+}
+
+export async function persistCompanyDiscoveryDryRun(result: CompanyDiscoveryDryRunResult) {
+  const supabase = getSupabaseAdmin();
+  const agent = getAgentDefinition(result.agent_id);
+  if (!agent) throw new Error(`Unbekannter Agent: ${result.agent_id}`);
+
+  const { data: region, error: regionError } = await supabase.from("regions").select("id,slug,name").eq("slug", result.region_slug).single();
+  if (regionError) throw regionError;
+
+  const tradeSlugs = [...new Set([...result.findings.map((finding) => finding.trade_slug), ...result.tasks.map((task) => task.trade_slug)])];
+  const { data: trades, error: tradesError } = tradeSlugs.length
+    ? await supabase.from("trades").select("id,slug,name").in("slug", tradeSlugs)
+    : { data: [], error: null };
+  if (tradesError) throw tradesError;
+  const tradeBySlug = new Map((trades || []).map((trade) => [trade.slug as string, trade]));
+
+  const candidateIds = [...new Set(result.review_items.map((item) => item.candidate_id))];
+  const { data: candidateRows, error: candidateError } = candidateIds.length
+    ? await supabase.from("company_candidates").select("id,possible_trade").in("id", candidateIds)
+    : { data: [], error: null };
+  if (candidateError) throw candidateError;
+  const candidateById = new Map((candidateRows || []).map((candidate) => [candidate.id as string, candidate]));
+
+  const startedAt = new Date().toISOString();
+  const { data: run, error: runError } = await supabase
+    .from("agent_runs")
+    .insert({
+      agent_id: agent.agent_id,
+      agent_name: agent.name,
+      department: agent.department,
+      objective: `Company Discovery Dry Run fuer ${region.name}`,
+      mode: "dry_run",
+      status: "completed",
+      region_id: region.id,
+      dry_run: true,
+      risk_level: agent.risk_level,
+      cost_center: agent.cost_center,
+      estimated_cost: 0,
+      actual_cost: 0,
+      input: { region_slug: result.region_slug, trade_slug: result.trade_slug || null },
+      output: {
+        findings_count: result.findings.length,
+        tasks_count: result.tasks.length,
+        review_items_count: result.review_items.length,
+        guardrails: result.guardrails,
+        findings: result.findings,
+      },
+      started_at: startedAt,
+      finished_at: new Date().toISOString(),
+      created_by: "gewerkeliste-os",
+    })
+    .select("id")
+    .single();
+  if (runError) throw runError;
+
+  const { error: stepsError } = await supabase.from("agent_run_steps").insert([
+    {
+      agent_run_id: run.id,
+      step_key: "load_local_discovery_inputs",
+      step_name: "Region, Gewerke, Firmen, Kandidaten und Coverage lokal laden",
+      status: "completed",
+      output: { region_slug: result.region_slug, trade_slug: result.trade_slug || null },
+      confidence_score: 90,
+      started_at: startedAt,
+      finished_at: new Date().toISOString(),
+    },
+    {
+      agent_run_id: run.id,
+      step_key: "derive_discovery_gaps",
+      step_name: "Discovery-Luecken aus lokalen Daten ableiten",
+      status: "completed",
+      output: { findings_count: result.findings.length },
+      confidence_score: 70,
+      started_at: startedAt,
+      finished_at: new Date().toISOString(),
+    },
+    {
+      agent_run_id: run.id,
+      step_key: "prepare_review_queue",
+      step_name: "Tasks und Review Items ohne externe Wirkung vorbereiten",
+      status: "completed",
+      output: { tasks_count: result.tasks.length, review_items_count: result.review_items.length },
+      confidence_score: 70,
+      started_at: startedAt,
+      finished_at: new Date().toISOString(),
+    },
+  ]);
+  if (stepsError) throw stepsError;
+
+  const { error: toolCallError } = await supabase.from("agent_tool_calls").insert([
+    {
+      agent_run_id: run.id,
+      tool_class: "database_read",
+      tool_name: "supabase",
+      status: "completed",
+      request_summary: { tables: ["regions", "trades", "companies", "company_candidates", "coverage_snapshots"] },
+      response_summary: { findings_count: result.findings.length, existing_review_candidates: result.review_items.length },
+      cost_estimate: 0,
+      actual_cost: 0,
+    },
+    {
+      agent_run_id: run.id,
+      tool_class: "classifier",
+      tool_name: "local_discovery_rules",
+      status: "completed",
+      request_summary: { mode: "deterministic_local_rules", external_api: false },
+      response_summary: { tasks_count: result.tasks.length, review_items_count: result.review_items.length },
+      cost_estimate: 0,
+      actual_cost: 0,
+    },
+  ]);
+  if (toolCallError) throw toolCallError;
+
+  if (result.tasks.length) {
+    const { error: tasksError } = await supabase.from("agent_tasks").insert(
+      result.tasks.map((task) => {
+        const trade = tradeBySlug.get(task.trade_slug);
+        return {
+          agent_run_id: run.id,
+          agent_id: agent.agent_id,
+          title: task.title,
+          description: task.suggested_action,
+          task_type: task.task_type,
+          priority: task.priority,
+          status: "open",
+          region_id: region.id,
+          trade_id: trade?.id || null,
+          confidence_score: task.confidence_score,
+          created_by: "company-discovery-agent",
+        };
+      }),
+    );
+    if (tasksError) throw tasksError;
+  }
+
+  if (result.review_items.length) {
+    const { error: reviewsError } = await supabase.from("agent_review_items").insert(
+      result.review_items.map((item) => {
+        const candidate = candidateById.get(item.candidate_id);
+        const trade = tradeBySlug.get(item.trade_slug || candidate?.possible_trade || "");
+        return {
+          agent_run_id: run.id,
+          agent_id: agent.agent_id,
+          review_type: "company_discovery_candidate",
+          title: `Discovery-Kandidat pruefen: ${item.candidate_name}`,
+          description: `${item.reason}\n${item.next_action}`,
+          status: "open",
+          severity: item.severity,
+          region_id: region.id,
+          trade_id: trade?.id || null,
+          candidate_id: item.candidate_id,
+          source_url: item.source_url,
+          source_type: item.source_url ? "local_candidate_source" : "needs_source",
+          confidence_score: item.confidence_score,
+          payload: {
+            dry_run: true,
+            candidate_name: item.candidate_name,
+            trade_slug: item.trade_slug,
+            reason: item.reason,
+            next_action: item.next_action,
+            creates_company: false,
+            sends_email: false,
+            external_api_used: false,
+          },
+        };
+      }),
+    );
+    if (reviewsError) throw reviewsError;
+  }
+
+  const { error: costError } = await supabase.from("agent_cost_events").insert({
+    agent_run_id: run.id,
+    agent_id: agent.agent_id,
+    cost_center: agent.cost_center,
+    provider: "internal",
+    tool_name: "company_discovery_dry_run",
+    region_id: region.id,
+    estimated_cost: 0,
+    actual_cost: 0,
+    metadata: { note: "No web search and no paid API used" },
   });
   if (costError) throw costError;
 

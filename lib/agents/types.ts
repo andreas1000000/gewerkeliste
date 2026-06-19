@@ -82,3 +82,52 @@ export type RegionalCoverageDryRunResult = {
   }>;
   guardrails: string[];
 };
+
+export type CompanyDiscoveryDryRunInput = {
+  regionSlug: string;
+  tradeSlug?: string;
+};
+
+export type CompanyDiscoveryFinding = {
+  region_slug: string;
+  region_name: string;
+  trade_slug: string;
+  trade_name: string;
+  found_companies: number;
+  candidate_companies: number;
+  estimated_companies: number | null;
+  gap_estimate: number | null;
+  status: "needs_source" | "review_candidates" | "needs_more_candidates" | "sufficient_for_now";
+  confidence_score: number;
+  next_action: string;
+  reasoning: string;
+};
+
+export type CompanyDiscoveryReviewItem = {
+  candidate_id: string;
+  candidate_name: string;
+  trade_slug: string | null;
+  source_url: string | null;
+  confidence_score: number;
+  severity: "low" | "medium" | "high" | "critical";
+  reason: string;
+  next_action: string;
+};
+
+export type CompanyDiscoveryDryRunResult = {
+  agent_id: string;
+  mode: "dry_run";
+  region_slug: string;
+  trade_slug?: string;
+  findings: CompanyDiscoveryFinding[];
+  tasks: Array<{
+    title: string;
+    priority: AgentTaskPriority;
+    trade_slug: string;
+    task_type: "find_candidates_for_region_trade" | "verify_candidate_source" | "review_possible_duplicate" | "needs_manual_source";
+    suggested_action: string;
+    confidence_score: number;
+  }>;
+  review_items: CompanyDiscoveryReviewItem[];
+  guardrails: string[];
+};

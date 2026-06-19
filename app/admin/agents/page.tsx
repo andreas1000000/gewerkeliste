@@ -4,8 +4,16 @@ import Link from "next/link";
 import { AgentApprovalCard } from "@/components/agent-approval-card";
 import { agentRegistry } from "@/lib/agents/agent-registry";
 import { agentOsTablesAvailableError, getAgentCockpitData } from "@/lib/agents/persistence";
+import { runCompanyDiscoveryDryRun } from "@/lib/agents/company-discovery";
 import { runRegionalCoverageDryRun } from "@/lib/agents/regional-coverage";
-import { persistRiederingCoverageDryRun, setAgentApprovalStatus, setAgentOutboxStatus, setAgentReviewStatus, setAgentTaskStatus } from "./actions";
+import {
+  persistRiederingCoverageDryRun,
+  persistRiederingDiscoveryDryRun,
+  setAgentApprovalStatus,
+  setAgentOutboxStatus,
+  setAgentReviewStatus,
+  setAgentTaskStatus,
+} from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -49,23 +57,37 @@ export default async function AdminAgentsPage() {
       ) : null}
 
       <section className="mb-6 rounded-lg border border-line bg-white p-5 shadow-soft">
-        <div className="mb-4 flex flex-col justify-between gap-3 md:flex-row md:items-center">
+        <div className="mb-4 flex flex-col justify-between gap-3 md:flex-row md:items-start">
           <div>
             <h2 className="text-xl font-semibold text-ink">Regional Coverage Dry Run</h2>
             <p className="mt-1 text-sm text-muted">
               Region Riedering wird gelesen und bewertet. Speichern erzeugt nur interne Agent-Runs und Agent-Tasks.
             </p>
           </div>
-          <form action={persistRiederingCoverageDryRun}>
-            <button
-              className="rounded-md bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-[#265a4d] disabled:cursor-not-allowed disabled:opacity-50"
-              disabled={cockpit.migrationMissing || Boolean(cockpit.coverageError)}
-              type="submit"
-            >
-              Dry Run speichern
-            </button>
-          </form>
+          <div className="flex flex-wrap gap-2">
+            <form action={persistRiederingCoverageDryRun}>
+              <button
+                className="rounded-md bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-[#265a4d] disabled:cursor-not-allowed disabled:opacity-50"
+                disabled={cockpit.migrationMissing || Boolean(cockpit.coverageError)}
+                type="submit"
+              >
+                Coverage Dry Run speichern
+              </button>
+            </form>
+            <form action={persistRiederingDiscoveryDryRun}>
+              <button
+                className="rounded-md border border-brand bg-white px-4 py-2 text-sm font-semibold text-brand hover:bg-panel disabled:cursor-not-allowed disabled:opacity-50"
+                disabled={cockpit.migrationMissing || Boolean(cockpit.discoveryError)}
+                type="submit"
+              >
+                Discovery Dry Run speichern
+              </button>
+            </form>
+          </div>
         </div>
+        <p className="mb-4 rounded-md border border-line bg-panel p-3 text-xs font-semibold text-muted">
+          Discovery Dry Run nutzt nur lokale Daten. Keine Websuche, keine externe API, keine Firmenanlage, keine E-Mail.
+        </p>
         {cockpit.coverageError ? (
           <pre className="overflow-auto rounded-md bg-panel p-4 text-xs text-muted">{cockpit.coverageError}</pre>
         ) : (
@@ -282,6 +304,8 @@ async function loadCockpit() {
     migrationMissing: false,
     coverage: null as Awaited<ReturnType<typeof runRegionalCoverageDryRun>> | null,
     coverageError: "",
+    discovery: null as Awaited<ReturnType<typeof runCompanyDiscoveryDryRun>> | null,
+    discoveryError: "",
     persisted: null as Awaited<ReturnType<typeof getAgentCockpitData>> | null,
   };
 
@@ -289,6 +313,12 @@ async function loadCockpit() {
     base.coverage = await runRegionalCoverageDryRun({ regionSlug: "riedering" });
   } catch (error) {
     base.coverageError = error instanceof Error ? error.message : String(error);
+  }
+
+  try {
+    base.discovery = await runCompanyDiscoveryDryRun({ regionSlug: "riedering" });
+  } catch (error) {
+    base.discoveryError = error instanceof Error ? error.message : String(error);
   }
 
   try {

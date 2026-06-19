@@ -1,12 +1,26 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { persistRegionalCoverageDryRun, updateAgentApprovalStatus, updateAgentOutboxStatus, updateAgentReviewStatus, updateAgentTaskStatus } from "@/lib/agents/persistence";
+import {
+  persistCompanyDiscoveryDryRun,
+  persistRegionalCoverageDryRun,
+  updateAgentApprovalStatus,
+  updateAgentOutboxStatus,
+  updateAgentReviewStatus,
+  updateAgentTaskStatus,
+} from "@/lib/agents/persistence";
+import { runCompanyDiscoveryDryRun } from "@/lib/agents/company-discovery";
 import { runRegionalCoverageDryRun } from "@/lib/agents/regional-coverage";
 
 export async function persistRiederingCoverageDryRun() {
   const result = await runRegionalCoverageDryRun({ regionSlug: "riedering" });
   await persistRegionalCoverageDryRun(result);
+  revalidatePath("/admin/agents");
+}
+
+export async function persistRiederingDiscoveryDryRun() {
+  const result = await runCompanyDiscoveryDryRun({ regionSlug: "riedering" });
+  await persistCompanyDiscoveryDryRun(result);
   revalidatePath("/admin/agents");
 }
 
