@@ -8,7 +8,7 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { promisify } from "node:util";
 import ts from "typescript";
-import { requireExternalApiConfirmation, requireLiveConfirmation } from "./safety-gates.mjs";
+import { requireExternalApiConfirmation, requireLiveConfirmation, requireSupabaseSafety } from "./safety-gates.mjs";
 
 const execFileAsync = promisify(execFile);
 const searchModule = await importSearchModule();
@@ -36,6 +36,7 @@ if (live) {
     reason: "Company Enrichment kann Firmenfelder, Quellen, Gewerke und Change Logs schreiben.",
   });
 }
+requireSupabaseSafety({ args, url: supabaseUrl, live, action: "enrich-company-live" });
 if (process.env.BRAVE_SEARCH_API_KEY) {
   requireExternalApiConfirmation({ args, provider: "brave-search", estimatedRequests: maxSearchQueries });
 }
@@ -432,7 +433,11 @@ async function analyzeSource(url, source, company) {
     references_url: pages.find((page) => page.role === "referenzen")?.url || null,
   };
   result.matching_features = matchingFeatures(company, text, url, result.extracted);
-  result.accepted_as_official_website = !directoryLike && hasOfficialWebsiteEvidence(company, result, officialCandidate);
+  const companyOwnedHost = isLikelyCompanyOwnedHost(host, targetCompany || company.name || "");
+  result.accepted_as_official_website =
+    !directoryLike &&
+    (officialCandidate || companyOwnedHost) &&
+    hasOfficialWebsiteEvidence(company, result, officialCandidate || companyOwnedHost);
   if (!result.accepted_as_official_website && officialCandidate && result.matching_features.includes("Firmenname")) {
     result.risks.push("Direkter Domain-Kandidat wurde nicht als offizielle Website akzeptiert, weil Ort, PLZ, Adresse oder Telefonnummer nicht bestaetigt wurden.");
   }
@@ -450,6 +455,15 @@ function hasOfficialWebsiteEvidence(company, source, officialCandidate) {
 
   if (officialCandidate) return features.has("Leistungsangebot");
   return features.size >= 2;
+}
+
+function isLikelyCompanyOwnedHost(host, companyName) {
+  if (!host || isDirectoryLikeHost(host)) return false;
+  const hostText = normalize(host.replace(/^www\./, ""));
+  const tokens = domainTokens(companyName);
+  if (tokens.length === 0) return false;
+  const matched = tokens.filter((token) => contains(hostText, token) || domainTokenVariants(token).some((variant) => contains(hostText, variant)));
+  return matched.length >= Math.min(2, tokens.length);
 }
 
 function matchingFeatures(company, text, url, extracted) {
@@ -549,13 +563,17 @@ function proposeTrades(company, analyzedSources) {
   }
   const signalSources = websiteSources;
   const extractedServices = signalSources.flatMap((source) => source.extracted?.services || []);
-  const electricalContext = extractedServices.some((service) => /elektro|photovoltaik|knx|smart|netzwerk/i.test(service));
+  const hasElectricalIdentity = /elektro|photovoltaik|knx|smart|netzwerk/i.test(
+    `${company.name} ${company.trades?.name || ""} ${company.website_url || ""}`,
+  );
+  const hasStrongConstructionServices = extractedServices.some((service) =>
+    /hochbau|umbau|sanierung|verputz|beton|maurer|garten|landschaft|pflaster|zimmerer|schreiner|dach|spengler|metall/i.test(service),
+  );
   const text = normalize([
     company.name,
     company.description,
     company.trades?.name,
     extractedServices.join(" "),
-    signalSources.map((source) => source.text_sample).join(" "),
   ].join(" "));
   const candidates = [
     { slug: "bauunternehmen", name: "Bauunternehmen", terms: ["bauunternehmen", "hochbau", "umbau", "renovierung"], score: 95 },
@@ -582,7 +600,7 @@ function proposeTrades(company, analyzedSources) {
       return matchedTerm ? { ...trade, confidence_score: trade.score, evidence: `Textsignal: ${matchedTerm}` } : null;
     })
     .filter(Boolean)
-    .filter((match) => !electricalContext || isAllowedElectricalContextTrade(match.slug, text));
+    .filter((match) => isContextuallyAllowedTrade(match.slug, { hasElectricalIdentity, hasStrongConstructionServices }));
 
   return {
     auto: matches.filter((match) => match.confidence_score >= 75),
@@ -590,8 +608,12 @@ function proposeTrades(company, analyzedSources) {
   };
 }
 
-function isAllowedElectricalContextTrade(slug, text) {
-  if (["elektroinstallation", "elektrotechnik", "photovoltaik", "knx-smart-home", "netzwerktechnik"].includes(slug)) return true;
+function isContextuallyAllowedTrade(slug, { hasElectricalIdentity, hasStrongConstructionServices }) {
+  if (!["elektroinstallation", "elektrotechnik", "photovoltaik", "knx-smart-home", "netzwerktechnik"].includes(slug)) {
+    return true;
+  }
+  if (hasElectricalIdentity) return true;
+  if (hasStrongConstructionServices) return false;
   return false;
 }
 
@@ -887,7 +909,7 @@ function pageWeight(role) {
 }
 
 function isDirectoryLikeHost(host) {
-  return /(google|bing|duckduckgo|gelbeseiten|11880|dasoertliche|werkenntdenbesten|meinestadt|cylex|golocal|facebook|instagram|linkedin|riedering\.de)/i.test(host);
+  return /(google|bing|duckduckgo|gelbeseiten|11880|dasoertliche|werkenntdenbesten|meinestadt|cylex|golocal|facebook|instagram|linkedin|riedering\.de|handwerkerportal|gartenbau\.org|branchenportal|northdata|unternehmensregister|firmenwissen|ovbstellen)/i.test(host);
 }
 
 function extractLinks(html, baseUrl) {

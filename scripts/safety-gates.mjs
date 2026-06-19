@@ -30,7 +30,33 @@ export function requireRemoteSqlConfirmation({ args }) {
   }
 }
 
+export function requireSupabaseSafety({ args, url, live, action }) {
+  if (!url) return;
+  if (isLocalSupabaseUrl(url)) return;
+
+  if (live) {
+    requireLiveConfirmation({
+      args,
+      action,
+      reason: "Nicht-lokale Supabase-URL erkannt. Live-Schreibzugriffe brauchen eine ausdrueckliche Production-Write-Freigabe.",
+    });
+
+    if (process.env.GEWERKELISTE_ALLOW_PRODUCTION_WRITE !== "true") {
+      fail("Production-Schreibzugriff blockiert: Setze zusaetzlich GEWERKELISTE_ALLOW_PRODUCTION_WRITE=true.");
+    }
+    return;
+  }
+
+  if (process.env.GEWERKELISTE_ALLOW_REMOTE_READ !== "true") {
+    fail("Remote-Supabase-Lesezugriff im Dry Run blockiert: Nutze lokale Supabase oder setze bewusst GEWERKELISTE_ALLOW_REMOTE_READ=true.");
+  }
+}
+
 export function requireExternalApiConfirmation({ args, provider, estimatedRequests, freeLimit = 3 }) {
+  if (process.env.GEWERKELISTE_ALLOW_EXTERNAL_API !== "true") {
+    fail(`Externe API blockiert: Setze bewusst GEWERKELISTE_ALLOW_EXTERNAL_API=true fuer ${provider}.`);
+  }
+
   const count = Number(estimatedRequests || 0);
   if (count <= freeLimit) return;
 
@@ -48,6 +74,15 @@ export function requireExternalApiConfirmation({ args, provider, estimatedReques
       `Alternativ lokal: GEWERKELISTE_CONFIRM_COST=${expected}`,
     ].join("\n"),
   );
+}
+
+function isLocalSupabaseUrl(value) {
+  try {
+    const url = new URL(value);
+    return ["localhost", "127.0.0.1", "::1"].includes(url.hostname);
+  } catch {
+    return false;
+  }
 }
 
 function normalizeAction(value) {

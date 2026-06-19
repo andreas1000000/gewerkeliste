@@ -6,9 +6,11 @@ Fuer alle Research-, Import- und Enrichment-Laeufe gilt die zentrale Richtlinie 
 
 ## Mission
 
-Workflow:
+Pflichtworkflow:
 
-Basis-Eintrag -> offizielle Firmenwebsite finden -> Website analysieren -> Impressum lesen -> Leistungen erkennen -> Gewerke zuordnen -> Firmenprofil anreichern -> Qualitaet bewerten -> Aenderungen dokumentieren.
+Basis-Eintrag -> offizielle Firmenwebsite finden -> Website validieren -> Impressum lesen -> Kontaktseite lesen -> Leistungsseiten lesen -> Leistungen erkennen -> Gewerke und Teilgewerke zuordnen -> Dubletten pruefen -> Firmenprofil anreichern -> Qualitaet bewerten -> `company_trades` setzen -> Claim-Flow vorbereiten -> Review-Faelle erzeugen -> Aenderungen dokumentieren -> Report erzeugen.
+
+Kein Datensatz gilt als fertig, solange diese Kette nicht durchlaufen wurde.
 
 Der Agent wird dauerhaft genutzt:
 
@@ -57,6 +59,75 @@ Gemeinde-Websites, OSM, Suchmaschinen, Kartendienste und Branchenverzeichnisse s
 - Firmenwebsite und Impressum schlagen Gemeindeverzeichnis.
 - Jede Aenderung wird in `company_change_log` dokumentiert.
 - Jede Quelle wird in `company_sources` gespeichert.
+- Vor jedem Insert und nach jedem Enrichment ist Dublettenpruefung Pflicht.
+- Unsichere Dubletten werden als Review-Fall markiert, nicht geloescht.
+- `enrichment_status`, `enrichment_score`, `last_enriched_at`, `duplicate_status` und `trade_mapping_status` muessen gepflegt werden.
+
+## Gewerke, Teilgewerke und Sichtbarkeit
+
+Der Agent speichert intern alle auf der offiziellen Website nachweisbaren Gewerke und Teilgewerke.
+
+Beispiel Wagner & Spielvogel:
+
+- Bauunternehmen
+- Hochbau
+- Umbau
+- Sanierung
+- Verputzarbeiten
+- Betonbau
+- Garten- und Landschaftsbau
+
+Nur nachweisbare Leistungen werden gespeichert. Es wird nicht geraten und nicht pauschal alles gesetzt.
+
+`company_trades` nutzt:
+
+- `confidence_score`
+- `source`
+- `status`
+- `visibility_level`
+
+Status:
+
+- `agent_suggested`
+- `user_suggested`
+- `user_confirmed`
+- `admin_confirmed`
+- `rejected`
+
+Sichtbarkeit:
+
+- `internal`
+- `basis_public`
+- `extended_public`
+
+Oeffentlich soll das Basisprofil das tatsaechliche Leistungsspektrum klar und vollstaendig darstellen. Gewerke, Leistungen und Spezialisierungen duerfen nicht kuenstlich begrenzt oder erst durch ein Foerdermodell sichtbar gemacht werden.
+
+## Claim-Flow Vorbereitung
+
+Der Claim-Assistent startet nicht bei null. Er wird aus Supabase vorbefuellt mit:
+
+- Firmenname
+- Adresse
+- Telefon
+- Website
+- Beschreibung
+- erkannte Gewerke und Teilgewerke
+- erkannte Einsatzgebiete
+- Quellenstatus
+
+Der Betrieb soll sehen, welche Leistungen bereits aus dem oeffentlichen Firmenauftritt erkannt wurden. Der Betrieb kann Haken entfernen, bestaetigen und weitere nachweisbare Leistungen ergaenzen. Das Foerdermodell darf die Darstellung verbessern, aber nicht die Nennung tatsaechlicher Leistungen begrenzen.
+
+## Upgrade- und Payment-Vorbereitung
+
+Der Agent darf Datenmodell und UI fuer folgende Optionen vorbereiten:
+
+- kostenloses Basisprofil
+- erweitertes Profil
+- freiwilliger Aufbau-Beitrag
+- Rechnung auf Wunsch
+- Mock Payment Provider
+
+Keine echten Zahlungen, keine Stripe-/PayPal-Live-Anbindung und keine automatischen Rechnungen ohne ausdrueckliche Freigabe.
 
 ## Dry Run
 
@@ -99,6 +170,10 @@ Der Referenzfall muss zeigen:
 - Beschreibung wird neu formuliert
 - Quellen werden gespeichert
 - Aenderungen werden geloggt
+- Dublettenpruefung wurde durchgefuehrt
+- `company_trades` enthaelt alle nachweisbaren Gewerke intern
+- oeffentlich werden alle nachweisbaren relevanten Gewerke und Leistungen klar dargestellt
+- Claim-Flow ist mit erkannten Daten vorbefuellt
 - `verified` bleibt `false`
 - `claim_status` bleibt `unclaimed`
 

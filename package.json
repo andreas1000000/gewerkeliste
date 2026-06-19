@@ -22,6 +22,7 @@
     "enrich:create-jobs": "node scripts/enrich-create-jobs.mjs",
     "research:publish:basis": "node scripts/publish-public-basis-entries.mjs",
     "research:map:trades": "node scripts/map-companies-to-trades.mjs",
+    "research:discover:region": "node scripts/discover-region.mjs --dry-run",
     "taxonomy:sync": "node scripts/sync-trade-taxonomy.mjs",
     "supabase:apply-sql": "node scripts/apply-supabase-sql.mjs"
   },
