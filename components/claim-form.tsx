@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useActionState } from "react";
 import { TradeCheckboxGroups } from "@/components/trade-checkbox-groups";
-import { submitClaim } from "@/lib/actions";
+import { submitClaim } from "@/lib/actions/claims";
 import type { CompanyFormState } from "@/lib/types";
 
 const initialState: CompanyFormState = { ok: false, message: "" };

@@ -1,0 +1,90 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { getSupabaseAdmin } from "@/lib/supabase";
+import type { CompanyFormState } from "@/lib/types";
+import { parseBusinessSubmissionForm } from "@/lib/validation";
+
+export async function submitBusinessEntry(
+  _prevState: CompanyFormState,
+  formData: FormData,
+): Promise<CompanyFormState> {
+  const parsed = parseBusinessSubmissionForm(formData);
+  if (parsed.state) return parsed.state;
+
+  const input = parsed.data;
+  if (!input) return { ok: false, message: "Ungueltige Eingabe." };
+
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("company_submissions")
+    .insert({
+      status: "submitted",
+      company_name: input.companyName,
+      legal_form: input.legalForm,
+      website: input.website,
+      phone: input.phone,
+      email: input.email,
+      contact_email: input.contactEmail,
+      contact_first_name: input.contactFirstName,
+      contact_last_name: input.contactLastName,
+      contact_role: input.contactRole,
+      contact_person_email: input.contactPersonEmail,
+      contact_person_phone: input.contactPersonPhone,
+      street: input.street,
+      house_number: input.houseNumber,
+      postal_code: input.postalCode,
+      city: input.city,
+      region: input.region,
+      country: input.country,
+      primary_trade: input.primaryTrade,
+      secondary_trades: input.secondaryTrades,
+      selected_services: input.selectedServices,
+      specializations: input.additionalSpecializations
+        ? [...input.specializations, input.additionalSpecializations]
+        : input.specializations,
+      service_radius_km: input.serviceRadiusKm,
+      service_regions: input.serviceRegions,
+      postal_codes: input.postalCodes,
+      service_countries: input.serviceCountries,
+      short_description: input.shortDescription,
+      description: input.description,
+      references_text: input.referencesText,
+      memberships: input.memberships,
+      certificates: input.certificates,
+      manufacturer_certificates: input.manufacturerCertificates,
+      wants_founder_verification: input.wantsFounderVerification,
+      wants_support_contribution: input.supportContribution !== "none",
+      support_contribution_amount:
+        input.supportContribution === "none"
+          ? null
+          : input.supportContribution === "custom"
+            ? input.supportCustomAmount
+            : Number(input.supportContribution),
+      support_invoice_requested: input.supportInvoiceRequested,
+      consent_authorized: input.consentAuthorized,
+      consent_data_correct: input.consentDataCorrect,
+      consent_privacy: input.consentPrivacy,
+      source: "betrieb-eintragen",
+    })
+    .select("id")
+    .single();
+
+  if (error) {
+    const missingTable = error.code === "42P01" || error.message.toLowerCase().includes("company_submissions");
+    return {
+      ok: false,
+      message: missingTable
+        ? "Die Einreichungstabelle ist noch nicht in Supabase angelegt. Die Migration liegt im Projekt bereit."
+        : error.message,
+    };
+  }
+
+  revalidatePath("/admin/companies");
+  return {
+    ok: true,
+    message:
+      "Vielen Dank. Ihr Betriebseintrag wurde eingereicht. Wir pruefen die Angaben und melden uns, falls Rueckfragen bestehen.",
+    fieldErrors: data?.id ? { submissionId: String(data.id) } : undefined,
+  };
+}
