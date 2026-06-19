@@ -15,6 +15,13 @@ import {
   updatePlannerProfile as updatePlannerProfileAction,
 } from "@/lib/actions/planner";
 import {
+  deletePlannerContact as deletePlannerContactAction,
+  preparePlannerInvitation as preparePlannerInvitationAction,
+  publishClaimSuggestion as publishClaimSuggestionAction,
+  rejectClaimSuggestion as rejectClaimSuggestionAction,
+  sendPlannerInvitationDryRun as sendPlannerInvitationDryRunAction,
+} from "@/lib/actions/approval-required";
+import {
   claimSchema,
   csvCompanySchema,
   flattenZodErrors,
@@ -40,6 +47,26 @@ export async function suggestPlannerContact(formData: FormData) {
 
 export async function updatePlannerProfile(formData: FormData) {
   return updatePlannerProfileAction(formData);
+}
+
+export async function deletePlannerContact(formData: FormData) {
+  return deletePlannerContactAction(formData);
+}
+
+export async function preparePlannerInvitation(formData: FormData) {
+  return preparePlannerInvitationAction(formData);
+}
+
+export async function sendPlannerInvitationDryRun(formData: FormData) {
+  return sendPlannerInvitationDryRunAction(formData);
+}
+
+export async function publishClaimSuggestion(formData: FormData) {
+  return publishClaimSuggestionAction(formData);
+}
+
+export async function rejectClaimSuggestion(formData: FormData) {
+  return rejectClaimSuggestionAction(formData);
 }
 
 export async function createCompany(_prevState: CompanyFormState, formData: FormData): Promise<CompanyFormState> {
