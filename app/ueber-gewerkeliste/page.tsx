@@ -1,78 +1,66 @@
 import type { Metadata } from "next";
 import type { Route } from "next";
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { SiteHeader } from "@/components/site-header";
 
 export const metadata: Metadata = {
-  title: "Über GewerkeListe.com – Aus echter Baupraxis entstanden",
+  title: "Warum GewerkeListe.com entsteht | Über uns",
   description:
-    "GewerkeListe.com entsteht aus echter Baupraxis und schafft ein professionelles Verzeichnis für Baugewerke, Fachbetriebe und Auftraggeber.",
+    "GewerkeListe.com entsteht aus echter Baupraxis, um passende Bau- und Handwerksbetriebe besser auffindbar zu machen und mehr Transparenz in den Markt zu bringen.",
   alternates: {
     canonical: "/ueber-gewerkeliste",
   },
 };
 
-const trustPoints = [
-  {
-    title: "Fachbetriebe sind schwer auffindbar",
-    text: "Wer einen Fachbetrieb sucht, findet oft Empfehlungen, alte Kontakte, Suchtreffer und verstreute Informationen. Das kostet Zeit und führt nicht immer zum passenden Betrieb.",
-  },
-  {
-    title: "Leistungen sind oft nicht strukturiert",
-    text: "Leistungen, Spezialisierungen, Regionen und Tätigkeitsgebiete sind online häufig nicht klar dargestellt oder schwer vergleichbar.",
-  },
-  {
-    title: "Das Bauwesen braucht ein verlässliches Register",
-    text: "GewerkeListe.com schafft eine klare, strukturierte und verifizierbare Übersicht für Baugewerke, Auftraggeber und Fachbetriebe.",
-  },
-];
-
-const practiceFacts = [
+const trustItems = [
   "Gelernter Maurer",
   "Bauingenieur",
-  "Erfahrung aus Ausführung, Bauherrenvertretung und Projektsteuerung",
-  "Praxiswissen aus Baustelle, Planung und Bauorganisation",
-  "Verständnis für Baugewerke, Schnittstellen und regionale Betriebe",
-  "Unternehmerischer Anspruch: aus Einzelwissen ein skalierbares System machen",
+  "Bauherrenvertretung",
+  "Planung und Projektsteuerung",
+  "Erfahrung aus Auftraggeber- und Ausführungsperspektive",
+  "Aus der Region Rosenheim",
 ];
 
-const comparison = [
-  {
-    title: "Allgemeine Suchmaschinen",
-    items: ["Viele Treffer, wenig Einordnung", "Schwer vergleichbar", "Spezialisierungen oft unsichtbar", "Keine klare Struktur nach Gewerk und Region"],
-  },
-  {
-    title: "Klassische Auftragsportale",
-    items: ["Häufig Preisdruck", "Einzelne Anfragen statt Betriebseintrag", "Begrenzte fachliche Struktur", "Darstellung oft austauschbar"],
-  },
+const transparencyQuestions = [
+  "Welche Betriebe gibt es?",
+  "Wo sind sie tätig?",
+  "Welche Leistungen bieten sie an?",
+  "Welche Spezialisierungen haben sie?",
+  "Wie können Auftraggeber sie erreichen?",
+  "Welche Betriebe fehlen noch?",
 ];
 
-const different = [
-  "Strukturierte Gewerkeliste",
-  "Klare Leistungen",
-  "Region und Tätigkeitsgebiet",
-  "Verifizierbare Betriebseinträge",
-  "Professionelle Darstellung",
-  "Direkte Kontaktaufnahme",
+const benefits = [
+  "Auftraggeber finden schneller passende Betriebe.",
+  "Planer sparen Suchaufwand.",
+  "Bauleiter bekommen bessere Übersicht.",
+  "Betriebe werden mit ihren tatsächlichen Leistungen sichtbarer.",
+  "Regionale Kapazitäten können besser genutzt werden.",
+  "Unnötige Wege und ineffiziente Suche werden reduziert.",
 ];
 
 const audiences = [
-  {
-    title: "Für Fachbetriebe",
-    text: "Für Handwerksbetriebe, Bauunternehmen und spezialisierte Fachfirmen, die Leistungen und Tätigkeitsgebiet sauber darstellen möchten.",
-  },
-  {
-    title: "Für Bauherren",
-    text: "Bauherren finden Fachbetriebe nach Gewerk, Ort und Spezialisierung schneller und strukturierter.",
-  },
-  {
-    title: "Für Planer und Architekten",
-    text: "Planer erhalten eine bessere Übersicht regionaler Fachbetriebe für konkrete Bauaufgaben.",
-  },
-  {
-    title: "Für Unternehmen und Projektentwickler",
-    text: "Professionelle Auftraggeber können Ausführungspartner gezielter identifizieren und vergleichen.",
-  },
+  "Handwerksbetriebe",
+  "Bauleiter",
+  "Architekten",
+  "Planer",
+  "Projektentwickler",
+  "Bauherren",
+  "Hausverwaltungen",
+  "Kommunen",
+  "Unternehmen mit Bauprojekten",
+];
+
+const monetizationExamples = [
+  "Verifizierung",
+  "Referenzprojekte",
+  "Bildergalerien",
+  "Unternehmensvorstellungen",
+  "Verfügbarkeiten",
+  "Matching",
+  "Ausschreibungen",
+  "professionelle Werkzeuge für Planer und Auftraggeber",
 ];
 
 export default function AboutGewerkeListePage() {
@@ -82,7 +70,7 @@ export default function AboutGewerkeListePage() {
 
       <section className="border-b border-line bg-white">
         <div className="mx-auto max-w-7xl px-4 py-3 text-sm text-muted sm:px-6 lg:px-8">
-          <Link className="hover:text-ink" href={"/suche" as Route}>
+          <Link className="hover:text-ink" href={"/" as Route}>
             Start
           </Link>
           <span className="mx-2">/</span>
@@ -93,19 +81,28 @@ export default function AboutGewerkeListePage() {
       <section className="bg-white">
         <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[minmax(0,1fr)_420px] lg:px-8 lg:py-16">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-normal text-brand">Aus der Baupraxis</p>
+            <p className="text-sm font-semibold uppercase tracking-normal text-brand">Warum GewerkeListe.com entsteht</p>
             <h1 className="mt-4 max-w-4xl text-4xl font-semibold tracking-normal text-brand sm:text-5xl">
-              GewerkeListe.com entsteht aus echter Baupraxis.
+              Warum GewerkeListe.com entsteht.
             </h1>
             <p className="mt-6 max-w-3xl text-lg leading-8 text-ink">
-              GewerkeListe.com wurde aufgebaut, weil die Suche nach passenden Fachbetrieben in der Baupraxis oft
-              unnötig kompliziert ist. Gute Betriebe sind vorhanden – aber Leistungen, Spezialisierungen und
-              Tätigkeitsgebiete sind häufig nicht sauber auffindbar.
+              Weil die Suche nach passenden Bau- und Handwerksbetrieben heute noch viel zu oft über Zufall, alte
+              Kontakte und persönliche Netzwerke läuft.
             </p>
+            <div className="mt-6 max-w-3xl space-y-4 text-base leading-7 text-ink">
+              <p>
+                Mein Name ist Andreas Moser. Ich bin gelernter Maurer, Bauingenieur und arbeite seit vielen Jahren auf
+                Auftraggeberseite in der Planung, Steuerung und Umsetzung von Bauprojekten.
+              </p>
+              <p>Ich kenne die Frage aus der Praxis:</p>
+              <p className="rounded-lg border border-line bg-panel px-5 py-4 text-xl font-semibold text-brand">
+                „Kennst du jemanden, der das machen kann?“
+              </p>
+              <p>Genau aus dieser Frage heraus entsteht GewerkeListe.com.</p>
+            </div>
             <div className="mt-8 flex flex-wrap gap-3">
-              <BlueLink href="/suche">Fachbetrieb suchen</BlueLink>
-              <OutlineLink href="/eintrag-beanspruchen">Eintrag beanspruchen</OutlineLink>
-              <OutlineLink href="/betrieb-eintragen">Betrieb eintragen</OutlineLink>
+              <BlueLink href="/betrieb-eintragen">Betrieb kostenlos eintragen</BlueLink>
+              <OutlineLink href="/betrieb-eintragen">Fehlenden Betrieb vorschlagen</OutlineLink>
             </div>
           </div>
 
@@ -119,7 +116,7 @@ export default function AboutGewerkeListePage() {
             </div>
             <div className="mt-5 rounded-lg border border-line bg-white p-5">
               <p className="text-lg font-semibold text-ink">Andreas Moser</p>
-              <p className="mt-1 text-sm text-muted">Gründer von GewerkeListe.com</p>
+              <p className="mt-1 text-sm text-muted">Gelernter Maurer | Bauingenieur | Bauherrenvertreter</p>
               <a
                 className="mt-4 inline-flex min-h-10 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-action hover:border-action"
                 href="https://www.linkedin.com/in/andreasmoserrealestate/"
@@ -134,189 +131,331 @@ export default function AboutGewerkeListePage() {
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <h2 className="text-2xl font-semibold text-brand">Warum es GewerkeListe.com geben muss</h2>
-        <div className="mt-5 grid gap-4 lg:grid-cols-3">
-          {trustPoints.map((point, index) => (
-            <Card key={point.title}>
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[#eef4ff] text-sm font-semibold text-action">
-                {index + 1}
-              </div>
-              <h3 className="mt-5 text-lg font-semibold text-ink">{point.title}</h3>
-              <p className="mt-3 text-sm leading-6 text-muted">{point.text}</p>
-            </Card>
+        <h2 className="text-2xl font-semibold text-brand">Gebaut von jemandem, der den Bau kennt.</h2>
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          {trustItems.map((item) => (
+            <Fact key={item}>{item}</Fact>
           ))}
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-7xl gap-5 px-4 py-4 sm:px-6 lg:grid-cols-2 lg:px-8">
-        <Card>
-          <h2 className="text-2xl font-semibold text-brand">Über den Gründer</h2>
-          <div className="mt-5 space-y-4 text-base leading-7 text-ink">
+      <TwoColumnSection
+        eyebrow="Das Problem"
+        title="Der Markt ist nicht leer. Er ist nur schlecht sichtbar."
+        body={
+          <>
+            <p>Auf dem Bau fehlt nicht nur Personal. Oft fehlt vor allem Übersicht.</p>
             <p>
-              Andreas Moser ist gelernter Maurer, Bauingenieur und Gründer von GewerkeListe.com. Sein Blick auf das
-              Register kommt aus Ausführung, Planung, Bauherrenvertretung und Organisation.
+              Viele Auftraggeber suchen passende Betriebe. Viele Betriebe leisten gute Arbeit. Viele Spezialisten sind
+              regional vorhanden. Und trotzdem finden beide Seiten häufig nicht zusammen.
             </p>
             <p>
-              Dadurch kennt er beide Seiten: die praktische Ausführung auf der Baustelle und die Anforderungen
-              professioneller Projektsteuerung.
+              Dann wird telefoniert, herumgefragt, weiterempfohlen, gesucht und improvisiert. Große Büros fragen kleine
+              Netzwerke. Bauleiter fragen andere Bauleiter. Bauherren suchen über Google. Gute Betriebe bleiben
+              unsichtbar, wenn sie nicht zufällig genannt werden.
+            </p>
+            <p>Das kostet Zeit, Geld, Energie und oft auch Baufortschritt.</p>
+          </>
+        }
+        aside={
+          <Card>
+            <h3 className="text-lg font-semibold text-ink">Woran es häufig scheitert</h3>
+            <div className="mt-4 grid gap-3">
+              {["fehlende Übersicht", "verstreute Informationen", "unklare Spezialisierungen", "schwer erkennbare Einsatzgebiete"].map(
+                (item) => (
+                  <Fact key={item}>{item}</Fact>
+                ),
+              )}
+            </div>
+          </Card>
+        }
+      />
+
+      <TwoColumnSection
+        eyebrow="Beobachtung aus der Praxis"
+        title="Die entscheidende Frage lautet fast immer: Wer kann das wirklich?"
+        body={
+          <>
+            <p>Bei Bauprojekten geht es selten nur um ein Gewerk. Es geht um konkrete Leistungen.</p>
+            <p>
+              Nicht nur Gartenbau, sondern zum Beispiel Natursteinmauern, Granitpflaster, Entwässerungsrinnen,
+              Außenanlagen, Stützwände oder Hofbefestigungen.
+            </p>
+            <p>
+              Nicht nur Elektro, sondern PV, Zähleranlagen, KNX, Baustrom, Ladeinfrastruktur oder
+              Industrieinstallationen.
+            </p>
+            <p>
+              Nicht nur Metallbau, sondern Treppen, Geländer, Loftwände, Tore, Sonderkonstruktionen oder
+              Edelstahlverarbeitung.
             </p>
             <p className="font-semibold text-action">
-              GewerkeListe.com ist deshalb keine abstrakte Plattformidee. Es entsteht aus einem wiederkehrenden Problem
-              der Baupraxis.
+              GewerkeListe.com soll genau diese Leistungstiefe sichtbar machen. Deshalb darf ein Betrieb nicht künstlich
+              auf wenige Leistungen begrenzt werden.
             </p>
+          </>
+        }
+        aside={
+          <Card>
+            <h3 className="text-lg font-semibold text-ink">Was sichtbar werden soll</h3>
+            <div className="mt-4 grid gap-3">
+              {["Gewerke", "Leistungen", "Spezialisierungen", "Tätigkeitsgebiet", "Kontaktwege", "Betriebsstatus"].map((item) => (
+                <Fact key={item}>{item}</Fact>
+              ))}
+            </div>
+          </Card>
+        }
+      />
+
+      <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div className="rounded-lg border border-line bg-white p-6 shadow-soft sm:p-8">
+          <p className="text-sm font-semibold uppercase tracking-normal text-brand">Was anders werden soll</p>
+          <h2 className="mt-2 text-3xl font-semibold text-brand">Nicht der billigste Betrieb. Der passende Betrieb.</h2>
+          <div className="mt-5 max-w-4xl space-y-4 text-base leading-7 text-ink">
+            <p>GewerkeListe.com soll keine Plattform werden, die Handwerker gegeneinander ausspielt.</p>
+            <p>Es geht nicht darum, Preise zu drücken. Es geht darum, den Markt besser auffindbar zu machen.</p>
             <p>
-              Berufliches Profil:{" "}
-              <a
-                className="font-semibold text-action hover:underline"
-                href="https://www.linkedin.com/in/andreasmoserrealestate/"
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                Andreas Moser auf LinkedIn
-              </a>
+              Ein guter Betrieb soll gefunden werden, weil er die passende Leistung in der passenden Region anbietet.
+              Ein Auftraggeber soll schneller erkennen, wer für sein Vorhaben grundsätzlich infrage kommt. Ein Planer
+              oder Bauleiter soll nicht jedes Mal bei null anfangen müssen.
             </p>
           </div>
-        </Card>
-
-        <Card>
-          <h2 className="text-2xl font-semibold text-brand">Baupraxis statt Plattformfantasie</h2>
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            {practiceFacts.map((fact) => (
-              <div key={fact} className="rounded-md border border-line bg-panel px-4 py-3 text-sm font-medium leading-6 text-ink">
-                <span className="mr-2 font-semibold text-brand">✓</span>
-                {fact}
-              </div>
-            ))}
-          </div>
-        </Card>
-      </section>
-
-      <section className="mx-auto grid max-w-7xl gap-5 px-4 py-4 sm:px-6 lg:grid-cols-2 lg:px-8">
-        <Card>
-          <h2 className="text-2xl font-semibold text-brand">Das Marktproblem: fehlende Struktur</h2>
-          <p className="mt-4 text-base leading-7 text-ink">
-            Viele gute Handwerksbetriebe haben genug Arbeit, werden aber online nicht klar genug gefunden. Gleichzeitig
-            suchen Bauherren, Architekten, Projektsteuerer, Hausverwaltungen und Unternehmen regelmäßig nach genau diesen
-            Fachbetrieben.
-          </p>
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            {comparison.map((block) => (
-              <div key={block.title} className="rounded-md border border-line bg-panel p-4">
-                <h3 className="text-sm font-semibold text-ink">{block.title}</h3>
-                <ul className="mt-3 grid gap-2 text-sm text-muted">
-                  {block.items.map((item) => (
-                    <li key={item}>
-                      <span className="mr-2 font-semibold text-accent">×</span>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </Card>
-
-        <Card>
-          <h2 className="text-2xl font-semibold text-brand">Was GewerkeListe.com anders macht</h2>
-          <p className="mt-4 text-base leading-7 text-ink">
-            GewerkeListe.com ist kein lautes Auftragsportal und kein System für Preiskampf. Ein Betrieb wird als
-            Fachbetrieb mit konkretem Leistungsprofil dargestellt.
-          </p>
-          <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            {different.map((item) => (
-              <div key={item} className="rounded-md border border-line bg-panel px-4 py-3 text-sm font-medium text-ink">
-                <span className="mr-2 font-semibold text-brand">✓</span>
-                {item}
-              </div>
-            ))}
-          </div>
-        </Card>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-        <Card>
-          <h2 className="text-2xl font-semibold text-brand">Der Anspruch</h2>
-          <p className="mt-4 max-w-4xl text-base leading-7 text-ink">
-            GewerkeListe.com soll langfristig der professionelle Standard für Baugewerke werden. Nicht als größtes
-            Werbeportal. Nicht als lauteste Plattform. Sondern als verlässliches Verzeichnis echter Fachbetriebe.
-          </p>
-          <div className="mt-5 grid gap-3 sm:grid-cols-3">
-            <Fact value="Region für Region" />
-            <Fact value="Gewerk für Gewerk" />
-            <Fact value="Betrieb für Betrieb" />
-          </div>
-        </Card>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-        <h2 className="text-2xl font-semibold text-brand">Für wen GewerkeListe.com gebaut wird</h2>
-        <div className="mt-5 grid gap-4 lg:grid-cols-4">
-          {audiences.map((audience) => (
-            <Card key={audience.title}>
-              <h3 className="text-lg font-semibold text-ink">{audience.title}</h3>
-              <p className="mt-3 text-sm leading-6 text-muted">{audience.text}</p>
-            </Card>
-          ))}
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-7xl gap-5 px-4 py-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_420px] lg:px-8">
+      <TwoColumnSection
+        eyebrow="Klare Abgrenzung"
+        title="Kein Lead-Portal. Keine Kontaktbörse gegen Gebühr. Keine Preisschlacht."
+        body={
+          <>
+            <p>
+              Viele bestehende Plattformen leben davon, Kontakte zu verkaufen oder Betriebe in Konkurrenz um einzelne
+              Anfragen zu bringen.
+            </p>
+            <p>GewerkeListe.com verfolgt einen anderen Ansatz. Die Plattform soll zuerst Transparenz schaffen.</p>
+            <p>Das Ziel ist nicht, den Markt auszupressen. Das Ziel ist, ihn besser zu ordnen.</p>
+          </>
+        }
+        aside={
+          <Card>
+            <h3 className="text-lg font-semibold text-ink">Transparenz heißt konkret</h3>
+            <div className="mt-4 grid gap-3">
+              {transparencyQuestions.map((item) => (
+                <Fact key={item}>{item}</Fact>
+              ))}
+            </div>
+          </Card>
+        }
+      />
+
+      <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div className="rounded-lg border border-line bg-white p-6 shadow-soft sm:p-8">
+          <p className="text-sm font-semibold uppercase tracking-normal text-brand">Gesellschaftlicher Nutzen</p>
+          <h2 className="mt-2 text-3xl font-semibold text-brand">
+            Weniger Zufall. Weniger Suchaufwand. Bessere Bauprojekte.
+          </h2>
+          <p className="mt-5 max-w-4xl text-base leading-7 text-ink">
+            Wenn der Markt transparenter wird, profitieren alle. GewerkeListe.com soll dazu beitragen, dass Bauprojekte
+            einfacher, schneller und besser vorbereitet werden können.
+          </p>
+          <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {benefits.map((item) => (
+              <Fact key={item}>{item}</Fact>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <TwoColumnSection
+        eyebrow="Aufbauphase"
+        title="Wir bauen das pragmatisch auf."
+        body={
+          <>
+            <p>GewerkeListe.com befindet sich im Aufbau.</p>
+            <p>
+              Die Plattform startet bewusst einfach: Betriebe sichtbar machen, Leistungen erfassen, Regionen
+              strukturieren und Suchenden eine bessere Übersicht geben.
+            </p>
+            <p>Nicht perfekt am ersten Tag. Aber nützlich von Anfang an.</p>
+            <p className="font-semibold text-action">
+              Mit jedem Betrieb, jedem Hinweis und jeder Verbesserung wird die Plattform wertvoller.
+            </p>
+          </>
+        }
+        aside={
+          <Card>
+            <h3 className="text-lg font-semibold text-ink">Gebaut für</h3>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {audiences.map((audience) => (
+                <span key={audience} className="rounded-full border border-line bg-panel px-3 py-2 text-sm font-semibold text-ink">
+                  {audience}
+                </span>
+              ))}
+            </div>
+          </Card>
+        }
+      />
+
+      <TwoColumnSection
+        eyebrow="Finanzierung und Fairness"
+        title="Kostenlos starten. Echten Mehrwert später ausbauen."
+        body={
+          <>
+            <p>Der Basiseintrag soll niedrigschwellig bleiben, damit möglichst viele Betriebe sichtbar werden können.</p>
+            <p>
+              Der Aufbau einer guten Plattform kostet trotzdem Geld: Entwicklung, Hosting, Datenpflege, Prüfung,
+              Verbesserung und Support.
+            </p>
+            <p>
+              Später können zusätzliche Funktionen entstehen, wenn sie echten Mehrwert schaffen. Wichtig bleibt:
+              Grundlegende Sichtbarkeit und das tatsächliche Leistungsspektrum eines Betriebs dürfen nicht künstlich
+              versteckt werden.
+            </p>
+          </>
+        }
+        aside={
+          <Card>
+            <h3 className="text-lg font-semibold text-ink">Möglicher Zusatznutzen</h3>
+            <div className="mt-4 grid gap-3">
+              {monetizationExamples.map((item) => (
+                <Fact key={item}>{item}</Fact>
+              ))}
+            </div>
+          </Card>
+        }
+      />
+
+      <section className="mx-auto grid max-w-7xl gap-5 px-4 py-6 sm:px-6 lg:grid-cols-[minmax(0,1fr)_420px] lg:px-8">
         <Card>
-          <h2 className="text-2xl font-semibold text-brand">Meine Haltung</h2>
+          <p className="text-sm font-semibold uppercase tracking-normal text-brand">Persönlich</p>
+          <h2 className="mt-2 text-3xl font-semibold text-brand">Warum ich das mache.</h2>
           <div className="mt-5 space-y-4 text-base leading-7 text-ink">
-            <p>Ich glaube an klare Leistung, saubere Ausführung und verlässliche Strukturen.</p>
+            <p>Ich habe selbst auf dem Bau gearbeitet. Ich kenne Baustellen nicht nur aus Besprechungsräumen.</p>
+            <p>Später habe ich Bauingenieurwesen studiert und auf Auftraggeberseite viele Projekte begleitet.</p>
             <p>
-              Gute Fachbetriebe verdienen es, professionell gefunden zu werden. Auftraggeber verdienen es, schneller die
-              richtigen Betriebe zu finden.
+              Dabei habe ich immer wieder gesehen, wie viel Zeit verloren geht, nur weil passende Betriebe schwer zu
+              finden sind.
             </p>
-            <p>
-              GewerkeListe.com soll kein lautes Marketingprodukt sein. Es soll ein praktisches Werkzeug für die
-              Bauwirtschaft werden.
-            </p>
+            <p>Diese Lücke möchte ich schließen. Nicht theoretisch. Nicht kompliziert. Sondern pragmatisch, aus der Praxis heraus und Schritt für Schritt.</p>
+          </div>
+          <div className="mt-6 rounded-lg border border-line bg-panel p-5">
+            <p className="text-base font-semibold text-brand">Andreas Moser</p>
+            <p className="mt-1 text-sm text-muted">Gelernter Maurer | Bauingenieur | Bauherrenvertreter</p>
+            <p className="mt-1 text-sm text-muted">Gründer von GewerkeListe.com</p>
           </div>
         </Card>
 
         <Card>
-          <h2 className="text-2xl font-semibold text-brand">GewerkeListe.com wächst mit jedem bestätigten Betrieb.</h2>
-          <p className="mt-4 text-sm leading-6 text-muted">
-            Wenn Ihr Betrieb bereits gelistet ist, können Sie den Eintrag übernehmen und die Betriebsdaten bestätigen.
-            Wenn Ihr Betrieb noch fehlt, können Sie ihn eintragen lassen.
+          <h2 className="text-2xl font-semibold text-brand">„Gute Betriebe sollen gefunden werden.“</h2>
+          <p className="mt-5 text-lg leading-8 text-ink">
+            Gute Betriebe sollen gefunden werden, weil sie gute Arbeit leisten und die passende Leistung anbieten, nicht
+            nur, weil zufällig jemand ihre Telefonnummer kennt.
           </p>
-          <div className="mt-6 grid gap-3">
-            <BlueLink href="/suche">Fachbetrieb suchen</BlueLink>
-            <OutlineLink href="/eintrag-beanspruchen">Eintrag beanspruchen</OutlineLink>
-            <OutlineLink href="/betrieb-eintragen">Betrieb eintragen</OutlineLink>
-          </div>
         </Card>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 pb-12 pt-6 sm:px-6 lg:px-8">
+        <div className="rounded-lg bg-[#082a63] p-6 text-white shadow-soft sm:p-8 lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-8">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-normal text-blue-100">Mitmachen</p>
+            <h2 className="mt-2 text-3xl font-semibold">Hilf mit, die GewerkeListe besser zu machen.</h2>
+            <p className="mt-4 max-w-3xl text-sm leading-6 text-blue-50">
+              Eine gute GewerkeListe entsteht nicht am Schreibtisch allein. Sie entsteht durch Hinweise aus der Praxis.
+              Wenn ein Betrieb fehlt, ein Gewerk nicht sauber erfasst ist oder eine Leistung besser beschrieben werden
+              sollte, freue ich mich über Rückmeldung.
+            </p>
+          </div>
+          <div className="mt-6 grid gap-3 lg:mt-0">
+            <WhiteLink href="/betrieb-eintragen">Betrieb eintragen</WhiteLink>
+            <WhiteOutlineLink href="/betrieb-eintragen">Fehlenden Betrieb melden</WhiteOutlineLink>
+            <a
+              className="inline-flex min-h-11 items-center justify-center rounded-md border border-white/45 px-5 text-sm font-semibold text-white hover:bg-white/10"
+              href="mailto:kontakt@gewerkeliste.com?subject=Feedback%20zu%20GewerkeListe.com"
+            >
+              Feedback geben
+            </a>
+          </div>
+        </div>
       </section>
     </main>
   );
 }
 
-function Card({ children }: { children: React.ReactNode }) {
+function TwoColumnSection({
+  eyebrow,
+  title,
+  body,
+  aside,
+}: {
+  eyebrow: string;
+  title: string;
+  body: ReactNode;
+  aside: ReactNode;
+}) {
+  return (
+    <section className="mx-auto grid max-w-7xl gap-5 px-4 py-6 sm:px-6 lg:grid-cols-[minmax(0,1fr)_420px] lg:px-8">
+      <Card>
+        <p className="text-sm font-semibold uppercase tracking-normal text-brand">{eyebrow}</p>
+        <h2 className="mt-2 text-3xl font-semibold text-brand">{title}</h2>
+        <div className="mt-5 space-y-4 text-base leading-7 text-ink">{body}</div>
+      </Card>
+      {aside}
+    </section>
+  );
+}
+
+function Card({ children }: { children: ReactNode }) {
   return <section className="rounded-lg border border-line bg-white p-5 shadow-soft sm:p-6">{children}</section>;
 }
 
-function Fact({ value }: { value: string }) {
+function Fact({ children }: { children: ReactNode }) {
   return (
-    <div className="rounded-md border border-line bg-panel px-4 py-3 text-sm font-semibold text-ink">
-      <span className="mr-2 text-brand">✓</span>
-      {value}
+    <div className="rounded-md border border-line bg-panel px-4 py-3 text-sm font-medium leading-6 text-ink">
+      <span className="mr-2 font-semibold text-brand">✓</span>
+      {children}
     </div>
   );
 }
 
-function BlueLink({ href, children }: { href: Route; children: React.ReactNode }) {
+function BlueLink({ href, children }: { href: Route; children: ReactNode }) {
   return (
-    <Link className="inline-flex min-h-11 items-center justify-center rounded-md bg-action px-5 text-sm font-semibold text-white hover:bg-brand" href={href}>
+    <Link
+      className="inline-flex min-h-11 items-center justify-center rounded-md bg-action px-5 text-sm font-semibold text-white hover:bg-brand"
+      href={href}
+    >
       {children}
     </Link>
   );
 }
 
-function OutlineLink({ href, children }: { href: Route; children: React.ReactNode }) {
+function OutlineLink({ href, children }: { href: Route; children: ReactNode }) {
   return (
-    <Link className="inline-flex min-h-11 items-center justify-center rounded-md border border-line bg-white px-5 text-sm font-semibold text-action hover:border-action" href={href}>
+    <Link
+      className="inline-flex min-h-11 items-center justify-center rounded-md border border-line bg-white px-5 text-sm font-semibold text-action hover:border-action"
+      href={href}
+    >
+      {children}
+    </Link>
+  );
+}
+
+function WhiteLink({ href, children }: { href: Route; children: ReactNode }) {
+  return (
+    <Link
+      className="inline-flex min-h-11 items-center justify-center rounded-md bg-white px-5 text-sm font-semibold text-brand hover:bg-blue-50"
+      href={href}
+    >
+      {children}
+    </Link>
+  );
+}
+
+function WhiteOutlineLink({ href, children }: { href: Route; children: ReactNode }) {
+  return (
+    <Link
+      className="inline-flex min-h-11 items-center justify-center rounded-md border border-white/45 px-5 text-sm font-semibold text-white hover:bg-white/10"
+      href={href}
+    >
       {children}
     </Link>
   );

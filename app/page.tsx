@@ -9,9 +9,9 @@ import { tradeTaxonomy } from "@/lib/trade-taxonomy";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "GewerkeListe.com – Fachbetriebe nach Gewerk und Ort finden",
+  title: "GewerkeListe.com – Die offene GewerkeListe für Bauprojekte",
   description:
-    "Finden Sie Baugewerke und Fachbetriebe nach Leistung, Ort und Tätigkeitsgebiet. Betriebe können ihren Eintrag übernehmen, verifizieren und Leistungen strukturiert darstellen.",
+    "Finde passende Handwerksbetriebe, Fachfirmen und Baupartner nach Gewerk, Region und Tätigkeitsgebiet.",
   alternates: {
     canonical: "/",
   },
@@ -102,7 +102,6 @@ export default async function HomePage() {
               className="aspect-[16/7] w-full object-cover opacity-95"
               autoPlay
               muted
-              loop
               playsInline
               preload="metadata"
               aria-label="Baugewerke und Baustellensituation als Hintergrundvideo"
@@ -119,20 +118,23 @@ export default async function HomePage() {
           </div>
 
           <div className="max-w-5xl">
-            <p className="text-sm font-semibold uppercase tracking-normal text-brand">Professionelles Fachbetriebsregister</p>
+            <p className="text-sm font-semibold uppercase tracking-normal text-brand">Offene GewerkeListe im Aufbau</p>
             <h1 className="mt-4 text-4xl font-semibold tracking-normal text-brand sm:text-5xl">
-              Fachbetriebe nach Gewerk, Ort und Tätigkeitsgebiet finden.
+              Die offene GewerkeListe für Bauprojekte in deiner Region.
             </h1>
             <p className="mt-6 text-lg leading-8 text-ink">
-              GewerkeListe.com ist ein professionelles Verzeichnis für Baugewerke. Finden Sie regionale Fachbetriebe,
-              prüfen Sie Leistungen und sehen Sie, in welchem Gebiet ein Betrieb tätig ist.
+              Finde passende Handwerksbetriebe, Fachfirmen und Baupartner – ehrlich, regional und übersichtlich.
             </p>
 
             <div className="mt-6 flex flex-wrap gap-4 text-sm font-semibold text-brand">
               <TrustItem text="Strukturierte Betriebsdaten" />
-              <TrustItem text="Verifizierbare Einträge" />
-              <TrustItem text="Direkte Kontaktaufnahme" />
+              <TrustItem text="Gewerke klar einordnen" />
+              <TrustItem text="Regionale Suche" />
             </div>
+            <p className="mt-4 max-w-3xl text-sm leading-6 text-muted">
+              GewerkeListe.com hilft Auftraggebern, Planern und Bauleitern, Betriebe nach Gewerk, Leistung und
+              Tätigkeitsgebiet besser einzuordnen.
+            </p>
 
             <form action="/suche" className="mt-8 rounded-lg border border-line bg-white p-4 shadow-soft">
               <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
@@ -222,12 +224,32 @@ export default async function HomePage() {
           <Step number="2" text="Eintrag übernehmen" />
           <Step number="3" text="Leistungen und Tätigkeitsgebiet bestätigen" />
           <p className="mt-5 rounded-md border border-[#b9dec8] bg-[#eef9f2] px-4 py-3 text-sm font-semibold text-brand">
-            Gründungsphase: Die ersten 500 Fachbetriebe werden ohne Verifizierungsgebühr aufgenommen.
+            Zeig, was dein Betrieb wirklich kann: Gewerke, Leistungen, Spezialisierungen und Tätigkeitsgebiet klar darstellen.
           </p>
           <div className="mt-6">
             <BlueLink href="/eintrag-beanspruchen">Eintrag beanspruchen</BlueLink>
           </div>
         </Card>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div className="rounded-lg border border-line bg-white p-6 shadow-soft sm:p-8 lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-8">
+          <div>
+            <p className="text-sm font-semibold uppercase tracking-normal text-brand">Für Bauprojekte</p>
+            <h2 className="mt-2 text-3xl font-semibold text-[#07173d]">Finde Betriebe, die zur Aufgabe und zur Region passen.</h2>
+            <p className="mt-4 text-base font-semibold leading-7 text-ink">
+              GewerkeListe.com ordnet Leistungen, Standorte und Tätigkeitsgebiete so, dass Projektbeteiligte schneller
+              eine belastbare Vorauswahl treffen können.
+            </p>
+            <p className="mt-3 max-w-3xl text-sm leading-6 text-muted">
+              Der Wert entsteht nicht durch Druck oder Preiskampf, sondern durch bessere Marktübersicht: welches Gewerk,
+              welche Leistung, welche Region, welcher Kontaktweg.
+            </p>
+          </div>
+          <div className="mt-6 flex items-center lg:mt-0 lg:justify-end">
+            <BlueLink href="/suche">Gewerk suchen</BlueLink>
+          </div>
+        </div>
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
@@ -307,6 +329,33 @@ export default async function HomePage() {
             </div>
           </div>
         </div>
+      </section>
+
+      <section className="mx-auto grid max-w-7xl gap-5 px-4 py-6 sm:px-6 lg:grid-cols-3 lg:px-8">
+        <Card>
+          <p className="text-sm font-semibold uppercase tracking-normal text-brand">Marktübersicht</p>
+          <h2 className="mt-2 text-2xl font-semibold text-[#07173d]">Für den gesamten Bau- und Handwerksmarkt.</h2>
+          <p className="mt-4 text-sm leading-6 text-muted">
+            Jeder Betrieb soll unabhängig von Region, Größe oder Unternehmensalter die Möglichkeit haben, seine
+            Leistungen klar darzustellen und gefunden zu werden.
+          </p>
+        </Card>
+        <Card>
+          <p className="text-sm font-semibold uppercase tracking-normal text-brand">Aus der Praxis</p>
+          <h2 className="mt-2 text-2xl font-semibold text-[#07173d]">Gebaut von jemandem, der den Bau kennt.</h2>
+          <p className="mt-4 text-sm leading-6 text-muted">
+            GewerkeListe.com entsteht aus echter Baupraxis. Auf Baustellen und in der Planung zeigt sich immer wieder,
+            wie schwer es ist, schnell passende und verfügbare Fachfirmen zu finden.
+          </p>
+        </Card>
+        <Card>
+          <p className="text-sm font-semibold uppercase tracking-normal text-brand">Kein Lead-Portal</p>
+          <h2 className="mt-2 text-2xl font-semibold text-[#07173d]">Passende Betriebe statt Preiskampf.</h2>
+          <p className="mt-4 text-sm leading-6 text-muted">
+            GewerkeListe.com soll nicht den billigsten Anbieter finden, sondern passende Betriebe sichtbar machen:
+            nach Gewerk, Leistung, Region und nachvollziehbaren Betriebsdaten.
+          </p>
+        </Card>
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
