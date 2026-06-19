@@ -28,6 +28,7 @@ export function VerifiedBadge({ verified }: { verified: boolean }) {
       className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${
         verified ? "border-[#8ab9aa] bg-[#e8f3ef] text-[#25584c]" : "border-line bg-white text-muted"
       }`}
+      title={verified ? "Die Unternehmensdaten wurden geprüft und bestätigt." : undefined}
     >
       {verified ? "Verifiziert" : "Nicht verifiziert"}
     </span>
