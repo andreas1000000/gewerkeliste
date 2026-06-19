@@ -15,11 +15,19 @@ import {
   updatePlannerProfile as updatePlannerProfileAction,
 } from "@/lib/actions/planner";
 import {
+  approveClaim as approveClaimAction,
+  approveResearchCandidate as approveResearchCandidateAction,
+  approveSubmission as approveSubmissionAction,
+  createCompany as createCompanyAction,
+  deleteCompany as deleteCompanyAction,
   deletePlannerContact as deletePlannerContactAction,
+  deleteTrade as deleteTradeAction,
+  importCompanies as importCompaniesAction,
   preparePlannerInvitation as preparePlannerInvitationAction,
   publishClaimSuggestion as publishClaimSuggestionAction,
   rejectClaimSuggestion as rejectClaimSuggestionAction,
   sendPlannerInvitationDryRun as sendPlannerInvitationDryRunAction,
+  updateCompany as updateCompanyAction,
 } from "@/lib/actions/approval-required";
 import {
   claimSchema,
@@ -70,25 +78,7 @@ export async function rejectClaimSuggestion(formData: FormData) {
 }
 
 export async function createCompany(_prevState: CompanyFormState, formData: FormData): Promise<CompanyFormState> {
-  const parsed = parseCompanyForm(formData);
-  if (parsed.state) return parsed.state;
-
-  const input = parsed.data;
-  if (!input) return { ok: false, message: "Ungueltige Eingabe." };
-
-  const supabase = getSupabaseAdmin();
-  const slug = await getUniqueCompanySlug(companySlug(input.name, input.postal_code, input.city));
-  const { error } = await supabase.from("companies").insert({
-    ...input,
-    slug,
-  });
-
-  if (error) {
-    return { ok: false, message: error.message };
-  }
-
-  revalidatePath("/");
-  redirect("/");
+  return createCompanyAction(formData);
 }
 
 export async function updateCompany(
@@ -96,28 +86,8 @@ export async function updateCompany(
   _prevState: CompanyFormState,
   formData: FormData,
 ): Promise<CompanyFormState> {
-  const parsed = parseCompanyForm(formData);
-  if (parsed.state) return parsed.state;
-
-  const input = parsed.data;
-  if (!input) return { ok: false, message: "Ungueltige Eingabe." };
-
-  const supabase = getSupabaseAdmin();
-  const slug = await getUniqueCompanySlug(companySlug(input.name, input.postal_code, input.city), id);
-  const { error } = await supabase
-    .from("companies")
-    .update({
-      ...input,
-      slug,
-    })
-    .eq("id", id);
-
-  if (error) {
-    return { ok: false, message: error.message };
-  }
-
-  revalidatePath("/");
-  redirect("/");
+  formData.set("id", id);
+  return updateCompanyAction(formData);
 }
 
 export async function submitClaim(_prevState: CompanyFormState, formData: FormData): Promise<CompanyFormState> {
@@ -321,23 +291,7 @@ function formatSupportContribution(contribution: "none" | "49" | "99" | "199" | 
 }
 
 export async function approveClaim(formData: FormData) {
-  const claimId = String(formData.get("claim_id") || "");
-  const companyId = String(formData.get("company_id") || "");
-  if (!claimId || !companyId) return;
-
-  const supabase = getSupabaseAdmin();
-  const { error: companyError } = await supabase.from("companies").update({ claim_status: "claimed" }).eq("id", companyId);
-  if (companyError) throw companyError;
-
-  const { error: claimError } = await supabase
-    .from("company_claims")
-    .update({ status: "approved", decided_at: new Date().toISOString() })
-    .eq("id", claimId);
-  if (claimError) throw claimError;
-
-  revalidatePath("/admin/claims");
-  revalidatePath("/");
-  revalidatePath("/suche");
+  return approveClaimAction(formData);
 }
 
 export async function rejectClaim(formData: FormData) {
@@ -411,115 +365,7 @@ export async function updateSubmission(formData: FormData) {
 }
 
 export async function approveSubmission(formData: FormData) {
-  const id = String(formData.get("id") || "");
-  if (!id) return;
-
-  const submission = await getCompanySubmission(id);
-  const supabase = getSupabaseAdmin();
-  const claimCompanyId = claimCompanyIdFromSource(submission.source);
-  const verified = formData.get("verified") === "on";
-  const publicVisible = formData.get("public_visible") === "on";
-
-  if (claimCompanyId) {
-    const description = [
-      submission.short_description,
-      submission.description,
-      submission.selected_services.length ? `Leistungen: ${submission.selected_services.join(", ")}` : "",
-      submission.service_regions.length ? `Tätigkeitsgebiet: ${submission.service_regions.join(", ")}` : "",
-    ]
-      .filter(Boolean)
-      .join("\n\n");
-
-    const { data: company, error: companyError } = await supabase
-      .from("companies")
-      .update({
-        description,
-        contact_name: [submission.contact_first_name, submission.contact_last_name].filter(Boolean).join(" ") || null,
-        email: submission.email,
-        phone: submission.phone,
-        website_url: normalizeSubmissionWebsite(submission.website),
-        street: [submission.street, submission.house_number].filter(Boolean).join(" ") || null,
-        city: submission.city,
-        postal_code: submission.postal_code,
-        claim_status: "claimed",
-        verified,
-        public_visible: publicVisible,
-      })
-      .eq("id", claimCompanyId)
-      .select("slug")
-      .single();
-
-    if (companyError || !company) throw companyError || new Error("Bestehender Betriebseintrag konnte nicht aktualisiert werden.");
-
-    const { error: submissionError } = await supabase
-      .from("company_submissions")
-      .update({ status: "approved" })
-      .eq("id", id);
-    if (submissionError) throw submissionError;
-
-    revalidatePath("/admin/submissions");
-    revalidatePath(`/admin/submissions/${id}`);
-    revalidatePath("/suche");
-    revalidatePath("/");
-    revalidatePath(`/firma/${company.slug}`);
-    redirect(`/admin/submissions/${id}?approved=${company.slug}`);
-  }
-
-  const submissionTradeSlug = canonicalTradeSlug(submission.primary_trade);
-  const { data: trade, error: tradeError } = await supabase
-    .from("trades")
-    .select("id")
-    .eq("slug", submissionTradeSlug)
-    .single();
-
-  if (tradeError || !trade) throw tradeError || new Error(`Gewerk fehlt in Supabase: ${submissionTradeSlug}`);
-
-  const slug = await getUniqueCompanySlug(companySlug(submission.company_name, submission.postal_code, submission.city));
-  const description = [
-    submission.short_description,
-    submission.description,
-    submission.selected_services.length ? `Leistungen: ${submission.selected_services.join(", ")}` : "",
-    submission.service_regions.length ? `Tätigkeitsgebiet: ${submission.service_regions.join(", ")}` : "",
-  ]
-    .filter(Boolean)
-    .join("\n\n");
-
-  const { data: company, error: companyError } = await supabase
-    .from("companies")
-    .insert({
-      trade_id: trade.id,
-      name: submission.company_name,
-      slug,
-      description,
-      contact_name: [submission.contact_first_name, submission.contact_last_name].filter(Boolean).join(" ") || null,
-      email: submission.email,
-      phone: submission.phone,
-      website_url: normalizeSubmissionWebsite(submission.website),
-      street: [submission.street, submission.house_number].filter(Boolean).join(" ") || null,
-      city: submission.city,
-      postal_code: submission.postal_code,
-      latitude: 0,
-      longitude: 0,
-      claim_status: "claimed",
-      verified,
-      public_visible: publicVisible,
-    })
-    .select("id, slug")
-    .single();
-
-  if (companyError || !company) throw companyError || new Error("Betriebseintrag konnte nicht angelegt werden.");
-
-  const { error: submissionError } = await supabase
-    .from("company_submissions")
-    .update({ status: "approved" })
-    .eq("id", id);
-  if (submissionError) throw submissionError;
-
-  revalidatePath("/admin/submissions");
-  revalidatePath(`/admin/submissions/${id}`);
-  revalidatePath("/suche");
-  revalidatePath("/");
-  redirect(`/admin/submissions/${id}?approved=${company.slug}`);
+  return approveSubmissionAction(formData);
 }
 
 export async function setResearchCandidateStatus(formData: FormData) {
@@ -546,91 +392,7 @@ export async function setResearchCandidateStatus(formData: FormData) {
 }
 
 export async function approveResearchCandidate(formData: FormData) {
-  const id = String(formData.get("id") || "");
-  if (!id) return;
-
-  const candidate = await getResearchCandidate(id);
-  if (candidate.status === "approved") return;
-
-  const supabase = getSupabaseAdmin();
-  const duplicateId = nullableFormString(formData, "duplicate_company_id") || candidate.duplicate_company_id;
-
-  if (duplicateId) {
-    const { error } = await supabase
-      .from("research_company_candidates")
-      .update({
-        status: "duplicate",
-        duplicate_company_id: duplicateId,
-        admin_notes: nullableFormString(formData, "admin_notes") || candidate.admin_notes,
-      })
-      .eq("id", id);
-    if (error) throw error;
-
-    revalidatePath("/admin/research-imports");
-    revalidatePath(`/admin/research-imports/${id}`);
-    redirect(`/admin/research-imports/${id}?duplicate=1`);
-  }
-
-  const tradeSlug = canonicalTradeSlug(slugify(candidate.trade_slug || candidate.trade_name));
-  const tradeName = tradeNameFromSlug(tradeSlug);
-  const { data: trade, error: tradeError } = await supabase
-    .from("trades")
-    .select("id")
-    .eq("slug", tradeSlug)
-    .single();
-
-  if (tradeError || !trade) throw tradeError || new Error(`Gewerk fehlt in Supabase: ${tradeSlug}`);
-
-  const slug = await getUniqueCompanySlug(companySlug(candidate.company_name, candidate.postal_code, candidate.city));
-  const description = [
-    candidate.short_description || `${tradeName} in ${candidate.city}`,
-    "Basis-Eintrag aus öffentlich zugänglichen Gewerbedaten. Noch nicht vom Betrieb bestätigt.",
-    `Quelle: ${candidate.source_label} (${candidate.source_url})`,
-    "Korrektur oder Löschung kann jederzeit über die im Profil angegebene Kontaktadresse angefragt werden.",
-  ].join("\n\n");
-
-  const { data: company, error: companyError } = await supabase
-    .from("companies")
-    .insert({
-      trade_id: trade.id,
-      name: candidate.company_name,
-      slug,
-      description,
-      contact_name: null,
-      email: candidate.email,
-      phone: candidate.phone,
-      website_url: normalizeSubmissionWebsite(candidate.website),
-      street: candidate.street,
-      city: candidate.city,
-      postal_code: candidate.postal_code,
-      latitude: candidate.latitude ?? 0,
-      longitude: candidate.longitude ?? 0,
-      claim_status: "unclaimed",
-      verified: false,
-      public_visible: true,
-    })
-    .select("id, slug")
-    .single();
-
-  if (companyError || !company) throw companyError || new Error("Basis-Eintrag konnte nicht angelegt werden.");
-
-  const { error: candidateError } = await supabase
-    .from("research_company_candidates")
-    .update({
-      status: "approved",
-      company_id: company.id,
-      approved_at: new Date().toISOString(),
-      approved_by: "admin",
-      admin_notes: nullableFormString(formData, "admin_notes") || candidate.admin_notes,
-    })
-    .eq("id", id);
-  if (candidateError) throw candidateError;
-
-  revalidatePath("/admin/research-imports");
-  revalidatePath(`/admin/research-imports/${id}`);
-  revalidatePath("/");
-  revalidatePath("/suche");
-  redirect(`/admin/research-imports/${id}?approved=${company.slug}`);
+  return approveResearchCandidateAction(formData);
 }
 
 function claimCompanyIdFromSource(source: string) {
@@ -639,102 +401,11 @@ function claimCompanyIdFromSource(source: string) {
 }
 
 export async function importCompanies(_prevState: ImportReport, formData: FormData): Promise<ImportReport> {
-  const file = formData.get("file");
-  if (!(file instanceof File) || file.size === 0) {
-    return { ok: false, message: "CSV-Datei fehlt.", created: 0, skipped: 0, errors: [] };
-  }
-
-  const text = await file.text();
-  const rows = parseCsv(text);
-  const supabase = getSupabaseAdmin();
-  let created = 0;
-  let skipped = 0;
-  const errors: string[] = [];
-
-  for (let index = 0; index < rows.length; index += 1) {
-    const rowNumber = index + 2;
-    const parsed = csvCompanySchema.safeParse(rows[index]);
-
-    if (!parsed.success) {
-      errors.push(`Zeile ${rowNumber}: ${parsed.error.issues.map((issue) => `${issue.path.join(".")}: ${issue.message}`).join(", ")}`);
-      continue;
-    }
-
-    const input = parsed.data;
-    const website = input.website;
-    let duplicateQuery = supabase.from("companies").select("id").eq("name", input.name).eq("postal_code", input.postal_code).limit(1);
-    duplicateQuery = website ? duplicateQuery.eq("website_url", website) : duplicateQuery.is("website_url", null);
-    const { data: duplicate, error: duplicateError } = await duplicateQuery;
-
-    if (duplicateError) {
-      errors.push(`Zeile ${rowNumber}: ${duplicateError.message}`);
-      continue;
-    }
-
-    if (duplicate && duplicate.length > 0) {
-      skipped += 1;
-      continue;
-    }
-
-    const tradeSlug = canonicalTradeSlug(slugify(input.trade));
-    const tradeName = tradeNameFromSlug(tradeSlug);
-    const { data: trade, error: tradeError } = await supabase
-      .from("trades")
-      .select("id")
-      .eq("slug", tradeSlug)
-      .single();
-
-    if (tradeError || !trade) {
-      errors.push(`Zeile ${rowNumber}: Gewerk fehlt in zentraler Taxonomie/Supabase (${tradeSlug}).`);
-      continue;
-    }
-
-    const slug = await getUniqueCompanySlug(companySlug(input.name, input.postal_code, input.city));
-    const { error: insertError } = await supabase.from("companies").insert({
-      trade_id: trade.id,
-      name: input.name,
-      slug,
-      description: `${tradeName} in ${input.city}`,
-      email: input.email,
-      phone: input.phone,
-      website_url: website,
-      city: input.city,
-      postal_code: input.postal_code,
-      latitude: input.latitude,
-      longitude: input.longitude,
-      claim_status: "unclaimed",
-      verified: false,
-      public_visible: true,
-    });
-
-    if (insertError) {
-      errors.push(`Zeile ${rowNumber}: ${insertError.message}`);
-      continue;
-    }
-
-    created += 1;
-  }
-
-  revalidatePath("/");
-  revalidatePath("/suche");
-  return {
-    ok: errors.length === 0,
-    message: `Import abgeschlossen: ${created} erstellt, ${skipped} uebersprungen, ${errors.length} Fehler.`,
-    created,
-    skipped,
-    errors,
-  };
+  return importCompaniesAction(formData);
 }
 
 export async function deleteCompany(formData: FormData) {
-  const id = String(formData.get("id") || "");
-  if (!id) return;
-
-  const supabase = getSupabaseAdmin();
-  const { error } = await supabase.from("companies").delete().eq("id", id);
-  if (error) throw error;
-
-  revalidatePath("/");
+  return deleteCompanyAction(formData);
 }
 
 export async function createTrade(formData: FormData) {
@@ -758,17 +429,7 @@ export async function createTrade(formData: FormData) {
 }
 
 export async function deleteTrade(formData: FormData) {
-  const id = String(formData.get("id") || "");
-  if (!id) return;
-
-  const supabase = getSupabaseAdmin();
-  const { error } = await supabase.from("trades").delete().eq("id", id);
-  if (error) {
-    redirect(`/trades?error=${encodeURIComponent(error.message)}`);
-  }
-
-  revalidatePath("/trades");
-  revalidatePath("/");
+  return deleteTradeAction(formData);
 }
 
 function parseCsv(text: string) {
