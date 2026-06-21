@@ -300,8 +300,7 @@ export default async function HomePage() {
           </div>
           <p className="mt-5 text-sm leading-6 text-muted">
             Karten- und Wirkungskreisfunktionen werden schrittweise ausgebaut. Wirkungskreise können vom Betrieb
-            angegeben oder aus Quellen abgeleitet und geprüft werden. Sie sind keine Qualitäts- oder
-            Verfügbarkeitsgarantie.
+            angegeben oder aus Quellen abgeleitet und geprüft werden.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <BlueLink href="/suche">Gewerke suchen</BlueLink>
