@@ -11,7 +11,7 @@ export async function getRegionalCoverageOverview(params?: {
   const regionSlug = params?.region || "riedering";
   const [{ data: region, error: regionError }, candidates, snapshots] = await Promise.all([
     supabase.from("regions").select("*").eq("slug", regionSlug).single(),
-    getRegionalCompanyCandidates(params),
+    getRegionalCompanyCandidates({ ...params, region: regionSlug }),
     getLatestCoverageSnapshots(regionSlug),
   ]);
 
@@ -25,11 +25,17 @@ export async function getRegionalCoverageOverview(params?: {
 }
 
 export async function getRegionalCompanyCandidates(params?: {
+  region?: string;
   status?: string;
   trade?: string;
   query?: string;
 }) {
   const supabase = getSupabaseAdmin();
+  const regionSlug = params?.region || "riedering";
+  const { data: region } = await supabase.from("regions").select("name,postal_codes").eq("slug", regionSlug).single();
+  const regionName = region?.name || regionSlug;
+  const postalCodes = Array.isArray(region?.postal_codes) ? region.postal_codes.filter(Boolean) : [];
+
   let query = supabase
     .from("company_candidates")
     .select("*, duplicate_company:companies!company_candidates_duplicate_of_company_id_fkey(id, name, slug, city, postal_code)")
@@ -37,7 +43,14 @@ export async function getRegionalCompanyCandidates(params?: {
     .order("created_at", { ascending: false })
     .limit(200);
 
+  if (postalCodes.length > 0) {
+    query = query.or(`city.ilike.%${regionName}%,postal_code.in.(${postalCodes.join(",")})`);
+  } else {
+    query = query.ilike("city", `%${regionName}%`);
+  }
+
   if (params?.status) query = query.eq("status", params.status);
+  else query = query.neq("status", "rejected");
   if (params?.trade) query = query.eq("possible_trade", params.trade);
   if (params?.query) query = query.ilike("name", `%${params.query.trim()}%`);
 

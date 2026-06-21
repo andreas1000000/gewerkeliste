@@ -26,12 +26,13 @@ const statuses = [
 
 export default async function AdminCoveragePage({ searchParams }: PageProps) {
   const params = await searchParams;
+  const regionSlug = stringParam(params.region) || "riedering";
   const status = stringParam(params.status);
   const trade = stringParam(params.trade);
   const query = stringParam(params.q);
 
   try {
-    const overview = await getRegionalCoverageOverview({ region: "riedering", status, trade, query });
+    const overview = await getRegionalCoverageOverview({ region: regionSlug, status, trade, query });
     const candidates = overview.candidates;
     const snapshots = overview.snapshots;
 
@@ -40,7 +41,7 @@ export default async function AdminCoveragePage({ searchParams }: PageProps) {
         <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
           <div>
             <p className="text-sm font-semibold uppercase tracking-normal text-brand">Regional Coverage Agent</p>
-            <h1 className="mt-2 text-3xl font-semibold text-ink">Riedering Abdeckung</h1>
+            <h1 className="mt-2 text-3xl font-semibold text-ink">{overview.region.name} Abdeckung</h1>
             <p className="mt-2 max-w-3xl text-sm leading-6 text-muted">
               Kandidaten werden zuerst geprüft und bleiben unverifiziert. Neue Betriebe landen nicht direkt öffentlich in
               der Suche.
@@ -95,7 +96,17 @@ export default async function AdminCoveragePage({ searchParams }: PageProps) {
           </div>
         </section>
 
+        <div className="mb-4 flex flex-wrap gap-2 text-sm">
+          <Link className={regionPillClass(regionSlug === "stephanskirchen")} href="/admin/coverage?region=stephanskirchen">
+            Stephanskirchen
+          </Link>
+          <Link className={regionPillClass(regionSlug === "riedering")} href="/admin/coverage?region=riedering">
+            Riedering
+          </Link>
+        </div>
+
         <form className="mb-6 grid gap-3 rounded-lg border border-line bg-white p-4 shadow-soft lg:grid-cols-[1fr_180px_220px_auto]">
+          <input name="region" type="hidden" value={regionSlug} />
           <input className="rounded-md border border-line px-3 py-2 text-sm outline-none focus:border-brand" defaultValue={query || ""} name="q" placeholder="Kandidat suchen" />
           <select className="rounded-md border border-line px-3 py-2 text-sm outline-none focus:border-brand" defaultValue={status || ""} name="status">
             {statuses.map(([value, label]) => (
@@ -262,6 +273,12 @@ function Metric({ label, value }: { label: string; value: number }) {
       <div className="mt-2 text-3xl font-semibold text-ink">{value}</div>
     </div>
   );
+}
+
+function regionPillClass(active: boolean) {
+  return active
+    ? "rounded-md bg-brand px-3 py-2 font-semibold text-white"
+    : "rounded-md border border-line bg-white px-3 py-2 font-semibold text-ink hover:bg-panel";
 }
 
 function ScorePill({ score }: { score: number }) {
