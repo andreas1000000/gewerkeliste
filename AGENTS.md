@@ -11,9 +11,13 @@ GewerkeListe.com ist kein Lead-Portal, keine Auktionsplattform und kein Marktpla
 Strategische Leitplanken:
 
 - `GEWERKELISTE_GRUNDSATZ.md`
+- `GEWERKELISTE_PRODUCT_DOCTRINE.md`
+- `BUSINESSPLAN_GEWERKELISTE_V2.md`
 - `AGENT_OPERATING_RULES.md`
 - `docs/agent-company/*`
 - `docs/knowledge/*`
+
+Bei Produkt-, Monetarisierungs-, Go-to-Market-, Agenten-, Discovery-, Enrichment-, Outreach-, Datenqualitaets- oder Skalierungsentscheidungen ist `BUSINESSPLAN_GEWERKELISTE_V2.md` zusammen mit `GEWERKELISTE_PRODUCT_DOCTRINE.md` als verbindliche strategische Quelle zu beruecksichtigen.
 
 ## Technische Architektur
 
