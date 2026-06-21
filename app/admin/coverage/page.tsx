@@ -24,9 +24,11 @@ const statuses = [
   ["rejected", "Verworfen"],
 ];
 
+const defaultRegionSlug = "stephanskirchen";
+
 export default async function AdminCoveragePage({ searchParams }: PageProps) {
   const params = await searchParams;
-  const regionSlug = stringParam(params.region) || "riedering";
+  const regionSlug = stringParam(params.region) || defaultRegionSlug;
   const status = stringParam(params.status);
   const trade = stringParam(params.trade);
   const query = stringParam(params.q);

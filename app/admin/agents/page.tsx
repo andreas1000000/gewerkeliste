@@ -31,7 +31,7 @@ export default async function AdminAgentsPage() {
             Riskante Aktionen bleiben Human-in-the-Loop.
           </p>
         </div>
-        <a className="w-fit rounded-md border border-line bg-white px-4 py-2 text-sm font-semibold text-ink hover:bg-panel" href="/admin/coverage">
+        <a className="w-fit rounded-md border border-line bg-white px-4 py-2 text-sm font-semibold text-ink hover:bg-panel" href="/admin/coverage?region=stephanskirchen">
           Coverage Review
         </a>
       </div>
