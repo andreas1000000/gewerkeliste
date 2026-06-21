@@ -105,18 +105,12 @@ export default async function HomePage() {
               <source src="/videos/gewerkeliste-homepage-background.mp4" type="video/mp4" />
             </video>
             <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,23,61,0)_48%,rgba(7,23,61,0.68))]" />
-            <div className="absolute bottom-0 left-0 right-0 p-5 text-white">
-              <p className="text-xs font-semibold uppercase tracking-normal text-blue-100">Aus der Baupraxis</p>
-              <p className="mt-2 max-w-2xl text-sm leading-6 text-blue-50">
-                GewerkeListe.com ordnet Fachbetriebe nach Gewerk, Leistung, Spezialisierung und Region.
-              </p>
-            </div>
           </div>
 
           <div className="max-w-5xl">
             <p className="text-sm font-semibold uppercase tracking-normal text-brand">Die digitale Infrastruktur der Bauwirtschaft</p>
             <h1 className="mt-4 text-4xl font-semibold tracking-normal text-brand sm:text-5xl">
-              Die regionale Gewerke-Suche für professionelle Bauprojekte.
+              Bau- und Handwerksbetriebe nach Gewerk, Leistung und Region finden.
             </h1>
             <p className="mt-6 text-lg leading-8 text-ink">
               Finden Sie passende Bau- und Handwerksbetriebe nach Gewerk, Leistung, Spezialisierung und Region –
@@ -125,8 +119,8 @@ export default async function HomePage() {
 
             <div className="mt-6 flex flex-wrap gap-4 text-sm font-semibold text-brand">
               <TrustItem text="Strukturierte Betriebsdaten" />
-              <TrustItem text="Gewerke klar einordnen" />
               <TrustItem text="Regionale Suche" />
+              <TrustItem text="Direkte Kontaktaufnahme" />
             </div>
             <p className="mt-4 max-w-3xl text-sm leading-6 text-muted">
               GewerkeListe.com ersetzt keine persönlichen Empfehlungen. Die Plattform macht den Markt davor besser
