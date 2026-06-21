@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import type { Route } from "next";
 import Link from "next/link";
+import { ServiceAreaPreview } from "@/components/map/service-area-preview";
 import { SiteHeader } from "@/components/site-header";
 import { getPublicCompanies } from "@/lib/data/public-directory";
+import type { ServiceAreaGeoJson } from "@/lib/geo/types";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { tradeTaxonomy } from "@/lib/trade-taxonomy";
 
@@ -60,6 +62,21 @@ const comparisons = [
     positive: true,
   },
 ];
+
+const exampleServiceArea: ServiceAreaGeoJson = {
+  type: "Polygon",
+  coordinates: [
+    [
+      [12.06, 47.78],
+      [12.18, 47.91],
+      [12.38, 47.9],
+      [12.47, 47.79],
+      [12.3, 47.69],
+      [12.12, 47.7],
+      [12.06, 47.78],
+    ],
+  ],
+};
 
 export default async function HomePage() {
   const companies = isSupabaseConfigured() ? await getPublicCompanies() : [];
@@ -267,27 +284,37 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="mx-auto grid max-w-7xl gap-5 px-4 py-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_420px] lg:px-8">
-        <Card>
-          <h2 className="text-2xl font-semibold text-[#07173d]">Fachbetriebe in Ihrer Region finden.</h2>
+      <section className="mx-auto grid max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_480px] lg:items-center lg:px-8">
+        <div className="rounded-lg border border-line bg-white p-6 shadow-soft sm:p-8">
+          <p className="text-sm font-semibold uppercase tracking-normal text-brand">Wirkungskreis-Suche</p>
+          <h2 className="mt-2 text-3xl font-semibold text-[#07173d]">Nicht nur Standort. Wirkungskreis.</h2>
           <p className="mt-4 text-base leading-7 text-ink">
-            GewerkeListe.com ordnet Betriebe nicht nur nach Gewerk, sondern auch nach Standort, Umkreis und
-            Tätigkeitsgebiet. So wird sichtbar, welche Betriebe für eine Region tatsächlich relevant sind.
+            Handwerksbetriebe arbeiten nicht in perfekten Kreisen. GewerkeListe macht sichtbar, in welchen Regionen,
+            Orten und Projektgebieten Betriebe tatsächlich aktiv sein wollen.
           </p>
-          <div className="mt-6">
-            <BlueLink href="/suche">Regionale Suche starten</BlueLink>
+          <div className="mt-5 grid gap-3 sm:grid-cols-2">
+            <CheckLine>Firmenstandort als Punkt</CheckLine>
+            <CheckLine>Einsatzgebiet als Wirkungskreis</CheckLine>
+            <CheckLine>später frei markierbar mit Karte</CheckLine>
+            <CheckLine>geprüft vor Veröffentlichung</CheckLine>
           </div>
-        </Card>
-        <div className="rounded-lg border border-line bg-white p-5 shadow-soft">
-          <div className="relative h-64 overflow-hidden rounded-md border border-line bg-[#eef4fb]">
-            <div className="absolute left-10 top-10 h-36 w-36 rounded-full border border-[#1f5fd4]/35 bg-[#1f5fd4]/10" />
-            <div className="absolute right-10 top-14 h-24 w-24 rounded-full border border-brand/35 bg-brand/10" />
-            <div className="absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#1f5fd4] shadow-[0_0_0_10px_rgba(31,95,212,0.12)]" />
-            <div className="absolute bottom-5 left-5 rounded-md border border-line bg-white px-4 py-3 text-sm font-semibold text-[#07173d]">
-              Beispielregion Rosenheim / Chiemgau
-            </div>
+          <p className="mt-5 text-sm leading-6 text-muted">
+            Karten- und Wirkungskreisfunktionen werden schrittweise ausgebaut. Wirkungskreise können vom Betrieb
+            angegeben oder aus Quellen abgeleitet und geprüft werden. Sie sind keine Qualitäts- oder
+            Verfügbarkeitsgarantie.
+          </p>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <BlueLink href="/suche">Gewerke suchen</BlueLink>
+            <OutlineLink href="/betrieb-eintragen">Betrieb eintragen</OutlineLink>
           </div>
         </div>
+        <ServiceAreaPreview
+          geojson={exampleServiceArea}
+          label="Wirkungskreis: Rosenheim / Chiemgau"
+          regionNames={["Rosenheim", "Chiemgau"]}
+          status="draft"
+          type="manual_drawn"
+        />
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
