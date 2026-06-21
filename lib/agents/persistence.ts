@@ -741,6 +741,50 @@ export async function updateAgentTaskStatus(id: string, status: "in_progress" | 
 }
 
 export function agentOsTablesAvailableError(error: unknown) {
-  const message = error instanceof Error ? error.message : String(error);
-  return message.includes("agent_runs") || message.includes("agent_tasks") || message.includes("agent_approvals") || message.includes("schema cache");
+  const message = errorToSearchableMessage(error);
+  const agentOsTables = [
+    "agent_runs",
+    "agent_run_steps",
+    "agent_tool_calls",
+    "agent_tasks",
+    "agent_approvals",
+    "agent_review_items",
+    "agent_outbox",
+    "agent_cost_events",
+  ];
+
+  if (agentOsTables.some((table) => message.includes(table))) {
+    return true;
+  }
+
+  return (
+    message.includes("agent_") &&
+    (message.includes("schema cache") ||
+      message.includes("does not exist") ||
+      message.includes("relation") ||
+      message.includes("could not find") ||
+      message.includes("foreign key relationship") ||
+      message.includes("pgrst200") ||
+      message.includes("pgrst205") ||
+      message.includes("42p01"))
+  );
+}
+
+function errorToSearchableMessage(error: unknown) {
+  if (error instanceof Error) {
+    return `${error.name} ${error.message}`.toLowerCase();
+  }
+
+  if (typeof error === "object" && error !== null) {
+    const record = error as Record<string, unknown>;
+    return ["message", "details", "hint", "code"]
+      .map((key) => {
+        const value = record[key];
+        return typeof value === "string" ? value : "";
+      })
+      .join(" ")
+      .toLowerCase();
+  }
+
+  return String(error).toLowerCase();
 }
