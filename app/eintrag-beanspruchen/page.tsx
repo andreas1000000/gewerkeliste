@@ -7,7 +7,7 @@ import { getCompany, getCompanyBySlug } from "@/lib/data";
 
 export const metadata: Metadata = {
   title: "Eintrag übernehmen | GewerkeListe.com",
-  description: "Bestehenden Betriebseintrag finden und kostenloses Basisprofil zur Prüfung einreichen.",
+  description: "Bestehenden Betriebseintrag finden, Betriebsdaten prüfen und vollständiges Leistungsspektrum zur Prüfung einreichen.",
 };
 
 type PageProps = {
@@ -33,7 +33,8 @@ export default async function LegacyClaimEntryPage({ searchParams }: PageProps) 
           <h1 className="mt-3 text-4xl font-semibold text-[#07173d]">Betriebseintrag finden</h1>
           <p className="mt-5 text-base leading-7 text-ink">
             Suchen Sie zuerst Ihren bestehenden Betriebseintrag. Auf der Profilseite können Sie das kostenlose
-            Basisprofil übernehmen und Korrekturen zur Prüfung einreichen.
+            Basisprofil übernehmen, Korrekturen einreichen und Ihr tatsächliches Leistungsspektrum strukturiert
+            darstellen. Änderungen werden geprüft, bevor sie veröffentlicht werden.
           </p>
           <div className="mt-6 grid gap-3 sm:grid-cols-2">
             <Link

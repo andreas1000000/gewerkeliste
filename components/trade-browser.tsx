@@ -83,15 +83,16 @@ export function TradeBrowser({
     <>
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="border-b border-line pb-8">
-          <p className="text-sm font-semibold uppercase tracking-normal text-brand">Gewerkeregister nach Kostenstruktur</p>
+          <p className="text-sm font-semibold uppercase tracking-normal text-brand">Gewerkeregister nach Bauleistungslogik</p>
           <div className="mt-3 grid gap-8 lg:grid-cols-[minmax(0,1fr)_440px] lg:items-start">
             <div>
               <h1 className="max-w-4xl text-4xl font-semibold tracking-normal text-brand sm:text-5xl">
-                Gewerke finden nach Baukostenstruktur
+                Baugewerke und Leistungen strukturiert finden
               </h1>
               <p className="mt-5 max-w-4xl text-base leading-7 text-muted">
-                Strukturierte Suche nach Baugewerken, Planungsleistungen und ausführenden Unternehmen, gegliedert nach
-                Kostenstruktur und praxisnahen Vergabeeinheiten.
+                GewerkeListe.com ordnet Fachbetriebe nach bauleistungsnahen Gewerken, Spezialisierungen, Leistungen und
+                Region. Die Struktur orientiert sich an der Baupraxis und nutzt DIN-276-nahe Ordnung nur als Hilfe, nicht
+                als starre Gewerkeliste.
               </p>
               {claimIntent ? (
                 <div className="mt-5 rounded-lg border border-[#b9dec8] bg-[#eef9f2] p-4 text-sm leading-6 text-ink">
@@ -143,7 +144,7 @@ export function TradeBrowser({
         </div>
 
         <div className="mt-6 flex flex-wrap gap-2 border-b border-line pb-6">
-          <ViewButton label="Nach Kostengruppen" mode="kostengruppen" current={viewMode} onClick={setViewMode} />
+          <ViewButton label="Nach Struktur" mode="kostengruppen" current={viewMode} onClick={setViewMode} />
           <ViewButton label="Alphabetisch" mode="alphabetisch" current={viewMode} onClick={setViewMode} />
           <ViewButton label="Häufig gesucht" mode="haeufig" current={viewMode} onClick={setViewMode} />
         </div>
@@ -202,8 +203,8 @@ export function TradeBrowser({
         <section className="mt-8 rounded-lg border border-line bg-white p-5 shadow-soft">
           <h2 className="text-xl font-semibold text-[#07173d]">Einordnung für Planung, Ausschreibung und Vergabe</h2>
           <p className="mt-3 text-sm leading-6 text-muted">
-            Die Struktur hilft bei der fachlichen Suche nach passenden Gewerken und Betrieben. Sie ersetzt keine Norm-
-            oder Ausschreibungsprüfung.
+            Die Struktur hilft bei der fachlichen Suche nach passenden Gewerken und Betrieben. Sie ersetzt keine Norm-,
+            Leistungs- oder Ausschreibungsprüfung und behauptet keine Qualifikation eines Betriebs.
           </p>
         </section>
       </section>

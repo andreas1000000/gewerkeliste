@@ -4,9 +4,9 @@ import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 
 export const metadata: Metadata = {
-  title: "Für Betriebe – kostenloser Basiseintrag | GewerkeListe.com",
+  title: "Für Betriebe – Betrieb vollständig darstellen | GewerkeListe.com",
   description:
-    "Fachbetriebe können ihren Betrieb kostenlos eintragen, Leistungen hinterlegen und die regionale GewerkeListe mit aufbauen.",
+    "Fachbetriebe können ihren Betrieb kostenlos eintragen, Leistungen vollständig darstellen und die regionale GewerkeListe mit aufbauen.",
 };
 
 const steps = [
@@ -20,14 +20,14 @@ const steps = [
   },
   {
     title: "Daten bestätigen",
-    text: "Nach Prüfung werden Betriebsdaten, Leistungen und Tätigkeitsgebiet sauber hinterlegt.",
+    text: "Nach Prüfung werden Betriebsdaten, Leistungen und Wirkungskreis sauber hinterlegt.",
   },
 ];
 
 const principles = [
-  "Sachliche Darstellung statt Anfragenverkauf",
-  "Klare Leistungen statt unstrukturierter Freitexte",
-  "Region und Tätigkeitsgebiet sauber abbilden",
+  "Sachliche Darstellung statt Kontaktverkauf",
+  "vollständige Leistungsbreite statt künstlicher Limits",
+  "Region und Wirkungskreis sauber abbilden",
   "Direkte Kontaktaufnahme ohne künstliche Hürden",
 ];
 
@@ -38,11 +38,11 @@ export default function ForCompaniesPage() {
       <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
         <p className="text-sm font-semibold uppercase tracking-normal text-brand">Für Fachbetriebe</p>
         <h1 className="mt-3 max-w-4xl text-4xl font-semibold text-brand">
-          Kostenlos sichtbar werden. Von Anfang an dabei sein.
+          Zeig, was dein Betrieb wirklich kann.
         </h1>
         <p className="mt-5 max-w-3xl text-base leading-7 text-muted">
           GewerkeListe.com ist ein unabhängiges, regional wachsendes Verzeichnis für Baugewerke. Fachbetriebe können
-          ihren kostenlosen Basiseintrag übernehmen, Betriebsdaten bestätigen und Leistungen sowie Tätigkeitsgebiet
+          ihren kostenlosen Basiseintrag übernehmen, Betriebsdaten bestätigen und ihr tatsächliches Leistungsspektrum
           strukturiert darstellen.
         </p>
 
@@ -53,8 +53,9 @@ export default function ForCompaniesPage() {
             </h2>
             <p className="mt-4 text-sm leading-6 text-muted">
               Trage deinen Betrieb kostenlos ein und hilf mit, eine vollständige, regionale GewerkeListe aufzubauen.
-              Ziel ist eine Plattform, auf der Auftraggeber, Planer und Betriebe schneller zueinanderfinden. Der
-              Basiseintrag bleibt kostenlos.
+              Ziel ist eine Daten- und Vertrauensinfrastruktur, auf der Planer, Bauleiter, Unternehmen, Kommunen,
+              Bauherren und Betriebe schneller die passende fachliche Verbindung finden. Der Basiseintrag bleibt
+              kostenlos.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <BlueLink href="/betrieb-eintragen">Betrieb kostenlos eintragen</BlueLink>
@@ -132,7 +133,7 @@ export default function ForCompaniesPage() {
                 "Referenzen und Projektbeispiele, falls vorhanden",
                 "Zertifikate oder Innungen, falls vorhanden",
                 "Badge Betriebsdaten bestätigt",
-                "optional Fördermitglied",
+                "optionale erweiterte Darstellung",
               ].map((item) => (
                 <li key={item}>
                   <span className="mr-2 text-[#2f8f5b]">✓</span>
@@ -144,20 +145,20 @@ export default function ForCompaniesPage() {
         </section>
 
         <section className="mt-8 rounded-lg border border-line bg-white p-6 shadow-soft">
-          <h2 className="text-2xl font-semibold text-brand">Kein Anfragenverkauf. Kein Preiskampf.</h2>
+          <h2 className="text-2xl font-semibold text-brand">Kein Kontaktverkauf. Kein Preiskampf.</h2>
           <p className="mt-4 max-w-4xl text-sm leading-6 text-muted">
-            GewerkeListe.com verkauft keine einzelnen Anfragen. Der Betriebseintrag soll langfristig sichtbar machen,
-            welche Leistungen ein Betrieb anbietet und in welchem Gebiet er tätig ist.
+            GewerkeListe.com verkauft keine einzelnen Kontakte als Kernmodell. Der Betriebseintrag soll langfristig
+            sichtbar machen, welche Leistungen ein Betrieb anbietet und in welchem Gebiet er tätig ist.
           </p>
         </section>
 
         <section className="mt-8 grid gap-4 lg:grid-cols-2">
           <div className="rounded-lg border border-[#b9dec8] bg-[#eef9f2] p-6">
-            <h2 className="text-2xl font-semibold text-brand">Fördermitglied werden</h2>
+            <h2 className="text-2xl font-semibold text-brand">Erweiterte Darstellung unterstützen</h2>
             <p className="mt-4 text-sm leading-6 text-muted">
-              Wer das Projekt gut findet, kann GewerkeListe.com freiwillig unterstützen. Fördermitglieder können
-              zusätzliche Darstellungsmöglichkeiten nutzen, zum Beispiel mehr Bilder, Referenzen, eine persönliche
-              Vorstellung oder frühes Feedback zu neuen Funktionen.
+              Wer das Projekt gut findet, kann GewerkeListe.com freiwillig unterstützen. Zusätzliche
+              Darstellungsmöglichkeiten können später Bilder, Referenzen, persönliche Vorstellung, Projektbeispiele oder
+              Sichtbarkeitsauswertungen umfassen.
             </p>
             <p className="mt-4 text-sm font-semibold text-brand">Der kostenlose Basiseintrag bleibt davon unberührt.</p>
           </div>

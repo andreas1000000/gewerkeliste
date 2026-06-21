@@ -9,9 +9,9 @@ import { tradeTaxonomy } from "@/lib/trade-taxonomy";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "GewerkeListe.com – Die offene GewerkeListe für Bauprojekte",
+  title: "GewerkeListe.com – Die digitale Infrastruktur für Baugewerke",
   description:
-    "Finde passende Handwerksbetriebe, Fachfirmen und Baupartner nach Gewerk, Region und Tätigkeitsgebiet.",
+    "Regionale B2B-Suche für Baugewerke: passende Fachbetriebe nach Gewerk, Leistung, Spezialisierung und Region finden – ohne Leadportal und ohne Preisdruck.",
   alternates: {
     canonical: "/",
   },
@@ -19,16 +19,16 @@ export const metadata: Metadata = {
 
 const benefits = [
   {
-    title: "Fachbetrieb gezielt suchen",
-    text: "Finden Sie Betriebe nach konkreter Leistung – nicht nur nach Firmennamen.",
+    title: "Passende Betriebe schneller finden",
+    text: "Für Planer, Bauleiter, GU, Kommunen und professionelle Bauherren entsteht eine strukturierte Suche nach Gewerk, Leistung und Region.",
   },
   {
-    title: "Region prüfen",
-    text: "Sehen Sie Standort, Einsatzradius und Tätigkeitsgebiet auf einen Blick.",
+    title: "Region und Wirkungskreis einordnen",
+    text: "Nicht nur Sitz und Radius zählen. GewerkeListe.com macht sichtbar, in welchen Regionen ein Betrieb fachlich relevant ist.",
   },
   {
-    title: "Daten besser einordnen",
-    text: "Betriebseinträge zeigen Leistungen, Kontaktwege und Verifizierungsstatus.",
+    title: "Datenqualität mit Review Gates",
+    text: "KI-Agenten helfen intern bei Recherche und Strukturierung. Veröffentlichung, Löschung und E-Mail bleiben freigabepflichtig.",
   },
 ];
 
@@ -36,9 +36,9 @@ const registerFields = [
   "Gewerk",
   "Ort und Region",
   "angebotene Leistungen",
-  "Tätigkeitsgebiet",
+  "Wirkungskreis und Tätigkeitsgebiet",
   "Kontakt",
-  "Verifizierungsstatus",
+  "Verifizierungsstatus ohne Qualitätsgarantie",
   "Referenzen, soweit vorhanden",
 ];
 
@@ -49,7 +49,7 @@ const comparisons = [
   },
   {
     title: "Klassische Auftragsportale",
-    items: ["einzelne Anfragen", "oft Preisdruck", "begrenzte Betriebsdarstellung", "wenig Registercharakter"],
+    items: ["einzelne Anfragen", "oft Preisdruck", "Kontaktverkauf als Kernmodell", "wenig Registercharakter"],
   },
   {
     title: "GewerkeListe.com",
@@ -57,9 +57,9 @@ const comparisons = [
       "strukturierte Gewerkeliste",
       "Leistungen sichtbar",
       "Region und Tätigkeitsgebiet",
-      "verifizierbare Betriebseinträge",
+      "Datenbestätigung statt Qualitätsversprechen",
       "direkte Kontaktaufnahme",
-      "langfristiger Fachbetriebseintrag",
+      "langfristiger Fachbetriebseintrag mit voller Leistungsbreite",
     ],
     positive: true,
   },
@@ -112,28 +112,30 @@ export default async function HomePage() {
             <div className="absolute bottom-0 left-0 right-0 p-5 text-white">
               <p className="text-xs font-semibold uppercase tracking-normal text-blue-100">Aus der Baupraxis</p>
               <p className="mt-2 max-w-2xl text-sm leading-6 text-blue-50">
-                GewerkeListe.com ordnet Fachbetriebe nach Gewerk, Region und Tätigkeitsgebiet.
+                GewerkeListe.com ordnet Fachbetriebe nach Gewerk, Leistung, Spezialisierung und Region.
               </p>
             </div>
           </div>
 
           <div className="max-w-5xl">
-            <p className="text-sm font-semibold uppercase tracking-normal text-brand">Offene GewerkeListe im Aufbau</p>
+            <p className="text-sm font-semibold uppercase tracking-normal text-brand">B2B-Infrastruktur für Baugewerke</p>
             <h1 className="mt-4 text-4xl font-semibold tracking-normal text-brand sm:text-5xl">
-              Die offene GewerkeListe für Bauprojekte in deiner Region.
+              Die regionale Gewerke-Suche für professionelle Bauprojekte.
             </h1>
             <p className="mt-6 text-lg leading-8 text-ink">
-              Finde passende Handwerksbetriebe, Fachfirmen und Baupartner – ehrlich, regional und übersichtlich.
+              Finden Sie passende Bau- und Handwerksbetriebe nach Gewerk, Leistung, Spezialisierung und Region –
+              ohne Leadportal, ohne Preisdruck, mit strukturierter Datenbasis.
             </p>
 
             <div className="mt-6 flex flex-wrap gap-4 text-sm font-semibold text-brand">
-              <TrustItem text="Strukturierte Betriebsdaten" />
-              <TrustItem text="Gewerke klar einordnen" />
-              <TrustItem text="Regionale Suche" />
+              <TrustItem text="Kein Kontaktverkauf als Kernmodell" />
+              <TrustItem text="Kostenlose Grundsichtbarkeit" />
+              <TrustItem text="Review vor Veröffentlichung" />
             </div>
             <p className="mt-4 max-w-3xl text-sm leading-6 text-muted">
-              GewerkeListe.com hilft Auftraggebern, Planern und Bauleitern, Betriebe nach Gewerk, Leistung und
-              Tätigkeitsgebiet besser einzuordnen.
+              GewerkeListe.com ersetzt keine persönlichen Empfehlungen. Die Plattform macht den Markt davor besser
+              sichtbar: strukturierte Betriebsdaten, nachvollziehbare Quellen, Claim-Prozess und später Wirkungskreis,
+              Kapazitätsbezug und Sichtbarkeitsreport.
             </p>
 
             <form action="/suche" className="mt-8 rounded-lg border border-line bg-white p-4 shadow-soft">
@@ -165,7 +167,7 @@ export default async function HomePage() {
                 <span>·</span>
                 <span>Einsatzgebiet</span>
                 <span>·</span>
-                <span>Verifizierungsstatus</span>
+                <span>Datenbestätigung</span>
               </div>
               <div className="mt-4 flex flex-wrap gap-3">
                 <OutlineLink href="/betrieb-eintragen">Betrieb eintragen</OutlineLink>
@@ -191,12 +193,12 @@ export default async function HomePage() {
       <section className="mx-auto grid max-w-7xl gap-5 px-4 py-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_420px] lg:px-8">
         <Card>
           <h2 className="text-2xl font-semibold text-[#07173d]">
-            Die passenden Betriebe sind da. Sie müssen nur besser auffindbar sein.
+            Der Markt ist nicht leer. Er ist schlecht sortiert.
           </h2>
           <p className="mt-4 text-base leading-7 text-ink">
             In der Baupraxis geht viel Zeit verloren, weil Informationen zu Fachbetrieben verstreut sind: Website,
-            Empfehlung, Branchenbuch, Suchmaschine oder persönlicher Kontakt. GewerkeListe.com bringt diese Informationen
-            in eine klare Struktur.
+            Empfehlung, Branchenbuch, Suchmaschine oder persönliche Kontaktliste. GewerkeListe.com bringt diese
+            Informationen in eine fachliche B2B-Suchlogik vor Ausschreibung, Anfrage und Vergabe.
           </p>
         </Card>
         <Card>
@@ -210,19 +212,19 @@ export default async function HomePage() {
 
       <section className="mx-auto grid max-w-7xl gap-5 px-4 py-4 sm:px-6 lg:grid-cols-2 lg:px-8">
         <Card>
-          <h2 className="text-2xl font-semibold text-[#07173d]">Für Auftraggeber</h2>
+          <h2 className="text-2xl font-semibold text-[#07173d]">Für Planer, Bauleiter und Auftraggeber</h2>
           <Step number="1" text="Gewerk und Ort eingeben" />
-          <Step number="2" text="passende Betriebe vergleichen" />
-          <Step number="3" text="direkt Kontakt aufnehmen" />
+          <Step number="2" text="Leistung, Spezialisierung und Region einordnen" />
+          <Step number="3" text="passende Betriebe direkt kontaktieren" />
           <div className="mt-6">
             <BlueLink href="/suche">Fachbetrieb suchen</BlueLink>
           </div>
         </Card>
         <Card>
           <h2 className="text-2xl font-semibold text-[#07173d]">Für Fachbetriebe</h2>
-          <Step number="1" text="Fachbetrieb suchen" />
-          <Step number="2" text="Eintrag übernehmen" />
-          <Step number="3" text="Leistungen und Tätigkeitsgebiet bestätigen" />
+          <Step number="1" text="Eintrag finden oder neu anlegen" />
+          <Step number="2" text="Betriebsdaten übernehmen oder korrigieren" />
+          <Step number="3" text="volle Leistungsbreite und Wirkungskreis darstellen" />
           <p className="mt-5 rounded-md border border-[#b9dec8] bg-[#eef9f2] px-4 py-3 text-sm font-semibold text-brand">
             Zeig, was dein Betrieb wirklich kann: Gewerke, Leistungen, Spezialisierungen und Tätigkeitsgebiet klar darstellen.
           </p>
@@ -238,7 +240,7 @@ export default async function HomePage() {
             <p className="text-sm font-semibold uppercase tracking-normal text-brand">Für Bauprojekte</p>
             <h2 className="mt-2 text-3xl font-semibold text-[#07173d]">Finde Betriebe, die zur Aufgabe und zur Region passen.</h2>
             <p className="mt-4 text-base font-semibold leading-7 text-ink">
-              GewerkeListe.com ordnet Leistungen, Standorte und Tätigkeitsgebiete so, dass Projektbeteiligte schneller
+              GewerkeListe.com ordnet Leistungen, Standorte und Wirkungskreise so, dass Projektbeteiligte schneller
               eine belastbare Vorauswahl treffen können.
             </p>
             <p className="mt-3 max-w-3xl text-sm leading-6 text-muted">
@@ -304,18 +306,18 @@ export default async function HomePage() {
             <h2 className="text-2xl font-semibold">Ihr Betrieb. Ihre Leistungen. Ihr Tätigkeitsgebiet.</h2>
             <p className="mt-4 max-w-3xl text-sm leading-6 text-blue-50">
               Ein Betriebseintrag zeigt sachlich, welche Leistungen Ihr Betrieb anbietet, wo Sie tätig sind und wie
-              Auftraggeber Sie erreichen können. Wenn Ihr Betrieb bereits gelistet ist, können Sie den Eintrag übernehmen
-              und die Daten bestätigen.
+              Auftraggeber Sie erreichen können. Die vollständige Nennung von Gewerken, Leistungen und Spezialisierungen
+              gehört zur Grundsichtbarkeit und wird nicht künstlich begrenzt.
             </p>
             <div className="mt-5 grid gap-2 sm:grid-cols-2">
               <WhiteCheck>Betriebsdaten bestätigen</WhiteCheck>
-              <WhiteCheck>Leistungen strukturieren</WhiteCheck>
-              <WhiteCheck>Tätigkeitsgebiet festlegen</WhiteCheck>
+              <WhiteCheck>Leistungsbreite vollständig darstellen</WhiteCheck>
+              <WhiteCheck>Wirkungskreis festlegen</WhiteCheck>
               <WhiteCheck>Kontaktwege aktuell halten</WhiteCheck>
             </div>
             <p className="mt-5 text-sm leading-6 text-blue-50">
-              GewerkeListe.com ist kein System für Preiskampf und verkauft keine einzelnen Anfragen. Ziel ist ein
-              professionelles Verzeichnis echter Baugewerke mit klaren Betriebseinträgen.
+              GewerkeListe.com ist kein System für Preiskampf und verkauft keine einzelnen Anfragen. Ziel ist eine
+              professionelle Daten- und Vertrauensschicht für echte Baugewerke.
             </p>
           </div>
           <div className="mt-6 rounded-lg bg-white p-5 text-ink lg:mt-0">
@@ -341,11 +343,11 @@ export default async function HomePage() {
           </p>
         </Card>
         <Card>
-          <p className="text-sm font-semibold uppercase tracking-normal text-brand">Aus der Praxis</p>
-          <h2 className="mt-2 text-2xl font-semibold text-[#07173d]">Gebaut von jemandem, der den Bau kennt.</h2>
+          <p className="text-sm font-semibold uppercase tracking-normal text-brand">Kontrollierte KI-Agenten</p>
+          <h2 className="mt-2 text-2xl font-semibold text-[#07173d]">Datenarbeit mit Review und Freigabe.</h2>
           <p className="mt-4 text-sm leading-6 text-muted">
-            GewerkeListe.com entsteht aus echter Baupraxis. Auf Baustellen und in der Planung zeigt sich immer wieder,
-            wie schwer es ist, schnell passende und verfügbare Fachfirmen zu finden.
+            Interne Agenten dürfen recherchieren, strukturieren und Review Items erzeugen. Sie veröffentlichen keine
+            Firmen automatisch, senden keine E-Mails und führen keine gefährlichen Aktionen ohne Freigabe aus.
           </p>
         </Card>
         <Card>
@@ -383,8 +385,8 @@ export default async function HomePage() {
         <Card>
           <h2 className="text-xl font-semibold text-[#07173d]">Bestätigte Betriebsdaten schaffen Vertrauen.</h2>
           <p className="mt-4 text-sm leading-6 text-muted">
-            Ein verifizierter Eintrag zeigt, dass Betriebsdaten übernommen und bestätigt wurden. So können Auftraggeber
-            besser einschätzen, ob ein Betrieb zum gesuchten Gewerk und zur Region passt.
+            Ein verifizierter Eintrag zeigt, dass Betriebsdaten übernommen und bestätigt wurden. Das ist keine
+            Qualitätsgarantie, sondern ein Signal für nachvollziehbare Daten und aktuelle Kontaktwege.
           </p>
         </Card>
         <Card>

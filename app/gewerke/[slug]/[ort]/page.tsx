@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   return {
     title: `${trade.name} in ${location} finden | GewerkeListe.com`,
-    description: `${trade.name}: Fachbetriebe und Betriebseinträge in ${location} nach Leistung, Standort und Tätigkeitsgebiet finden.`,
+    description: `${trade.name}: Fachbetriebe und Betriebseinträge in ${location} nach Leistung, Standort und Wirkungskreis finden.`,
   };
 }
 
@@ -64,8 +64,9 @@ export default async function TradeLocationPage({ params }: PageProps) {
               {trade.name} in {location}
             </h1>
             <p className="mt-5 max-w-3xl text-base leading-7 text-muted">
-              Regionale Suche nach {trade.name} mit Bezug zu Leistung, Standort und Tätigkeitsgebiet. Die Einträge
-              zeigen, ob Betriebsdaten bereits bestätigt wurden und wie der Betrieb erreichbar ist.
+              Regionale Suche nach {trade.name} mit Bezug zu Leistung, Standort und Wirkungskreis. Die Einträge zeigen,
+              ob Betriebsdaten bereits bestätigt wurden und wie der Betrieb erreichbar ist. Verifizierung bedeutet keine
+              Qualitäts- oder Ausführungsgarantie.
             </p>
             <div className="mt-6 flex flex-wrap gap-3">
               <Link className="inline-flex min-h-11 items-center justify-center rounded-md bg-action px-5 text-sm font-semibold text-white hover:bg-brand" href={searchHref(trade.slug, location) as Route}>

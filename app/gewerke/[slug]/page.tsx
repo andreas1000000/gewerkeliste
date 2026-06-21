@@ -113,7 +113,8 @@ export default async function TradeDetailPage({ params }: PageProps) {
             <div>
               <h2 className="text-xl font-semibold text-[#07173d]">Öffentlich gelistete Betriebe</h2>
               <p className="mt-2 text-sm leading-6 text-muted">
-                Zuordnung über bestätigte oder öffentlich erkennbare Gewerkesignale. Verifiziert bedeutet nur: Betriebsdaten bestätigt.
+                Zuordnung über bestätigte oder öffentlich erkennbare Gewerkesignale. Verifiziert bedeutet nur:
+                Betriebsdaten bestätigt, keine Qualitäts- oder Ausführungsgarantie.
               </p>
             </div>
             <span className="text-sm font-semibold text-muted">{companies.length > 0 ? `${companies.length} Betriebe` : "Betriebe finden"}</span>
@@ -197,7 +198,7 @@ export default async function TradeDetailPage({ params }: PageProps) {
           <h2 className="text-xl font-semibold text-[#07173d]">Worauf Auftraggeber achten sollten</h2>
           <div className="mt-4 grid gap-3 md:grid-cols-3">
             <InfoCard title="Leistungsprofil" text="Passt die konkrete Leistung zum Bauvorhaben und zum Bestand?" />
-            <InfoCard title="Tätigkeitsgebiet" text="Ist der Betrieb in der gesuchten Region regelmäßig tätig?" />
+            <InfoCard title="Wirkungskreis" text="Ist der Betrieb in der gesuchten Region fachlich und organisatorisch sinnvoll einzuordnen?" />
             <InfoCard title="Betriebsangaben" text="Sind Kontaktwege, Standort und Verifizierungsstatus nachvollziehbar?" />
           </div>
         </section>
@@ -223,7 +224,8 @@ export default async function TradeDetailPage({ params }: PageProps) {
         <section className="mt-8 rounded-lg border border-line bg-white p-6 text-center shadow-soft">
           <h2 className="text-2xl font-semibold text-[#07173d]">Eigenen Betrieb für dieses Gewerk eintragen</h2>
           <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-muted">
-            Fachbetriebe können Leistungen, Tätigkeitsgebiet und Betriebsdaten strukturiert zur Prüfung einreichen.
+            Fachbetriebe können ihr vollständiges Leistungsspektrum, ihren Wirkungskreis und ihre Betriebsdaten
+            strukturiert zur Prüfung einreichen.
           </p>
           <div className="mt-5 flex flex-wrap justify-center gap-3">
             <Link className="inline-flex min-h-11 items-center justify-center rounded-md bg-[#1f5fd4] px-5 text-sm font-semibold text-white hover:bg-[#174eb2]" href="/betrieb-eintragen">

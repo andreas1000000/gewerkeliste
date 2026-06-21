@@ -6,9 +6,9 @@ import { SiteHeader } from "@/components/site-header";
 import { publicTradeTaxonomy } from "@/lib/trade-taxonomy";
 
 export const metadata: Metadata = {
-  title: "Betrieb kostenlos eintragen | GewerkeListe.com",
+  title: "Betrieb kostenlos eintragen und Leistungen darstellen | GewerkeListe.com",
   description:
-    "Tragen Sie Ihren Fachbetrieb kostenlos ein, wählen Sie Gewerke und Leistungen aus und hinterlegen Sie Ihr Tätigkeitsgebiet.",
+    "Tragen Sie Ihren Fachbetrieb kostenlos ein, wählen Sie Gewerke und Leistungen aus und hinterlegen Sie Wirkungskreis und Tätigkeitsgebiet.",
 };
 
 export default function RegisterCompanyPage() {
@@ -21,18 +21,20 @@ export default function RegisterCompanyPage() {
           <h1 className="mt-3 text-4xl font-semibold text-brand">Betrieb kostenlos eintragen</h1>
           <p className="mt-5 max-w-3xl text-base leading-7 text-ink">
             Tragen Sie Ihren Fachbetrieb ein, wählen Sie Gewerke und Leistungen aus und hinterlegen Sie Ihr
-            Tätigkeitsgebiet. Die Angaben werden vor der Veröffentlichung geprüft.
+            Tätigkeitsgebiet. Die Angaben werden vor der Veröffentlichung geprüft und nicht automatisch live gestellt.
           </p>
           <p className="mt-4 max-w-3xl text-sm leading-6 text-muted">
             GewerkeListe.com wird als professionelles Verzeichnis für Baugewerke aufgebaut. Wenn Ihr Betrieb noch nicht
-            gelistet ist, können Sie hier einen neuen Fachbetriebseintrag anlegen.
+            gelistet ist, können Sie hier einen neuen Fachbetriebseintrag anlegen. Ziel ist keine Auftragsauktion,
+            sondern eine klare Marktübersicht nach Gewerk, Leistung und Region.
           </p>
           <div className="mt-6 rounded-md border border-[#b9dec8] bg-[#eef9f2] p-4 text-sm leading-6 text-[#24523a]">
             <div className="text-lg font-semibold text-[#07173d]">Kostenloser Basiseintrag</div>
             <p className="mt-2 font-semibold">Werde in deiner Region sachlich und strukturiert auffindbar.</p>
             <p className="mt-2">
               GewerkeListe.com befindet sich im Aufbau. Der Basiseintrag ist kostenlos und bleibt von freiwilligen
-              Förderbeiträgen getrennt. Jeder Betrieb soll sein tatsächliches Leistungsspektrum klar darstellen können.
+              Aufbau-Beiträgen getrennt. Jeder Betrieb soll sein tatsächliches Leistungsspektrum klar und vollständig
+              darstellen können.
             </p>
           </div>
           <div className="mt-6 grid gap-3 rounded-lg border border-line bg-panel p-4 text-sm font-semibold text-brand sm:grid-cols-4">

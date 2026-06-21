@@ -309,11 +309,12 @@ export default async function CompanyPublicPage({ params }: PageProps) {
           </div>
 
           <section className="mt-5 rounded-lg border border-line bg-white p-5 shadow-soft sm:p-6">
-            <p className="text-sm font-semibold uppercase tracking-normal text-brand">Förderprofil</p>
-            <h2 className="mt-2 text-2xl font-semibold text-[#07173d]">Zusätzliche Möglichkeiten für Fördermitglieder</h2>
+            <p className="text-sm font-semibold uppercase tracking-normal text-brand">Erweiterte Darstellung</p>
+            <h2 className="mt-2 text-2xl font-semibold text-[#07173d]">Zusätzliche Profilbereiche für mehr Vertrauen</h2>
             <p className="mt-3 text-sm leading-6 text-muted">
-              Der Basiseintrag bleibt kostenlos. Fördermitglieder können das Projekt freiwillig unterstützen und ihr
-              Profil schrittweise ausführlicher darstellen.
+              Der Basiseintrag bleibt kostenlos und kann das tatsächliche Leistungsspektrum vollständig darstellen.
+              Erweiterte Profilbereiche können später zusätzliche Referenzen, Bilder, Ansprechpartner und
+              Projektbeispiele abbilden.
             </p>
             <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {plannedProfileExtensions.map((item) => (
@@ -380,7 +381,6 @@ const plannedProfileExtensions = [
   "Zertifikate und Nachweise",
   "Verfügbarkeitsanzeige",
   "Direkte Anfragefunktion",
-  "Ausführlichere Leistungsdarstellung",
   "Persönliche Vorstellung",
   "Bilder und Referenzen",
   "Ausführlichere Unternehmensseite",

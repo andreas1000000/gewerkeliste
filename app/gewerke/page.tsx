@@ -9,9 +9,9 @@ import { publicTradeTaxonomy } from "@/lib/trade-taxonomy";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Gewerke finden nach Baukostenstruktur | GewerkeListe.com",
+  title: "Baugewerke und Leistungen finden | GewerkeListe.com",
   description:
-    "Strukturierte Suche nach Baugewerken, Planungsleistungen und ausführenden Unternehmen, gegliedert nach Kostenstruktur und praxisnahen Vergabeeinheiten.",
+    "Bauleistungsnahe Suche nach Gewerken, Spezialisierungen und passenden Fachbetrieben, mit DIN-276-orientierter Struktur und praxisnahen Vergabeeinheiten.",
 };
 
 type PageProps = {
