@@ -7,8 +7,8 @@ import { agentOsTablesAvailableError, getAgentCockpitData } from "@/lib/agents/p
 import { runCompanyDiscoveryDryRun } from "@/lib/agents/company-discovery";
 import { runRegionalCoverageDryRun } from "@/lib/agents/regional-coverage";
 import {
-  persistRiederingCoverageDryRun,
-  persistRiederingDiscoveryDryRun,
+  persistDefaultCoverageDryRun,
+  persistDefaultDiscoveryDryRun,
   setAgentApprovalStatus,
   setAgentOutboxStatus,
   setAgentReviewStatus,
@@ -16,6 +16,9 @@ import {
 } from "./actions";
 
 export const dynamic = "force-dynamic";
+
+const defaultAgentRegionSlug = "stephanskirchen";
+const defaultAgentRegionName = "Stephanskirchen";
 
 export default async function AdminAgentsPage() {
   const cockpit = await loadCockpit();
@@ -32,7 +35,7 @@ export default async function AdminAgentsPage() {
           </p>
         </div>
         <a className="w-fit rounded-md border border-line bg-white px-4 py-2 text-sm font-semibold text-ink hover:bg-panel" href="/admin/coverage?region=stephanskirchen">
-          Coverage Review
+          Stephanskirchen Review öffnen
         </a>
       </div>
 
@@ -61,11 +64,11 @@ export default async function AdminAgentsPage() {
           <div>
             <h2 className="text-xl font-semibold text-ink">Regional Coverage Dry Run</h2>
             <p className="mt-1 text-sm text-muted">
-              Region Riedering wird gelesen und bewertet. Speichern erzeugt nur interne Agent-Runs und Agent-Tasks.
+              Region {defaultAgentRegionName} wird gelesen und bewertet. Speichern erzeugt nur interne Agent-Runs und Agent-Tasks.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <form action={persistRiederingCoverageDryRun}>
+            <form action={persistDefaultCoverageDryRun}>
               <button
                 className="rounded-md bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-[#265a4d] disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={cockpit.migrationMissing || Boolean(cockpit.coverageError)}
@@ -74,7 +77,7 @@ export default async function AdminAgentsPage() {
                 Coverage Dry Run speichern
               </button>
             </form>
-            <form action={persistRiederingDiscoveryDryRun}>
+            <form action={persistDefaultDiscoveryDryRun}>
               <button
                 className="rounded-md border border-brand bg-white px-4 py-2 text-sm font-semibold text-brand hover:bg-panel disabled:cursor-not-allowed disabled:opacity-50"
                 disabled={cockpit.migrationMissing || Boolean(cockpit.discoveryError)}
@@ -315,13 +318,13 @@ async function loadCockpit() {
   };
 
   try {
-    base.coverage = await runRegionalCoverageDryRun({ regionSlug: "riedering" });
+    base.coverage = await runRegionalCoverageDryRun({ regionSlug: defaultAgentRegionSlug });
   } catch (error) {
     base.coverageError = error instanceof Error ? error.message : String(error);
   }
 
   try {
-    base.discovery = await runCompanyDiscoveryDryRun({ regionSlug: "riedering" });
+    base.discovery = await runCompanyDiscoveryDryRun({ regionSlug: defaultAgentRegionSlug });
   } catch (error) {
     base.discoveryError = error instanceof Error ? error.message : String(error);
   }

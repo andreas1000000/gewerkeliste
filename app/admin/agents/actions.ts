@@ -12,14 +12,16 @@ import {
 import { runCompanyDiscoveryDryRun } from "@/lib/agents/company-discovery";
 import { runRegionalCoverageDryRun } from "@/lib/agents/regional-coverage";
 
-export async function persistRiederingCoverageDryRun() {
-  const result = await runRegionalCoverageDryRun({ regionSlug: "riedering" });
+const defaultAgentRegionSlug = "stephanskirchen";
+
+export async function persistDefaultCoverageDryRun() {
+  const result = await runRegionalCoverageDryRun({ regionSlug: defaultAgentRegionSlug });
   await persistRegionalCoverageDryRun(result);
   revalidatePath("/admin/agents");
 }
 
-export async function persistRiederingDiscoveryDryRun() {
-  const result = await runCompanyDiscoveryDryRun({ regionSlug: "riedering" });
+export async function persistDefaultDiscoveryDryRun() {
+  const result = await runCompanyDiscoveryDryRun({ regionSlug: defaultAgentRegionSlug });
   await persistCompanyDiscoveryDryRun(result);
   revalidatePath("/admin/agents");
 }
