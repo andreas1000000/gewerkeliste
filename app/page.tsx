@@ -26,10 +26,6 @@ const benefits = [
     title: "Region und Wirkungskreis einordnen",
     text: "Nicht nur Sitz und Radius zählen. GewerkeListe.com macht sichtbar, in welchen Regionen ein Betrieb fachlich relevant ist.",
   },
-  {
-    title: "Datenqualität mit Review Gates",
-    text: "KI-Agenten helfen intern bei Recherche und Strukturierung. Veröffentlichung, Löschung und E-Mail bleiben freigabepflichtig.",
-  },
 ];
 
 const registerFields = [
@@ -45,11 +41,11 @@ const registerFields = [
 const comparisons = [
   {
     title: "Allgemeine Suchmaschinen",
-    items: ["viele Treffer", "wenig fachliche Struktur", "Spezialisierungen oft schwer erkennbar", "Tätigkeitsgebiet unklar"],
+    items: ["wenig fachliche Struktur", "Spezialisierungen oft schwer erkennbar", "Tätigkeitsgebiet unklar"],
   },
   {
     title: "Klassische Auftragsportale",
-    items: ["einzelne Anfragen", "oft Preisdruck", "Kontaktverkauf als Kernmodell", "wenig Registercharakter"],
+    items: ["einzelne Anfragen", "oft Preisdruck"],
   },
   {
     title: "GewerkeListe.com",
@@ -118,7 +114,7 @@ export default async function HomePage() {
           </div>
 
           <div className="max-w-5xl">
-            <p className="text-sm font-semibold uppercase tracking-normal text-brand">B2B-Infrastruktur für Baugewerke</p>
+            <p className="text-sm font-semibold uppercase tracking-normal text-brand">Die digitale Infrastruktur der Bauwirtschaft</p>
             <h1 className="mt-4 text-4xl font-semibold tracking-normal text-brand sm:text-5xl">
               Die regionale Gewerke-Suche für professionelle Bauprojekte.
             </h1>
@@ -128,9 +124,9 @@ export default async function HomePage() {
             </p>
 
             <div className="mt-6 flex flex-wrap gap-4 text-sm font-semibold text-brand">
-              <TrustItem text="Kein Kontaktverkauf als Kernmodell" />
-              <TrustItem text="Kostenlose Grundsichtbarkeit" />
-              <TrustItem text="Review vor Veröffentlichung" />
+              <TrustItem text="Strukturierte Betriebsdaten" />
+              <TrustItem text="Gewerke klar einordnen" />
+              <TrustItem text="Regionale Suche" />
             </div>
             <p className="mt-4 max-w-3xl text-sm leading-6 text-muted">
               GewerkeListe.com ersetzt keine persönlichen Empfehlungen. Die Plattform macht den Markt davor besser
@@ -340,14 +336,6 @@ export default async function HomePage() {
           <p className="mt-4 text-sm leading-6 text-muted">
             Jeder Betrieb soll unabhängig von Region, Größe oder Unternehmensalter die Möglichkeit haben, seine
             Leistungen klar darzustellen und gefunden zu werden.
-          </p>
-        </Card>
-        <Card>
-          <p className="text-sm font-semibold uppercase tracking-normal text-brand">Kontrollierte KI-Agenten</p>
-          <h2 className="mt-2 text-2xl font-semibold text-[#07173d]">Datenarbeit mit Review und Freigabe.</h2>
-          <p className="mt-4 text-sm leading-6 text-muted">
-            Interne Agenten dürfen recherchieren, strukturieren und Review Items erzeugen. Sie veröffentlichen keine
-            Firmen automatisch, senden keine E-Mails und führen keine gefährlichen Aktionen ohne Freigabe aus.
           </p>
         </Card>
         <Card>

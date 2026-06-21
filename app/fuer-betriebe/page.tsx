@@ -20,7 +20,7 @@ const steps = [
   },
   {
     title: "Daten bestätigen",
-    text: "Nach Prüfung werden Betriebsdaten, Leistungen und Wirkungskreis sauber hinterlegt.",
+    text: "Nach Prüfung werden Betriebsdaten, Leistungen und Wirkungskreis hinterlegt.",
   },
 ];
 
@@ -147,8 +147,8 @@ export default function ForCompaniesPage() {
         <section className="mt-8 rounded-lg border border-line bg-white p-6 shadow-soft">
           <h2 className="text-2xl font-semibold text-brand">Kein Kontaktverkauf. Kein Preiskampf.</h2>
           <p className="mt-4 max-w-4xl text-sm leading-6 text-muted">
-            GewerkeListe.com verkauft keine einzelnen Kontakte als Kernmodell. Der Betriebseintrag soll langfristig
-            sichtbar machen, welche Leistungen ein Betrieb anbietet und in welchem Gebiet er tätig ist.
+            GewerkeListe.com verkauft keine einzelnen Kontakte. Der Betriebseintrag soll langfristig sichtbar machen,
+            welche Leistungen ein Betrieb anbietet und in welchem Gebiet er tätig ist.
           </p>
         </section>
 
