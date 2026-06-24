@@ -141,6 +141,7 @@ export type MunicipalityDiscoveryInput = {
   municipality: string;
   county?: string;
   trade_scope: "prio1" | "all" | string;
+  discovery_mode?: "local_candidates" | "human_search_assist" | "web_search_discovery";
   max_queries: number;
   max_publications: number;
   max_cost_eur: number;
@@ -176,8 +177,11 @@ export type MunicipalityDiscoveryResult = {
   email_mode: MunicipalityDiscoveryEmailMode;
   queries_planned: number;
   queries_executed: number;
+  manual_queries: string[];
   external_api_used: boolean;
   costs_eur: number;
+  websites_found: number;
+  candidates_created: number;
   candidates: MunicipalityDiscoveryCandidate[];
   tier_counts: Record<MunicipalityDiscoveryTier, number>;
   publications_created: number;

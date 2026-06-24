@@ -52,6 +52,13 @@ export default async function MunicipalityDiscoveryPage() {
                 <option value="dachdeckerarbeiten">Einzelnes Gewerk: Dachdeckerarbeiten</option>
               </select>
             </Field>
+            <Field label="Discovery-Modus">
+              <select className="mt-1 w-full rounded-md border border-line px-3 py-2 text-sm outline-none focus:border-brand" defaultValue="web_search_discovery" name="discovery_mode">
+                <option value="web_search_discovery">web_search_discovery - Search API mit Gate</option>
+                <option value="human_search_assist">human_search_assist - nur Suchliste erzeugen</option>
+                <option value="local_candidates">local_candidates - vorhandene Kandidaten nutzen</option>
+              </select>
+            </Field>
             <Field label="Publish-Modus">
               <select className="mt-1 w-full rounded-md border border-line px-3 py-2 text-sm outline-none focus:border-brand" defaultValue="manual_approval" name="publish_mode">
                 <option value="manual_approval">manual_approval - Freigaben erzeugen</option>
@@ -81,7 +88,8 @@ export default async function MunicipalityDiscoveryPage() {
 
           <div className="mt-5 rounded-md border border-line bg-panel p-4 text-sm leading-6 text-muted">
             <strong className="text-ink">Sicherheitslogik:</strong> Dry Run veroeffentlicht nichts. Manual Approval erzeugt nur Freigaben.
-            Tier-A-Live legt nur unbestaetigte Basis-Eintraege bis zum Limit an. E-Mails bleiben Outbox-Entwuerfe.
+            Tier-A-Live legt nur unbestaetigte Basis-Eintraege bis zum Limit an. E-Mails bleiben Outbox-Entwuerfe. Externe Suche laeuft nur mit
+            gesetztem API-Key und <code>GEWERKELISTE_ALLOW_EXTERNAL_API=true</code>.
           </div>
 
           <div className="mt-5 flex flex-wrap gap-3">
@@ -112,6 +120,7 @@ export default async function MunicipalityDiscoveryPage() {
             <Guardrail title="Tier A" body="Plausibler Firmenname, Ort, Gewerk, Quelle und keine Dublette. Nur diese Kandidaten duerfen bei bewusstem Live-Modus als unbestaetigte Basis-Eintraege entstehen." />
             <Guardrail title="Tier B" body="Bleibt im Review. Typisch: schwache Quelle, unsicheres Gewerk oder moegliche Dublette." />
             <Guardrail title="Tier C" body="Wird blockiert. Behoerden, News, Toplisten, Google-Maps-Scrapes oder private Daten werden nicht veroeffentlicht." />
+            <Guardrail title="Suchmaschine" body="Suchtreffer sind nur Wegweiser. Gespeichert wird bevorzugt die eigene Firmenwebsite als Quelle." />
             <Guardrail title="E-Mail" body="Drafts nur in agent_outbox. Kein automatischer Versand, keine Massen-E-Mail." />
           </div>
         </aside>

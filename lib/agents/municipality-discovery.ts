@@ -1,6 +1,8 @@
 import { revalidatePath } from "next/cache";
 import { getAgentDefinition } from "@/lib/agents/agent-registry";
 import { getUniqueCompanySlug } from "@/lib/data";
+import { BraveSearchProvider } from "@/lib/search/brave-search-provider";
+import type { SearchResult } from "@/lib/search/search-provider";
 import { companySlug, slugify } from "@/lib/slug";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { canonicalTradeSlug, findTaxonomyTrade } from "@/lib/trade-taxonomy";
@@ -15,6 +17,8 @@ import type {
 const agentId = "municipality-discovery-agent";
 const defaultCounty = "Landkreis Rosenheim";
 const blockedSourcePattern = /(rathaus|landratsamt|beh[oö]rde|regierung|ovb|zeitung|news|nachrichten|top[- ]?10|google\.com\/maps|maps\.google)/i;
+const blockedHostPattern = /(google\.|maps\.google|bing\.|duckduckgo\.|ovb-online|rosenheim24|chiemgau24|merkur\.de|meinestadt\.de|gelbeseiten\.de|dasoertliche\.de|11880\.com|cylex\.de|branchenbuch|northdata|firmenwissen|unternehmensregister|facebook\.com|instagram\.com|linkedin\.com)/i;
+const estimatedBraveQueryCostEur = 0.01;
 const prio1TradeSlugs = [
   "maurerarbeiten",
   "betonbau",
@@ -71,6 +75,12 @@ type DbCandidate = {
 };
 
 type PublishStats = {
+  queries_planned: string[];
+  queries_executed: number;
+  websites_found: number;
+  candidates_created: number;
+  external_api_used: boolean;
+  costs_eur: number;
   publications_created: number;
   approvals_created: number;
   review_items_created: number;
@@ -87,6 +97,7 @@ export function normalizeMunicipalityDiscoveryInput(formInput: Partial<Municipal
     municipality: (formInput.municipality || "").trim(),
     county: (formInput.county || defaultCounty).trim(),
     trade_scope: formInput.trade_scope || "prio1",
+    discovery_mode: isDiscoveryMode(formInput.discovery_mode) ? formInput.discovery_mode : "web_search_discovery",
     max_queries: clampInteger(formInput.max_queries, 0, 500, 50),
     max_publications: clampInteger(formInput.max_publications, 0, 250, 10),
     max_cost_eur: clampNumber(formInput.max_cost_eur, 0, 25, 1),
@@ -135,6 +146,12 @@ export async function runMunicipalityDiscovery(input: MunicipalityDiscoveryInput
   if (runError || !run) throw runError || new Error("Agent Run konnte nicht angelegt werden.");
 
   const stats: PublishStats = {
+    queries_planned: [],
+    queries_executed: 0,
+    websites_found: 0,
+    candidates_created: 0,
+    external_api_used: false,
+    costs_eur: 0,
     publications_created: 0,
     approvals_created: 0,
     review_items_created: 0,
@@ -149,9 +166,14 @@ export async function runMunicipalityDiscovery(input: MunicipalityDiscoveryInput
       municipality: normalized.municipality,
       max_queries: normalized.max_queries,
       max_publications: normalized.max_publications,
+      discovery_mode: normalized.discovery_mode,
       publish_mode: normalized.publish_mode,
       email_mode: normalized.email_mode,
     });
+
+    if (normalized.discovery_mode !== "local_candidates") {
+      await runWebSearchDiscovery(run.id, region, normalized, stats);
+    }
 
     const candidates = await loadMunicipalityCandidates(region, normalized);
     await insertToolCall(run.id, "database", "load_company_candidates", {
@@ -160,7 +182,7 @@ export async function runMunicipalityDiscovery(input: MunicipalityDiscoveryInput
       external_api: false,
     }, {
       candidates_found: candidates.length,
-      external_api_used: false,
+      external_api_used: stats.external_api_used,
     });
 
     const classified = await classifyCandidates(candidates, normalized);
@@ -178,7 +200,7 @@ export async function runMunicipalityDiscovery(input: MunicipalityDiscoveryInput
       await publishTierA(run.id, region, classified, normalized, stats);
     }
 
-    await insertCostEvent(run.id, region.id, normalized);
+    await insertCostEvent(run.id, region.id, normalized, stats);
 
     const result = buildResult(run.id, region, normalized, classified, stats);
     const { error: updateError } = await supabase
@@ -257,6 +279,216 @@ async function loadMunicipalityCandidates(region: DbRegion, input: MunicipalityD
   const { data, error } = await query;
   if (error) throw error;
   return (data || []) as DbCandidate[];
+}
+
+async function runWebSearchDiscovery(runId: string, region: DbRegion, input: MunicipalityDiscoveryInput, stats: PublishStats) {
+  const queries = await buildMunicipalityQueries(region, input);
+  stats.queries_planned = queries.slice(0, input.max_queries);
+
+  const externalApiAllowed = process.env.GEWERKELISTE_ALLOW_EXTERNAL_API === "true";
+  const provider = new BraveSearchProvider({ maxResults: 5 });
+  if (!externalApiAllowed || !provider.available || input.discovery_mode === "human_search_assist") {
+    await insertStep(runId, "human_search_assist", "Suchliste fuer menschliche Recherche erzeugt", "completed", {
+      external_api_allowed: externalApiAllowed,
+      provider_available: provider.available,
+      manual_queries: stats.queries_planned,
+      note: "Keine Suchmaschine wurde aufgerufen. Suchmaschine dient nur als Wegweiser, Firmenwebsite ist der Beleg.",
+    });
+    await insertToolCall(
+      runId,
+      "web_search",
+      "human_search_assist_query_batch",
+      { queries: stats.queries_planned, external_api_allowed: externalApiAllowed },
+      { queries_executed: 0, candidates_created: 0, reason: "External API disabled or provider unavailable" },
+    );
+    return;
+  }
+
+  const supabase = getSupabaseAdmin();
+  const createdCandidates: Array<Record<string, unknown>> = [];
+  const seenHosts = new Set<string>();
+  let spent = 0;
+
+  for (const query of stats.queries_planned) {
+    if (spent + estimatedBraveQueryCostEur > input.max_cost_eur) break;
+    const results = await provider.search(query);
+    stats.queries_executed += 1;
+    spent += estimatedBraveQueryCostEur;
+    stats.external_api_used = true;
+
+    for (const result of results) {
+      const candidate = await candidateFromSearchResult(result, query, region, input);
+      if (!candidate) continue;
+      const host = hostname(candidate.possible_website || candidate.source_url || "");
+      if (!host || seenHosts.has(host)) continue;
+      seenHosts.add(host);
+      createdCandidates.push(candidate);
+    }
+  }
+
+  stats.costs_eur = Number(spent.toFixed(4));
+  stats.websites_found = createdCandidates.length;
+  if (createdCandidates.length) {
+    const { data, error } = await supabase
+      .from("company_candidates")
+      .upsert(createdCandidates, { onConflict: "source_url,name", ignoreDuplicates: true })
+      .select("id");
+    if (error) throw error;
+    stats.candidates_created = data?.length || 0;
+  }
+
+  await insertStep(runId, "web_search_discovery", "Suchanbieter als Wegweiser genutzt", "completed", {
+    provider: provider.name,
+    queries_executed: stats.queries_executed,
+    websites_found: stats.websites_found,
+    candidates_created: stats.candidates_created,
+    estimated_cost_eur: stats.costs_eur,
+    google_maps_used: false,
+    google_places_used: false,
+  });
+  await insertToolCall(
+    runId,
+    "web_search",
+    provider.name,
+    { queries: stats.queries_planned.slice(0, stats.queries_executed), cost_gate_eur: input.max_cost_eur },
+    { queries_executed: stats.queries_executed, candidates_created: stats.candidates_created, google_maps_used: false, google_places_used: false },
+  );
+}
+
+async function buildMunicipalityQueries(region: DbRegion, input: MunicipalityDiscoveryInput) {
+  const tradeSlugs = await resolveTradeScope(input.trade_scope);
+  const trades = await loadQueryTrades(tradeSlugs);
+  const place = region.name;
+  const county = input.county || region.county || defaultCounty;
+  const queries: string[] = [];
+  for (const trade of trades) {
+    const terms = queryTermsForTrade(trade.slug, trade.name);
+    for (const term of terms.slice(0, 2)) {
+      queries.push(`${term} ${place}`);
+      queries.push(`${term} ${place} Firma`);
+      queries.push(`${term} ${place} Meisterbetrieb`);
+      queries.push(`${term} ${place} GmbH`);
+      queries.push(`${term} ${county}`);
+      queries.push(`${term} Rosenheim Chiemgau`);
+      queries.push(`${term} in der Nähe Rosenheim`);
+    }
+  }
+  return [...new Set(queries.map((query) => query.trim()).filter(Boolean))].slice(0, input.max_queries);
+}
+
+async function loadQueryTrades(tradeSlugs: string[]) {
+  if (!tradeSlugs.length) {
+    return prio1TradeSlugs.map((slug) => ({ slug, name: findTaxonomyTrade(slug)?.name || titleCase(slug.replace(/-/g, " ")) }));
+  }
+  const supabase = getSupabaseAdmin();
+  const { data } = await supabase.from("trades").select("name,slug").in("slug", tradeSlugs);
+  if (data?.length) return data as Array<{ name: string; slug: string }>;
+  return tradeSlugs.map((slug) => ({ slug, name: findTaxonomyTrade(slug)?.name || titleCase(slug.replace(/-/g, " ")) }));
+}
+
+function queryTermsForTrade(slug: string, name: string) {
+  const presets: Record<string, string[]> = {
+    elektroinstallation: ["Elektro", "Elektriker", "Elektrotechnik"],
+    "sanitaer-heizung-klima": ["Heizung Sanitär", "SHK", "Wärmepumpe"],
+    zimmererarbeiten: ["Zimmerei", "Holzbau", "Dachstuhl"],
+    dachdeckerarbeiten: ["Dachdecker", "Bedachungen", "Dachsanierung"],
+    spenglerarbeiten: ["Spengler", "Blechner", "Dachrinne"],
+    tiefbau: ["Tiefbau", "Baggerbetrieb", "Erdbau"],
+    pflasterbau: ["Pflasterbau", "Pflasterarbeiten", "Außenanlagen"],
+    maurerarbeiten: ["Maurer", "Bauunternehmen", "Rohbau"],
+    malerarbeiten: ["Maler", "Malerbetrieb", "Lackierer"],
+    schreinerarbeiten: ["Schreinerei", "Schreiner", "Innenausbau"],
+  };
+  return presets[slug] || [name, slug.replace(/-/g, " ")];
+}
+
+async function candidateFromSearchResult(result: SearchResult, query: string, region: DbRegion, input: MunicipalityDiscoveryInput) {
+  const sourceUrl = normalizeWebsite(result.url);
+  if (!sourceUrl || isBlockedSearchResult(sourceUrl)) return null;
+  const root = rootUrl(sourceUrl);
+  if (!root || isBlockedSearchResult(root)) return null;
+
+  const website = await analyzeCompanyWebsite(root, region.name);
+  const text = `${result.title} ${result.snippet} ${website.text}`.slice(0, 12000);
+  const tradeSlug = detectTradeFromText(text, input.trade_scope);
+  const name = cleanCompanyName(website.companyName || result.title || hostname(root));
+  if (!name || isGenericCompanyName(name)) return null;
+  if (!tradeSlug) return null;
+
+  return {
+    name,
+    city: website.city || region.name,
+    postal_code: website.postalCode || region.postal_codes?.[0] || null,
+    street: website.street,
+    possible_trade: tradeSlug,
+    possible_website: root,
+    phone: website.phone,
+    email: website.email,
+    source_type: website.imprintFound ? "official_website" : "search_result",
+    source_url: root,
+    discovery_confidence: 80,
+    identity_confidence: website.imprintFound ? 90 : 75,
+    trade_confidence: 82,
+    overall_score: website.imprintFound ? 88 : 78,
+    status: "needs_review",
+    duplicate_of_company_id: null,
+    raw_evidence: {
+      query,
+      search_provider: result.source,
+      search_title: result.title,
+      search_snippet: result.snippet,
+      pages_checked: website.pages,
+      services_raw: website.services,
+      google_maps_used: false,
+      google_places_used: false,
+    },
+  };
+}
+
+async function analyzeCompanyWebsite(root: string, municipality: string) {
+  const pages = [root, `${root.replace(/\/$/, "")}/impressum`, `${root.replace(/\/$/, "")}/kontakt`, `${root.replace(/\/$/, "")}/leistungen`];
+  const parts: string[] = [];
+  const checked: string[] = [];
+  for (const page of pages) {
+    const html = await fetchText(page);
+    if (!html) continue;
+    checked.push(page);
+    parts.push(html);
+  }
+  const text = stripHtml(parts.join(" ")).slice(0, 20000);
+  const postalCode = text.match(/\b(8[0-9]{4})\b/)?.[1] || null;
+  const email = text.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i)?.[0] || null;
+  const phone = text.match(/(?:\+49|0)[\d\s./()-]{6,}/)?.[0]?.replace(/\s+/g, " ").trim() || null;
+  const street = text.match(/\b([A-ZÄÖÜ][A-Za-zÄÖÜäöüß .-]+(?:straße|str\.|weg|platz|gasse|ring|allee)\s+\d+[a-zA-Z]?)\b/)?.[1] || null;
+  const title = text.split(/\s{2,}|\n/).find((line) => /gmbh|bau|elektro|zimmerei|schreinerei|maler|dach|sanit|heizung/i.test(line)) || "";
+  const companyName = cleanCompanyName(title);
+  return {
+    text,
+    pages: checked,
+    companyName,
+    city: text.toLowerCase().includes(municipality.toLowerCase()) ? municipality : null,
+    postalCode,
+    street,
+    phone,
+    email,
+    imprintFound: /impressum|anbieterkennzeichnung/i.test(text),
+    services: extractServices(text),
+  };
+}
+
+async function fetchText(url: string) {
+  try {
+    const response = await fetch(url, {
+      headers: { "user-agent": "GewerkeListeResearchBot/0.1 (+https://gewerkeliste.com; contact: kontakt@gewerkeliste.com)" },
+      signal: AbortSignal.timeout(6000),
+    });
+    if (!response.ok) return "";
+    const contentType = response.headers.get("content-type") || "";
+    if (!contentType.includes("text/html") && !contentType.includes("text/plain")) return "";
+    return await response.text();
+  } catch {
+    return "";
+  }
 }
 
 async function resolveTradeScope(scope: string) {
@@ -612,7 +844,7 @@ async function insertToolCall(agentRunId: string, toolClass: string, toolName: s
   if (error) throw error;
 }
 
-async function insertCostEvent(agentRunId: string, regionId: string, input: MunicipalityDiscoveryInput) {
+async function insertCostEvent(agentRunId: string, regionId: string, input: MunicipalityDiscoveryInput, stats: PublishStats) {
   const supabase = getSupabaseAdmin();
   const { error } = await supabase.from("agent_cost_events").insert({
     agent_run_id: agentRunId,
@@ -621,13 +853,14 @@ async function insertCostEvent(agentRunId: string, regionId: string, input: Muni
     provider: "internal",
     tool_name: "municipality_discovery_workflow",
     region_id: regionId,
-    estimated_cost: 0,
-    actual_cost: 0,
+    estimated_cost: stats.costs_eur,
+    actual_cost: stats.costs_eur,
     currency: "EUR",
     metadata: {
       max_cost_eur: input.max_cost_eur,
-      external_api_used: false,
-      note: "Keine externe Suche in diesem Slice; vorhandene Kandidatenbasis genutzt.",
+      external_api_used: stats.external_api_used,
+      queries_executed: stats.queries_executed,
+      websites_found: stats.websites_found,
     },
   });
   if (error) throw error;
@@ -649,10 +882,13 @@ function buildResult(
     region_slug: region.slug,
     publish_mode: input.publish_mode,
     email_mode: input.email_mode,
-    queries_planned: input.max_queries,
-    queries_executed: 0,
-    external_api_used: false,
-    costs_eur: 0,
+    queries_planned: stats.queries_planned.length,
+    queries_executed: stats.queries_executed,
+    manual_queries: stats.external_api_used ? [] : stats.queries_planned,
+    external_api_used: stats.external_api_used,
+    costs_eur: stats.costs_eur,
+    websites_found: stats.websites_found,
+    candidates_created: stats.candidates_created,
     candidates,
     tier_counts: tierCounts(candidates),
     publications_created: stats.publications_created,
@@ -666,7 +902,7 @@ function buildResult(
       "Keine Verifizierung gesetzt.",
       "Keine Claim-Status-Uebernahme gesetzt.",
       "Keine Google-Maps-Scrapes.",
-      "Externe API in diesem Slice nicht genutzt.",
+      stats.external_api_used ? "Externe API wurde nur mit Gate und Kostenlimit genutzt." : "Keine externe API genutzt; Suchliste wurde als manueller Batch erzeugt.",
       input.publish_mode === "tier_a_unverified_basis"
         ? "Tier-A-Kandidaten wurden nur bis zum gesetzten max_publications-Limit als unbestaetigte Basis-Eintraege angelegt."
         : "Keine oeffentlichen Firmen automatisch angelegt.",
@@ -751,6 +987,99 @@ function isPublishMode(value: unknown): value is MunicipalityDiscoveryInput["pub
 
 function isEmailMode(value: unknown): value is MunicipalityDiscoveryInput["email_mode"] {
   return value === "none" || value === "draft_only" || value === "send_after_approval";
+}
+
+function isDiscoveryMode(value: unknown): value is NonNullable<MunicipalityDiscoveryInput["discovery_mode"]> {
+  return value === "local_candidates" || value === "human_search_assist" || value === "web_search_discovery";
+}
+
+function isBlockedSearchResult(url: string) {
+  const host = hostname(url);
+  return !host || blockedHostPattern.test(host) || blockedSourcePattern.test(url);
+}
+
+function rootUrl(url: string) {
+  try {
+    const parsed = new URL(url);
+    return `${parsed.protocol}//${parsed.hostname.replace(/^www\./, "")}`;
+  } catch {
+    return null;
+  }
+}
+
+function hostname(url: string) {
+  try {
+    return new URL(url).hostname.replace(/^www\./, "").toLowerCase();
+  } catch {
+    return "";
+  }
+}
+
+function stripHtml(value: string) {
+  return value
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function cleanCompanyName(value: string) {
+  return stripHtml(value)
+    .replace(/\b(Startseite|Home|Willkommen|Impressum|Kontakt|Leistungen|Datenschutz)\b/gi, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 120);
+}
+
+function isGenericCompanyName(value: string) {
+  const normalized = value.toLowerCase();
+  return !normalized || normalized.length < 4 || /^(home|startseite|impressum|kontakt|leistungen|datenschutz|firma|unternehmen)$/.test(normalized);
+}
+
+function detectTradeFromText(text: string, fallbackScope: string) {
+  const normalized = text.toLowerCase();
+  const signals: Array<[string, RegExp]> = [
+    ["elektroinstallation", /elektro|elektriker|elektrotechnik|photovoltaik|netzwerk|blitzschutz/],
+    ["sanitaer-heizung-klima", /sanitär|sanitaer|heizung|shk|wärmepumpe|waermepumpe|lüftung|lueftung|klima/],
+    ["zimmererarbeiten", /zimmerei|zimmerer|holzbau|dachstuhl|holzrahmenbau/],
+    ["dachdeckerarbeiten", /dachdecker|bedachung|dachsanierung|flachdach|steildach/],
+    ["spenglerarbeiten", /spengler|blechner|dachrinne|blechdach|kaminverkleidung/],
+    ["tiefbau", /tiefbau|erdbau|bagger|kanalbau|entwässerung|entwaesserung/],
+    ["pflasterbau", /pflaster|außenanlagen|aussenanlagen|einfahrt|terrasse|naturstein/],
+    ["maurerarbeiten", /maurer|mauerwerk|rohbau|hochbau|massivbau/],
+    ["malerarbeiten", /maler|lackierer|anstrich|fassadenanstrich|beschichtung/],
+    ["schreinerarbeiten", /schreiner|schreinerei|innenausbau|möbel|moebel|türen|tueren/],
+    ["metallbau", /metallbau|schlosserei|stahlbau|geländer|gelaender/],
+  ];
+  for (const [slug, pattern] of signals) {
+    if (pattern.test(normalized)) return slug;
+  }
+  const canonical = canonicalTradeSlug(fallbackScope);
+  return canonical && canonical !== "prio1" && canonical !== "all" ? canonical : null;
+}
+
+function extractServices(text: string) {
+  const normalized = text.toLowerCase();
+  const services = [
+    "Elektroinstallation",
+    "Photovoltaik",
+    "Heizung",
+    "Sanitär",
+    "Wärmepumpe",
+    "Zimmerei",
+    "Holzbau",
+    "Dachdeckerarbeiten",
+    "Spenglerarbeiten",
+    "Tiefbau",
+    "Pflasterbau",
+    "Maurerarbeiten",
+    "Malerarbeiten",
+    "Schreinerarbeiten",
+    "Metallbau",
+  ];
+  return services.filter((service) => normalized.includes(service.toLowerCase())).slice(0, 8);
 }
 
 function escapeOrValue(value: string) {

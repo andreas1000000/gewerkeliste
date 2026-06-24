@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { normalizeMunicipalityDiscoveryInput, runMunicipalityDiscovery } from "@/lib/agents/municipality-discovery";
-import type { MunicipalityDiscoveryEmailMode, MunicipalityDiscoveryPublishMode } from "@/lib/agents/types";
+import type { MunicipalityDiscoveryEmailMode, MunicipalityDiscoveryInput, MunicipalityDiscoveryPublishMode } from "@/lib/agents/types";
 
 export async function startMunicipalityDiscovery(formData: FormData) {
   const intent = String(formData.get("intent") || "manual");
@@ -12,6 +12,7 @@ export async function startMunicipalityDiscovery(formData: FormData) {
     municipality: String(formData.get("municipality") || ""),
     county: String(formData.get("county") || ""),
     trade_scope: String(formData.get("trade_scope") || "prio1"),
+    discovery_mode: discoveryModeFromForm(formData),
     max_queries: Number(formData.get("max_queries") || 50),
     max_publications: Number(formData.get("max_publications") || 10),
     max_cost_eur: Number(formData.get("max_cost_eur") || 1),
@@ -35,4 +36,10 @@ function emailModeFromForm(formData: FormData): MunicipalityDiscoveryEmailMode {
   const value = String(formData.get("email_mode") || "");
   if (value === "none" || value === "draft_only" || value === "send_after_approval") return value;
   return "draft_only";
+}
+
+function discoveryModeFromForm(formData: FormData): NonNullable<MunicipalityDiscoveryInput["discovery_mode"]> {
+  const value = String(formData.get("discovery_mode") || "");
+  if (value === "local_candidates" || value === "human_search_assist" || value === "web_search_discovery") return value;
+  return "web_search_discovery";
 }
