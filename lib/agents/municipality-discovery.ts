@@ -187,12 +187,12 @@ export async function runMunicipalityDiscovery(input: MunicipalityDiscoveryInput
       .eq("id", run.id);
     if (updateError) throw updateError;
 
-    revalidatePath("/admin/agents");
-    revalidatePath("/admin/agents/municipality-discovery");
+    safeRevalidatePath("/admin/agents");
+    safeRevalidatePath("/admin/agents/municipality-discovery");
     if (stats.publications_created > 0) {
-      revalidatePath("/");
-      revalidatePath("/suche");
-      revalidatePath("/admin/companies");
+      safeRevalidatePath("/");
+      safeRevalidatePath("/suche");
+      safeRevalidatePath("/admin/companies");
     }
 
     return result;
@@ -755,4 +755,13 @@ function isEmailMode(value: unknown): value is MunicipalityDiscoveryInput["email
 
 function escapeOrValue(value: string) {
   return value.replace(/[,%]/g, "");
+}
+
+function safeRevalidatePath(path: string) {
+  try {
+    revalidatePath(path);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (!message.toLowerCase().includes("static generation store missing")) throw error;
+  }
 }
