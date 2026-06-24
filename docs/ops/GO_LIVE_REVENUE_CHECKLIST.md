@@ -24,16 +24,23 @@ Diese Checkliste ist das Freigabe-Dokument, bevor GewerkeListe.com echte Zahlung
 - [ ] Impressum geprüft.
 - [ ] Datenschutz geprüft.
 - [ ] Preisangaben geprüft.
+- [ ] Preisangabe als brutto/netto eindeutig formuliert.
+- [ ] Umsatzsteuerliche Behandlung geprüft.
 - [ ] Widerruf/Verbraucherrecht geprüft, falls relevante Zielgruppe betroffen ist.
 - [ ] AGB/Leistungsbeschreibung geprüft, bevor echte Zahlungen angenommen werden.
 - [ ] Rechnungsprozess geklärt.
 - [ ] Aussage "Gründungsmitglied" rechtlich und steuerlich geprüft.
+- [ ] Stripe-Datenverarbeitung in der Datenschutzerklärung ergänzt/geprüft.
+- [ ] B2B-Angebotscharakter geprüft und verständlich formuliert.
+- [ ] Leistungsumfang Founding Member schriftlich belegbar und nicht überversprochen.
 
 ## 3. Stripe Testmode
 
 - [ ] `STRIPE_SECRET_KEY` als Test-Key gesetzt.
 - [ ] Live-Key wird lokal/technisch blockiert, bis Andi Live-Freigabe gibt.
 - [ ] Optional `STRIPE_PRICE_FOUNDING_MEMBER_YEARLY` als Test-Price gesetzt.
+- [ ] Checkout ohne Stripe-ENV leitet sauber auf `/preise?stripe=missing-env`.
+- [ ] `sk_live_...` leitet sauber auf `/preise?stripe=live-blocked`.
 - [ ] Checkout für Gründungsmitglied im Testmode geprüft.
 - [ ] `/zahlung-erfolgreich` geprüft.
 - [ ] `/zahlung-abgebrochen` geprüft.
