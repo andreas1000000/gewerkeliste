@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 const navItems = [
   { label: "Gewerke", href: "/gewerke" },
   { label: "Für Betriebe", href: "/fuer-betriebe" },
+  { label: "Preise", href: "/preise" },
   { label: "Über uns", href: "/ueber-gewerkeliste" },
 ];
 
