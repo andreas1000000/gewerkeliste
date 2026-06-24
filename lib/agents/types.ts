@@ -5,6 +5,7 @@ import type { AgentToolClass } from "./tools";
 export type AgentDepartment =
   | "strategy"
   | "regional_coverage"
+  | "municipality_discovery"
   | "discovery"
   | "enrichment"
   | "classification"
@@ -130,4 +131,61 @@ export type CompanyDiscoveryDryRunResult = {
   }>;
   review_items: CompanyDiscoveryReviewItem[];
   guardrails: string[];
+};
+
+export type MunicipalityDiscoveryPublishMode = "review_only" | "manual_approval" | "tier_a_unverified_basis";
+
+export type MunicipalityDiscoveryEmailMode = "none" | "draft_only" | "send_after_approval";
+
+export type MunicipalityDiscoveryInput = {
+  municipality: string;
+  county?: string;
+  trade_scope: "prio1" | "all" | string;
+  max_queries: number;
+  max_publications: number;
+  max_cost_eur: number;
+  publish_mode: MunicipalityDiscoveryPublishMode;
+  email_mode: MunicipalityDiscoveryEmailMode;
+};
+
+export type MunicipalityDiscoveryTier = "A" | "B" | "C";
+
+export type MunicipalityDiscoveryCandidate = {
+  candidate_id: string;
+  name: string;
+  city: string | null;
+  postal_code: string | null;
+  possible_trade: string | null;
+  possible_website: string | null;
+  source_type: string;
+  source_url: string | null;
+  tier: MunicipalityDiscoveryTier;
+  confidence_score: number;
+  reasons: string[];
+  duplicate_company_id: string | null;
+};
+
+export type MunicipalityDiscoveryResult = {
+  agent_id: "municipality-discovery-agent";
+  run_id: string;
+  mode: "dry_run" | "approval_required" | "live";
+  municipality: string;
+  county?: string;
+  region_slug: string;
+  publish_mode: MunicipalityDiscoveryPublishMode;
+  email_mode: MunicipalityDiscoveryEmailMode;
+  queries_planned: number;
+  queries_executed: number;
+  external_api_used: boolean;
+  costs_eur: number;
+  candidates: MunicipalityDiscoveryCandidate[];
+  tier_counts: Record<MunicipalityDiscoveryTier, number>;
+  publications_created: number;
+  approvals_created: number;
+  review_items_created: number;
+  outbox_drafts_created: number;
+  duplicates_blocked: number;
+  blocked_candidates: number;
+  guardrails: string[];
+  errors: string[];
 };

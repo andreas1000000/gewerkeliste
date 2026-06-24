@@ -41,6 +41,20 @@ export const agentRegistry = [
     enabled: true,
   },
   {
+    agent_id: "municipality-discovery-agent",
+    name: "Municipality Discovery Agent",
+    department: "municipality_discovery",
+    mission:
+      "Bearbeitet eine Gemeinde als kontrollierten Agentenauftrag: Kandidaten klassifizieren, Review/Freigaben erzeugen und begrenzte unbestaetigte Basis-Eintraege anlegen.",
+    allowed_tools: ["database_read", "database_write_internal", "web_search", "website_fetch", "classifier", "outbox"],
+    autonomy_level: "write_internal",
+    risk_level: "high",
+    requires_approval_for: ["publish_company", "send_email", "bulk_update", "delete_data", "start_paid_api"],
+    default_output: "candidate_review",
+    cost_center: "municipality_discovery",
+    enabled: true,
+  },
+  {
     agent_id: "company-enrichment-agent",
     name: "Company Enrichment Agent",
     department: "enrichment",
