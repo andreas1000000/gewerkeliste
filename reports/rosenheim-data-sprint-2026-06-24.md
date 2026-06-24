@@ -152,3 +152,166 @@ Weitere Orte mit je 1 Kandidat: Alteiselfing, Brannenburg, Halfing, Oberaudorf, 
 3. Website-Enrichment für die ersten 30 High-Confidence-Kandidaten mit offizieller Website.
 4. Zusätzliche Quellen für unterabgedeckte Gewerke: Innungen/Kammern/öffentliche Firmenwebsites/Such-API nach Freigabe.
 5. Stephanskirchen separat mit Firmenwebsites und lokalen Quellen nachziehen, weil OSM hier nicht ausreichend ist.
+
+---
+
+# Multi-Source-Ergänzung Landkreis Rosenheim
+
+Status: `review_only`  
+Datum: 2026-06-24  
+Quelle zweiter Lauf: Brave Search API, öffentliche Suchtreffer, mögliche Firmenwebsites, einzelne öffentliche Fach-/Verzeichnisprofile.  
+Produktstatus: Kandidaten sind nicht veröffentlicht, nicht verifiziert und nicht beansprucht.  
+Wichtig: Dieser Lauf hat Review-Daten in Production geschrieben, aber keine öffentlichen Firmen angelegt.
+
+## Kurzfazit Multi-Source
+
+- 180 Suchabfragen wurden kontrolliert ausgeführt.
+- 56 zusätzliche Kandidaten wurden in `company_candidates` geschrieben.
+- 56 Review-Items wurden erzeugt.
+- 56 Kandidaten stehen auf `needs_review`.
+- 0 Kandidaten stehen auf `ready_for_publish`.
+- 13 Kandidaten wurden aus akzeptierten möglichen Firmenwebsites abgeleitet.
+- 41 Kandidaten stammen aus Suchtreffern und brauchen Sichtprüfung.
+- 2 Kandidaten stammen aus externen Fach-/Verzeichnisprofilen und brauchen Sichtprüfung.
+- 29 Coverage-Snapshots wurden erzeugt.
+- Keine öffentlichen Firmen wurden angelegt.
+- Keine E-Mails wurden versendet.
+- Kein Google-Maps-Scraping wurde genutzt.
+- Keine Löschungen wurden durchgeführt.
+
+## Live-Schreibumfang
+
+Geschrieben wurden ausschließlich:
+
+- `discovery_runs`
+- `company_candidates`
+- `review_queue`
+- `coverage_snapshots`
+
+Nicht geschrieben oder verändert wurden:
+
+- öffentliche Firmenveröffentlichungen
+- E-Mails
+- Claim-/Verification-Status
+- Zahlungsdaten
+- Löschungen
+
+Verifikation nach dem Lauf:
+
+| Kennzahl | Wert |
+| --- | ---: |
+| Firmen gesamt | 279 |
+| öffentliche Firmen | 276 |
+| Kandidaten gesamt | 294 |
+| Brave-/Multi-Source-Kandidaten | 86 |
+| Kandidaten mit `needs_review` | 126 |
+| Review-Queue gesamt | 294 |
+| Discovery-Runs gesamt | 215 |
+| Coverage-Snapshots gesamt | 36 |
+
+## Quellenarten Multi-Source-Lauf
+
+| Source Type | Kandidaten |
+| --- | ---: |
+| `search_result` | 41 |
+| `official_website` | 13 |
+| `external_directory` | 2 |
+
+## Confidence-Verteilung
+
+| Gruppe | Kandidaten |
+| --- | ---: |
+| High Confidence, Score >= 90 | 15 |
+| Medium, Score 60-89 | 22 |
+| Low/unsicher, Score < 60 | 19 |
+
+Alle Gruppen bleiben im Review. Kein Kandidat wird automatisch veröffentlicht.
+
+## Gewerke-Abdeckung Multi-Source-Lauf
+
+| Gewerk | Kandidaten |
+| --- | ---: |
+| sanitaerinstallation | 16 |
+| bauunternehmen | 6 |
+| maurerarbeiten | 5 |
+| garten-und-landschaftsbau | 4 |
+| dachdeckerarbeiten | 3 |
+| bodenlegerarbeiten | 2 |
+| elektroinstallation | 2 |
+| heizungsbau | 2 |
+| schlosserarbeiten | 2 |
+| schreinerarbeiten | 2 |
+| spenglerarbeiten | 2 |
+| tiefbau | 2 |
+| zimmererarbeiten | 2 |
+| bauwerksabdichtung | 1 |
+| betonbau | 1 |
+| brandschutz | 1 |
+| fenster-tueren | 1 |
+| metallbau | 1 |
+| trockenbau | 1 |
+
+## Top 20 Beispielkandidaten aus Multi-Source
+
+Diese Liste ist ein Review-Auszug, keine Veröffentlichungsfreigabe. Einige Treffer sind bewusst als Review-Fälle sichtbar, weil Suchmaschinen auch Rathaus-, Portal- oder Partnerseiten liefern können.
+
+| Name | Gewerk | Quelle | Score | Website/Kandidat |
+| --- | --- | --- | ---: | --- |
+| Dachdeckerei Otto Spenglerei - Bad Aibling, Bruckmühl, Rosenheim | dachdeckerarbeiten | official_website | 100 | https://dachdeckerei-otto.de |
+| Elegant Bau | garten-und-landschaftsbau | official_website | 100 | https://elegant-bau.com |
+| M. Schwendemann Bauunternehmung GmbH | bauunternehmen | official_website | 100 | http://schwendemann.de |
+| Rosenheim - Schweinsteiger Bau | bauunternehmen | official_website | 100 | https://schweinsteiger-bau.de |
+| Sebastian Daxeder Bauunternehmung GmbH | bauunternehmen | official_website | 100 | https://daxeder.de |
+| Elektro Duschl GmbH Kolbermoor | elektroinstallation | search_result | 90 | https://duschl-elektro.de |
+| Hans Kern, Garten- & Landschaftsbau | garten-und-landschaftsbau | official_website | 90 | https://kern-gartenbau.de |
+| Schmid GmbH Heizung-Sanitär-Solar-Kundendienst | heizungsbau | external_directory | 90 | https://www.schmidhaustechnik.com |
+| Schwaiger Bau | bauunternehmen | official_website | 90 | https://schwaiger-bau.de |
+| Abdichtung von Kellern planen im Raum Bad Aibling | sanitaerinstallation | search_result | 80 | https://eh-bauabdichtung.de |
+| Inntaler Innenausbau & Sanierung | schreinerarbeiten | search_result | 80 | https://firmenabc.com |
+| Johann Feiel Baggerbetrieb | tiefbau | search_result | 80 | https://dialo.de |
+| Max Aicher Bau GmbH & Co. KG | bauunternehmen | search_result | 80 | https://www.max-aicher-bau.de |
+| Stadler & Holzner Bau GmbH | maurerarbeiten | search_result | 80 | https://www.stadler-holzner-bau.de |
+| Wanner Bau GmbH | maurerarbeiten | search_result | 80 | https://www.wannerbau.de |
+| Tor- und Zaunanlagen | schlosserarbeiten | search_result | 80 | https://tore-zaeune-rosenheim.de |
+| Holzbau Eder GmbH | zimmererarbeiten | search_result | 70 | https://www.holzbau-eder.de |
+| Zimmerei Egger | zimmererarbeiten | search_result | 70 | https://www.zimmerei-egger.de |
+| Spielberger Bau | betonbau | search_result | 70 | https://www.spielberger-bau.de |
+| Gartenbau Ganslmaier | garten-und-landschaftsbau | search_result | 70 | https://www.ganslmaier.de |
+
+## Qualitätsbefund
+
+Der Multi-Source-Ansatz funktioniert besser als OSM-only, ist aber noch nicht gut genug fuer automatische Veröffentlichung:
+
+- Suchmaschinen liefern auch Behörden-, Nachrichten-, Portal- und Partnerseiten.
+- Einige Namen sind noch zu lang oder enthalten Seitentitel statt reine Firmierung.
+- Einige Treffer haben eine plausible Website, aber Ort/Gewerk muss manuell gegengeprüft werden.
+- Coverage nach Ort ist noch grob, weil viele Treffer auf Landkreis-Ebene statt sauberer Gemeindeebene gespeichert wurden.
+- Mehr Kandidaten sind erreichbar, aber die Schwelle für automatische Übernahme muss bewusst streng bleiben.
+
+## Größte Lücken nach Multi-Source
+
+- Zielwert 300 Kandidaten wurde in diesem kontrollierten Sprint noch nicht erreicht.
+- Zielwert 100 High-Confidence wurde noch nicht erreicht.
+- Ortserkennung muss verbessert werden, damit Rosenheim, Bad Aibling, Kolbermoor, Stephanskirchen usw. sauber getrennt werden.
+- Directory-/Portal-Domains muessen stärker abgewertet werden.
+- Firmenname-Normalisierung muss vor dem naechsten Massenlauf verbessert werden.
+
+## Compliance-Bestätigung Multi-Source
+
+- Google Maps Scraping: nein
+- E-Mails gesendet: nein
+- Öffentliche Firmen veröffentlicht: nein
+- Löschungen: nein
+- Live-Zahlungen: nein
+- Remote-SQL: nein
+- Production-Migration: nein
+- Externe API genutzt: ja, Brave Search API, kontrolliert begrenzt
+- Geschätzte API-Kosten laut Skript: ca. 1,80 EUR
+
+## Empfohlener nächster Sprint Multi-Source
+
+1. Filter für Behörden-/Portal-/Nachrichten-Domains verschärfen.
+2. Firmenname-Normalisierung verbessern.
+3. Ortserkennung aus Impressum/Kontaktseiten verbessern.
+4. Erst danach den Suchumfang auf 300-600 Queries erhöhen.
+5. Kandidaten weiterhin nur in Review schreiben, keine automatische Veröffentlichung.

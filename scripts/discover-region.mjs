@@ -41,6 +41,98 @@ const supabase = supabaseUrl && serviceRoleKey
   : null;
 
 const pilotRegions = {
+  "landkreis-rosenheim": {
+    name: "Landkreis Rosenheim",
+    slug: "landkreis-rosenheim",
+    postal_codes: [
+      "83022",
+      "83024",
+      "83026",
+      "83043",
+      "83052",
+      "83059",
+      "83064",
+      "83071",
+      "83075",
+      "83080",
+      "83083",
+      "83088",
+      "83093",
+      "83098",
+      "83101",
+      "83109",
+      "83112",
+      "83115",
+      "83119",
+      "83122",
+      "83123",
+      "83125",
+      "83126",
+      "83128",
+      "83129",
+      "83131",
+      "83134",
+      "83135",
+      "83137",
+      "83139",
+      "83209",
+      "83229",
+      "83233",
+      "83253",
+      "83512",
+      "83533",
+      "83539",
+      "83543",
+      "83549",
+      "83556",
+      "83561",
+      "83564",
+      "83569",
+    ],
+    query_localities: [
+      "Rosenheim",
+      "Kolbermoor",
+      "Bad Aibling",
+      "Raubling",
+      "Stephanskirchen",
+      "Riedering",
+      "Prien am Chiemsee",
+      "Wasserburg am Inn",
+      "Brannenburg",
+      "Rohrdorf",
+      "Bernau am Chiemsee",
+      "Frasdorf",
+      "Bad Endorf",
+      "Grosskarolinenfeld",
+      "Bruckmuehl",
+      "Neubeuern",
+      "Nussdorf am Inn",
+      "Flintsbach am Inn",
+      "Oberaudorf",
+      "Kiefersfelden",
+      "Aschau im Chiemgau",
+      "Rimsting",
+      "Eggstaett",
+      "Halfing",
+      "Soechtenau",
+      "Tuntenhausen",
+      "Feldkirchen-Westerham",
+      "Schechen",
+      "Rott am Inn",
+      "Amerang",
+      "Eiselfing",
+      "Griesstaett",
+      "Pfaffing",
+      "Vogtareuth",
+    ],
+    municipality: null,
+    county: "Rosenheim",
+    state: "Bayern",
+    country: "Deutschland",
+    latitude: 47.856,
+    longitude: 12.129,
+    region_type: "county",
+  },
   riedering: {
     name: "Riedering",
     slug: "riedering",
@@ -56,6 +148,24 @@ const pilotRegions = {
 };
 
 const tradePresets = {
+  maurerarbeiten: {
+    slug: "maurerarbeiten",
+    name: "Maurer",
+    terms: ["maurer", "maurerarbeiten", "mauerwerk", "massivbau", "rohbau", "hochbau"],
+    estimated: 20,
+  },
+  rohbau: {
+    slug: "rohbau",
+    name: "Rohbau",
+    terms: ["rohbau", "hochbau", "mauerwerk", "betonarbeiten", "schalung", "bewehrung"],
+    estimated: 18,
+  },
+  betonbau: {
+    slug: "betonbau",
+    name: "Betonbau",
+    terms: ["betonbau", "stahlbeton", "betonarbeiten", "schalung", "bewehrung", "fundament"],
+    estimated: 12,
+  },
   bauunternehmen: {
     slug: "bauunternehmen",
     name: "Bauunternehmen",
@@ -68,11 +178,77 @@ const tradePresets = {
     terms: ["elektro", "elektriker", "elektroinstallation", "elektrotechnik", "photovoltaik", "netzwerktechnik"],
     estimated: 12,
   },
+  elektrotechnik: {
+    slug: "elektrotechnik",
+    name: "Elektrotechnik",
+    terms: ["elektrotechnik", "elektro", "elektriker", "elektroanlagen", "photovoltaik", "netzwerktechnik"],
+    estimated: 18,
+  },
+  heizungsbau: {
+    slug: "heizungsbau",
+    name: "Heizung",
+    terms: ["heizung", "heizungsbau", "waermepumpe", "wärmepumpe", "heizungsanlage", "shk"],
+    estimated: 16,
+  },
+  sanitaerinstallation: {
+    slug: "sanitaerinstallation",
+    name: "Sanitär",
+    terms: ["sanitär", "sanitaer", "bad", "trinkwasser", "abwasser", "shk"],
+    estimated: 16,
+  },
   "sanitaer-heizung-klima": {
     slug: "sanitaer-heizung-klima",
     name: "Sanitär Heizung Klima",
     relatedSlugs: ["sanitaerinstallation", "heizungsbau", "lueftung", "kaelte-klima", "waermepumpen"],
     terms: ["sanitär", "sanitaer", "heizung", "shk", "lüftung", "lueftung", "klima", "wärmepumpe", "waermepumpe"],
+    estimated: 8,
+  },
+  lueftung: {
+    slug: "lueftung",
+    name: "Lüftung",
+    terms: ["lüftung", "lueftung", "lüftungsbau", "raumlufttechnik", "wohnraumlüftung"],
+    estimated: 8,
+  },
+  "kaelte-klima": {
+    slug: "kaelte-klima",
+    name: "Klima",
+    terms: ["klima", "klimatechnik", "kälte", "kaelte", "kälteanlagen", "klimaanlage"],
+    estimated: 8,
+  },
+  zimmererarbeiten: {
+    slug: "zimmererarbeiten",
+    name: "Zimmerei",
+    terms: ["zimmerei", "zimmerer", "holzbau", "dachstuhl", "holzrahmenbau", "abbund"],
+    estimated: 20,
+  },
+  dachdeckerarbeiten: {
+    slug: "dachdeckerarbeiten",
+    name: "Dachdecker",
+    terms: ["dachdecker", "bedachungen", "dachsanierung", "flachdach", "steildach", "dachfenster"],
+    estimated: 14,
+  },
+  spenglerarbeiten: {
+    slug: "spenglerarbeiten",
+    name: "Spengler",
+    terms: ["spengler", "blechner", "klempner", "dachrinne", "blechdach", "kaminverkleidung"],
+    estimated: 12,
+  },
+  tiefbau: {
+    slug: "tiefbau",
+    name: "Tiefbau",
+    terms: ["tiefbau", "erdbau", "kanalbau", "entwässerung", "entwaesserung", "baggerbetrieb"],
+    estimated: 14,
+  },
+  erdbau: {
+    slug: "erdbau",
+    name: "Erdbau",
+    terms: ["erdbau", "baggerarbeiten", "aushub", "erdarbeiten", "baggerbetrieb"],
+    estimated: 12,
+  },
+  kanalbau: {
+    slug: "kanalbau",
+    name: "Kanalbau",
+    terms: ["kanalbau", "entwässerung", "entwaesserung", "kanalsanierung", "rohrleitungsbau"],
     estimated: 8,
   },
   malerarbeiten: {
@@ -81,11 +257,107 @@ const tradePresets = {
     terms: ["maler", "malerarbeiten", "lackierer", "anstrich", "fassadenanstrich", "innenanstrich"],
     estimated: 8,
   },
+  stuckateurarbeiten: {
+    slug: "stuckateurarbeiten",
+    name: "Stuckateur",
+    terms: ["stuckateur", "stuck", "putz", "innenputz", "aussenputz", "fassade"],
+    estimated: 12,
+  },
+  trockenbau: {
+    slug: "trockenbau",
+    name: "Trockenbau",
+    terms: ["trockenbau", "gipskarton", "akustikbau", "trennwand", "deckenbau"],
+    estimated: 14,
+  },
+  fliesenarbeiten: {
+    slug: "fliesenarbeiten",
+    name: "Fliesenleger",
+    terms: ["fliesenleger", "fliesen", "platten", "natursteinverlegung", "badsanierung"],
+    estimated: 16,
+  },
+  estricharbeiten: {
+    slug: "estricharbeiten",
+    name: "Estrich",
+    terms: ["estrich", "estricharbeiten", "fliessestrich", "zementestrich", "bodenausgleich"],
+    estimated: 8,
+  },
+  bodenlegerarbeiten: {
+    slug: "bodenlegerarbeiten",
+    name: "Bodenleger",
+    terms: ["bodenleger", "bodenbelag", "parkett", "vinyl", "linoleum", "boden"],
+    estimated: 12,
+  },
+  schreinerarbeiten: {
+    slug: "schreinerarbeiten",
+    name: "Schreiner",
+    terms: ["schreiner", "schreinerei", "tischler", "möbelbau", "moebelbau", "innenausbau"],
+    estimated: 22,
+  },
+  innenausbau: {
+    slug: "innenausbau",
+    name: "Innenausbau",
+    terms: ["innenausbau", "ausbau", "möbelbau", "moebelbau", "akustik", "trockenbau"],
+    estimated: 18,
+  },
+  "fenster-tueren": {
+    slug: "fenster-tueren",
+    name: "Fensterbau",
+    terms: ["fensterbau", "fenster", "türen", "tueren", "haustüren", "haustueren"],
+    estimated: 12,
+  },
+  metallbau: {
+    slug: "metallbau",
+    name: "Metallbau",
+    terms: ["metallbau", "schlosserei", "stahlbau", "geländer", "gelaender", "torbau"],
+    estimated: 18,
+  },
+  schlosserarbeiten: {
+    slug: "schlosserarbeiten",
+    name: "Schlosserei",
+    terms: ["schlosserei", "schlosser", "metallbau", "stahlbau", "geländer", "gelaender"],
+    estimated: 10,
+  },
+  bauwerksabdichtung: {
+    slug: "bauwerksabdichtung",
+    name: "Abdichtung",
+    terms: ["abdichtung", "bauwerksabdichtung", "kellerabdichtung", "flachdachabdichtung", "feuchteschutz"],
+    estimated: 8,
+  },
+  brandschutz: {
+    slug: "brandschutz",
+    name: "Brandschutz",
+    terms: ["brandschutz", "brandschutztechnik", "abschottung", "brandabschottung", "rauchschutz"],
+    estimated: 6,
+  },
+  geruestbau: {
+    slug: "geruestbau",
+    name: "Gerüstbau",
+    terms: ["gerüstbau", "geruestbau", "arbeitsgerüst", "fassadengerüst", "gerüst"],
+    estimated: 8,
+  },
+  abbrucharbeiten: {
+    slug: "abbrucharbeiten",
+    name: "Abbruch",
+    terms: ["abbruch", "rückbau", "rueckbau", "entkernung", "demontage"],
+    estimated: 8,
+  },
+  bauendreinigung: {
+    slug: "bauendreinigung",
+    name: "Bauendreinigung",
+    terms: ["bauendreinigung", "baureinigung", "baugrobreinigung", "baufeinreinigung"],
+    estimated: 8,
+  },
   "garten-und-landschaftsbau": {
     slug: "garten-und-landschaftsbau",
     name: "Garten- und Landschaftsbau",
     terms: ["gartenbau", "landschaftsbau", "galabau", "aussenanlagen", "außenanlagen", "pflaster", "gartenpflege"],
     estimated: 10,
+  },
+  pflasterbau: {
+    slug: "pflasterbau",
+    name: "Pflasterbau",
+    terms: ["pflasterbau", "pflasterarbeiten", "natursteinpflaster", "einfahrt", "terrassen", "wege"],
+    estimated: 14,
   },
 };
 
@@ -100,7 +372,7 @@ const report = {
   mode: live ? "live" : "dry_run",
   guardrails: {
     region_based: true,
-    pilot_region: "Riedering",
+    pilot_region: regionSlug,
     writes_companies_directly: false,
     writes_only_candidates: live,
     auto_publish_threshold: 90,
@@ -140,7 +412,7 @@ report.region = region;
 const selectedTrades = selectTrades(requestedTrade);
 report.selected_trades = selectedTrades.map(({ slug, name }) => ({ slug, name }));
 
-const queries = selectedTrades.flatMap((trade) => buildRegionTradeQueries(region, trade));
+const queries = buildSearchQueries(region, selectedTrades);
 report.search.generated_queries = queries;
 const executableQueries = queries.slice(0, maxQueries);
 report.search.executed_queries = executableQueries;
@@ -202,7 +474,7 @@ finish();
 async function resolveRegion(slug) {
   if (supabase) {
     const { data, error } = await supabase.from("regions").select("*").eq("slug", slug).limit(1);
-    if (!error && data?.[0]) return normalizeRegion(data[0]);
+    if (!error && data?.[0]) return { ...(pilotRegions[slug] || {}), ...normalizeRegion(data[0]) };
   }
   if (pilotRegions[slug]) return pilotRegions[slug];
   fail(`Region nicht bekannt: ${slug}`);
@@ -210,28 +482,39 @@ async function resolveRegion(slug) {
 
 function selectTrades(slug) {
   if (!slug) {
-    return [
-      tradePresets.bauunternehmen,
-      tradePresets.elektroinstallation,
-      tradePresets["sanitaer-heizung-klima"],
-      tradePresets.malerarbeiten,
-      tradePresets["garten-und-landschaftsbau"],
-    ];
+    return Object.values(tradePresets);
   }
   const trade = tradePresets[slug];
   if (!trade) fail(`Gewerk nicht im MVP-Preset: ${slug}`);
   return [trade];
 }
 
+function buildSearchQueries(region, trades) {
+  const tradeQueries = trades.map((trade) => buildRegionTradeQueries(region, trade));
+  const result = [];
+  const maxLength = Math.max(...tradeQueries.map((queries) => queries.length));
+  for (let index = 0; index < maxLength; index += 1) {
+    for (const queries of tradeQueries) {
+      if (queries[index]) result.push(queries[index]);
+    }
+  }
+  return [...new Set(result)];
+}
+
 function buildRegionTradeQueries(region, trade) {
-  const postalCode = region.postal_codes?.[0] || "";
-  return [
-    `${trade.name} ${region.name}`,
-    `${trade.name} ${postalCode}`,
-    `${trade.name} ${region.county} ${region.name}`,
-    `Handwerker ${region.name} ${trade.name}`,
-    `site:.de ${trade.name} ${region.name}`,
-  ].filter(Boolean);
+  const localities = region.query_localities?.length ? region.query_localities : [region.name];
+  const county = region.county || region.name;
+  const queries = [];
+  for (const locality of localities) {
+    queries.push(`${trade.name} ${locality}`);
+    queries.push(`${trade.name} ${locality} Handwerk`);
+  }
+  queries.push(`${trade.name} Landkreis ${county}`);
+  queries.push(`${trade.name} Rosenheim Chiemgau`);
+  queries.push(`${trade.name} ${county} Innung`);
+  queries.push(`${trade.name} ${county} Gewerbeverzeichnis`);
+  queries.push(`site:.de ${trade.name} ${county}`);
+  return [...new Set(queries.filter(Boolean))];
 }
 
 function createSearchProvider() {
@@ -263,7 +546,8 @@ async function loadExistingCandidates(region) {
   const { data, error } = await supabase
     .from("company_candidates")
     .select("id,name,city,postal_code,phone,email,possible_website,source_url,status")
-    .or(`city.ilike.%${region.name}%,postal_code.eq.${postalCode}`);
+    .or(`city.ilike.%${region.name}%,postal_code.eq.${postalCode}`)
+    .neq("status", "rejected");
   if (error) return [];
   return data || [];
 }
@@ -285,13 +569,9 @@ function candidateFromSearchResult(result, region, trade, existingCompanies, exi
   const duplicate = detectDuplicate({ name, possibleWebsite, phone, city: address?.city || region.name, postal_code: address?.postal_code || region.postal_codes?.[0] }, existingCompanies, existingCandidates);
   const status = duplicate
     ? "needs_review"
-    : !possibleWebsite
+    : scoring.overall_score >= 60 || possibleWebsite
       ? "needs_review"
-      : scoring.overall_score >= 90
-        ? "ready_for_publish"
-        : scoring.overall_score >= 60
-          ? "needs_review"
-          : "discovered";
+      : "discovered";
 
   return {
     name,
@@ -311,7 +591,7 @@ function candidateFromSearchResult(result, region, trade, existingCompanies, exi
     status,
     duplicate_of_company_id: duplicate?.kind === "company" ? duplicate.id : null,
     review_reason: reviewReason({ duplicate, possibleWebsite, tradeConfidence, overallScore: scoring.overall_score }),
-    suggested_action: duplicate ? "Dublette manuell prüfen" : status === "ready_for_publish" ? "Kandidat fachlich prüfen und veröffentlichen" : "Quelle und Gewerk prüfen",
+    suggested_action: duplicate ? "Dublette manuell prüfen" : status === "needs_review" ? "Kandidat fachlich prüfen und als Basis-Eintrag vorbereiten" : "Quelle und Gewerk prüfen",
     raw_evidence: {
       query: result.query,
       rank: result.rank,
@@ -338,6 +618,10 @@ async function enrichCandidates(candidates, region, trades, existingCompanies, e
       current = mergeExternalDirectoryData(current, external, region, trades);
     }
 
+    if (isGenericCandidateName(current.name)) {
+      continue;
+    }
+
     if (!current.possible_website || visited >= maxEnrichCandidates) {
       enriched.push(current);
       continue;
@@ -355,7 +639,7 @@ async function enrichCandidates(candidates, region, trades, existingCompanies, e
         email: current.email,
         tradeConfidence: current.trade_confidence || 40,
       });
-      enriched.push({
+      const fallbackCandidate = {
         ...current,
         status: "needs_review",
         overall_score: Math.max(current.overall_score || 0, fallbackScore.overall_score),
@@ -365,7 +649,8 @@ async function enrichCandidates(candidates, region, trades, existingCompanies, e
           website_analysis: website,
           score_reasons: [...(current.raw_evidence?.score_reasons || []), ...fallbackScore.reasons],
         },
-      });
+      };
+      if (!isGenericCandidateName(fallbackCandidate.name)) enriched.push(fallbackCandidate);
       continue;
     }
 
@@ -373,7 +658,8 @@ async function enrichCandidates(candidates, region, trades, existingCompanies, e
     const detectedTrade = normalizeDetectedTrade(detectBestTrade(website.text, trades, current.possible_trade), website.text);
     const phone = current.phone || website.phone;
     const email = current.email || website.email;
-    const name = website.company_name || current.name;
+    const name = cleanCompanyName(website.company_name || current.name);
+    if (isGenericCandidateName(name)) continue;
     const identityConfidence = calculateIdentityConfidence({
       name,
       sourceHost: hostname(current.possible_website),
@@ -400,13 +686,9 @@ async function enrichCandidates(candidates, region, trades, existingCompanies, e
     const fromExternalDirectory = Boolean(current.raw_evidence?.external_directory_analysis);
     const status = duplicate
       ? "needs_review"
-      : fromExternalDirectory
+      : scoring.overall_score >= 60 || fromExternalDirectory
         ? "needs_review"
-      : scoring.overall_score >= 90
-        ? "ready_for_publish"
-        : scoring.overall_score >= 60
-          ? "needs_review"
-          : "discovered";
+        : "discovered";
 
     enriched.push({
       ...current,
@@ -425,7 +707,7 @@ async function enrichCandidates(candidates, region, trades, existingCompanies, e
       status,
       duplicate_of_company_id: duplicate?.kind === "company" ? duplicate.id : null,
       review_reason: fromExternalDirectory ? "Eigene Website bestaetigt; finale Sichtpruefung empfohlen" : reviewReason({ duplicate, possibleWebsite: current.possible_website, tradeConfidence, overallScore: scoring.overall_score }),
-      suggested_action: duplicate ? "Dublette manuell prüfen" : status === "ready_for_publish" ? "Kandidat fachlich prüfen und veröffentlichen" : "Quelle und Gewerk prüfen",
+      suggested_action: duplicate ? "Dublette manuell prüfen" : status === "needs_review" ? "Kandidat fachlich prüfen und als Basis-Eintrag vorbereiten" : "Quelle und Gewerk prüfen",
       raw_evidence: {
         ...current.raw_evidence,
         score_reasons: scoring.reasons,
@@ -445,7 +727,9 @@ async function enrichCandidates(candidates, region, trades, existingCompanies, e
 
   report.enrichment.visited_websites = visited;
   report.enrichment.accepted_official_websites = accepted;
-  return enriched.sort((a, b) => b.overall_score - a.overall_score || a.name.localeCompare(b.name, "de"));
+  return dedupeCandidates(enriched
+    .filter((candidate) => isAcceptableCandidate(candidate))
+    .sort((a, b) => b.overall_score - a.overall_score || a.name.localeCompare(b.name, "de")));
 }
 
 async function analyzeExternalDirectorySource(candidate, region, trades) {
@@ -510,8 +794,11 @@ function mergeExternalDirectoryData(candidate, external, region, trades) {
     address.city,
     trade.slug,
   ].filter(Boolean).join(" ");
+  const externalName = cleanCompanyName(external.company_name || "");
+  const fallbackName = cleanCompanyName(candidate.name || "");
+  const mergedName = !isGenericCandidateName(externalName) ? externalName : fallbackName;
   const identityConfidence = calculateIdentityConfidence({
-    name: external.company_name || candidate.name,
+    name: mergedName,
     sourceHost: hostname(candidate.source_url),
     text,
     region,
@@ -529,7 +816,7 @@ function mergeExternalDirectoryData(candidate, external, region, trades) {
 
   return {
     ...candidate,
-    name: cleanCompanyName(external.company_name || candidate.name),
+    name: mergedName,
     phone,
     email,
     street: candidate.street || address.street || null,
@@ -635,28 +922,47 @@ async function analyzeCompanyWebsite(root, candidate, region, trades) {
   analysis.services = extractServicesFromText(analysis.text, trades);
   analysis.matching_features = websiteMatchingFeatures(candidate, region, analysis);
   const ownedDomain = domainMatchesName(hostname(rootUrlValue), analysis.company_name || candidate.name);
-  analysis.accepted = ownedDomain && !isGenericCandidateName(analysis.company_name || candidate.name) && analysis.matching_features.includes("Firmenname") && (
+  const strongOnPageIdentity = analysis.matching_features.includes("Firmenname") &&
+    (
+      analysis.matching_features.includes("Adresse") ||
+      analysis.matching_features.includes("Ort") ||
+      analysis.matching_features.includes("PLZ")
+    ) &&
+    (
+      analysis.matching_features.includes("Telefon") ||
+      analysis.matching_features.includes("Leistungsangebot")
+    );
+  analysis.accepted = !isGenericCandidateName(analysis.company_name || candidate.name) && analysis.matching_features.includes("Firmenname") && (ownedDomain || strongOnPageIdentity) && (
     analysis.matching_features.includes("Ort") ||
     analysis.matching_features.includes("PLZ") ||
     analysis.matching_features.includes("Adresse") ||
     analysis.matching_features.includes("Telefon") ||
     analysis.matching_features.includes("Leistungsangebot")
   );
-  if (!analysis.accepted) analysis.reason = ownedDomain ? "Zu wenige Identitaetsmerkmale auf der Website" : "Domain passt nicht eindeutig zum Firmennamen";
+  if (!analysis.accepted) analysis.reason = ownedDomain ? "Zu wenige Identitaetsmerkmale auf der Website" : "Domain und Website-Identitaet passen nicht eindeutig genug";
   return analysis;
 }
 
 function extractCandidateName(result, trade, region) {
-  const title = clean(result.title)
-    .replace(/\s+-\s+.*$/g, "")
-    .replace(/\s+\|\s+.*$/g, "")
+  const rawTitle = clean(result.title);
+  const locations = [region.name, ...(region.postal_codes || [])].filter(Boolean);
+  const locationPattern = locations.map(escapeRegex).join("|");
+  const titleWithoutDirectoryTail = rawTitle
+    .replace(/\s*(?:⇒|»|›|->)\s+.*$/g, "")
+    .replace(/\s+-\s+(?:Das Örtliche|Das Telefonbuch|Gelbe Seiten|Meinestadt|Branchenbuch|Google|Facebook|Instagram).*$/gi, "")
+    .replace(/\s+\|\s+.*$/g, "");
+  const inMatch = locationPattern
+    ? titleWithoutDirectoryTail.match(new RegExp(`^(.+?)\\s+(?:in|bei|nahe)\\s+(?:${locationPattern})(?:\\b|\\s|$)`, "i"))
+    : null;
+  const title = clean(inMatch?.[1] || titleWithoutDirectoryTail)
     .replace(new RegExp(`\\b${escapeRegex(trade.name)}\\b`, "ig"), "")
     .replace(new RegExp(`\\b${escapeRegex(region.name)}\\b`, "ig"), "")
-    .replace(/\b(Handwerker|Branchenbuch|Firma|Firmen|Kontakt|Impressum|Leistungen)\b/gi, "")
+    .replace(/\b(Handwerker|Branchenbuch|Firma|Firmen|Kontakt|Impressum|Leistungen|Details ansehen|Jetzt finden|Startseite|Zertifikate)\b/gi, "")
+    .replace(/\b(?:in|bei)\s*$/i, "")
+    .replace(/^\d+\s+(?:besten|beste)\s+/i, "")
     .replace(/\s+in\s+$/i, "")
     .trim();
-  const inMatch = clean(result.title).match(/^(.+?)\s+in\s+(Riedering|83083)\b/i);
-  return cleanCompanyName(inMatch?.[1] || title).slice(0, 140);
+  return cleanCompanyName(title).slice(0, 140);
 }
 
 function scoreCandidate({ directory, possibleWebsite, text, region, phone, email, tradeConfidence, websiteAnalysis }) {
@@ -808,7 +1114,7 @@ async function persistLive(region, trades, queries, candidates, coverage) {
   const result = { discovery_runs: 0, candidates_inserted: 0, review_items: 0, coverage_snapshots: 0, skipped: [] };
   const { data: dbRegion, error: regionError } = await supabase
     .from("regions")
-    .upsert(region, { onConflict: "slug" })
+    .upsert(regionToRow(region), { onConflict: "slug" })
     .select("id")
     .single();
   if (regionError) fail(regionError.message);
@@ -842,7 +1148,7 @@ async function persistLive(region, trades, queries, candidates, coverage) {
       continue;
     }
     result.candidates_inserted += 1;
-    if (candidate.status === "needs_review" || candidate.duplicate_of_company_id) {
+    if (candidate.status !== "rejected") {
       const { data: existingReview } = await supabase
         .from("review_queue")
         .select("id")
@@ -885,6 +1191,22 @@ async function persistLive(region, trades, queries, candidates, coverage) {
     else result.coverage_snapshots += 1;
   }
   return result;
+}
+
+function regionToRow(region) {
+  return {
+    name: region.name,
+    slug: region.slug,
+    postal_codes: region.postal_codes || [],
+    municipality: region.municipality || null,
+    county: region.county || null,
+    state: region.state || null,
+    country: region.country || "Deutschland",
+    latitude: region.latitude || null,
+    longitude: region.longitude || null,
+    population: region.population || null,
+    region_type: region.region_type || "municipality",
+  };
 }
 
 function resolveTradeId(trade, tradeRows) {
@@ -938,16 +1260,73 @@ function normalizeRegion(row) {
 }
 
 function isDirectoryLikeHost(host) {
-  return searchModule.isDirectoryDomain(host) || /(riedering\.de|rosenheimsbeste|gelbeseiten|dasoertliche|dastelefonbuch|meinestadt|cylex|11880|firmenwissen|northdata|unternehmensregister|branchenbuch|gewerbeverzeichnis|ortsdienst|handwerkerportal|gartenbau\.org|bauunternehmen\.org|elektriker\.org|maler\.org|maler-regional|my-hammer|starofservice|auskunft\.de|wirsindhandwerk|wasserwaermeluft|mein-elektriker-profi|elektriker-vorort|si-ex\.de|handwerkerservice365|innung|branchenportal|facebook|instagram|linkedin)/i.test(host);
+  return searchModule.isDirectoryDomain(host) || /(riedering\.de|rosenheim\.de|landkreis-rosenheim\.de|handwerk-rosenheim\.de|zimmerer-rosenheim\.de|rosenheimsbeste|bauenimlandkreis|gelbeseiten|dasoertliche|dastelefonbuch|meinestadt|cylex|11880|firmenwissen|northdata|unternehmensregister|branchenbuch|gewerbeverzeichnis|ortsdienst|handwerkerportal|gartenbau\.org|bauunternehmen\.org|elektriker\.org|maler\.org|maler-regional|sanitaer\.org|schlosserei\.net|fensterbau\.org|stuckateur-portal|installateur-mv|handwerk\.de|bghm\.de|shk-nrw|dgfnb|mobile\.de|coelnconcept|chatbase|werkenntdenbesten|wlw\.de|my-hammer|starofservice|auskunft\.de|wirsindhandwerk|wasserwaermeluft|mein-elektriker-profi|elektriker-vorort|si-ex\.de|handwerkerservice365|innung|branchenportal|facebook|instagram|linkedin)/i.test(host);
 }
 
 function isGenericCandidateName(name) {
   const value = normalize(name);
   if (!value || value.length < 4) return true;
-  if (/^(top|beste|start|adresse|firmenverzeichnis|innungsbetriebe|innungsmitglieder|handwerker|bauunternehmen|elektriker|maler|sanitaer heizung|heizungsbau|kontakt|impressum)/i.test(value)) return true;
-  if (/\b(rewe|stellenangebote|karriere|notdienst|top 10|bewertungen|branchenbuch)\b/i.test(value)) return true;
+  if (/^(top|beste|start|home|hauptseite|adresse|aus |firmenverzeichnis|innungsbetriebe|innungsmitglieder|mitglieder|betriebe|handwerker|bauunternehmen|elektriker|maler|sanitaer heizung|sanitar heizung|heizungsbau|kontakt|impressum|das unternehmen|unternehmen|profil|zertifikate|uhr|bahn details ansehen|fachhandwerker|fachbetrieb fuer|fachbetrieb fur|fachbetrieb fur|anlagenmechaniker|sanitaer heizungs und klima handwerk|sanitar heizungs und klima handwerk|bghm|alle daten bleiben|ihre experten fuer|ihre experten fur|experte fuer|experte fur|installation von|stadt|landratsamt|bescheinigung|klima schuetzen|bayern rosenheim|entwaesserung und|erdarbeiten|baureinigung|brandschutzkonzepte|dachdeckerei in|die [0-9]+ besten)/i.test(value)) return true;
+  if (/\b(rewe|stellenangebote|karriere|notdienst|top 10|bewertungen|branchenbuch|houzz|innung|landratsamt|stadt rosenheim|selbst aktiv werden|wer kennt den besten|jetzt finden|in jetzt finden|in der naehe|in und umgebung|rosenheim und in der naehe|kommen sie vorbei|oeffnungszeiten|route planen|gratis anrufen|angebote von|suchergebnis|startseite sts|leistungen produkte|gesellschaft fuer|verband|zentralverband|datenschutz impressum|matomo|arbeitsschutz|ausbildung)\b/i.test(value)) return true;
+  if (/\b(profis\s+\w+\s+20\d{2}|top fachbetriebe|qualifizierter fachbetrieb|unverbindlich anfragen)\b/i.test(value)) return true;
+  if (/^[^A-Za-zÄÖÜäöüß0-9]/.test(name)) return true;
+  if (/\b(?:rosenheim|chiemgau|landkreis)\b/i.test(value) && !/\b(gmbh|gbr|gdbr|ug|ag|kg|ohg|ek|e k|meisterbetrieb|schreinerei|zimmerei|bau|elektro|maler|metall|dach|spenglerei|fliesen|heizung|sanitaer|sanitär|gartenbau)\b/i.test(value)) return true;
+  if (/^(?:in|bei|nahe|fuer|für)\b/i.test(value)) return true;
+  if (/[?!]{2,}/.test(name) || /(?:⇒|»|›|->)/.test(name)) return true;
   const tokens = value.split(" ").filter((token) => token.length >= 3);
   return tokens.length < 2 && !/\b(gmbh|gbr|kg|ohg|ek)\b/i.test(name);
+}
+
+function isAcceptableCandidate(candidate) {
+  if (!candidate?.name || isGenericCandidateName(candidate.name)) return false;
+  const ownWebsiteAccepted = candidate.raw_evidence?.website_analysis?.accepted === true && candidate.source_type === "official_website";
+  const sourceHost = hostname(candidate.source_url || "");
+  if (ownWebsiteAccepted) return true;
+  if ((candidate.overall_score || 0) < 45) return false;
+  if (isDirectoryLikeHost(sourceHost) && !candidate.possible_website && !candidate.phone && !candidate.street) return false;
+  if (candidate.possible_website && isDirectoryLikeHost(hostname(candidate.possible_website))) return false;
+  if (candidate.source_type === "search_result" && isDirectoryLikeHost(sourceHost)) return false;
+  return true;
+}
+
+function dedupeCandidates(candidates) {
+  const result = [];
+  for (const candidate of candidates) {
+    const duplicateIndex = result.findIndex((item) => areLikelySameCandidate(item, candidate));
+    if (duplicateIndex === -1) {
+      result.push(candidate);
+      continue;
+    }
+    if (candidateQuality(candidate) > candidateQuality(result[duplicateIndex])) {
+      result[duplicateIndex] = candidate;
+    }
+  }
+  return result.sort((a, b) => b.overall_score - a.overall_score || a.name.localeCompare(b.name, "de"));
+}
+
+function areLikelySameCandidate(a, b) {
+  const aDomain = hostname(a.possible_website || "");
+  const bDomain = hostname(b.possible_website || "");
+  if (aDomain && bDomain && aDomain === bDomain) return true;
+  const aPhone = digits(a.phone || "");
+  const bPhone = digits(b.phone || "");
+  if (aPhone && bPhone && aPhone === bPhone) return true;
+  const aName = normalizeCompanyName(a.name || "");
+  const bName = normalizeCompanyName(b.name || "");
+  if (!aName || !bName) return false;
+  const samePlace = normalize(a.city || "") === normalize(b.city || "") || a.postal_code === b.postal_code;
+  return samePlace && (aName === bName || aName.includes(bName) || bName.includes(aName));
+}
+
+function candidateQuality(candidate) {
+  let score = candidate.overall_score || 0;
+  if (candidate.source_type === "official_website") score += 25;
+  if (candidate.raw_evidence?.website_analysis?.accepted) score += 20;
+  if (!isDirectoryLikeHost(hostname(candidate.source_url || ""))) score += 10;
+  if (/\b(GmbH|GbR|GdbR|UG|OHG|KG|e\.K\.)\b/i.test(candidate.name || "")) score += 10;
+  if (candidate.email) score += 5;
+  if (candidate.street) score += 5;
+  return score;
 }
 
 async function isRobotsAllowed(root) {
@@ -1131,15 +1510,31 @@ function normalizeUrl(url) {
 }
 
 function cleanCompanyName(value) {
-  return clean(value)
+  const cleaned = clean(value)
     .replace(/^(www\.)/i, "")
     .replace(/\b(Google|Branchenbuch|Gelbe Seiten|Das Örtliche|Meinestadt)\b/gi, "")
+    .replace(/\s*(?:⇒|»|›|->)\s+.*$/g, "")
+    .replace(/\s*[•·]{2,}.*$/g, "")
+    .replace(/^[-–—•\s]+/g, "")
+    .replace(/^(?:Zertifikate|Uhr|Kommen Sie vorbei|Profil von)\s+/gi, "")
+    .replace(/^(?:Über uns|Ueber uns)\s*[–-]\s*/gi, "")
+    .replace(/\s+-\s+Startseite.*$/gi, "")
+    .replace(/\s+-\s+(?:Maler|Bauunternehmen|Elektroinstallation|Sanitär|Sanitaer|Heizung).*$/gi, "")
+    .replace(/\s+(?:Elektrische|Elektroinstallation|Elektrische Installationen|Sanitärinstallateur|Bauunternehmen|Malerarbeiten)\s*$/gi, "")
+    .replace(/\s+in\s+\/?[A-ZÄÖÜa-zäöüß-]+$/g, "")
+    .replace(/\s+in\s+\d{5}$/g, "")
+    .replace(/\b(?:in|bei)\s+(?:jetzt|der naehe|der nähe)\b.*$/gi, "")
+    .replace(/\b(?:Details ansehen|Jetzt finden|Gratis anrufen|Route planen|Öffnungszeiten|Oeffnungszeiten)\b.*$/gi, "")
+    .replace(/^(?:Startseite|Das Unternehmen|Profil von|Bahn Details ansehen)\s+/gi, "")
+    .replace(/^[-–—•\s]+/g, "")
     .replace(/\s{2,}/g, " ")
     .trim();
+  const duplicateTitle = cleaned.match(/^(.{3,80}?)\s+-\s+\1$/i);
+  return (duplicateTitle?.[1] || cleaned).trim();
 }
 
 function normalizeCompanyName(value) {
-  return normalize(value).replace(/\b(gmbh|gbr|gdbr|ug|ag|kg|ohg|ek|firma|bauunternehmen)\b/g, " ").replace(/\s+/g, " ").trim();
+  return normalize(value).replace(/\b(gmbh|gbr|gdbr|ug|ag|kg|ohg|ek|co|firma|bauunternehmen)\b/g, " ").replace(/\s+/g, " ").trim();
 }
 
 function extractPhone(value) {
@@ -1153,8 +1548,8 @@ function extractEmail(value) {
 
 function normalizeObfuscatedEmailText(value) {
   return String(value || "")
-    .replace(/\s*(?:\(|\[)?\s*at\s*(?:\)|\])?\s*/gi, "@")
-    .replace(/\s*(?:\(|\[)?\s*dot\s*(?:\)|\])?\s*/gi, ".")
+    .replace(/(?:\s|\(|\[)+at(?:\s|\)|\])+/gi, "@")
+    .replace(/(?:\s|\(|\[)+dot(?:\s|\)|\])+/gi, ".")
     .replace(/\s*@\s*/g, "@")
     .replace(/\s*\.\s*/g, ".");
 }
@@ -1191,7 +1586,10 @@ function extractCompanyNameFromDirectoryText(text, fallback) {
   const cleanText = clean(text);
   const target = cleanCompanyName(fallback || "");
   const titleMatch = cleanText.match(/([A-ZÄÖÜ][A-Za-zÄÖÜäöüß .&-]{2,100}?(?:Heizungs-?\s*und\s*Lüftungsbau|Heizungs-?\s*und\s*Lueftungsbau|Sanitär|Sanitaer|SHK)[A-Za-zÄÖÜäöüß .&-]*)/i)?.[1];
-  if (titleMatch) return cleanCompanyName(titleMatch.replace(/\s+Handwerker.*$/i, ""));
+  if (titleMatch) {
+    const value = cleanCompanyName(titleMatch.replace(/\s+Handwerker.*$/i, ""));
+    if (!isGenericCandidateName(value)) return value;
+  }
   if (target && cleanText.toLowerCase().includes(target.toLowerCase())) return target;
   return target || null;
 }
