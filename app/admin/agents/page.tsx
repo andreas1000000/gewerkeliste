@@ -34,9 +34,14 @@ export default async function AdminAgentsPage() {
             Riskante Aktionen bleiben Human-in-the-Loop.
           </p>
         </div>
-        <a className="w-fit rounded-md border border-line bg-white px-4 py-2 text-sm font-semibold text-ink hover:bg-panel" href="/admin/coverage?region=stephanskirchen">
-          Stephanskirchen Review öffnen
-        </a>
+        <div className="flex flex-wrap gap-2">
+          <a className="w-fit rounded-md border border-line bg-white px-4 py-2 text-sm font-semibold text-ink hover:bg-panel" href="/admin/coverage?region=stephanskirchen">
+            Stephanskirchen Review öffnen
+          </a>
+          <a className="w-fit rounded-md bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-[#265a4d]" href="/admin/agents/municipality-discovery">
+            Gemeinde-Agent starten
+          </a>
+        </div>
       </div>
 
       <section className="mb-6 grid gap-4 md:grid-cols-5">
