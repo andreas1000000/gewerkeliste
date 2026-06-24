@@ -1,0 +1,5414 @@
+{
+  "version": 0.6,
+  "generator": "Overpass API 0.7.62.11 87bfad18",
+  "osm3s": {
+    "timestamp_osm_base": "2026-06-24T16:40:58Z",
+    "timestamp_areas_base": "2026-05-12T07:36:16Z",
+    "copyright": "The data included in this document is from www.openstreetmap.org. The data is made available under ODbL."
+  },
+  "elements": [
+
+{
+  "type": "node",
+  "id": 308359325,
+  "lat": 47.8441861,
+  "lon": 12.0124531,
+  "tags": {
+    "addr:city": "Kolbermoor",
+    "addr:country": "DE",
+    "addr:housenumber": "19",
+    "addr:place": "Pullach",
+    "addr:postcode": "83059",
+    "craft": "tinsmith",
+    "email": "info@spenglerei-stadler.de",
+    "fax": "+49 8061 92 92 9",
+    "name": "Spenglerei Stadler GmbH",
+    "opening_hours": "Mo-Th 08:00-16:30, Fr 08:00-12:00; Sa,Su,PH off",
+    "phone": "+49 8061 92 92 8",
+    "website": "https://spenglerei-stadler.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 366524837,
+  "lat": 48.0606402,
+  "lon": 12.2331104,
+  "tags": {
+    "addr:city": "Wasserburg am Inn",
+    "addr:country": "DE",
+    "addr:housenumber": "11",
+    "addr:postcode": "83512",
+    "addr:street": "Marienplatz",
+    "amenity": "cafe",
+    "craft": "coffee_roaster",
+    "name": "Wasserburger Bohnenröster",
+    "opening_hours": "Mo-Fr 08:00-18:00",
+    "outdoor_seating": "yes",
+    "toilets:wheelchair": "no",
+    "website": "https://wasserburger-bohnenroester.de",
+    "wheelchair": "limited"
+  }
+},
+{
+  "type": "node",
+  "id": 418238950,
+  "lat": 47.8919338,
+  "lon": 12.0196141,
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "5",
+    "addr:place": "Thalacker",
+    "addr:postcode": "83043",
+    "craft": "carpenter",
+    "email": "info@rottmueller-systemholz.de",
+    "name": "Rottmüller Systemholz",
+    "opening_hours": "Mo-Fr 08:00-17:00; Sa,Su,PH off",
+    "phone": "+49 8061 370 38 18",
+    "shop": "construction",
+    "website": "https://www.rottmueller-systemholz.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 473442261,
+  "lat": 47.8563584,
+  "lon": 12.0158321,
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "63",
+    "addr:postcode": "83043",
+    "addr:street": "Rosenheimer Straße",
+    "check_date": "2025-01-22",
+    "craft": "plumber",
+    "name": "Haustechnik Klaus Heiber",
+    "phone": "+49 8061 89 47"
+  }
+},
+{
+  "type": "node",
+  "id": 474428729,
+  "lat": 47.8592060,
+  "lon": 11.9902848,
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "8b",
+    "addr:postcode": "83043",
+    "addr:street": "Altwasserstraße",
+    "craft": "painter",
+    "fax": "+49 8061 6699",
+    "name": "Hafner \"Der Maler\"",
+    "phone": "+49 8061 2640",
+    "website": "https://www.maler-hafner.de"
+  }
+},
+{
+  "type": "node",
+  "id": 474428900,
+  "lat": 47.8579387,
+  "lon": 11.9921426,
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "9",
+    "addr:postcode": "83043",
+    "addr:street": "Altwasserstraße",
+    "craft": "metal_construction",
+    "name": "Maschinenbau Ing. Lang GmbH",
+    "phone": "+49 8061 3945-0",
+    "website": "https://www.lang-gmbh.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 521282245,
+  "lat": 47.8624506,
+  "lon": 12.0113515,
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "14a",
+    "addr:postcode": "83043",
+    "addr:street": "Rosenheimer Straße",
+    "craft": "painter",
+    "name": "Maler Leyer",
+    "operator": "Thomas E. Leyer",
+    "phone": "+49 8061 7470",
+    "website": "https://www.leyer.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 521956852,
+  "lat": 47.8639942,
+  "lon": 12.0091196,
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "1",
+    "addr:postcode": "83043",
+    "addr:street": "Münchner Straße",
+    "check_date:opening_hours": "2024-07-15",
+    "craft": "photographer",
+    "name": "Foto Hornauer",
+    "opening_hours": "Mo-Fr 09:00-12:00,14:00-18:00; Sa 09:00-12:00"
+  }
+},
+{
+  "type": "node",
+  "id": 616629957,
+  "lat": 47.8953340,
+  "lon": 11.9172712,
+  "tags": {
+    "addr:city": "Bruckmühl",
+    "addr:country": "DE",
+    "addr:housenumber": "29",
+    "addr:postcode": "83052",
+    "addr:street": "Haunpoldstraße",
+    "addr:suburb": "Kirchdorf am Haunpold",
+    "craft": "carpenter",
+    "email": "info@sedlmaier-schreinerei.de",
+    "mobile": "+49 1573 170 45 27",
+    "name": "Schreinerei Sedlmaier",
+    "operator": "Christian Sedlmaier",
+    "phone": "+49 8062 80 47 83",
+    "website": "https://www.sedlmaier-schreinerei.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 683495964,
+  "lat": 47.8837330,
+  "lon": 11.8604754,
+  "tags": {
+    "addr:city": "Feldkirchen-Westerham",
+    "addr:country": "DE",
+    "addr:housenumber": "4",
+    "addr:postcode": "83620",
+    "addr:street": "Sternecker Weg",
+    "addr:suburb": "Vagen",
+    "craft": "builder",
+    "name": "Bauunternehmung Steiner",
+    "website": "https://bauunternehmen-steiner.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 1189492484,
+  "lat": 47.7933867,
+  "lon": 12.1160513,
+  "tags": {
+    "craft": "metal_construction",
+    "name": "Thomas Reichert Metallbau GmbH",
+    "url": "http://www.mb-reichert.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 1189492545,
+  "lat": 47.7933344,
+  "lon": 12.1163910,
+  "tags": {
+    "craft": "painter",
+    "name": "Michael Hable",
+    "url": "http://www.maler-hable.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 1189503132,
+  "lat": 47.7935356,
+  "lon": 12.1153784,
+  "tags": {
+    "craft": "hvac",
+    "name": "Ralf Gruninger"
+  }
+},
+{
+  "type": "node",
+  "id": 1189503153,
+  "lat": 47.7933752,
+  "lon": 12.1170091,
+  "tags": {
+    "contact:website": "http://www.ofenfeuer.de/",
+    "craft": "stove_fitter",
+    "name": "Soutschek GmbH",
+    "opening_hours": "Mo-Fr 10:00-18:00; Sa 09:00-13:00"
+  }
+},
+{
+  "type": "node",
+  "id": 1189745714,
+  "lat": 47.7902128,
+  "lon": 12.1111895,
+  "tags": {
+    "addr:city": "Raubling",
+    "addr:country": "DE",
+    "addr:housenumber": "12",
+    "addr:postcode": "83064",
+    "addr:street": "Bahnhofstraße",
+    "craft": "glaziery",
+    "name": "Glaserei Moser",
+    "url": "http://www.glaserei-moser.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 1764903568,
+  "lat": 47.9189757,
+  "lon": 12.2954137,
+  "tags": {
+    "craft": "electrician",
+    "name": "Schmid Elektroanlagen"
+  }
+},
+{
+  "type": "node",
+  "id": 1783727154,
+  "lat": 47.7451022,
+  "lon": 12.1379751,
+  "tags": {
+    "craft": "coffee_roaster",
+    "description": "Kaffeerösterei",
+    "name": "WERKSBRANDT Kaffeerösterei",
+    "website": "https://www.werksbrandt.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 1799477111,
+  "lat": 47.9190500,
+  "lon": 12.3816360,
+  "tags": {
+    "craft": "carpenter",
+    "name": "Schreinerei Hundhammer"
+  }
+},
+{
+  "type": "node",
+  "id": 1893202532,
+  "lat": 48.0550452,
+  "lon": 12.1229718,
+  "tags": {
+    "craft": "beekeeper",
+    "name": "Imkerei Karl Pielmeier",
+    "shop": "honey"
+  }
+},
+{
+  "type": "node",
+  "id": 2010233440,
+  "lat": 47.8569793,
+  "lon": 12.3469456,
+  "tags": {
+    "addr:city": "Prien am Chiemsee",
+    "addr:country": "DE",
+    "addr:housenumber": "4",
+    "addr:postcode": "83209",
+    "addr:street": "Hallwanger Straße",
+    "craft": "bookbinder",
+    "email": "info@bindewerk.de",
+    "fax": "+49 8051 966726",
+    "name": "Bindewerk",
+    "opening_hours": "Mo-Th 07:00-16:30; Fr 07:00-13:00",
+    "phone": "+49 8051 966723",
+    "shop": "stationery",
+    "website": "https://www.bindewerk.de"
+  }
+},
+{
+  "type": "node",
+  "id": 2010246144,
+  "lat": 47.8564224,
+  "lon": 12.3476098,
+  "tags": {
+    "addr:city": "Prien am Chiemsee",
+    "addr:country": "DE",
+    "addr:housenumber": "11",
+    "addr:postcode": "83209",
+    "addr:street": "Seestraße",
+    "check_date": "2025-11-05",
+    "check_date:opening_hours": "2025-11-05",
+    "craft": "shoemaker",
+    "name": "Voggenauer Dirk",
+    "opening_hours": "Mo,Tu,Th 09:00-12:30,13:30-18:00; We,Fr 09:00-12:30",
+    "phone": "+49 8051 1218",
+    "shop": "shoes",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 2098001316,
+  "lat": 47.9308927,
+  "lon": 12.3871683,
+  "tags": {
+    "contact:website": "http://www.am-maibaum.de/",
+    "craft": "carpenter",
+    "name": "Maibaum Manufaktur für individuelles und gesundes Wohnen"
+  }
+},
+{
+  "type": "node",
+  "id": 2366154250,
+  "lat": 47.9491753,
+  "lon": 12.1401698,
+  "tags": {
+    "addr:city": "Schechen",
+    "addr:country": "DE",
+    "addr:housenumber": "80",
+    "addr:place": "Oberwöhrn",
+    "addr:postcode": "83135",
+    "craft": "cabinet_maker",
+    "name": "Schreinerei Maier GmbH"
+  }
+},
+{
+  "type": "node",
+  "id": 2465904533,
+  "lat": 47.9036165,
+  "lon": 12.2367915,
+  "tags": {
+    "addr:city": "Söchtenau",
+    "addr:country": "DE",
+    "addr:housenumber": "3",
+    "addr:postcode": "83139",
+    "addr:street": "Lindenweg",
+    "addr:suburb": "Schwabering",
+    "craft": "carpenter",
+    "name": "Schmidmayer Treppen- und Rolladenbau",
+    "website": "https://www.treppen-rolladen.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 2514088005,
+  "lat": 48.0601257,
+  "lon": 12.2323089,
+  "tags": {
+    "addr:city": "Wasserburg am Inn",
+    "addr:country": "DE",
+    "addr:housenumber": "4",
+    "addr:postcode": "83512",
+    "addr:street": "Bruckgasse",
+    "check_date": "2023-08-29",
+    "craft": "pottery",
+    "name": "Wasserburger Töpferei",
+    "phone": "+49 8071 4793",
+    "website": "http://www.heldwasserburg.de"
+  }
+},
+{
+  "type": "node",
+  "id": 2971994592,
+  "lat": 47.9033376,
+  "lon": 12.3044356,
+  "tags": {
+    "check_date": "2025-09-14",
+    "craft": "plumber",
+    "name": "Beutlhauser",
+    "phone": "+49 8053 79510-0"
+  }
+},
+{
+  "type": "node",
+  "id": 2979277896,
+  "lat": 47.8788769,
+  "lon": 11.9182424,
+  "tags": {
+    "addr:city": "Bruckmühl",
+    "addr:country": "DE",
+    "addr:housenumber": "4a",
+    "addr:postcode": "83052",
+    "addr:street": "Rotwandstraße",
+    "craft": "painter",
+    "name": "Manfred Oswald GmbH & Co. KG",
+    "operator": "Malermeister Oswald",
+    "phone": "+49 8062 79895",
+    "website": "https://malermeister-oswald.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 3132760040,
+  "lat": 47.8100663,
+  "lon": 12.1928160,
+  "tags": {
+    "check_date": "2023-05-11",
+    "contact:website": "http://www.staudacher-haustechnik.de/",
+    "craft": "hvac",
+    "name": "Sebastian Staudacher GmbH"
+  }
+},
+{
+  "type": "node",
+  "id": 3136896482,
+  "lat": 47.8109385,
+  "lon": 12.1911906,
+  "tags": {
+    "craft": "metal_construction",
+    "name": "Zinngießerei"
+  }
+},
+{
+  "type": "node",
+  "id": 3177139464,
+  "lat": 47.7951493,
+  "lon": 12.1200007,
+  "tags": {
+    "addr:city": "Raubling",
+    "addr:country": "DE",
+    "addr:housenumber": "32",
+    "addr:postcode": "83064",
+    "addr:street": "Rosenheimer Straße",
+    "craft": "stove_fitter",
+    "name": "Chiemsee Öfen e.K.",
+    "operator": "Christian Buchfellner",
+    "website": "https://www.chiemsee-oefen.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 3177139471,
+  "lat": 47.7951894,
+  "lon": 12.1209903,
+  "tags": {
+    "craft": "window_construction",
+    "name": "Niedermaier Türen & Fenster"
+  }
+},
+{
+  "type": "node",
+  "id": 3177139476,
+  "lat": 47.7953361,
+  "lon": 12.1208443,
+  "tags": {
+    "craft": "tiler",
+    "name": "Fliesen Reitberger"
+  }
+},
+{
+  "type": "node",
+  "id": 3402850630,
+  "lat": 47.9276587,
+  "lon": 11.9832182,
+  "tags": {
+    "contact:email": "elektro-dobl@t-online.de;elektro-dobl@web.de",
+    "contact:fax": "+49 8065 430",
+    "contact:phone": "+49 8065 1202",
+    "craft": "electrician",
+    "name": "Elektro Dobl"
+  }
+},
+{
+  "type": "node",
+  "id": 3402850631,
+  "lat": 47.9232659,
+  "lon": 11.9888752,
+  "tags": {
+    "check_date": "2026-06-14",
+    "contact:phone": "+49 8065 216",
+    "craft": "sawmill",
+    "name": "Sägewerk Sewald",
+    "operator": "Michael Sewald"
+  }
+},
+{
+  "type": "node",
+  "id": 3402850632,
+  "lat": 47.9265245,
+  "lon": 11.9834610,
+  "tags": {
+    "contact:website": "http://www.holzhandwerk-reischl.de",
+    "craft": "carpenter",
+    "name": "Schreinerei Reischl"
+  }
+},
+{
+  "type": "node",
+  "id": 3407345437,
+  "lat": 47.8969860,
+  "lon": 11.8354400,
+  "tags": {
+    "craft": "carpenter",
+    "name": "Holzhaus Andrä"
+  }
+},
+{
+  "type": "node",
+  "id": 3407345438,
+  "lat": 47.8979646,
+  "lon": 11.8343177,
+  "tags": {
+    "craft": "carpenter",
+    "name": "Landhausmöbel Lechner"
+  }
+},
+{
+  "type": "node",
+  "id": 3408529933,
+  "lat": 47.8953059,
+  "lon": 11.8407818,
+  "tags": {
+    "craft": "carpenter",
+    "name": "Johann Kray"
+  }
+},
+{
+  "type": "node",
+  "id": 3493773238,
+  "lat": 47.9253796,
+  "lon": 11.9752744,
+  "tags": {
+    "contact:phone": "+49 8065 90360",
+    "contact:website": "http://www.gollreiter.de/",
+    "craft": "yes",
+    "name": "Gartenmöbel Gollreiter",
+    "opening_hours": "Mar-Aug: Tu-Fr 09:00-18:00; Sa 09:00-16:00"
+  }
+},
+{
+  "type": "node",
+  "id": 3683005911,
+  "lat": 47.7904780,
+  "lon": 12.1111853,
+  "tags": {
+    "craft": "tailor",
+    "name": "Änderungsschneiderei Anna",
+    "opening_hours": "Mo,Tu 10:00-16:00; We 09:00-12:00; Th,Fr 10:00-16:00",
+    "phone": "+49 157 36973142"
+  }
+},
+{
+  "type": "node",
+  "id": 3859753745,
+  "lat": 47.7450950,
+  "lon": 12.3101889,
+  "tags": {
+    "contact:phone": "+49 8052 2260",
+    "contact:website": "http://www.docforamps.de/",
+    "craft": "electrician",
+    "name": "Werkstatt DocForAmps",
+    "shop": "hifi"
+  }
+},
+{
+  "type": "node",
+  "id": 3961753424,
+  "lat": 47.8566307,
+  "lon": 12.3467656,
+  "tags": {
+    "addr:city": "Prien am Chiemsee",
+    "addr:country": "DE",
+    "addr:housenumber": "2",
+    "addr:postcode": "83209",
+    "addr:street": "Hallwanger Straße",
+    "check_date": "2025-11-05",
+    "craft": "printer",
+    "name": "Rieder Druckservice",
+    "official_name": "RIEDER Druckservice GmbH",
+    "website": "http://www.rieder-druckservice.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 3969039757,
+  "lat": 47.8015883,
+  "lon": 12.1631106,
+  "tags": {
+    "addr:city": "Rohrdorf",
+    "addr:country": "DE",
+    "addr:housenumber": "6 1/2",
+    "addr:postcode": "83101",
+    "addr:street": "Ludwig-Thoma-Straße",
+    "craft": "carpenter",
+    "name": "Designwerk Christl",
+    "website": "https://www.designwerk-christl.com/"
+  }
+},
+{
+  "type": "node",
+  "id": 3969039758,
+  "lat": 47.8005062,
+  "lon": 12.1659501,
+  "tags": {
+    "craft": "glaziery",
+    "name": "magna Glasdesign",
+    "website": "https://www.magma-glas-design.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 3994879544,
+  "lat": 47.9239211,
+  "lon": 11.9888023,
+  "tags": {
+    "check_date": "2023-06-27",
+    "contact:email": "elektro-dobl@t-online.de;elektro-dobl@web.de",
+    "contact:fax": "+49 8065 430",
+    "contact:phone": "+49 8065 1202",
+    "craft": "electrician",
+    "name": "Elektro Dobl"
+  }
+},
+{
+  "type": "node",
+  "id": 4005922299,
+  "lat": 47.9003068,
+  "lon": 12.2916535,
+  "tags": {
+    "addr:city": "Bad Endorf",
+    "addr:country": "DE",
+    "addr:housenumber": "4",
+    "addr:place": "Kurf",
+    "addr:postcode": "83093",
+    "craft": "beekeeper",
+    "description": "Honig",
+    "operator": "Tange",
+    "shop": "farm"
+  }
+},
+{
+  "type": "node",
+  "id": 4065685929,
+  "lat": 47.6180175,
+  "lon": 12.1957418,
+  "tags": {
+    "craft": "electrician",
+    "name": "Elektro Wieser",
+    "website": "https://elektro-wieser.com/"
+  }
+},
+{
+  "type": "node",
+  "id": 4131672498,
+  "lat": 47.9265147,
+  "lon": 11.9903683,
+  "tags": {
+    "contact:email": "info@fraestec-sued.de",
+    "contact:phone": "+49 8065 909709",
+    "contact:website": "http://www.fraestec-sued.de/",
+    "craft": "floorer",
+    "description": "Oberflächenbehandlung von Industrieböden, Fräsen, Schleifen, Polieren",
+    "name": "Frästec Süd",
+    "operator": "Klaus Schramm"
+  }
+},
+{
+  "type": "node",
+  "id": 4226491661,
+  "lat": 47.7760414,
+  "lon": 12.3249369,
+  "tags": {
+    "addr:city": "Aschau im Chiemgau",
+    "addr:country": "DE",
+    "addr:housenumber": "15",
+    "addr:postcode": "83229",
+    "addr:street": "Kampenwandstraße",
+    "contact:fax": "+49 8052 9571295",
+    "contact:phone": "+49 8052 9571295",
+    "contact:website": "http://www.confiserie-dengel.de/",
+    "craft": "confectionery",
+    "indoor_seating": "no",
+    "name": "Dengel Kampenwand Confiserie",
+    "opening_hours": "Mo-Fr 09:15-18:00; Sa 09:15-14:00",
+    "outdoor_seating": "no",
+    "shop": "confectionery",
+    "source": "http://www.confiserie-dengel.de/",
+    "source:date": "2017-04-05",
+    "takeaway": "only"
+  }
+},
+{
+  "type": "node",
+  "id": 4349397397,
+  "lat": 47.7921476,
+  "lon": 12.1163758,
+  "tags": {
+    "craft": "jeweller",
+    "name": "Goldschmiede Möbes"
+  }
+},
+{
+  "type": "node",
+  "id": 4397520898,
+  "lat": 47.9818619,
+  "lon": 12.1269588,
+  "tags": {
+    "craft": "gardener"
+  }
+},
+{
+  "type": "node",
+  "id": 4828576547,
+  "lat": 48.0360264,
+  "lon": 12.1630910,
+  "tags": {
+    "addr:city": "Edling",
+    "addr:country": "DE",
+    "addr:housenumber": "12",
+    "addr:place": "Roßhart",
+    "addr:postcode": "83533",
+    "check_date": "2023-10-28",
+    "craft": "electrician",
+    "name": "Kainz"
+  }
+},
+{
+  "type": "node",
+  "id": 4906229541,
+  "lat": 47.9902318,
+  "lon": 12.3162051,
+  "tags": {
+    "addr:city": "Amerang",
+    "addr:housenumber": "31",
+    "addr:postcode": "83123",
+    "addr:street": "Obingerstr.",
+    "craft": "arborist",
+    "description": "Wir erledigen zuverlässig anstehende Arbeiten an Ihren Bäumen nach den Richtlinien der ZTV Baumpflege. Mittels Seilklettertechnik erreichen wir jeden Ast im Baum.",
+    "email": "info@habitat-baumpflege.de",
+    "image": "https://lh3.googleusercontent.com/p/AF1QipPYqrwYow8AfN0VspgDuEQSxSvMROa96VpMfwwZ=s1360-w1360-h1020-rw",
+    "lgbtq": "welcome",
+    "name": "Habitat Baumpflege Marius DIab",
+    "note": "Fachbetrieb für Baumarbeiten",
+    "office": "surveyor",
+    "opening_hours": "24/7",
+    "phone": "+491636364004",
+    "recycling:green_waste": "yes",
+    "website": "https://www.habitat-baumpflege.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 4924833860,
+  "lat": 47.6568932,
+  "lon": 12.1612899,
+  "tags": {
+    "craft": "painter",
+    "name": "Haidacher Farbe+Technik",
+    "website": "https://www.maler-haidacher.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 5075398485,
+  "lat": 48.0818984,
+  "lon": 12.2062048,
+  "tags": {
+    "addr:city": "Soyen",
+    "addr:housenumber": "3",
+    "addr:place": "Graben",
+    "addr:postcode": "83564",
+    "contact:phone": "+49 8071 90640",
+    "contact:website": "http://www.schomavoelk.de/",
+    "craft": "agricultural_engines",
+    "name": "Hans Völk GmbH | Niederlassung Soyen"
+  }
+},
+{
+  "type": "node",
+  "id": 5191666831,
+  "lat": 47.9913067,
+  "lon": 12.2549338,
+  "tags": {
+    "addr:city": "Schonstett",
+    "addr:country": "DE",
+    "addr:housenumber": "10",
+    "addr:postcode": "83137",
+    "addr:street": "Amselweg",
+    "addr:suburb": "Au",
+    "contact:website": "http://www.josef-obermaier.de",
+    "craft": "carpenter",
+    "name": "Schreinerei Obermaier"
+  }
+},
+{
+  "type": "node",
+  "id": 5195553476,
+  "lat": 47.9951296,
+  "lon": 12.2538083,
+  "tags": {
+    "contact:website": "http://www.gruber-lorenz-holzbau.de/",
+    "craft": "carpenter",
+    "name": "Holzbau Gruber"
+  }
+},
+{
+  "type": "node",
+  "id": 5314852422,
+  "lat": 47.8812968,
+  "lon": 11.9861661,
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "10",
+    "addr:postcode": "83043",
+    "addr:street": "Carl-von-Ossietzky-Straße",
+    "craft": "convenience_food",
+    "name": "Bio-Kontor 7",
+    "phone": "+49 8061 93 90 28 0",
+    "website": "https://www.bio-kontor7.com"
+  }
+},
+{
+  "type": "node",
+  "id": 5364729078,
+  "lat": 47.8390048,
+  "lon": 12.2071740,
+  "tags": {
+    "alt_name": "Installationen Alfons Huber",
+    "craft": "plumber",
+    "name": "Huber Alfons Heizung - Sanitär"
+  }
+},
+{
+  "type": "node",
+  "id": 5372478216,
+  "lat": 47.8089253,
+  "lon": 12.3773557,
+  "tags": {
+    "addr:city": "Bernau am Chiemsee",
+    "addr:housenumber": "18",
+    "addr:postcode": "83233",
+    "addr:street": "Ramoserstraße",
+    "check_date:opening_hours": "2025-12-14",
+    "craft": "carpenter",
+    "name": "Weingartner Donat",
+    "opening_hours:signed": "no",
+    "phone": "+49 8051 7329"
+  }
+},
+{
+  "type": "node",
+  "id": 5466674491,
+  "lat": 47.8691851,
+  "lon": 11.9000172,
+  "tags": {
+    "craft": "gardener",
+    "description": "Bioland Gärtnerei",
+    "identity": "economy_for_the_common_good",
+    "name": "Bioland Gärtnerei am Hainerbach",
+    "opening_hours": "Tu 09:00-13:00, Tu 14:00-18:00, Fr 09:00-13:00, Fr 14:00-18:00, Sa 09:00-13:00",
+    "organic": "only",
+    "provides": "food+drink",
+    "shop": "farm",
+    "source": "survey;Homepage",
+    "source:date": "2018-03-09",
+    "type_of_initiative": "other_buylocal",
+    "website": "https://www.bioland-gaertnerei-am-hainerbach.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 5721601144,
+  "lat": 48.0487416,
+  "lon": 12.2362352,
+  "tags": {
+    "addr:city": "Eiselfing",
+    "addr:country": "DE",
+    "addr:housenumber": "4",
+    "addr:postcode": "83549",
+    "addr:street": "Wasserburger Straße",
+    "craft": "carpenter",
+    "name": "Huber & Sohn",
+    "official_name": "Huber & Sohn Gmbh & Co. KG"
+  }
+},
+{
+  "type": "node",
+  "id": 5786504728,
+  "lat": 47.8784176,
+  "lon": 11.9274292,
+  "tags": {
+    "addr:city": "Bruckmühl",
+    "addr:country": "DE",
+    "addr:housenumber": "26",
+    "addr:postcode": "83052",
+    "addr:street": "Rösnerstraße",
+    "contact:email": "info@geier-feinmechanik.de",
+    "contact:fax": "+49 8062 7286743",
+    "contact:phone": "+49 8062 728670",
+    "contact:website": "https://geier-feinmechanik.de/",
+    "craft": "metal_construction",
+    "name": "Geier Feinmechanik",
+    "opening_hours": "Mo-Fr 08:00-17:00; Sa,Su,PH off",
+    "operator": "Geier Feinmechanik GmbH & Co KG"
+  }
+},
+{
+  "type": "node",
+  "id": 6250039022,
+  "lat": 47.8511935,
+  "lon": 12.0496659,
+  "tags": {
+    "craft": "electrician",
+    "name": "Elektro Hartinger",
+    "website": "https://www.elektro-hartinger.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 6468169678,
+  "lat": 48.0586539,
+  "lon": 12.1696157,
+  "tags": {
+    "craft": "roofer",
+    "name": "Schwarz und Dietrich"
+  }
+},
+{
+  "type": "node",
+  "id": 6469383819,
+  "lat": 47.8527947,
+  "lon": 12.3425296,
+  "tags": {
+    "addr:city": "Prien am Chiemsee",
+    "addr:country": "DE",
+    "addr:housenumber": "17",
+    "addr:postcode": "83209",
+    "addr:street": "Bachstraße",
+    "craft": "gardener",
+    "description": "Planung, Ausführung, Neuanlage, Umgestaltung, Gartenpflege",
+    "email": "kontakt@georg-mueller.org",
+    "name": "Georg Müller, Garten- & Landschaftsbauten",
+    "operator": "Georg Müller",
+    "website": "https://georg-mueller.org/index.php"
+  }
+},
+{
+  "type": "node",
+  "id": 6568467705,
+  "lat": 48.0625746,
+  "lon": 12.2316777,
+  "tags": {
+    "addr:city": "Wasserburg am Inn",
+    "addr:country": "DE",
+    "addr:housenumber": "4",
+    "addr:postcode": "83512",
+    "addr:street": "Ledererzeile",
+    "craft": "confectionery",
+    "name": "Dengel–Confiserie Genüsse"
+  }
+},
+{
+  "type": "node",
+  "id": 6572715583,
+  "lat": 47.8801718,
+  "lon": 11.9106353,
+  "tags": {
+    "check_date": "2023-10-14",
+    "craft": "sheet-metal construction worker",
+    "name": "Jürgen Roth"
+  }
+},
+{
+  "type": "node",
+  "id": 6576809488,
+  "lat": 47.8500442,
+  "lon": 12.1901441,
+  "tags": {
+    "addr:city": "Stephanskirchen",
+    "addr:housenumber": "42",
+    "addr:postcode": "83071",
+    "addr:street": "Krottenhausmühlstraße",
+    "brewery": "Simsseer Braumanufaktur",
+    "craft": "brewery",
+    "drink:beer": "bottled",
+    "email": "info@simsseer.de",
+    "name": "Simsseer Braumanufaktur",
+    "opening_hours": "Th-Fr 14:00-17:00; Sa 10:00-14:00",
+    "payment:cash": "yes",
+    "payment:credit_cards": "yes",
+    "payment:debit_cards": "yes",
+    "phone": "+49 175 6696890",
+    "shop": "beverages",
+    "website": "https://www.simsseer.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 6638616303,
+  "lat": 47.8573472,
+  "lon": 12.1717890,
+  "tags": {
+    "addr:city": "Stephanskirchen",
+    "addr:country": "DE",
+    "addr:housenumber": "53",
+    "addr:postcode": "83071",
+    "addr:street": "Westerndorfer Straße",
+    "addr:suburb": "Westerndorf",
+    "craft": "gardener",
+    "name": "Gartenbau Robert Lex"
+  }
+},
+{
+  "type": "node",
+  "id": 6742147363,
+  "lat": 47.9541184,
+  "lon": 12.2357888,
+  "tags": {
+    "addr:city": "Halfing",
+    "addr:country": "DE",
+    "addr:housenumber": "2",
+    "addr:postcode": "83128",
+    "addr:street": "Rothmoos",
+    "contact:website": "http://www.rothmooser.de/",
+    "craft": "brewery",
+    "name": "Brauerei Rothmoos"
+  }
+},
+{
+  "type": "node",
+  "id": 6744150371,
+  "lat": 47.8814491,
+  "lon": 11.9140757,
+  "tags": {
+    "addr:city": "Bruckmühl",
+    "addr:country": "DE",
+    "addr:housenumber": "16",
+    "addr:postcode": "83052",
+    "addr:street": "Bahnhofstraße",
+    "check_date": "2025-01-29",
+    "check_date:opening_hours": "2025-01-29",
+    "contact:phone": "+49 8062 5812",
+    "craft": "locksmith",
+    "name": "Servicecenter Bruckmühl",
+    "opening_hours": "Mo-Fr 09:00-12:00, Mo,Tu,Th,Fr 14:00-17:00, Sa 09:00-12:00",
+    "operator": "Thomas & Albert Heinritzi",
+    "wheelchair": "no"
+  }
+},
+{
+  "type": "node",
+  "id": 6770475977,
+  "lat": 47.8809993,
+  "lon": 11.9180607,
+  "tags": {
+    "check_date": "2023-10-01",
+    "craft": "joiner",
+    "name": "Schreinerei Eham",
+    "operator": "Martin Eham",
+    "source": "survey",
+    "website": "http://www.schreinerei-martin-eham.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 6777250445,
+  "lat": 47.8805252,
+  "lon": 11.9144066,
+  "tags": {
+    "addr:city": "Bruckmühl",
+    "addr:country": "DE",
+    "addr:housenumber": "15",
+    "addr:postcode": "83052",
+    "addr:street": "Adalbert-Stifter-Straße",
+    "check_date": "2023-10-01",
+    "contact:email": "info@mangfalltal-fliesenleger.de",
+    "contact:phone": "+49 8062 8070332",
+    "contact:website": "https://www.mangfalltal-fliesenleger.de/",
+    "craft": "tiler",
+    "name": "Fliesenverlegung Wiewiora",
+    "operator": "Krzysztof Wiewiora",
+    "source": "survey"
+  }
+},
+{
+  "type": "node",
+  "id": 6927674535,
+  "lat": 47.8075705,
+  "lon": 11.9629283,
+  "tags": {
+    "craft": "stonemason",
+    "name": "Naturstein Mair"
+  }
+},
+{
+  "type": "node",
+  "id": 6937977564,
+  "lat": 47.9265379,
+  "lon": 11.9929661,
+  "tags": {
+    "contact:email": "post@ofenbau-sewald.de",
+    "contact:fax": "+49 8065 1600",
+    "contact:mobile": "+49 171 7926540",
+    "contact:phone": "+49 8065 1366",
+    "contact:website": "http://www.ofenbau-sewald.de",
+    "craft": "ovens",
+    "name": "Sewald Ofenbau",
+    "opening_hours": "Mo, Tu 09:00-12:00; Th, Fr 15:00-18:00; Sa 09:00-12:00; PH off",
+    "operator": "Dietmar Sewald"
+  }
+},
+{
+  "type": "node",
+  "id": 6937982338,
+  "lat": 47.9272672,
+  "lon": 11.9926231,
+  "tags": {
+    "contact:email": "info@hbjgmbh.de",
+    "contact:fax": "+49 8065 1039",
+    "contact:phone": "+49 8065 1036",
+    "contact:website": "http://www.hbjgmbh.de/",
+    "craft": "builder",
+    "name": "Baugeschäft Haus Bau Jegg (HBJ) GmbH",
+    "operator": "Petra Jegg"
+  }
+},
+{
+  "type": "node",
+  "id": 6938360502,
+  "lat": 47.9240398,
+  "lon": 11.9887479,
+  "tags": {
+    "addr:housenumber": "4",
+    "addr:street": "Mühlweg",
+    "contact:phone": "+49 8065 180880",
+    "craft": "metal_construction",
+    "name": "Stadler-Kaluza GmbH",
+    "operator": "Georg Stadler",
+    "phone": "+49 8065 9099388",
+    "website": "https://www.maschinenbau-stadler.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 6943360331,
+  "lat": 47.9272083,
+  "lon": 11.9904469,
+  "tags": {
+    "contact:email": "u4w-bau@t-online.de",
+    "contact:fax": "+49 8065 180451",
+    "contact:phone": "+49 8065 180450",
+    "craft": "builder",
+    "name": "u4w.bau GmbH"
+  }
+},
+{
+  "type": "node",
+  "id": 6954285158,
+  "lat": 47.8390221,
+  "lon": 12.3526295,
+  "tags": {
+    "addr:city": "Prien am Chiemsee",
+    "addr:country": "DE",
+    "addr:housenumber": "3",
+    "addr:postcode": "83209",
+    "addr:street": "Dickertsmühlstraße",
+    "craft": "plumber",
+    "name": "Rudolf Hasholzner",
+    "phone": "+49 8051 4142;+49 179 4964119",
+    "website": "http://www.hasholzner.de"
+  }
+},
+{
+  "type": "node",
+  "id": 7174265406,
+  "lat": 47.8629653,
+  "lon": 12.0094271,
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "3a",
+    "addr:postcode": "83043",
+    "addr:street": "Irlachstraße",
+    "craft": "glaziery",
+    "email": "kontakt@pauliel.de",
+    "name": "Glaserei Pauliel",
+    "opening_hours": "Mo-Th 08:00-12:00,13:00-17:00;Fr 08:00-12:00;Sa 10:00-12:00;PH off",
+    "phone": "+49 8061 55 67",
+    "website": "https://www.pauliel.de"
+  }
+},
+{
+  "type": "node",
+  "id": 7177573082,
+  "lat": 47.8045544,
+  "lon": 12.2204109,
+  "tags": {
+    "addr:city": "Rohrdorf",
+    "addr:country": "DE",
+    "addr:housenumber": "4",
+    "addr:postcode": "83101",
+    "addr:street": "Wendelsteinstraße",
+    "craft": "electrician",
+    "name": "Blitzplank",
+    "website": "http://blitzplank.com/"
+  }
+},
+{
+  "type": "node",
+  "id": 7178533393,
+  "lat": 47.8588444,
+  "lon": 12.0148815,
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "53",
+    "addr:postcode": "83043",
+    "addr:street": "Rosenheimer Straße",
+    "craft": "dental_technician",
+    "email": "info@dentalmanufaktur-kurpark.de",
+    "name": "Dentalmanufaktur am Kurpark",
+    "phone": "+49 8061 939 99 80",
+    "website": "https://www.dentalmanufaktur-kurpark.de"
+  }
+},
+{
+  "type": "node",
+  "id": 7180407394,
+  "lat": 47.8558183,
+  "lon": 11.9843077,
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "17",
+    "addr:postcode": "83043",
+    "addr:street": "Eugen-Belz-Straße",
+    "craft": "joiner",
+    "name": "Der Holzladen",
+    "phone": "+49 8061 34 98 468",
+    "website": "https://www.holzladen-bad-aibling.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 7185914995,
+  "lat": 47.8699421,
+  "lon": 11.9862850,
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "11",
+    "addr:postcode": "83043",
+    "addr:street": "Gewerbepark Markfeld",
+    "craft": "electronics_assembly",
+    "email": "info@inteca.de",
+    "fax": "+49 8061 2801 180",
+    "name": "Inteca",
+    "phone": "+49 8061 2801 0",
+    "website": "https://www.inteca.de"
+  }
+},
+{
+  "type": "node",
+  "id": 7185914996,
+  "lat": 47.8696044,
+  "lon": 11.9849215,
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "8",
+    "addr:postcode": "83043",
+    "addr:street": "Gewerbepark Markfeld",
+    "craft": "metal_construction",
+    "email": "info@opticamms.de",
+    "fax": "+49 8061 938 69 72",
+    "name": "OptiCAMMS Formenbau",
+    "opening_hours": "Mo-Fr 08:00-17:00; PH,Sa,Su off",
+    "phone": "+49 8061 938 69 70",
+    "website": "https://www.opticamms.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 7185914997,
+  "lat": 47.8695332,
+  "lon": 11.9853245,
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "8",
+    "addr:postcode": "83043",
+    "addr:street": "Gewerbepark Markfeld",
+    "addr:suburb": "Markfeld",
+    "craft": "hvac",
+    "name": "Klepp Absauganlagen GmbH",
+    "phone": "+49 8061 93 93 300",
+    "website": "https://klepp.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 7185914999,
+  "lat": 47.8718610,
+  "lon": 11.9820079,
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "1a",
+    "addr:postcode": "83043",
+    "addr:street": "Gewerbepark Markfeld",
+    "craft": "metal_construction",
+    "fax": "+49 8061 349 72 12",
+    "name": "Geisler GmbH",
+    "phone": "+49 8061 349 72 11",
+    "website": "http://www.geisler-cnc.de"
+  }
+},
+{
+  "type": "node",
+  "id": 7185915000,
+  "lat": 47.8708109,
+  "lon": 11.9855132,
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "7a",
+    "addr:postcode": "83043",
+    "addr:street": "Gewerbepark Markfeld",
+    "addr:suburb": "Markfeld",
+    "craft": "metal_construction",
+    "email": "info@stm-deutschland.de",
+    "name": "STM Deutschland",
+    "opening_hours": "Mo-Fr 08:00-17:00; PH,Sa,Su off",
+    "phone": "+49 8061 93 76 80",
+    "website": "http://www.stm-deutschland.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 7185915003,
+  "lat": 47.8707725,
+  "lon": 11.9816198,
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "2b",
+    "addr:postcode": "83043",
+    "addr:street": "Gewerbepark Markfeld",
+    "craft": "builder",
+    "name": "Umbauhilfe Meyer",
+    "phone": "+49 8061 49 53 556",
+    "website": "https://umbauhilfe-meyer.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 7185915067,
+  "lat": 47.8721847,
+  "lon": 11.9818872,
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "1",
+    "addr:postcode": "83043",
+    "addr:street": "Gewerbepark Markfeld",
+    "craft": "door_construction",
+    "name": "Pakt Türen",
+    "opening_hours": "Mo-Fr 09:00-12:00,14:00-17:30, Sa 09:00-12:00; PH,Su off",
+    "phone": "+49 8061 2618",
+    "shop": "doors",
+    "website": "https://pakt-tueren.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 7185915068,
+  "lat": 47.8713569,
+  "lon": 11.9834117,
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "5",
+    "addr:postcode": "83043",
+    "addr:street": "Gewerbepark Markfeld",
+    "craft": "loudspeaker_construction",
+    "name": "RCS Audio-Systems",
+    "opening_hours": "Mo-Th 08:00-17:00;Fr 08:00-15:00;PH off",
+    "phone": "+49 8061 35 01 0",
+    "website": "https://www.rcs-audio.com"
+  }
+},
+{
+  "type": "node",
+  "id": 7192416873,
+  "lat": 47.8654109,
+  "lon": 12.0038100,
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "7",
+    "addr:postcode": "83043",
+    "addr:street": "Wildstraße",
+    "craft": "glaziery",
+    "email": "info@glasboehm.de",
+    "fax": "+49 8061 22 44",
+    "name": "Die Glaser",
+    "opening_hours": "Mo,Tu,Th 08:00-12:00,13:00-16:00; We,Fr 08:00-12:00; PH,Sa,Su off",
+    "operator": "Robert Böhm GmbH",
+    "phone": "+49 8061 60 79",
+    "website": "https://www.glasboehm.de"
+  }
+},
+{
+  "type": "node",
+  "id": 7194677753,
+  "lat": 47.8653817,
+  "lon": 12.0066467,
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "30",
+    "addr:postcode": "83043",
+    "addr:street": "Münchner Straße",
+    "craft": "saddler",
+    "name": "Sattlerei Schaaf",
+    "opening_hours": "Mo,We,Th 09:00-12:00,14:00-18:00; Fr 09:00-12:00; Tu,Sa,Su,PH off",
+    "operator": "Mike Schaaf",
+    "phone": "+49 8061 93 99 61",
+    "upholsterer": "yes",
+    "website": "https://sattlerei-schaaf.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 7224647550,
+  "lat": 47.8652748,
+  "lon": 12.0109581,
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "30",
+    "addr:postcode": "83043",
+    "addr:street": "Kirchzeile",
+    "craft": "jeweller",
+    "name": "Goldschmiede Schmuckstück",
+    "opening_hours": "Mo,Tu,Th,Fr 10:00-13:00,15:00-18:00; Sa 10:00-13:00; PH off",
+    "phone": "+49 8061 9 39 90 74",
+    "website": "https://i-m-schmuckstueck.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 7224647552,
+  "lat": 47.8651152,
+  "lon": 12.0109970,
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "26",
+    "addr:postcode": "83043",
+    "addr:street": "Kirchzeile",
+    "craft": "pottery",
+    "name": "Töpferei Gruber",
+    "opening_hours": "Mo-Sa 09:00-12:00,15:00-18:00; Sa 15:00-18:00 off; We,Su,PH off",
+    "phone": "+49 8061 3 78 05",
+    "website": "https://toepferei-gruber.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 7247494289,
+  "lat": 47.8637346,
+  "lon": 12.0021473,
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "1b",
+    "addr:postcode": "83043",
+    "addr:street": "Ludwig-Thoma-Straße",
+    "craft": "plumber",
+    "name": "Steffen Böttcher",
+    "phone": "+49 8061 92 477",
+    "website": "https://www.steffenboettcher.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 7249158612,
+  "lat": 47.8662753,
+  "lon": 12.0041859,
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "44a",
+    "addr:postcode": "83043",
+    "addr:street": "Münchner Straße",
+    "craft": "metal_construction",
+    "name": "Ernst Kessler Stanzerei",
+    "phone": "+49 8061 23 81",
+    "website": "https://www.stanzerei-kessler-gmbh.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 7249158631,
+  "lat": 47.8794545,
+  "lon": 11.9932790,
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "75",
+    "addr:postcode": "83043",
+    "addr:street": "Ebersberger Straße",
+    "craft": "painter",
+    "name": "Malerbetrieb Kühnle",
+    "phone": "+49 8061 93 98 333"
+  }
+},
+{
+  "type": "node",
+  "id": 7252144552,
+  "lat": 47.8563490,
+  "lon": 12.0025833,
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "12f",
+    "addr:postcode": "83043",
+    "addr:street": "Heubergstraße",
+    "craft": "metal_construction",
+    "name": "Maschinenbau Pohl",
+    "phone": "+49 8061 64 16"
+  }
+},
+{
+  "type": "node",
+  "id": 7259900555,
+  "lat": 47.8593521,
+  "lon": 11.9891068,
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "12",
+    "addr:postcode": "83043",
+    "addr:street": "Altwasserstraße",
+    "craft": "joiner",
+    "fax": "+49 8061 49 15 00",
+    "name": "werk.4 - Schreinerei Mathias Vierlinger",
+    "phone": "+49 8061 939 90 10",
+    "website": "https://werk-vier.de"
+  }
+},
+{
+  "type": "node",
+  "id": 7259900556,
+  "lat": 47.8591459,
+  "lon": 11.9897825,
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "10",
+    "addr:postcode": "83043",
+    "addr:street": "Altwasserstraße",
+    "craft": "door_construction",
+    "name": "TorExpert",
+    "opening_hours": "Mo-Fr 08:00-17:00; Sa 09:00-13:00; Su,PH off",
+    "phone": "+49 8035 24 32",
+    "website": "https://www.torexpert.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 7259900564,
+  "lat": 47.8585721,
+  "lon": 11.9912067,
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "8",
+    "addr:postcode": "83043",
+    "addr:street": "Altwasserstraße",
+    "craft": "metal_construction",
+    "name": "Klaus Angermaier Spritzgießtechnik",
+    "phone": "+49 8061 35 03 0",
+    "website": "https://www.angermaier-gmbh.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 7362929970,
+  "lat": 47.8760729,
+  "lon": 11.9144686,
+  "tags": {
+    "craft": "painter",
+    "name": "Maler Mühlbauer",
+    "operator": "Richard Mühlbauer",
+    "phone": "+49 8062 80246"
+  }
+},
+{
+  "type": "node",
+  "id": 7367272028,
+  "lat": 47.8818252,
+  "lon": 11.9190916,
+  "tags": {
+    "craft": "painter",
+    "name": "Maler Huber",
+    "operator": "Huber Karl",
+    "phone": "+49 8062 7255060"
+  }
+},
+{
+  "type": "node",
+  "id": 7538766732,
+  "lat": 47.8479014,
+  "lon": 12.0589623,
+  "tags": {
+    "craft": "tailor",
+    "name": "Änderungsschneiderei Samiya"
+  }
+},
+{
+  "type": "node",
+  "id": 7551892284,
+  "lat": 47.8441554,
+  "lon": 12.0535898,
+  "tags": {
+    "craft": "joiner",
+    "name": "Onkel Tom's Holzkiste"
+  }
+},
+{
+  "type": "node",
+  "id": 7551903022,
+  "lat": 47.8499417,
+  "lon": 12.0663531,
+  "tags": {
+    "craft": "joiner",
+    "name": "Hageneder"
+  }
+},
+{
+  "type": "node",
+  "id": 7599008815,
+  "lat": 47.9270199,
+  "lon": 11.9876410,
+  "tags": {
+    "contact:email": "schreinerei.gaar@t-online.de",
+    "contact:phone": "+49 8065 1630",
+    "craft": "carpenter",
+    "name": "Franz Xaver Gaar - Schreinermeister"
+  }
+},
+{
+  "type": "node",
+  "id": 7760527935,
+  "lat": 47.8534719,
+  "lon": 12.1879644,
+  "tags": {
+    "addr:city": "Stephanskirchen",
+    "addr:country": "DE",
+    "addr:housenumber": "5",
+    "addr:postcode": "83071",
+    "addr:street": "Eitzinger Straße",
+    "addr:suburb": "Eitzing",
+    "craft": "metal_construction",
+    "name": "Riepertinger"
+  }
+},
+{
+  "type": "node",
+  "id": 7817708785,
+  "lat": 47.9885867,
+  "lon": 12.1791093,
+  "tags": {
+    "craft": "agricultural_engines",
+    "name": "BayWa AG (Technik)",
+    "phone": "+498039404956",
+    "website": "https://www.baywa.de/de/i/standorte/technik/griesstatt/baywa-ag-griesstatt"
+  }
+},
+{
+  "type": "node",
+  "id": 7817708830,
+  "lat": 47.9683069,
+  "lon": 12.1676811,
+  "tags": {
+    "addr:city": "Griesstätt",
+    "addr:housenumber": "2",
+    "addr:postcode": "83556",
+    "addr:street": "Obermühl",
+    "craft": "carpenter",
+    "name": "Lindauer Holzbau GmbH",
+    "phone": "+498038220",
+    "website": "https://www.lindauer-holzbau.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 7817708831,
+  "lat": 47.9692744,
+  "lon": 12.1701469,
+  "tags": {
+    "addr:city": "Griesstätt",
+    "addr:housenumber": "1",
+    "addr:postcode": "83556",
+    "addr:street": "Obermühl",
+    "craft": "joiner",
+    "name": "Schreinerei Inninger GbR",
+    "opening_hours": "Mo-Fr 07:30-18:00",
+    "website": "https://www.inninger-schreinerei.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 7817708832,
+  "lat": 47.9687730,
+  "lon": 12.1698430,
+  "tags": {
+    "addr:city": "Griesstätt",
+    "addr:housenumber": "3",
+    "addr:postcode": "83556",
+    "addr:street": "Obermühl",
+    "craft": "gardener",
+    "email": "info@chiemgau-baumpflege.de",
+    "name": "Chiemgau Baumpflege",
+    "phone": "+498038909466",
+    "phone:mobile": "+491728240133",
+    "website": "https://chiemgau-baumpflege.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 7818507359,
+  "lat": 48.0014914,
+  "lon": 12.1776330,
+  "tags": {
+    "addr:city": "Griesstätt",
+    "addr:housenumber": "8",
+    "addr:postcode": "83556",
+    "addr:street": "Am Leitenfeld",
+    "craft": "joiner",
+    "name": "Holzkunst Kubitza",
+    "operator": "Kubitza",
+    "phone": "+4980399086999",
+    "product": "wood-floors;wood;floors",
+    "shop": "interior_decoration"
+  }
+},
+{
+  "type": "node",
+  "id": 8010320425,
+  "lat": 47.8800282,
+  "lon": 11.9261088,
+  "tags": {
+    "addr:city": "Bruckmühl",
+    "addr:country": "DE",
+    "addr:housenumber": "23",
+    "addr:postcode": "83052",
+    "addr:street": "Gartenstraße",
+    "contact:email": "info@malerbetrieb-lederer.de",
+    "contact:fax": "+49 8062 800578",
+    "contact:mobile": "+49 171 1932266",
+    "contact:phone": "+49 8062 800577",
+    "contact:website": "http://www.malerbetrieb-lederer.de/",
+    "craft": "painter",
+    "name": "Malerbetrieb Lederer",
+    "operator": "Andreas Lederer"
+  }
+},
+{
+  "type": "node",
+  "id": 8010334406,
+  "lat": 47.8768077,
+  "lon": 11.9156599,
+  "tags": {
+    "addr:city": "Bruckmühl",
+    "addr:country": "DE",
+    "addr:housenumber": "2",
+    "addr:postcode": "83052",
+    "addr:street": "Friedrich-Jahn-Straße",
+    "check_date:opening_hours": "2023-10-01",
+    "contact:email": "info@zimmerei-bichler.de",
+    "contact:fax": "+49 8062 729466",
+    "contact:mobile": "+49 170 9048424",
+    "contact:phone": "+49 8062 807138",
+    "contact:website": "https://www.zimmerei-bichler.de/",
+    "craft": "carpenter",
+    "name": "Zimmerei und Holzbau Bichler",
+    "opening_hours:signed": "no",
+    "operator": "Johann Bichler"
+  }
+},
+{
+  "type": "node",
+  "id": 8026308547,
+  "lat": 47.8865809,
+  "lon": 11.9325331,
+  "tags": {
+    "addr:city": "Bruckmühl",
+    "addr:country": "DE",
+    "addr:housenumber": "10",
+    "addr:postcode": "83052",
+    "addr:street": "Rudolf-Diesel-Straße",
+    "contact:email": "info@huber-fenster.de",
+    "contact:phone": "+49 8062 908590",
+    "contact:website": "https://huber-fenster.de",
+    "craft": "window_construction",
+    "name": "Schreinerei Huber",
+    "opening_hours": "Mo-Th 08:00-12:00,14:00-17:00; Fr 08:00-12:00; Sa,Su,PH off",
+    "operator": "Josef Huber"
+  }
+},
+{
+  "type": "node",
+  "id": 8026440452,
+  "lat": 47.8622616,
+  "lon": 11.9462728,
+  "tags": {
+    "addr:city": "Bruckmühl",
+    "addr:country": "DE",
+    "addr:housenumber": "29",
+    "addr:postcode": "83052",
+    "addr:street": "Aiblinger Straße",
+    "addr:suburb": "Götting",
+    "craft": "plumber",
+    "email": "info@shs-somun.de",
+    "fax": "+49 8062 809 284 4",
+    "mobile": "+49 172 265 13 94",
+    "name": "Somun",
+    "operator": "Nusamettin Somun",
+    "phone": "+49 8062 809 284 3",
+    "website": "https://sanitaer-somun.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 8040822312,
+  "lat": 48.0602735,
+  "lon": 12.2322790,
+  "tags": {
+    "craft": "jeweller",
+    "name": "Brugger"
+  }
+},
+{
+  "type": "node",
+  "id": 8150719047,
+  "lat": 47.7773849,
+  "lon": 12.1360423,
+  "tags": {
+    "addr:city": "Neubeuern",
+    "addr:housenumber": "14",
+    "addr:postcode": "83115",
+    "addr:street": "Am Gasteig",
+    "craft": "handicraft",
+    "name": "Neubeurer Keramik",
+    "old_name": "Keramik Holzer"
+  }
+},
+{
+  "type": "node",
+  "id": 8780566017,
+  "lat": 47.7890152,
+  "lon": 11.9648149,
+  "tags": {
+    "addr:city": "Bad Feilnbach",
+    "addr:country": "DE",
+    "addr:housenumber": "3",
+    "addr:postcode": "83075",
+    "addr:street": "Hummelhausen",
+    "craft": "joiner",
+    "name": "Martin Impler GmbH",
+    "phone": "+49 8064 909406",
+    "website": "https://impler.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 8792163507,
+  "lat": 47.8635234,
+  "lon": 12.2589958,
+  "tags": {
+    "addr:city": "Riedering",
+    "addr:housenumber": "13",
+    "addr:postcode": "83083",
+    "addr:street": "Moosen",
+    "craft": "agricultural_engines",
+    "name": "Bachmeier Melktechnik",
+    "opening_hours": "Mo-Fr 07:00-12:00",
+    "operator": "Bachmeier GmbH & Co. KG",
+    "phone": "+49 8036 8037",
+    "website": "https://klima-kaelte-bachmeier.de/melken-kuehlen-news.html"
+  }
+},
+{
+  "type": "node",
+  "id": 8792163508,
+  "lat": 47.8635804,
+  "lon": 12.2589172,
+  "tags": {
+    "addr:city": "Riedering",
+    "addr:housenumber": "13",
+    "addr:postcode": "83083",
+    "addr:street": "Moosen",
+    "craft": "hvac",
+    "name": "Bachmeier Kälte-/Klimatechnik",
+    "opening_hours": "Mo-Fr 07:00-16:30",
+    "operator": "Bachmeier GmbH & Co. KG",
+    "phone": "+49 8036 8037",
+    "website": "https://klima-kaelte-bachmeier.de/index.html"
+  }
+},
+{
+  "type": "node",
+  "id": 8841741591,
+  "lat": 47.9527687,
+  "lon": 12.2766753,
+  "tags": {
+    "craft": "handicraft",
+    "fax": "+49 8055 1479",
+    "name": "Holzkunst Hans Aicher",
+    "operator": "Hans Aicher",
+    "phone": "+49 8055 306400",
+    "website": "https://www.holzkunst-aicher.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 8901659241,
+  "lat": 47.8594187,
+  "lon": 12.0681187,
+  "tags": {
+    "craft": "plumber",
+    "name": "Hubert Seethaler",
+    "website": "https://www.wasserwaermeluft.de/handwerkersuche/betrieb/hubert-seethaler-83059-kolbermoor/details/"
+  }
+},
+{
+  "type": "node",
+  "id": 8998925977,
+  "lat": 47.8699255,
+  "lon": 11.9205227,
+  "tags": {
+    "craft": "carpenter",
+    "name": "A. Meixner Zimmerer"
+  }
+},
+{
+  "type": "node",
+  "id": 9038433456,
+  "lat": 47.8757656,
+  "lon": 11.9633737,
+  "tags": {
+    "addr:city": "Bruckmühl",
+    "addr:country": "DE",
+    "addr:housenumber": "12",
+    "addr:postcode": "83052",
+    "addr:street": "Pettenkoferstraße",
+    "addr:suburb": "Heufeld",
+    "carpenter": "cabinetmaker",
+    "craft": "carpenter",
+    "name": "Das Schreinerhaus",
+    "phone": "+49 8061 30 144",
+    "website": "https://www.das-schreinerhaus.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 9090310303,
+  "lat": 47.7810584,
+  "lon": 11.9930734,
+  "tags": {
+    "addr:city": "Bad Feilnbach",
+    "addr:country": "DE",
+    "addr:housenumber": "28",
+    "addr:postcode": "83075",
+    "addr:street": "Lippertskirchen",
+    "craft": "beekeeper",
+    "name": "Kirner",
+    "opening_hours": "\"nach Vereinbarun\"",
+    "shop": "farm"
+  }
+},
+{
+  "type": "node",
+  "id": 9373742220,
+  "lat": 47.8509908,
+  "lon": 12.0730787,
+  "tags": {
+    "craft": "glaziery",
+    "name": "Glaserei Moser",
+    "website": "https://www.moser-glaserei.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 9402145724,
+  "lat": 48.1064667,
+  "lon": 12.2996128,
+  "tags": {
+    "addr:housenumber": "2",
+    "addr:place": "Haderloh",
+    "addr:postcode": "83547",
+    "craft": "joiner",
+    "name": "Schreiner Umgeher",
+    "website": "https://www.umgeher.info"
+  }
+},
+{
+  "type": "node",
+  "id": 9457572907,
+  "lat": 47.8416271,
+  "lon": 12.0486343,
+  "tags": {
+    "addr:city": "Kolbermoor",
+    "addr:country": "DE",
+    "addr:housenumber": "2 c",
+    "addr:postcode": "83059",
+    "addr:street": "Bodenseestraße",
+    "craft": "joiner",
+    "name": "Historeiche",
+    "website": "https://historeiche.com/"
+  }
+},
+{
+  "type": "node",
+  "id": 9505888074,
+  "lat": 47.8756752,
+  "lon": 11.9694153,
+  "tags": {
+    "craft": "painter",
+    "name": "Rudolfo"
+  }
+},
+{
+  "type": "node",
+  "id": 9788782848,
+  "lat": 48.0624648,
+  "lon": 12.2320681,
+  "tags": {
+    "addr:city": "Wasserburg am Inn",
+    "addr:country": "DE",
+    "addr:housenumber": "2",
+    "addr:postcode": "83512",
+    "addr:street": "Hofstatt",
+    "amenity": "cafe",
+    "contact:phone": "+49 8071 1035653",
+    "craft": "coffee_roaster",
+    "diet:vegetarian": "yes",
+    "drinking_water:refill": "yes",
+    "name": "Deliano Kaffeerösterei",
+    "note": "Perfekt für Radfahrer! Der Pre-Ride Espresso bringt dich die letzten Kilometer deiner Tour nach Hause und du kannst hier kostenlos deine Trinkflasche nachfüllen. Selbst bei kleinen Defekten wird dir hier mit Werkzeug und einfachen Ersatzteilen geholfen!",
+    "opening_hours": "Mo-Sa 09:00-17:00",
+    "outdoor_seating": "yes",
+    "shop": "coffee",
+    "website": "https://www.deliano-kaffeeroesterei.de/",
+    "wheelchair": "no"
+  }
+},
+{
+  "type": "node",
+  "id": 9853039502,
+  "lat": 48.0236052,
+  "lon": 12.1553582,
+  "tags": {
+    "addr:housenumber": "1",
+    "addr:street": "Bruck",
+    "craft": "sawmill",
+    "name": "Georg Fischer",
+    "phone": "+49 8039 1226"
+  }
+},
+{
+  "type": "node",
+  "id": 9855132469,
+  "lat": 48.0032061,
+  "lon": 12.1445580,
+  "tags": {
+    "addr:city": "Rott am Inn",
+    "addr:country": "DE",
+    "addr:housenumber": "1",
+    "addr:postcode": "83543",
+    "addr:street": "Eich",
+    "craft": "sawmill",
+    "email": "ametsbichler-saegewerk@t-online.de",
+    "name": "Sägewerk Ametsbichler",
+    "phone": "+49 8039 1463"
+  }
+},
+{
+  "type": "node",
+  "id": 9908208947,
+  "lat": 48.1080219,
+  "lon": 12.2094400,
+  "tags": {
+    "addr:housenumber": "3",
+    "addr:street": "Bahnhofsplatz",
+    "craft": "bakery",
+    "description": "Hausgemachte Backwaren und Cafébetrieb",
+    "name": "Brotliebe-Soyen",
+    "opening_hours": "Mo 07:30-13:00; We-Su 07:30-17:00",
+    "phone": "+49 8071 5523808",
+    "website": "https://www.brotliebe-soyen.de"
+  }
+},
+{
+  "type": "node",
+  "id": 9917638456,
+  "lat": 47.9397755,
+  "lon": 12.0491677,
+  "tags": {
+    "addr:city": "Tuntenhausen",
+    "addr:housenumber": "32",
+    "addr:postcode": "83104",
+    "addr:street": "Oberrainer Feld",
+    "craft": "glaziery",
+    "name": "Mangstl Glas",
+    "official_name": "Mangstl Glas GmbH & Co. KG"
+  }
+},
+{
+  "type": "node",
+  "id": 9917638458,
+  "lat": 47.9376153,
+  "lon": 12.0496443,
+  "tags": {
+    "addr:city": "Tuntenhausen",
+    "addr:housenumber": "41",
+    "addr:postcode": "83104",
+    "addr:street": "Oberrainer Feld",
+    "craft": "toolmaker",
+    "name": "DHF Präzisionsmechanik",
+    "website": "https://www.dhf-gmbh.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 9917638472,
+  "lat": 47.9386887,
+  "lon": 12.0479207,
+  "tags": {
+    "addr:city": "Tuntenhausen",
+    "addr:housenumber": "24",
+    "addr:postcode": "83104",
+    "addr:street": "Oberrainer Feld",
+    "craft": "joiner",
+    "name": "multicase",
+    "operator": "Lorenz Gruber, Florian Gruber",
+    "phone": "+49 8067 909929-0",
+    "website": "https://multicase.eu"
+  }
+},
+{
+  "type": "node",
+  "id": 9927655798,
+  "lat": 47.8464006,
+  "lon": 12.0460126,
+  "tags": {
+    "addr:city": "Kolbermoor",
+    "addr:country": "DE",
+    "addr:housenumber": "2a",
+    "addr:postcode": "83059",
+    "addr:street": "Zugspitzstraße",
+    "craft": "plumber",
+    "name": "Andre Jablonski",
+    "website": "http://www.andrejablonski.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 9937229582,
+  "lat": 47.7736241,
+  "lon": 12.3250808,
+  "tags": {
+    "addr:city": "Aschau im Chiemgau",
+    "addr:housenumber": "35",
+    "addr:postcode": "83229",
+    "addr:street": "Kampenwandstraße",
+    "check_date": "2026-05-22",
+    "craft": "builder",
+    "name": "Hans Pumpfer Hoch- und Tiefbau",
+    "website": "http://pumpfer-bau.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 9969243398,
+  "lat": 47.9392353,
+  "lon": 12.0503812,
+  "tags": {
+    "addr:city": "Tuntenhausen",
+    "addr:housenumber": "63",
+    "addr:postcode": "83104",
+    "addr:street": "Oberrainer Feld",
+    "craft": "metal_construction",
+    "email": "info@thurm.com",
+    "fax": "+49 8067 90 964 29",
+    "name": "thurm",
+    "operator": "thurm GmbH",
+    "phone": "+49 8067 90 964 0",
+    "ref:vatin": "DE178 138 906",
+    "website": "https://www.thurm.com/"
+  }
+},
+{
+  "type": "node",
+  "id": 10047490179,
+  "lat": 47.8823356,
+  "lon": 11.9156019,
+  "tags": {
+    "addr:city": "Bruckmühl",
+    "addr:country": "DE",
+    "addr:housenumber": "2a",
+    "addr:postcode": "83052",
+    "addr:street": "Bahnhofstraße",
+    "check_date:opening_hours": "2025-05-14",
+    "contact:fax": "+49 8062 7768191",
+    "contact:mobile": "+49 1516 8173225",
+    "contact:phone": "+49 8062 7768183",
+    "craft": "engraver",
+    "name": "Laser-Gravur und Veredelung Lehmann",
+    "opening_hours": "\"Nach Vereinbarung\"",
+    "shop": "trophy"
+  }
+},
+{
+  "type": "node",
+  "id": 10152907723,
+  "lat": 47.7970089,
+  "lon": 12.2411034,
+  "tags": {
+    "addr:city": "Frasdorf",
+    "addr:housenumber": "9",
+    "addr:place": "Daxa",
+    "addr:postcode": "83112",
+    "addr:suburb": "Daxa",
+    "craft": "stonemason",
+    "email": "info@scholznaturstein.de",
+    "name": "Scholz Naturstein GmbH",
+    "phone": "+49 8032 707102",
+    "website": "https://www.scholz-naturstein-gmbh.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 10152907725,
+  "lat": 47.7973779,
+  "lon": 12.2407955,
+  "tags": {
+    "addr:city": "Frasdorf",
+    "addr:housenumber": "11",
+    "addr:place": "Daxa",
+    "addr:postcode": "83112",
+    "addr:suburb": "Daxa",
+    "craft": "metal_construction",
+    "email": "info@ftz-cnc.com",
+    "name": "FTZ Fräs- und Technologiezentrum GmbH",
+    "phone": "+49 8032 98830-0",
+    "website": "https://www.ftz-cnc.com/"
+  }
+},
+{
+  "type": "node",
+  "id": 10152907726,
+  "lat": 47.7970760,
+  "lon": 12.2422043,
+  "tags": {
+    "addr:city": "Frasdorf",
+    "addr:housenumber": "10",
+    "addr:place": "Daxa",
+    "addr:postcode": "83112",
+    "addr:suburb": "Daxa",
+    "craft": "carpenter",
+    "name": "Zimmerei Stefan Gmeiner",
+    "phone": "+49 8032 989692",
+    "website": "http://www.zimmerei-gmeiner.com"
+  }
+},
+{
+  "type": "node",
+  "id": 10152907727,
+  "lat": 47.7974703,
+  "lon": 12.2421572,
+  "tags": {
+    "addr:city": "Frasdorf",
+    "addr:housenumber": "12",
+    "addr:place": "Daxa",
+    "addr:postcode": "83112",
+    "addr:suburb": "Daxa",
+    "craft": "car_painter",
+    "email": "info@autolackiererei-gurtner.de",
+    "name": "Autolackiererei Konrad Gurtner GmbH",
+    "phone": "+49 8032 707162",
+    "website": "https://www.autolackiererei-gurtner.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 10152907728,
+  "lat": 47.7974379,
+  "lon": 12.2430471,
+  "tags": {
+    "addr:city": "Frasdorf",
+    "addr:housenumber": "15",
+    "addr:place": "Daxa",
+    "addr:postcode": "83112",
+    "addr:suburb": "Daxa",
+    "craft": "metal_construction",
+    "email": "info@cs-fertigungstechnik.de",
+    "name": "CS Fertigungstechnik",
+    "phone": "+49 8032 9894585",
+    "website": "https://www.cs-fertigungstechnik.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 10155353589,
+  "lat": 47.7794532,
+  "lon": 12.3247982,
+  "tags": {
+    "addr:city": "Aschau im Chiemgau",
+    "addr:housenumber": "11",
+    "addr:postcode": "83229",
+    "addr:street": "Bahnhofstraße",
+    "craft": "painter",
+    "email": "malerfischeraschau@gmx.de",
+    "name": "Andreas Fischer Malerbetrieb GmbH",
+    "phone": "+49 8052 2422",
+    "website": "https://malerfischeraschau.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 10155353595,
+  "lat": 47.7770710,
+  "lon": 12.3240162,
+  "tags": {
+    "addr:city": "Aschau im Chiemgau",
+    "addr:housenumber": "8",
+    "addr:postcode": "83229",
+    "addr:street": "Kampenwandstraße",
+    "craft": "joiner",
+    "email": "info@demldesign.de",
+    "name": "Möbelwerkstätte Christian Deml",
+    "phone": "+49 8052 956500",
+    "website": "https://www.demldesign.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 10209971512,
+  "lat": 47.9858990,
+  "lon": 12.1345854,
+  "tags": {
+    "addr:city": "Rott am Inn",
+    "addr:country": "DE",
+    "addr:housenumber": "12",
+    "addr:postcode": "83543",
+    "addr:street": "Innstraße",
+    "craft": "hvac",
+    "email": "info@huber-waermetechnik.de",
+    "name": "Ernst Huber Wärmetechnik GmbH",
+    "opening_hours": "Mo-Th: 8:00-17:00, Fr: 8:00-13:00",
+    "phone": "+49 8039 10 21",
+    "website": "https://www.huber-waermetechnik.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 10214609668,
+  "lat": 48.0585366,
+  "lon": 12.2256493,
+  "tags": {
+    "addr:city": "Wasserburg am Inn",
+    "addr:country": "DE",
+    "addr:housenumber": "13",
+    "addr:postcode": "83512",
+    "addr:street": "Unterauerweg",
+    "craft": "hvac",
+    "email": "info@karl-goepfert.com",
+    "name": "Karl Göpfert",
+    "official_name": "Karl Göpfert GmbH",
+    "opening_hours": "Mo-Th 7:30-12:00, 13:00-17:00; Fr 7:30-12:00",
+    "phone": "+4980717081",
+    "website": "https://www.karl-goepfert.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 10553171616,
+  "lat": 47.8356265,
+  "lon": 12.1817412,
+  "tags": {
+    "addr:city": "Niedermoosen",
+    "addr:housenumber": "27",
+    "addr:postcode": "83083",
+    "addr:street": "Falkensteinstraße",
+    "check_date": "2026-04-21",
+    "craft": "painter",
+    "name": "Farb- und Lacktechnik Prestige",
+    "operator": "Klaus Ketzer",
+    "phone": "+49 176 20132109"
+  }
+},
+{
+  "type": "node",
+  "id": 10680312034,
+  "lat": 47.9931033,
+  "lon": 12.1287609,
+  "tags": {
+    "addr:city": "Rott am Inn",
+    "addr:country": "DE",
+    "addr:housenumber": "37",
+    "addr:place": "Meiling",
+    "addr:postcode": "83543",
+    "contact:phone": "+49 8039 90590",
+    "craft": "plumber",
+    "name": "Kurtz Heizungen Bäder",
+    "website": "https://kurtz-rott.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 10810998219,
+  "lat": 47.9780841,
+  "lon": 12.1160296,
+  "tags": {
+    "addr:city": "Rott am Inn",
+    "addr:country": "DE",
+    "addr:housenumber": "10",
+    "addr:place": "Arbing",
+    "addr:postcode": "83543",
+    "addr:suburb": "Arbing",
+    "craft": "carpenter",
+    "name": "Andreas Heinzl GmbH Zimmerei - Holzbau",
+    "opening_hours": "Mo-Fr 07:00-17:00",
+    "operator": "Andreas Heinzl",
+    "phone": "+49 8039 3500",
+    "website": "https://www.zimmerei-heinzl.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 10829796779,
+  "lat": 47.7964930,
+  "lon": 12.2437027,
+  "tags": {
+    "addr:city": "Frasdorf",
+    "addr:housenumber": "1",
+    "addr:place": "Daxa",
+    "addr:postcode": "83112",
+    "addr:suburb": "Daxa",
+    "craft": "sawmill",
+    "name": "Sägewerk Lorenz Baumgartner e.K.",
+    "opening_hours": "Mo-Fr 08:00-12:00,13:00-16:30",
+    "operator": "Lorenz Baumgartner",
+    "phone": "+49 8032 5157",
+    "website": "https://www.holz-baumgartner.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 10980041297,
+  "lat": 48.0904411,
+  "lon": 12.2173701,
+  "tags": {
+    "addr:city": "Soyen",
+    "addr:housenumber": "1",
+    "addr:place": "Strohreit",
+    "addr:postcode": "83564",
+    "craft": "joiner",
+    "name": "Schreinerei Lechner"
+  }
+},
+{
+  "type": "node",
+  "id": 11007936995,
+  "lat": 47.7731277,
+  "lon": 12.0091319,
+  "tags": {
+    "craft": "photographer",
+    "name": "Foto Stadler"
+  }
+},
+{
+  "type": "node",
+  "id": 11084939459,
+  "lat": 48.0272153,
+  "lon": 12.2352201,
+  "tags": {
+    "addr:city": "Alteiselfing",
+    "addr:housenumber": "7",
+    "addr:postcode": "83549",
+    "addr:street": "Unterdorfstraße",
+    "craft": "builder",
+    "email": "info@pauker-bau-gmbh.de",
+    "name": "Sebastian Pauker Bauunternehmen GmbH",
+    "opening_hours": "Mo-Fr 07:00-12:00, 13:00-17:00",
+    "operator": "Sebastian Pauker",
+    "phone": "+49 8071 92060 0",
+    "website": "https://www.pauker-bau-gmbh.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 11114187826,
+  "lat": 47.7660787,
+  "lon": 12.3268103,
+  "tags": {
+    "addr:city": "Aschau im Chiemgau",
+    "addr:housenumber": "9",
+    "addr:postcode": "83229",
+    "addr:street": "Am Hofbichl",
+    "craft": "blacksmith",
+    "name": "Messer Werk Damaszenerstahl",
+    "operator": "Distler Luca und Florian Pichler GbR",
+    "phone": "+4980529571234",
+    "website": "https://www.messer-werk.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 11200052350,
+  "lat": 47.8119809,
+  "lon": 11.9630783,
+  "tags": {
+    "addr:city": "Bad Feilnbach",
+    "addr:country": "DE",
+    "addr:housenumber": "2",
+    "addr:postcode": "83075",
+    "addr:street": "Sonnenham",
+    "craft": "distillery",
+    "name": "Trainer Edelbrände und Liköre",
+    "phone": "+498064585",
+    "website": "https://www.brennerei-trainer.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 11364547626,
+  "lat": 48.0616400,
+  "lon": 12.2239371,
+  "tags": {
+    "addr:city": "Wasserburg am Inn",
+    "addr:country": "DE",
+    "addr:housenumber": "12",
+    "addr:postcode": "83512",
+    "addr:street": "Schopperstattweg",
+    "craft": "atelier,_kunsthandwerk",
+    "name": "lebensArt!",
+    "operator": "Raphaela C. Häringer",
+    "website": "https://www.lebensart-raphaela.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 11542437794,
+  "lat": 47.9051349,
+  "lon": 12.3040519,
+  "tags": {
+    "craft": "glaziery",
+    "name": "Stöttner"
+  }
+},
+{
+  "type": "node",
+  "id": 11645477061,
+  "lat": 47.8689881,
+  "lon": 12.0136826,
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "19a",
+    "addr:postcode": "83043",
+    "addr:street": "Ellmosener Straße",
+    "craft": "stonemason",
+    "email": "info@frankenaturstein.de",
+    "fax": "+49 8061 939 32 54",
+    "name": "Franke Naturstein",
+    "opening_hours": "Mo-Fr 09:30-12:00,14:00-17:00, Sa \"nach Vereinbarung\"; Su,PH off",
+    "phone": "+49 8061 939 32 52",
+    "website": "https://www.frankenaturstein.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 11671683755,
+  "lat": 47.7816773,
+  "lon": 12.0066927,
+  "tags": {
+    "addr:city": "Bad Feilnbach",
+    "addr:country": "DE",
+    "addr:housenumber": "20",
+    "addr:postcode": "83075",
+    "addr:street": "Ackerpointstraße",
+    "craft": "carpenter",
+    "email": "info@sl-holzbau.de",
+    "name": "Holzbau Stadler & Litzlfelder",
+    "opening_hours": "Mo-Th 07:00-17:00, Fr 07:00-12:00; Sa,Su,PH off",
+    "phone": "+49 8066 88 44 32",
+    "website": "https://sl-holzbau.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 11671683756,
+  "lat": 47.7815214,
+  "lon": 12.0062824,
+  "tags": {
+    "addr:city": "Bad Feilnbach",
+    "addr:country": "DE",
+    "addr:housenumber": "18",
+    "addr:postcode": "83075",
+    "addr:street": "Ackerpointstraße",
+    "craft": "joiner",
+    "name": "Thomas Pichler",
+    "opening_hours": "Mo-Fr 08:00-16:00; SA,Su,PH off"
+  }
+},
+{
+  "type": "node",
+  "id": 11703960190,
+  "lat": 47.8884990,
+  "lon": 12.4024365,
+  "tags": {
+    "addr:city": "Breitbrunn am Chiemsee",
+    "addr:country": "DE",
+    "addr:housenumber": "19",
+    "addr:postcode": "83254",
+    "addr:street": "Gstadter Straße",
+    "craft": "caterer",
+    "name": "Gelderstadl",
+    "opening_hours": "Mo-Th 10:00-12:00",
+    "operator": "Dagmar, Sebastion & Vincent Gelder",
+    "phone": "+49 8054 7710",
+    "website": "https://www.dergelderstadl.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 11783633556,
+  "lat": 47.8152956,
+  "lon": 12.3678517,
+  "tags": {
+    "craft": "dental_technician",
+    "level": "1",
+    "name": "Hüttlinger & Neumüller",
+    "phone": "+49 8051 6609783"
+  }
+},
+{
+  "type": "node",
+  "id": 11933673760,
+  "lat": 47.9879860,
+  "lon": 12.3048924,
+  "tags": {
+    "addr:city": "Amerang",
+    "addr:country": "DE",
+    "addr:housenumber": "20a",
+    "addr:postcode": "83123",
+    "addr:street": "Am Vogeltenn",
+    "craft": "beekeeper",
+    "description": "Honey production and selling from home",
+    "name": "Franceschini",
+    "phone": "+4917670292583"
+  }
+},
+{
+  "type": "node",
+  "id": 11941904796,
+  "lat": 48.0690457,
+  "lon": 12.1494994,
+  "tags": {
+    "addr:city": "Edling",
+    "addr:housenumber": "1",
+    "addr:postcode": "83533",
+    "addr:street": "Am Sonnenpoint",
+    "craft": "joiner",
+    "email": "info@grandl-sauna-innenausbau.de",
+    "name": "Grandl Sauna- und Innenausbau GmbH",
+    "opening_hours": "Mo-Th 07:00-12:00,13:00-17:00; Fr 07:00-12:00; PH off",
+    "phone": "+49 8071 9043171",
+    "website": "https://www.grandl-sauna-innenausbau.de"
+  }
+},
+{
+  "type": "node",
+  "id": 11957759055,
+  "lat": 48.1136766,
+  "lon": 12.2239893,
+  "tags": {
+    "addr:city": "Soyen",
+    "addr:housenumber": "2",
+    "addr:postcode": "83564",
+    "addr:street": "Kraimoos",
+    "craft": "carpenter",
+    "fax": "+49 8071 55530-59",
+    "name": "Zimmerei Rudolf Schiller GmbH & Co. KG",
+    "opening_hours": "Mo-Do 7:30 - 17:00 Uhr, Fr 7:30 - 12:00 Uhr",
+    "phone": "+49 8071 55530-30",
+    "website": "https://www.schiller-zimmerei.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 11957856384,
+  "lat": 47.9108492,
+  "lon": 12.3663888,
+  "tags": {
+    "addr:city": "Eggstätt",
+    "addr:country": "DE",
+    "addr:housenumber": "7",
+    "addr:postcode": "83125",
+    "addr:street": "Gewerbegebiet Natzing",
+    "craft": "carpenter",
+    "fax": "+49 8056 9049-10",
+    "name": "HOLZBAU WÖRNDL e.K.",
+    "opening_hours": "Mo-Th 07:00-17:00, Fr 07:00-14:00",
+    "phone": "+49 8056 9049-0",
+    "website": "https://holzbau-woerndl.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 12032302472,
+  "lat": 47.8760103,
+  "lon": 11.9353580,
+  "tags": {
+    "addr:city": "Bruckmühl",
+    "addr:country": "DE",
+    "addr:housenumber": "2a",
+    "addr:postcode": "83052",
+    "addr:street": "Fabrikweg",
+    "addr:suburb": "Heufeldmühle",
+    "craft": "glaziery",
+    "name": "Daniel Maier Glas nach Maß",
+    "operator": "Daniel Maier"
+  }
+},
+{
+  "type": "node",
+  "id": 12032302474,
+  "lat": 47.8758016,
+  "lon": 11.9351569,
+  "tags": {
+    "addr:city": "Bruckmühl",
+    "addr:country": "DE",
+    "addr:housenumber": "2c",
+    "addr:postcode": "83052",
+    "addr:street": "Fabrikweg",
+    "addr:suburb": "Heufeldmühle",
+    "craft": "sandblasting_service",
+    "description": "Sand- und Glasperlenstrahlen",
+    "opening_hours": "Mo-Th 06:00-11:30,12:30-17:00; Fr,Sa,Su,PH off",
+    "operator": "Thomas Maier",
+    "phone": "+49 8062 80 91 40",
+    "website": "https://www.sandstrahlen-maier.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 12058948833,
+  "lat": 47.8822059,
+  "lon": 11.9859526,
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "12",
+    "addr:postcode": "83043",
+    "addr:street": "Carl-von-Ossietzky-Straße",
+    "addr:suburb": "Mietraching",
+    "craft": "metal_construction",
+    "email": "info@ab-form.tech",
+    "name": "AB-Form Teck",
+    "operator": "Andreas Brandner",
+    "phone": "+49 8061 93 66 007",
+    "website": "https://www.ab-form.tech/"
+  }
+},
+{
+  "type": "node",
+  "id": 12058979582,
+  "lat": 47.8814767,
+  "lon": 11.9948310,
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "3",
+    "addr:postcode": "83043",
+    "addr:street": "Horstsiedlung",
+    "addr:suburb": "Mietraching",
+    "craft": "shoemaker",
+    "name": "Schuhmacherei René Werkmeister",
+    "opening_hours": "Mo,Tu,Th 16:30-18:30; We,Fr,Sa,Su,PH off"
+  }
+},
+{
+  "type": "node",
+  "id": 12076503700,
+  "lat": 47.9424815,
+  "lon": 12.1797998,
+  "tags": {
+    "addr:city": "Vogtareuth",
+    "addr:housenumber": "12",
+    "addr:postcode": "83569",
+    "addr:street": "Reuther Feld",
+    "contact:phone": "+49 8038 9696",
+    "craft": "beekeeper",
+    "name": "Imkerei Paul Loferer"
+  }
+},
+{
+  "type": "node",
+  "id": 12078004826,
+  "lat": 47.8711490,
+  "lon": 11.9839704,
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "5a",
+    "addr:postcode": "83043",
+    "addr:street": "Gewerbepark Markfeld",
+    "addr:suburb": "Markfeld",
+    "craft": "tinsmith",
+    "email": "info@spenglerei-paul.de",
+    "name": "Spenglerei Paul",
+    "opening_hours": "Mo-Fr 09:00-17:00; PH off",
+    "phone": "+49 8061 939 84 11",
+    "website": "https://www.spenglerei-paul.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 12078004829,
+  "lat": 47.8711400,
+  "lon": 11.9815242,
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "2",
+    "addr:postcode": "83043",
+    "addr:street": "Gewerbepark Markfeld",
+    "addr:suburb": "Markfeld",
+    "craft": "construction_drying",
+    "email": "info@jaist.de",
+    "name": "Bautrocknung Jaist",
+    "opening_hours": "Mo-Fr 08:00-16:30; PH off",
+    "phone": "+49 8061 938 62 60",
+    "website": "https://bautrocknung-jaist.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 12078004830,
+  "lat": 47.8713343,
+  "lon": 11.9815510,
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "2",
+    "addr:postcode": "83043",
+    "addr:street": "Gewerbepark Markfeld",
+    "addr:suburb": "Markfeld",
+    "craft": "parquet_layer",
+    "email": "info@jaist.de",
+    "name": "Parkett Jaist",
+    "opening_hours": "Mo-Fr 09:00-16:30; PH off",
+    "phone": "+49 8061 938 62 60",
+    "website": "https://parkett-jaist.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 12078004980,
+  "lat": 47.8776564,
+  "lon": 11.9728607,
+  "tags": {
+    "addr:city": "Bruckmühl",
+    "addr:country": "DE",
+    "addr:housenumber": "9½",
+    "addr:postcode": "83052",
+    "addr:street": "Münchener Straße",
+    "addr:suburb": "Heufeld",
+    "craft": "tiler",
+    "name": "Fliesen Walz",
+    "opening_hours": "Mo-Fr 08:00-12:30,14:00-18:00, Sa 09:30-13:00; PH off",
+    "operator": "Stefan, Felix & Lukas Walz",
+    "phone": "+49 8061 391 726",
+    "website": "https://www.walz-fliesen.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 12080013508,
+  "lat": 47.8718012,
+  "lon": 11.9819695,
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "1a",
+    "addr:postcode": "83043",
+    "addr:street": "Gewerbepark Markfeld",
+    "craft": "hydraulic_system",
+    "email": "service@pirtek-rosenheim.de",
+    "name": "Pirtek HydraulikService",
+    "opening_hours": "Mo-Fr 07:30-16:30; PH,Sa,Su off",
+    "phone": "+49 8061 280 38 10",
+    "website": "https://www.pirtek.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 12084326328,
+  "lat": 47.8693983,
+  "lon": 11.9857809,
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "13",
+    "addr:postcode": "83043",
+    "addr:street": "Gewerbepark Markfeld",
+    "addr:suburb": "Markfeld",
+    "craft": "coffee_roasting",
+    "name": "chicco di caffè Rösterei",
+    "opening_hours": "Mo-Th 08:00-16:00, Fr 08:00-12:00; PH,Sa,Su off",
+    "phone": "+49 8061 349 72 70",
+    "website": "https://chicco-di-caffe.de/roesterei/",
+    "wheelchair": "yes"
+  }
+},
+{
+  "type": "node",
+  "id": 12084959149,
+  "lat": 47.8669135,
+  "lon": 11.9833642,
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "11",
+    "addr:postcode": "83043",
+    "addr:street": "Unterheufeld",
+    "addr:suburb": "Unterheufeld",
+    "craft": "roofer",
+    "email": "info@dachdeckerei-ritthaler.com",
+    "name": "Ritthaler & Sohn",
+    "opening_hours": "Mo-Fr 08:00-12:00, Mo-Th 13:00-17:00; PH,Sa,Su off",
+    "phone": "+49 8061 13 41",
+    "website": "https://www.dachdeckerei-ritthaler.com/"
+  }
+},
+{
+  "type": "node",
+  "id": 12084959160,
+  "lat": 47.8705112,
+  "lon": 11.9825569,
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "2d",
+    "addr:postcode": "83043",
+    "addr:street": "Gewerbepark Markfeld",
+    "addr:suburb": "Markfeld",
+    "craft": "metal_construction",
+    "email": "info@mountaincart.com",
+    "name": "mountaincart",
+    "phone": "+49 8061 49 58 90",
+    "website": "https://mountaincart.com/"
+  }
+},
+{
+  "type": "node",
+  "id": 12114707747,
+  "lat": 47.8332570,
+  "lon": 11.9628614,
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "11b",
+    "addr:place": "Fachendorf",
+    "addr:postcode": "83043",
+    "addr:suburb": "Fachendorf",
+    "craft": "carpenter",
+    "email": "mail@zimmerei-heiss-heiss.de",
+    "fax": "+49 8061 93 75 94",
+    "name": "Zimmerei Heiß + Heiß",
+    "operator": "Brüder Heiß",
+    "phone": "+49 8061 93 75 63",
+    "website": "https://www.zimmerei-heiss-heiss.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 12157606760,
+  "lat": 47.7718402,
+  "lon": 12.0051049,
+  "tags": {
+    "addr:city": "Bad Feilnbach",
+    "addr:country": "DE",
+    "addr:housenumber": "25",
+    "addr:postcode": "83075",
+    "addr:street": "Breitensteinstraße",
+    "contact:email": "info@elektro-hauke.com",
+    "contact:phone": "+49 8066 1541",
+    "contact:website": "https://www.elektro-hauke.de",
+    "craft": "electrician",
+    "name": "Elektro Hauke",
+    "opening_hours": "\"Nach Vereinbarung\""
+  }
+},
+{
+  "type": "node",
+  "id": 12164092641,
+  "lat": 47.7741773,
+  "lon": 12.0056507,
+  "tags": {
+    "addr:city": "Bad Feilnbach",
+    "addr:country": "DE",
+    "addr:housenumber": "14",
+    "addr:postcode": "83075",
+    "addr:street": "Kufsteiner Straße",
+    "contact:email": "info@hannes-riesenberger.de",
+    "contact:phone": "+49 8066 9272",
+    "craft": "plumber",
+    "name": "Hannes Riesenberger"
+  }
+},
+{
+  "type": "node",
+  "id": 12164092648,
+  "lat": 47.7755545,
+  "lon": 12.0032689,
+  "tags": {
+    "addr:city": "Bad Feilnbach",
+    "addr:country": "DE",
+    "addr:housenumber": "3-5",
+    "addr:postcode": "83075",
+    "addr:street": "Kufsteiner Straße",
+    "craft": "carpenter",
+    "name": "Zimmerei Schnitzenbaumer",
+    "wikidata": "Q41214320"
+  }
+},
+{
+  "type": "node",
+  "id": 12164092684,
+  "lat": 47.7748767,
+  "lon": 12.0028652,
+  "tags": {
+    "addr:city": "Bad Feilnbach",
+    "addr:country": "DE",
+    "addr:housenumber": "3",
+    "addr:postcode": "83075",
+    "addr:street": "Breitensteinstraße",
+    "craft": "glaziery",
+    "name": "Glaserei Moser"
+  }
+},
+{
+  "type": "node",
+  "id": 12342322017,
+  "lat": 47.9239860,
+  "lon": 11.9886678,
+  "tags": {
+    "check_date": "2024-11-14",
+    "contact:email": "info@msschreinerei.de",
+    "contact:instagram": "schreinereisedlmaier",
+    "contact:phone": "+49 157 36237855",
+    "contact:website": "https://www.instagram.com/schreinereisedlmaier/",
+    "craft": "joiner",
+    "name": "Schreinerei Sedlmaier"
+  }
+},
+{
+  "type": "node",
+  "id": 12356623575,
+  "lat": 48.0617227,
+  "lon": 12.2291167,
+  "tags": {
+    "craft": "painter",
+    "name": "Dax & Eder",
+    "phone": "+49 80 71 92 57 50"
+  }
+},
+{
+  "type": "node",
+  "id": 12356623579,
+  "lat": 48.0617418,
+  "lon": 12.2295132,
+  "tags": {
+    "craft": "handicraft",
+    "name": "Atelier Jordani",
+    "opening_hours": "Tu 14:00-17:00; We-Fr 10:00-13:00,14:00-17:00; Sa 10:00-13:00",
+    "phone": "+49 172 8391175",
+    "website": "https://www.jordani.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 12359981082,
+  "lat": 48.0620606,
+  "lon": 12.2311130,
+  "tags": {
+    "craft": "key_cutter",
+    "name": "Schuhmacherei Machacek - Schlüsseldienst",
+    "opening_hours": "Mo-Fr 10:00-12:30,14:00-17:00; We off; Sa 10:00-12:00"
+  }
+},
+{
+  "type": "node",
+  "id": 12477928363,
+  "lat": 47.7321154,
+  "lon": 12.1131519,
+  "tags": {
+    "addr:city": "Brannenburg",
+    "addr:country": "DE",
+    "addr:housenumber": "12",
+    "addr:place": "Brannenburg",
+    "addr:postcode": "83098",
+    "addr:street": "Flintsbacher Straße",
+    "craft": "joiner",
+    "email": "lehrwerkstatt@oli-natura.de",
+    "name": "OLI-NATURA Lehrwerkstatt",
+    "operator": "OLI Lacke GmbH",
+    "phone": "+49 8034 6339620",
+    "website": "https://oli-lehrwerkstatt.de"
+  }
+},
+{
+  "type": "node",
+  "id": 12520807492,
+  "lat": 48.0242050,
+  "lon": 12.1103172,
+  "tags": {
+    "addr:city": "Pfaffing",
+    "addr:housenumber": "40",
+    "addr:place": "Englmannstett",
+    "addr:postcode": "83539",
+    "craft": "joiner",
+    "email": "info@riedl.com",
+    "name": "RIEDL Objektbau GmbH",
+    "opening_hours": "Mo-Do 8:00 - 17:00, Fr 8:00 – 12:00",
+    "phone": "+49 8039 90580",
+    "website": "https://www.riedl.com/"
+  }
+},
+{
+  "type": "node",
+  "id": 12539205492,
+  "lat": 47.8552134,
+  "lon": 12.0598973,
+  "tags": {
+    "addr:city": "Kolbermoor",
+    "addr:country": "DE",
+    "addr:housenumber": "17",
+    "addr:postcode": "83059",
+    "addr:street": "Peter-Rosegger-Straße",
+    "craft": "painter",
+    "description": "Wir sind ein eingespieltes Team, das sich eine professionelle Ausführung sämtlicher Maler-, Tapezier- und Lackierarbeiten auf die Fahnen geschrieben hat. „Wir“, das sind die beiden Maler- und Lackierermeister Bashkim Zeneli und Durim Hertica.",
+    "email": "info@malermeister-hz.de",
+    "name": "Malermeister HZ GbR",
+    "opening_hours": "Mo-Fr 07:00-18:00; Sa 08:00-13:00; PH:off",
+    "phone": "+49 8031 3507470",
+    "start_date": "2022-11-02",
+    "website": "https://www.malermeister-hz.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 12708586491,
+  "lat": 47.8723123,
+  "lon": 11.9189369,
+  "tags": {
+    "addr:city": "Bruckmühl",
+    "addr:housenumber": "3",
+    "addr:postcode": "83052",
+    "addr:street": "Hauptstraße",
+    "craft": "carpenter",
+    "name": "Zimmerei Karmann",
+    "source": "survey",
+    "website": "https://www.karmann-zimmerei.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 12708612015,
+  "lat": 47.8785727,
+  "lon": 11.9325687,
+  "tags": {
+    "addr:city": "Bruckmühl",
+    "addr:country": "DE",
+    "addr:housenumber": "8",
+    "addr:postcode": "83052",
+    "addr:street": "Hermann-Oberth-Straße",
+    "craft": "metal_construction",
+    "name": "Völkl Maschinenbau GmbH",
+    "website": "https://voelkl-gmbh.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 12708612016,
+  "lat": 47.8781873,
+  "lon": 11.9338604,
+  "tags": {
+    "addr:city": "Bruckmühl",
+    "addr:country": "DE",
+    "addr:housenumber": "14",
+    "addr:postcode": "83052",
+    "addr:street": "Hermann-Oberth-Straße",
+    "craft": "metal_construction",
+    "email": "info@hinteregger-gmbh.de",
+    "fax": "+49 8062 80 972 29",
+    "name": "Hinteregger GmbH",
+    "phone": "+49 8062 80 972 0",
+    "website": "https://www.hinteregger-gmbh.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 12708612017,
+  "lat": 47.8811111,
+  "lon": 11.9313954,
+  "tags": {
+    "addr:city": "Bruckmühl",
+    "addr:country": "DE",
+    "addr:housenumber": "18",
+    "addr:postcode": "83052",
+    "addr:street": "Albert-Mayer-Straße",
+    "craft": "metal_construction",
+    "name": "Rüger Schneidtechnik GmbH",
+    "source": "survay",
+    "website": "https://rueger-schneidtechnik.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 12708612019,
+  "lat": 47.8803630,
+  "lon": 11.9316537,
+  "tags": {
+    "addr:city": "Bruckmühl",
+    "addr:country": "DE",
+    "addr:housenumber": "30",
+    "addr:postcode": "83052",
+    "addr:street": "Carl-Zeiss-Straße",
+    "craft": "metal_construction",
+    "name": "Verzinkerei Bruckmühl Gabriel & Rakusch GmbH"
+  }
+},
+{
+  "type": "node",
+  "id": 12716844982,
+  "lat": 48.0583824,
+  "lon": 12.1716622,
+  "tags": {
+    "addr:city": "Edling",
+    "addr:country": "DE",
+    "addr:housenumber": "4",
+    "addr:postcode": "83533",
+    "addr:street": "Viehhauser Straße",
+    "contact:email": "info@schechtl.de",
+    "contact:fax": "+49 8071 5995-99",
+    "contact:phone": "+49 8071 5995-0",
+    "contact:website": "https://schechtl.de",
+    "craft": "toolmaker",
+    "industrial": "factory",
+    "name": "Schechtl",
+    "official_name": "Schechtl Maschinenbau GmbH"
+  }
+},
+{
+  "type": "node",
+  "id": 12905478576,
+  "lat": 47.8992527,
+  "lon": 12.0897073,
+  "tags": {
+    "craft": "painter",
+    "email": "info@maler-liebhart.de",
+    "mobile": "+49 170 5437976",
+    "name": "Maler- & Lackiermeister Uwe Liebhart",
+    "website": "https://maler-liebhart.de"
+  }
+},
+{
+  "type": "node",
+  "id": 12905561456,
+  "lat": 47.8981037,
+  "lon": 12.0889156,
+  "tags": {
+    "craft": "metal_construction",
+    "name": "BMG Metallbau GmbH"
+  }
+},
+{
+  "type": "node",
+  "id": 12906090302,
+  "lat": 47.8994748,
+  "lon": 12.0899485,
+  "tags": {
+    "craft": "metal_construction",
+    "email": "r_huber@t-online.de",
+    "name": "Roland Huber Präzisionsmechanik",
+    "phone": "+49 8031 50604",
+    "website": "https://www.huber-cnc.com/"
+  }
+},
+{
+  "type": "node",
+  "id": 13201544598,
+  "lat": 48.0574828,
+  "lon": 12.1106906,
+  "tags": {
+    "craft": "plumber",
+    "name": "Thomas Demmel GmbH"
+  }
+},
+{
+  "type": "node",
+  "id": 13375960239,
+  "lat": 47.8358116,
+  "lon": 12.3440157,
+  "tags": {
+    "craft": "electrician",
+    "name": "Weidacher Elektrotechnik",
+    "phone": "+49 8051 90650",
+    "website": "https://www.elektro-weidacher.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 13682109711,
+  "lat": 47.9396748,
+  "lon": 12.0460773,
+  "tags": {
+    "addr:city": "Ostermünchen",
+    "addr:housenumber": "10",
+    "addr:postcode": "83104",
+    "addr:street": "Oberrainer Feld",
+    "craft": "toolmaker",
+    "description": "Werkzeug- und Formenbau für die Herstellung von Gummiverbundteilen",
+    "email": "info@gume.de",
+    "name": "GUME GmbH",
+    "operator": "Geschäftsführung Marius Maier, Michael Obermeyer",
+    "phone": "+49 8067 90670",
+    "website": "https://www.gume.de/"
+  }
+},
+{
+  "type": "node",
+  "id": 13958318324,
+  "lat": 47.8579172,
+  "lon": 12.3452081,
+  "tags": {
+    "check_date:opening_hours": "2026-06-24",
+    "craft": "stonemason",
+    "name": "Eisenrichter",
+    "opening_hours:signed": "no"
+  }
+},
+{
+  "type": "node",
+  "id": 13959568675,
+  "lat": 47.6472629,
+  "lon": 12.1778916,
+  "tags": {
+    "craft": "brewery",
+    "name": "Oberaudorfer Privatbrauerei"
+  }
+},
+{
+  "type": "node",
+  "id": 13960190381,
+  "lat": 47.8532253,
+  "lon": 12.3451906,
+  "tags": {
+    "craft": "upholsterer",
+    "name": "Palk"
+  }
+},
+{
+  "type": "node",
+  "id": 13960212034,
+  "lat": 47.8533734,
+  "lon": 12.3455768,
+  "tags": {
+    "craft": "painter",
+    "name": "Lindenmayer"
+  }
+},
+{
+  "type": "way",
+  "id": 24024453,
+  "center": {
+    "lat": 48.0500264,
+    "lon": 12.2239588
+  },
+  "tags": {
+    "addr:city": "Wasserburg am Inn",
+    "addr:country": "DE",
+    "addr:housenumber": "1",
+    "addr:postcode": "83512",
+    "addr:street": "Alkorstraße",
+    "building": "yes",
+    "check_date": "2023-08-29",
+    "craft": "metal_construction",
+    "name": "Hutterer Stahlbau"
+  }
+},
+{
+  "type": "way",
+  "id": 68693331,
+  "center": {
+    "lat": 47.8741026,
+    "lon": 12.4255018
+  },
+  "tags": {
+    "addr:city": "Chiemsee",
+    "addr:country": "DE",
+    "addr:housenumber": "55",
+    "addr:place": "Frauenchiemsee",
+    "addr:postcode": "83256",
+    "amenity": "restaurant",
+    "building": "yes",
+    "craft": "brewery",
+    "cuisine": "regional;bavarian;german",
+    "email": "info@inselbraeu-frauenchiemsee.de",
+    "industrial": "brewery",
+    "microbrewery": "yes",
+    "name": "Inselbräu",
+    "operator": "Privatbrauerei Inselbräu",
+    "outdoor_seating": "yes",
+    "phone": "+49 8054 902088",
+    "website": "https://www.inselbraeu-frauenchiemsee.de"
+  }
+},
+{
+  "type": "way",
+  "id": 68693354,
+  "center": {
+    "lat": 47.8744281,
+    "lon": 12.4281180
+  },
+  "tags": {
+    "addr:city": "Chiemsee",
+    "addr:country": "DE",
+    "addr:housenumber": "21a",
+    "addr:place": "Frauenchiemsee",
+    "addr:postcode": "83256",
+    "building": "boathouse",
+    "check_date": "2026-03-20",
+    "craft": "handicraft",
+    "name": "Keramik im Bootshaus"
+  }
+},
+{
+  "type": "way",
+  "id": 68693357,
+  "center": {
+    "lat": 47.8732849,
+    "lon": 12.4273692
+  },
+  "tags": {
+    "addr:city": "Chiemsee",
+    "addr:country": "DE",
+    "addr:housenumber": "4a",
+    "addr:place": "Frauenchiemsee",
+    "addr:postcode": "83256",
+    "building": "yes",
+    "check_date": "2026-06-14",
+    "contact:facebook": "Insel-T%C3%B6pferei-Klampfleuthner-132328250167931",
+    "contact:instagram": "inseltoepferei",
+    "craft": "pottery",
+    "name": "Inseltöpferei Klampfleuthner",
+    "phone": "+49 8054 1233",
+    "shop": "pottery",
+    "website": "https://www.inseltoepferei.de/"
+  }
+},
+{
+  "type": "way",
+  "id": 68693362,
+  "center": {
+    "lat": 47.8755248,
+    "lon": 12.4267217
+  },
+  "tags": {
+    "addr:city": "Chiemsee",
+    "addr:country": "DE",
+    "addr:housenumber": "7",
+    "addr:place": "Frauenchiemsee",
+    "addr:postcode": "83256",
+    "building": "industrial",
+    "craft": "boatbuilder",
+    "name": "Bootswerft Heistracher",
+    "website": "https://heistracher.de"
+  }
+},
+{
+  "type": "way",
+  "id": 68693373,
+  "center": {
+    "lat": 47.8738136,
+    "lon": 12.4278653
+  },
+  "tags": {
+    "building": "yes",
+    "craft": "handicraft",
+    "name": "Keramik Galerie"
+  }
+},
+{
+  "type": "way",
+  "id": 95202367,
+  "center": {
+    "lat": 47.7951839,
+    "lon": 12.1202335
+  },
+  "tags": {
+    "addr:city": "Raubling",
+    "addr:country": "DE",
+    "addr:housenumber": "32",
+    "addr:postcode": "83064",
+    "addr:street": "Rosenheimer Straße",
+    "building": "commercial",
+    "building:levels": "2",
+    "craft": "yes",
+    "name": "Das Werkhaus",
+    "source": "Bing"
+  }
+},
+{
+  "type": "way",
+  "id": 104287440,
+  "center": {
+    "lat": 47.7977825,
+    "lon": 12.1712775
+  },
+  "tags": {
+    "craft": "sawmill",
+    "description": "Sägewerk",
+    "landuse": "industrial"
+  }
+},
+{
+  "type": "way",
+  "id": 109916730,
+  "center": {
+    "lat": 47.8740177,
+    "lon": 11.9997450
+  },
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "3",
+    "addr:postcode": "83043",
+    "addr:street": "Westerfeldweg",
+    "building": "commercial",
+    "building:colour": "gray",
+    "building:levels": "2",
+    "building:material": "metal",
+    "craft": "plumber",
+    "height": "7",
+    "name": "Demmel",
+    "roof:height": "1",
+    "roof:levels": "1",
+    "roof:material": "tar_paper",
+    "roof:orientation": "along",
+    "roof:shape": "gabled"
+  }
+},
+{
+  "type": "way",
+  "id": 110071828,
+  "center": {
+    "lat": 47.8986635,
+    "lon": 11.9883676
+  },
+  "tags": {
+    "addr:city": "Tuntenhausen",
+    "addr:country": "DE",
+    "addr:housenumber": "1",
+    "addr:postcode": "83104",
+    "addr:street": "Aiblinger Straße",
+    "building": "yes",
+    "check_date": "2026-05-17",
+    "craft": "brewery",
+    "email": "info@maxlrain.de",
+    "name": "Schlossbrauerei Maxlrain",
+    "phone": "+49 8061 9079-0",
+    "website": "https://www.maxlrain.de/de/"
+  }
+},
+{
+  "type": "way",
+  "id": 110084999,
+  "center": {
+    "lat": 47.8447496,
+    "lon": 11.9757493
+  },
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "6",
+    "addr:postcode": "83043",
+    "addr:street": "Heinrichsdorfer Straße",
+    "building": "commercial",
+    "craft": "carpenter",
+    "name": "Zimmerei Kirschner Kink"
+  }
+},
+{
+  "type": "way",
+  "id": 110336459,
+  "center": {
+    "lat": 47.8875410,
+    "lon": 12.0856216
+  },
+  "tags": {
+    "addr:city": "Großkarolinenfeld",
+    "addr:country": "DE",
+    "addr:housenumber": "31",
+    "addr:postcode": "83109",
+    "addr:street": "Am Weiher",
+    "building": "yes",
+    "craft": "carpenter",
+    "email": "huber-werner-zimmerei@t-online.de",
+    "fax": "+49 8031 50993",
+    "name": "Zimmerei Huber",
+    "operator": "Werner Huber",
+    "phone": "+49 8031 50032",
+    "website": "http://www.zimmerei-huber.de/"
+  }
+},
+{
+  "type": "way",
+  "id": 110781888,
+  "center": {
+    "lat": 47.6473170,
+    "lon": 12.1778845
+  },
+  "tags": {
+    "building": "yes",
+    "check_date": "2023-08-25",
+    "craft": "brewery",
+    "name": "Oberaudorfer Privatbrauerei",
+    "opening_hours": "Su 10:00-14:00"
+  }
+},
+{
+  "type": "way",
+  "id": 111471592,
+  "center": {
+    "lat": 47.6590190,
+    "lon": 12.1733344
+  },
+  "tags": {
+    "addr:city": "Oberaudorf",
+    "addr:country": "DE",
+    "addr:housenumber": "2",
+    "addr:postcode": "83080",
+    "addr:street": "Talweg",
+    "building": "yes",
+    "craft": "parquet_layer",
+    "email": "info@parkett-lehnert.de",
+    "name": "Parkett Thoralf Lehnert",
+    "operator": "Thoralf Lehnert",
+    "phone": "+49 174 33 69 868",
+    "source:addr": "survey",
+    "website": "https://parkett-lehnert.de/"
+  }
+},
+{
+  "type": "way",
+  "id": 116231210,
+  "center": {
+    "lat": 47.8430063,
+    "lon": 12.0698086
+  },
+  "tags": {
+    "addr:city": "Kolbermoor",
+    "addr:country": "DE",
+    "addr:housenumber": "46",
+    "addr:postcode": "83059",
+    "addr:street": "Wendelsteinstraße",
+    "building": "commercial",
+    "craft": "builder",
+    "name": "Sebastian Daxeder Bauunternehmung GmbH"
+  }
+},
+{
+  "type": "way",
+  "id": 120716182,
+  "center": {
+    "lat": 47.9288252,
+    "lon": 12.3767263
+  },
+  "tags": {
+    "addr:city": "Eggstätt",
+    "addr:country": "DE",
+    "addr:housenumber": "17",
+    "addr:postcode": "83125",
+    "addr:street": "Obinger Straße",
+    "building": "house",
+    "craft": "electrician",
+    "name": "Elektro Dieplinger"
+  }
+},
+{
+  "type": "way",
+  "id": 121711430,
+  "center": {
+    "lat": 47.8897104,
+    "lon": 12.4004824
+  },
+  "tags": {
+    "addr:city": "Breitbrunn am Chiemsee",
+    "addr:country": "DE",
+    "addr:housenumber": "2",
+    "addr:postcode": "83254",
+    "addr:street": "Gstadter Straße",
+    "building": "yes",
+    "craft": "grinding_mill",
+    "name": "Woodandform – Die MühlenManufaktur",
+    "website": "https://www.die-pfeffermühlen.de"
+  }
+},
+{
+  "type": "way",
+  "id": 134697893,
+  "center": {
+    "lat": 47.8551848,
+    "lon": 12.2849975
+  },
+  "tags": {
+    "building": "yes",
+    "craft": "carpenter",
+    "name": "Schreinerei Peter Kurz"
+  }
+},
+{
+  "type": "way",
+  "id": 140534221,
+  "center": {
+    "lat": 47.8979667,
+    "lon": 12.0894119
+  },
+  "tags": {
+    "addr:city": "Großkarolinenfeld",
+    "addr:country": "DE",
+    "addr:housenumber": "2a",
+    "addr:postcode": "83109",
+    "addr:street": "Gewerbering-Nord",
+    "building": "commercial",
+    "craft": "builder",
+    "name": "Schilp Bauunternehmung GmbH",
+    "website": "https://www.schilp-bauunternehmung.de/"
+  }
+},
+{
+  "type": "way",
+  "id": 150557787,
+  "center": {
+    "lat": 47.8501763,
+    "lon": 12.0706501
+  },
+  "tags": {
+    "addr:city": "Kolbermoor",
+    "addr:country": "DE",
+    "addr:housenumber": "39",
+    "addr:postcode": "83059",
+    "addr:street": "Rosenheimer Straße",
+    "building": "yes",
+    "craft": "carpenter",
+    "name": "Sigl u. Glas Zimmerei",
+    "phone": "+49 8031 2355386"
+  }
+},
+{
+  "type": "way",
+  "id": 151386949,
+  "center": {
+    "lat": 47.9185169,
+    "lon": 12.2961909
+  },
+  "tags": {
+    "addr:city": "Bad Endorf",
+    "addr:country": "DE",
+    "addr:housenumber": "13",
+    "addr:postcode": "83093",
+    "addr:street": "Im Gewerbegebiet",
+    "building": "commercial",
+    "craft": "metal_construction",
+    "name": "Kirner Schlosserei-Metallbau"
+  }
+},
+{
+  "type": "way",
+  "id": 164907012,
+  "center": {
+    "lat": 47.9160732,
+    "lon": 12.2937840
+  },
+  "tags": {
+    "addr:city": "Bad Endorf",
+    "addr:country": "DE",
+    "addr:housenumber": "4a",
+    "addr:postcode": "83093",
+    "addr:street": "Im Gewerbegebiet",
+    "building": "commercial",
+    "carpenter": "trim",
+    "craft": "carpenter",
+    "name": "Kotiers Schreinerei Glaserei"
+  }
+},
+{
+  "type": "way",
+  "id": 165483270,
+  "center": {
+    "lat": 47.9298070,
+    "lon": 12.3757499
+  },
+  "tags": {
+    "addr:city": "Eggstätt",
+    "addr:country": "DE",
+    "addr:housenumber": "25",
+    "addr:postcode": "83125",
+    "addr:street": "Obinger Straße",
+    "building": "house",
+    "craft": "beekeeper"
+  }
+},
+{
+  "type": "way",
+  "id": 166234798,
+  "center": {
+    "lat": 47.8456119,
+    "lon": 12.3464570
+  },
+  "tags": {
+    "addr:city": "Prien am Chiemsee",
+    "addr:country": "DE",
+    "addr:housenumber": "2",
+    "addr:postcode": "83209",
+    "addr:street": "Am Mühlbach",
+    "building": "retail",
+    "building:levels": "1",
+    "check_date": "2025-03-24",
+    "craft": "electrician",
+    "email": "info@elektro-langl.de",
+    "name": "Elektro Langl",
+    "phone": "+49 8051 4350",
+    "roof:levels": "1",
+    "website": "www.elektro-langl.de"
+  }
+},
+{
+  "type": "way",
+  "id": 166234802,
+  "center": {
+    "lat": 47.8457603,
+    "lon": 12.3457545
+  },
+  "tags": {
+    "addr:city": "Prien am Chiemsee",
+    "addr:country": "DE",
+    "addr:housenumber": "3",
+    "addr:postcode": "83209",
+    "addr:street": "Am Mühlbach",
+    "building": "yes",
+    "craft": "joiner",
+    "name": "A.V.Huber"
+  }
+},
+{
+  "type": "way",
+  "id": 171346027,
+  "center": {
+    "lat": 47.8933665,
+    "lon": 12.3436797
+  },
+  "tags": {
+    "addr:city": "Rimsting",
+    "addr:country": "DE",
+    "addr:housenumber": "85",
+    "addr:postcode": "83253",
+    "addr:street": "Bahnhofstraße",
+    "building": "yes",
+    "check_date": "2026-05-27",
+    "craft": "hvac",
+    "name": "Brandstädter & Heinz",
+    "source": "Bing"
+  }
+},
+{
+  "type": "way",
+  "id": 190510831,
+  "center": {
+    "lat": 47.8792103,
+    "lon": 12.2817615
+  },
+  "tags": {
+    "craft": "carpenter",
+    "name": "Schreinerei Franz Schmid",
+    "phone": "+49 8053 1848"
+  }
+},
+{
+  "type": "way",
+  "id": 194452378,
+  "center": {
+    "lat": 47.8363587,
+    "lon": 12.1630202
+  },
+  "tags": {
+    "addr:city": "Rohrdorf",
+    "addr:country": "DE",
+    "addr:housenumber": "11",
+    "addr:postcode": "83101",
+    "addr:street": "Sebastian-Tiefenthaler-Straße",
+    "building": "yes",
+    "craft": "furniture",
+    "furniture": "garden",
+    "name": "Weishäupl"
+  }
+},
+{
+  "type": "way",
+  "id": 199884049,
+  "center": {
+    "lat": 47.9303652,
+    "lon": 12.3871975
+  },
+  "tags": {
+    "addr:city": "Eggstätt",
+    "addr:country": "DE",
+    "addr:housenumber": "1",
+    "addr:postcode": "83125",
+    "addr:street": "An der Ache",
+    "building": "yes",
+    "craft": "plumber",
+    "email": "info@gloss-haustechnik.de",
+    "fax": "+49 8056 1077",
+    "name": "Gloss & Wolf Haustechnik GmbH & Co.KG",
+    "phone": "+49 8056 90450",
+    "website": "https://www.gloss-haustechnik.de/"
+  }
+},
+{
+  "type": "way",
+  "id": 200938877,
+  "center": {
+    "lat": 47.7767530,
+    "lon": 12.3242109
+  },
+  "tags": {
+    "addr:city": "Aschau im Chiemgau",
+    "addr:country": "DE",
+    "addr:housenumber": "10",
+    "addr:postcode": "83229",
+    "addr:street": "Kampenwandstraße",
+    "building": "yes",
+    "check_date": "2024-09-01",
+    "craft": "pottery",
+    "email": "ed.uahcsa-ierefpeot@sremmal.b",
+    "name": "Töpferei Barbara Lammers",
+    "phone": "+49 8052 951342",
+    "website": "https://toepferei-aschau.de/"
+  }
+},
+{
+  "type": "way",
+  "id": 214444722,
+  "center": {
+    "lat": 47.7371526,
+    "lon": 12.1045394
+  },
+  "tags": {
+    "building": "yes",
+    "check_date": "2023-04-20",
+    "craft": "blacksmith",
+    "name": "Schmied Astner",
+    "phone": "+49 8034 4520"
+  }
+},
+{
+  "type": "way",
+  "id": 245372274,
+  "center": {
+    "lat": 47.9028151,
+    "lon": 12.2227281
+  },
+  "tags": {
+    "addr:city": "Söchtenau",
+    "addr:housenumber": "2",
+    "addr:postcode": "83139",
+    "addr:street": "Gewerbegebiet",
+    "boat:repair": "boatbuilder",
+    "building": "yes",
+    "craft": "boatbuilder",
+    "email": "office@flyer-cat.de",
+    "name": "Flyer Catamarans",
+    "operator": "Aicher-Egner GmbH",
+    "phone": "+49 8053 798888",
+    "sport": "sailing",
+    "website": "https://flyer-cat.de"
+  }
+},
+{
+  "type": "way",
+  "id": 258696863,
+  "center": {
+    "lat": 47.8672529,
+    "lon": 12.3249558
+  },
+  "tags": {
+    "addr:city": "Rimsting",
+    "addr:housenumber": "1",
+    "addr:place": "Gewerbegebiet Greimharting",
+    "addr:postcode": "83253",
+    "building": "commercial",
+    "craft": "floorer",
+    "name": "Singhammer Bodensysteme GmbH",
+    "source": "bing",
+    "website": "https://singhammer-bodensysteme.de/"
+  }
+},
+{
+  "type": "way",
+  "id": 260152379,
+  "center": {
+    "lat": 47.9040311,
+    "lon": 12.3662720
+  },
+  "tags": {
+    "building": "yes",
+    "craft": "metal_construction",
+    "name": "Fritz Metall- & Maschinenbau",
+    "website": "https://www.metall-fritz.de/"
+  }
+},
+{
+  "type": "way",
+  "id": 260327700,
+  "center": {
+    "lat": 47.9210668,
+    "lon": 12.2878517
+  },
+  "tags": {
+    "addr:city": "Bad Endorf",
+    "addr:country": "DE",
+    "addr:housenumber": "2",
+    "addr:postcode": "83093",
+    "addr:street": "Handwerkerpark",
+    "building": "yes",
+    "craft": "plumber",
+    "name": "Axel Hanl"
+  }
+},
+{
+  "type": "way",
+  "id": 260329702,
+  "center": {
+    "lat": 47.9142796,
+    "lon": 12.2943640
+  },
+  "tags": {
+    "addr:city": "Bad Endorf",
+    "addr:country": "DE",
+    "addr:housenumber": "26",
+    "addr:postcode": "83093",
+    "addr:street": "Im Gewerbegebiet",
+    "building": "commercial",
+    "carpenter": "cabinetmaker",
+    "craft": "carpenter",
+    "name": "Schreinerei Kriechbaum"
+  }
+},
+{
+  "type": "way",
+  "id": 260498605,
+  "center": {
+    "lat": 47.9925066,
+    "lon": 12.2627175
+  },
+  "tags": {
+    "building": "yes",
+    "craft": "agricultural_engines"
+  }
+},
+{
+  "type": "way",
+  "id": 265766307,
+  "center": {
+    "lat": 47.8729754,
+    "lon": 12.3359564
+  },
+  "tags": {
+    "addr:city": "Rimsting",
+    "addr:country": "DE",
+    "addr:housenumber": "5",
+    "addr:postcode": "83253",
+    "addr:street": "Paradiesstraße",
+    "building": "house",
+    "building:levels": "2",
+    "craft": "painter",
+    "name": "Steindlmüller",
+    "roof:shape": "gabled"
+  }
+},
+{
+  "type": "way",
+  "id": 265766332,
+  "center": {
+    "lat": 47.8687137,
+    "lon": 12.3327808
+  },
+  "tags": {
+    "addr:city": "Rimsting",
+    "addr:country": "DE",
+    "addr:housenumber": "1",
+    "addr:place": "Burgersdorf",
+    "addr:postcode": "83253",
+    "building": "warehouse",
+    "craft": "builder",
+    "name": "Frommwieser",
+    "phone": "+49 8051 965911-0",
+    "website": "https://www.frommwieser.com/"
+  }
+},
+{
+  "type": "way",
+  "id": 265822354,
+  "center": {
+    "lat": 47.8043188,
+    "lon": 12.2208037
+  },
+  "tags": {
+    "addr:city": "Rohrdorf",
+    "addr:country": "DE",
+    "addr:housenumber": "2",
+    "addr:postcode": "83101",
+    "addr:street": "Wendelsteinstraße",
+    "building": "yes",
+    "craft": "cabinet_maker",
+    "name": "Schreinerei Baumgartner",
+    "website": "https://www.schreinerei-baumgartner.net/"
+  }
+},
+{
+  "type": "way",
+  "id": 268113364,
+  "center": {
+    "lat": 47.8922941,
+    "lon": 12.3439304
+  },
+  "tags": {
+    "addr:city": "Rimsting",
+    "addr:country": "DE",
+    "addr:housenumber": "83",
+    "addr:postcode": "83253",
+    "addr:street": "Bahnhofstraße",
+    "building": "yes",
+    "check_date": "2026-05-27",
+    "craft": "metal_construction",
+    "name": "Serra Maschinenbau GmbH",
+    "source": "Bing"
+  }
+},
+{
+  "type": "way",
+  "id": 286309543,
+  "center": {
+    "lat": 47.8975245,
+    "lon": 12.2219788
+  },
+  "tags": {
+    "building": "industrial",
+    "building:levels": "2",
+    "craft": "mechanical_engineering",
+    "name": "Maschinenbau Dettendorfer",
+    "operator": "Maschinenbau Dettendorfer GmbH"
+  }
+},
+{
+  "type": "way",
+  "id": 292800197,
+  "center": {
+    "lat": 47.9043442,
+    "lon": 12.3014493
+  },
+  "tags": {
+    "building": "yes",
+    "carpenter": "cabinetmaker",
+    "craft": "carpenter",
+    "name": "Möbelschreinerei Feil",
+    "phone": "+4980537989985"
+  }
+},
+{
+  "type": "way",
+  "id": 296922023,
+  "center": {
+    "lat": 47.8000497,
+    "lon": 12.1125821
+  },
+  "tags": {
+    "addr:city": "Raubling",
+    "addr:country": "DE",
+    "addr:housenumber": "55",
+    "addr:postcode": "83064",
+    "addr:street": "Aschaffenburger Straße",
+    "building": "yes",
+    "craft": "print_shop",
+    "name": "Druckerei Viechter"
+  }
+},
+{
+  "type": "way",
+  "id": 307060293,
+  "center": {
+    "lat": 47.9151238,
+    "lon": 12.2321263
+  },
+  "tags": {
+    "building": "shed",
+    "craft": "beekeeper",
+    "operator": "Voggenauer; Reischasch 7, 83139 Söchtenau",
+    "phone": "+49 8036 7186"
+  }
+},
+{
+  "type": "way",
+  "id": 326163363,
+  "center": {
+    "lat": 47.7964641,
+    "lon": 11.9704620
+  },
+  "tags": {
+    "addr:city": "Bad Feilnbach",
+    "addr:country": "DE",
+    "addr:housenumber": "10",
+    "addr:postcode": "83075",
+    "addr:street": "Schmiedgasse",
+    "building": "yes",
+    "craft": "sawmill",
+    "name": "Eutermoser"
+  }
+},
+{
+  "type": "way",
+  "id": 326163384,
+  "center": {
+    "lat": 47.7972136,
+    "lon": 11.9681251
+  },
+  "tags": {
+    "addr:city": "Bad Feilnbach",
+    "addr:country": "DE",
+    "addr:housenumber": "18",
+    "addr:postcode": "83075",
+    "addr:street": "Achthaler Straße",
+    "building": "yes",
+    "craft": "sawmill",
+    "name": "Sägewerk Walter Wiesböck"
+  }
+},
+{
+  "type": "way",
+  "id": 326163460,
+  "center": {
+    "lat": 47.7963013,
+    "lon": 11.9655793
+  },
+  "tags": {
+    "addr:city": "Bad Feilnbach",
+    "addr:country": "DE",
+    "addr:housenumber": "41",
+    "addr:postcode": "83075",
+    "addr:street": "Schmiedgasse",
+    "building": "yes",
+    "craft": "sawmill",
+    "name": "Sägewerk und Holzhandlung Josef Pauls",
+    "opening_hours": "Mo-Th 07:00-17:00; Fr 07:00-12:00"
+  }
+},
+{
+  "type": "way",
+  "id": 326163502,
+  "center": {
+    "lat": 47.7937874,
+    "lon": 11.9694031
+  },
+  "tags": {
+    "addr:city": "Bad Feilnbach",
+    "addr:country": "DE",
+    "addr:housenumber": "9",
+    "addr:postcode": "83075",
+    "addr:street": "Am Breindlbach",
+    "building": "yes",
+    "craft": "stonemason",
+    "name": "Naturstein Mair",
+    "website": "https://www.naturstein-mair.de/"
+  }
+},
+{
+  "type": "way",
+  "id": 329057044,
+  "center": {
+    "lat": 47.9532519,
+    "lon": 12.0179307
+  },
+  "tags": {
+    "building": "yes",
+    "craft": "sawmill"
+  }
+},
+{
+  "type": "way",
+  "id": 329057059,
+  "center": {
+    "lat": 47.9533269,
+    "lon": 12.0183247
+  },
+  "tags": {
+    "building": "yes",
+    "craft": "sawmill"
+  }
+},
+{
+  "type": "way",
+  "id": 331314520,
+  "center": {
+    "lat": 47.9006955,
+    "lon": 12.2042595
+  },
+  "tags": {
+    "addr:city": "Prutting",
+    "addr:housenumber": "4",
+    "addr:postcode": "83134",
+    "addr:street": "Handwerkerstraße",
+    "building": "commercial",
+    "craft": "carpenter",
+    "name": "Walter Heinl Holzdesign",
+    "operator": "Walter Heinl",
+    "phone": "+49 8036 3030265",
+    "website": "https://www.schreiner-rosenheim.de/"
+  }
+},
+{
+  "type": "way",
+  "id": 333235283,
+  "center": {
+    "lat": 47.9069105,
+    "lon": 12.1835011
+  },
+  "tags": {
+    "addr:city": "Vogtareuth",
+    "addr:country": "DE",
+    "addr:housenumber": "2a",
+    "addr:place": "Untersee",
+    "addr:postcode": "83569",
+    "building": "yes",
+    "craft": "carpenter",
+    "name": "Zimmerei Brunner"
+  }
+},
+{
+  "type": "way",
+  "id": 333771689,
+  "center": {
+    "lat": 47.8731636,
+    "lon": 11.9548157
+  },
+  "tags": {
+    "addr:city": "Bruckmühl",
+    "addr:country": "DE",
+    "addr:housenumber": "11",
+    "addr:postcode": "83052",
+    "addr:street": "Gutenbergstraße",
+    "addr:suburb": "Heufeld",
+    "building": "office",
+    "craft": "plumber",
+    "email": "th@huber-versorgungstechnik.de",
+    "fax": "+49 8062 807 10 63",
+    "name": "Huber Versorgungstechnik GmbH",
+    "opening_hours": "Mo-Fr 07:15-12:00, Mo,Tu,Th 13:00-17:00; PH,Sa,Su off",
+    "phone": "+49 8062 807 02 72",
+    "website": "https://www.huber-versorgungstechnik.de/"
+  }
+},
+{
+  "type": "way",
+  "id": 333771698,
+  "center": {
+    "lat": 47.8730555,
+    "lon": 11.9550853
+  },
+  "tags": {
+    "addr:city": "Bruckmühl",
+    "addr:country": "DE",
+    "addr:housenumber": "13",
+    "addr:postcode": "83052",
+    "addr:street": "Gutenbergstraße",
+    "addr:suburb": "Heufeld",
+    "building": "office",
+    "craft": "builder",
+    "email": "info@mudrich.de",
+    "name": "Mudrich & Schöttl",
+    "opening_hours": "Mo-Th 07:00-17:00, Fr 07:00-12:00; PH,Sa,Su off",
+    "phone": "+49 8062 80 76 753",
+    "website": "https://mudrich.de/"
+  }
+},
+{
+  "type": "way",
+  "id": 333771701,
+  "center": {
+    "lat": 47.8728413,
+    "lon": 11.9524714
+  },
+  "tags": {
+    "addr:city": "Bruckmühl",
+    "addr:country": "DE",
+    "addr:housenumber": "4",
+    "addr:postcode": "83052",
+    "addr:street": "Gutenbergstraße",
+    "addr:suburb": "Heufeld",
+    "building": "office",
+    "craft": "musical_instrument",
+    "musical_instrument": "organ",
+    "name": "Orgelbau Eder",
+    "opening_hours": "Mo-Fr 08:00-17:00; PH,Sa,Su off"
+  }
+},
+{
+  "type": "way",
+  "id": 333771705,
+  "center": {
+    "lat": 47.8728391,
+    "lon": 11.9520457
+  },
+  "tags": {
+    "addr:city": "Bruckmühl",
+    "addr:country": "DE",
+    "addr:housenumber": "2",
+    "addr:postcode": "83052",
+    "addr:street": "Gutenbergstraße",
+    "addr:suburb": "Heufeld",
+    "building": "office",
+    "craft": "electrician",
+    "name": "Elektro Plank",
+    "phone": "+49 8062 13 03"
+  }
+},
+{
+  "type": "way",
+  "id": 345622493,
+  "center": {
+    "lat": 47.8753864,
+    "lon": 11.9626007
+  },
+  "tags": {
+    "addr:city": "Bruckmühl",
+    "addr:country": "DE",
+    "addr:housenumber": "7",
+    "addr:postcode": "83052",
+    "addr:street": "Pettenkoferstraße",
+    "building": "commercial",
+    "craft": "metal_construction",
+    "name": "Metallbau Walter GmbH",
+    "website": "https://www.metallbau-walter.info/"
+  }
+},
+{
+  "type": "way",
+  "id": 379813090,
+  "center": {
+    "lat": 47.8103843,
+    "lon": 12.3728643
+  },
+  "tags": {
+    "addr:city": "Bernau am Chiemsee",
+    "addr:housenumber": "6",
+    "addr:postcode": "83233",
+    "addr:street": "Mitterweg",
+    "building": "yes",
+    "check_date": "2023-08-26",
+    "craft": "dressmaker",
+    "description": "Maßschneiderei, Trachtenschneiderei, Änderungsschneiderei, Trachtenstoffe, Trachtengeschäft, Nähkurse, Dirndlnähkurse, Klosterarbeiten",
+    "name": "Chiemgauer Heimatwerk",
+    "opening_hours": "Mo-Fr 09:00-12:30,14:00-18:00; We 09:00-12:30",
+    "operator": "Gabriele Herrmann",
+    "phone": "+49 8051 964534",
+    "shop": "clothes",
+    "website": "http://www.chiem-heimatwerkgh.de",
+    "wheelchair": "no"
+  }
+},
+{
+  "type": "way",
+  "id": 388539056,
+  "center": {
+    "lat": 47.8261346,
+    "lon": 11.9675395
+  },
+  "tags": {
+    "addr:city": "Bad Feilnbach",
+    "addr:country": "DE",
+    "addr:housenumber": "3",
+    "addr:postcode": "83075",
+    "addr:street": "Oberfeld",
+    "addr:suburb": "Dettendorf",
+    "building": "commercial",
+    "craft": "bookbinder",
+    "email": "info@buchbinderei-schoettl.de",
+    "name": "Buchbinderei Schöttl GmbH",
+    "phone": "+49 8064 14 23",
+    "website": "https://www.buchbinderei-schoettl.de/"
+  }
+},
+{
+  "type": "way",
+  "id": 406313769,
+  "center": {
+    "lat": 47.9118804,
+    "lon": 12.1738719
+  },
+  "tags": {
+    "addr:city": "Vogtareuth",
+    "addr:housenumber": "2a",
+    "addr:postcode": "83569",
+    "addr:street": "Holzleiten",
+    "building": "yes",
+    "craft": "carpenter",
+    "name": "Holzbau Gehrmann"
+  }
+},
+{
+  "type": "way",
+  "id": 406380093,
+  "center": {
+    "lat": 47.9529327,
+    "lon": 12.2633146
+  },
+  "tags": {
+    "addr:city": "Halfing",
+    "addr:housenumber": "2",
+    "addr:postcode": "83128",
+    "addr:street": "Holzham",
+    "craft": "carpenter",
+    "landuse": "commercial",
+    "name": "Aicher Holzhaus",
+    "phone": "+49 8055 90510",
+    "website": "https://www.aicher-holzhaus.de/"
+  }
+},
+{
+  "type": "way",
+  "id": 411398097,
+  "center": {
+    "lat": 47.8754773,
+    "lon": 12.4268741
+  },
+  "tags": {
+    "addr:city": "Chiemsee",
+    "addr:country": "DE",
+    "addr:housenumber": "44b",
+    "addr:place": "Frauenchiemsee",
+    "addr:postcode": "83256",
+    "building": "yes",
+    "craft": "yes"
+  }
+},
+{
+  "type": "way",
+  "id": 421135974,
+  "center": {
+    "lat": 48.0086585,
+    "lon": 12.1704485
+  },
+  "tags": {
+    "building": "yes",
+    "craft": "coffee_roaster",
+    "email": "info@modest-kaffeeroesterei.de",
+    "fax": "+49 8039 9088242",
+    "name": "Kaffeerösterei Modest",
+    "opening_hours": "Mo-Su,PH 12:00-16:00",
+    "organic": "yes",
+    "phone": "+49 8039 9084383",
+    "shop": "coffee",
+    "website": "https://www.modest-kaffeeroesterei.de/"
+  }
+},
+{
+  "type": "way",
+  "id": 435516394,
+  "center": {
+    "lat": 47.8990632,
+    "lon": 12.0911736
+  },
+  "tags": {
+    "addr:city": "Großkarolinenfeld",
+    "addr:country": "DE",
+    "addr:housenumber": "3",
+    "addr:postcode": "83109",
+    "addr:street": "Gewerbering-Nord",
+    "building": "yes",
+    "craft": "joiner",
+    "name": "Reichelt GmbH",
+    "source": "Bayern (80 cm)",
+    "source:addr": "survey"
+  }
+},
+{
+  "type": "way",
+  "id": 451626062,
+  "center": {
+    "lat": 47.6891149,
+    "lon": 12.0389565
+  },
+  "tags": {
+    "building": "yes",
+    "craft": "beekeeper"
+  }
+},
+{
+  "type": "way",
+  "id": 453607039,
+  "center": {
+    "lat": 48.0456814,
+    "lon": 12.2147081
+  },
+  "tags": {
+    "addr:city": "Wasserburg am Inn",
+    "addr:country": "DE",
+    "addr:postcode": "83512",
+    "addr:street": "Am Herder",
+    "building": "house",
+    "craft": "gardener",
+    "name": "Blumen Posch",
+    "shop": "florist"
+  }
+},
+{
+  "type": "way",
+  "id": 461202394,
+  "center": {
+    "lat": 48.0548017,
+    "lon": 12.2245571
+  },
+  "tags": {
+    "addr:city": "Wasserburg am Inn",
+    "addr:country": "DE",
+    "addr:housenumber": "2",
+    "addr:postcode": "83512",
+    "addr:street": "Georgstraße",
+    "building": "house",
+    "craft": "sun_protection",
+    "name": "RS Reiser",
+    "operator": "Rollladen + Sonnenschutz Reiser"
+  }
+},
+{
+  "type": "way",
+  "id": 468425325,
+  "center": {
+    "lat": 48.0551497,
+    "lon": 12.2226578
+  },
+  "tags": {
+    "addr:city": "Wasserburg am Inn",
+    "addr:country": "DE",
+    "addr:housenumber": "10",
+    "addr:postcode": "83512",
+    "addr:street": "Brunhuberstraße",
+    "building": "yes",
+    "craft": "hvac",
+    "name": "Edl Roland",
+    "operator": "Edl Roland GmbH"
+  }
+},
+{
+  "type": "way",
+  "id": 477282868,
+  "center": {
+    "lat": 47.7636725,
+    "lon": 12.3241815
+  },
+  "tags": {
+    "addr:city": "Aschau im Chiemgau",
+    "addr:housenumber": "96a",
+    "addr:postcode": "83229",
+    "addr:street": "Kampenwandstraße",
+    "building": "commercial",
+    "building:levels": "1",
+    "craft": "blacksmith",
+    "description": "Damaszenerschmiede und Werkstattladen",
+    "name": "Messer Werk",
+    "opening_hours:signed": "no",
+    "roof:levels": "1",
+    "roof:shape": "gabled",
+    "shop": "knives"
+  }
+},
+{
+  "type": "way",
+  "id": 479181090,
+  "center": {
+    "lat": 47.8527015,
+    "lon": 12.1854750
+  },
+  "tags": {
+    "craft": "builder",
+    "landuse": "industrial",
+    "name": "Peter Holzner Bauunternehmen"
+  }
+},
+{
+  "type": "way",
+  "id": 521639171,
+  "center": {
+    "lat": 47.9971882,
+    "lon": 12.1761460
+  },
+  "tags": {
+    "addr:city": "Griesstätt",
+    "addr:housenumber": "35",
+    "addr:postcode": "83556",
+    "addr:street": "Kirchmaierstraße",
+    "building": "commercial",
+    "building:levels": "2",
+    "craft": "scaffolder",
+    "name": "AP Gerüstbau GmbH",
+    "smoking": "outside"
+  }
+},
+{
+  "type": "way",
+  "id": 533215161,
+  "center": {
+    "lat": 47.9913662,
+    "lon": 12.1790782
+  },
+  "tags": {
+    "addr:housenumber": "25",
+    "addr:street": "Rosenheimer Straße",
+    "building": "yes",
+    "craft": "photographer"
+  }
+},
+{
+  "type": "way",
+  "id": 537334406,
+  "center": {
+    "lat": 47.9286470,
+    "lon": 12.1964960
+  },
+  "tags": {
+    "addr:city": "Vogtareuth",
+    "addr:country": "DE",
+    "addr:housenumber": "2",
+    "addr:postcode": "83569",
+    "addr:street": "Rackerting",
+    "building": "house",
+    "craft": "tinsmith",
+    "name": "Spenglerei Roß",
+    "website": "https://www.spenglerei-ross.de/"
+  }
+},
+{
+  "type": "way",
+  "id": 572872851,
+  "center": {
+    "lat": 47.9845616,
+    "lon": 12.1233352
+  },
+  "tags": {
+    "addr:city": "Rott am Inn",
+    "addr:country": "DE",
+    "addr:housenumber": "10",
+    "addr:postcode": "83543",
+    "addr:street": "Am Langacker",
+    "building": "yes",
+    "craft": "joiner",
+    "name": "Schreinerei Senega",
+    "opening_hours": "Mo-Th 08:00-17:00",
+    "website": "https://schreinerei-senega.de/"
+  }
+},
+{
+  "type": "way",
+  "id": 649223241,
+  "center": {
+    "lat": 47.9408668,
+    "lon": 11.8591176
+  },
+  "tags": {
+    "addr:city": "Feldkirchen-Westerham",
+    "addr:housenumber": "26",
+    "addr:place": "Unterlaus",
+    "addr:postcode": "83620",
+    "building": "yes",
+    "craft": "joiner",
+    "name": "Schreinerei Anton J. Kiesl",
+    "website": "https://www.schreinerei-kiesl.de/"
+  }
+},
+{
+  "type": "way",
+  "id": 658271932,
+  "center": {
+    "lat": 48.0489934,
+    "lon": 12.2393813
+  },
+  "tags": {
+    "building": "yes",
+    "craft": "joiner",
+    "name": "Stemmer Holz"
+  }
+},
+{
+  "type": "way",
+  "id": 677631661,
+  "center": {
+    "lat": 47.8773231,
+    "lon": 11.9622412
+  },
+  "tags": {
+    "addr:city": "Bruckmühl",
+    "addr:country": "DE",
+    "addr:housenumber": "19a",
+    "addr:postcode": "83052",
+    "addr:street": "Pettenkoferstraße",
+    "addr:suburb": "Heufeld",
+    "building": "commercial",
+    "craft": "carpenter",
+    "email": "info@holzbau-schnitzenbaumer.de",
+    "fax": "+49 8061 93 76 961",
+    "name": "Schnitzenbaumer GmbH",
+    "operator": "Marcus Schnitzenbaumer",
+    "phone": "+49 8061 93 76 960",
+    "website": "https://www.holzbau-schnitzenbaumer.de/"
+  }
+},
+{
+  "type": "way",
+  "id": 715549102,
+  "center": {
+    "lat": 47.9874602,
+    "lon": 12.1405164
+  },
+  "tags": {
+    "addr:city": "Rott am Inn",
+    "addr:country": "DE",
+    "addr:housenumber": "18",
+    "addr:postcode": "83543",
+    "addr:street": "Am Eckfeld",
+    "building": "industrial",
+    "contact:email": "info@confiserie-dengel.de",
+    "contact:phone": "+49 8039 9015060",
+    "contact:website": "https://confiserie-dengel.de",
+    "craft": "confectionery",
+    "name": "Confiserie Dengel",
+    "operator": "Confiserie Dengel"
+  }
+},
+{
+  "type": "way",
+  "id": 726918746,
+  "center": {
+    "lat": 48.0783032,
+    "lon": 12.0977604
+  },
+  "tags": {
+    "building": "yes",
+    "craft": "hvac",
+    "name": "Borrelli",
+    "operator": "Borrelli Reinigungssysteme Wärme- und Klimatechnik"
+  }
+},
+{
+  "type": "way",
+  "id": 726918751,
+  "center": {
+    "lat": 48.0788128,
+    "lon": 12.0979482
+  },
+  "tags": {
+    "building": "yes",
+    "craft": "gardener",
+    "name": "Steinbauer",
+    "operator": "Garten- und Landschaftsbau Steinbauer GmbH"
+  }
+},
+{
+  "type": "way",
+  "id": 744315012,
+  "center": {
+    "lat": 47.9502331,
+    "lon": 12.2750260
+  },
+  "tags": {
+    "building": "shop",
+    "contact:email": "info@fliesen-froehler.de",
+    "contact:phone": "+49 8055 9039550",
+    "contact:website": "http://fliesen-froehler.de",
+    "craft": "tiler",
+    "name": "Hermann Fröhler Fliesen- & Natursteinverlegung"
+  }
+},
+{
+  "type": "way",
+  "id": 757354794,
+  "center": {
+    "lat": 47.7890328,
+    "lon": 11.9647971
+  },
+  "tags": {
+    "building": "yes",
+    "craft": "joiner",
+    "name": "Martin Impler GmbH"
+  }
+},
+{
+  "type": "way",
+  "id": 757354797,
+  "center": {
+    "lat": 47.7882920,
+    "lon": 11.9641241
+  },
+  "tags": {
+    "building": "yes",
+    "craft": "joiner",
+    "name": "Martin Impler"
+  }
+},
+{
+  "type": "way",
+  "id": 765595207,
+  "center": {
+    "lat": 47.8615766,
+    "lon": 12.0019112
+  },
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "4",
+    "addr:postcode": "83043",
+    "addr:street": "Lagerhausstraße",
+    "building": "commercial",
+    "building:levels": "2",
+    "craft": "metal_construction",
+    "email": "info@schunk-maschinenbau.de",
+    "fax": "+49 8061 36 146",
+    "name": "Schunk Maschinenbau",
+    "phone": "+49 8061 25 31",
+    "roof:levels": "1",
+    "website": "https://schunk-maschinenbau.de"
+  }
+},
+{
+  "type": "way",
+  "id": 775103783,
+  "center": {
+    "lat": 47.9302246,
+    "lon": 12.3863263
+  },
+  "tags": {
+    "addr:city": "Eggstätt",
+    "addr:country": "DE",
+    "addr:housenumber": "32",
+    "addr:postcode": "83125",
+    "addr:street": "Seeoner Straße",
+    "building": "yes",
+    "building:levels": "0",
+    "contact:email": "info@hoefer-gartenbau.de",
+    "contact:phone": "+49 8056 902 66 57",
+    "contact:website": "https://www.hoefer-kraftorte.de/",
+    "craft": "gardener",
+    "description": "Planung, Neu- und Umgestaltung, Holzarbeiten, Obstbaumschnitt vom zertifizierten Fachmann, Gartenpflege, Pflaster- und Steinarbeiten, Wasser- und Teichanlagen, Pflanzarbeiten",
+    "name": "Höfer Gartenbau",
+    "opening_hours": "\"nach Vereinbarung\"",
+    "operator": "Georg Höfer"
+  }
+},
+{
+  "type": "way",
+  "id": 785187933,
+  "center": {
+    "lat": 47.9101219,
+    "lon": 12.3644650
+  },
+  "tags": {
+    "building": "cabin",
+    "craft": "beekeeper"
+  }
+},
+{
+  "type": "way",
+  "id": 808562433,
+  "center": {
+    "lat": 47.9309307,
+    "lon": 12.3200686
+  },
+  "tags": {
+    "building": "cabin",
+    "craft": "beekeeper"
+  }
+},
+{
+  "type": "way",
+  "id": 808562434,
+  "center": {
+    "lat": 47.9308846,
+    "lon": 12.3200476
+  },
+  "tags": {
+    "building": "cabin",
+    "craft": "beekeeper"
+  }
+},
+{
+  "type": "way",
+  "id": 815605781,
+  "center": {
+    "lat": 47.7960743,
+    "lon": 12.2430607
+  },
+  "tags": {
+    "building": "yes",
+    "craft": "sawmill"
+  }
+},
+{
+  "type": "way",
+  "id": 825461848,
+  "center": {
+    "lat": 48.0261958,
+    "lon": 12.2907713
+  },
+  "tags": {
+    "addr:city": "Amerang",
+    "addr:country": "DE",
+    "addr:housenumber": "14",
+    "addr:postcode": "83123",
+    "addr:street": "Forststraße",
+    "addr:suburb": "Evenhausen",
+    "building": "yes",
+    "craft": "metal_construction",
+    "name": "Metallbau Schürrle"
+  }
+},
+{
+  "type": "way",
+  "id": 837595269,
+  "center": {
+    "lat": 47.9919162,
+    "lon": 12.1262758
+  },
+  "tags": {
+    "addr:city": "Rott am Inn",
+    "addr:country": "DE",
+    "addr:housenumber": "10",
+    "addr:place": "Meiling",
+    "addr:postcode": "83543",
+    "addr:suburb": "Meiling",
+    "building": "yes",
+    "craft": "joiner",
+    "image": "https://schreinerei-sedlmeier.de/wp-content/uploads/2016/10/Sedlmeier_logo_braun-300x100.png",
+    "name": "Schreinerei Günther Sedlmeier",
+    "opening_hours": "Mo-Fr 08:00-17:00",
+    "operator": "Günther Sedlmeier",
+    "phone": "+4980391281",
+    "website": "https://schreinerei-sedlmeier.de/"
+  }
+},
+{
+  "type": "way",
+  "id": 1010541684,
+  "center": {
+    "lat": 47.8700374,
+    "lon": 11.9852672
+  },
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "6",
+    "addr:postcode": "83043",
+    "addr:street": "Gewerbepark Markfeld",
+    "craft": "carbon_construction",
+    "email": "info@c-matrixx.de",
+    "fax": "+49 8061 938 47 10",
+    "man_made": "works",
+    "name": "C-Matrixx Carbontechnik",
+    "phone": "+49 8061 938 47 0",
+    "website": "https://www.c-matrixx.de"
+  }
+},
+{
+  "type": "way",
+  "id": 1037702879,
+  "center": {
+    "lat": 47.8463646,
+    "lon": 12.0460239
+  },
+  "tags": {
+    "addr:city": "Kolbermoor",
+    "addr:country": "DE",
+    "addr:housenumber": "2a",
+    "addr:postcode": "83059",
+    "addr:street": "Zugspitzstraße",
+    "building": "yes",
+    "craft": "plumber"
+  }
+},
+{
+  "type": "way",
+  "id": 1040154266,
+  "center": {
+    "lat": 47.7733302,
+    "lon": 12.0012475
+  },
+  "tags": {
+    "building": "yes",
+    "craft": "beekeeper"
+  }
+},
+{
+  "type": "way",
+  "id": 1280087628,
+  "center": {
+    "lat": 47.8781060,
+    "lon": 11.9945765
+  },
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "69",
+    "addr:postcode": "83043",
+    "addr:street": "Ebersberger Straße",
+    "craft": "metal_construction",
+    "email": "info@werkzeugbau-kneifel.de",
+    "fax": "+49 8061 4999 48",
+    "landuse": "industrial",
+    "name": "Kneifel Werkzeugbau GmbH",
+    "phone": "+49 8061 4999 0",
+    "website": "https://www.werkzeugbau-kneifel.de/"
+  }
+},
+{
+  "type": "way",
+  "id": 1284086247,
+  "center": {
+    "lat": 47.8921252,
+    "lon": 11.9145756
+  },
+  "tags": {
+    "building": "commercial",
+    "craft": "plumber",
+    "email": "office@anton-stahuber.de",
+    "name": "Stahuber",
+    "operator": "Anton Stahuber",
+    "phone": "+49 8062 1478; +49 8062 79911",
+    "website": "https://www.anton-stahuber.de/"
+  }
+},
+{
+  "type": "way",
+  "id": 1298072682,
+  "center": {
+    "lat": 47.8787061,
+    "lon": 11.9261274
+  },
+  "tags": {
+    "addr:city": "Bruckmühl",
+    "addr:country": "DE",
+    "addr:housenumber": "28-30",
+    "addr:postcode": "83052",
+    "addr:street": "Rösnerstraße",
+    "craft": "stonemason",
+    "email": "mail@marmorgranitrinser.de",
+    "fax": "+49 8062 804 934",
+    "man_made": "works",
+    "name": "Marmor & Granit Werk Rinser Bruckmühl",
+    "opening_hours": "Mo-Fr 08:00-12:00, Mo-Th 13:00-17:00; Sa,Su,PH off",
+    "phone": "+49 8062 804 933",
+    "website": "https://marmorgranitrinser.de/"
+  }
+},
+{
+  "type": "way",
+  "id": 1304205704,
+  "center": {
+    "lat": 47.8768664,
+    "lon": 11.9737080
+  },
+  "tags": {
+    "addr:city": "Bruckmühl",
+    "addr:country": "DE",
+    "addr:housenumber": "9",
+    "addr:postcode": "83052",
+    "addr:street": "Münchener Straße",
+    "addr:suburb": "Heufeld",
+    "craft": "window_construction",
+    "email": "info@wolf-fenster.de",
+    "industrial": "factory",
+    "landuse": "industrial",
+    "name": "Fenster Türen Wolf",
+    "operator": "Schreinerei Engelbert Wolf GmbH",
+    "phone": "+49 8061 90 70 0",
+    "website": "https://www.wolf-fenster.de/"
+  }
+},
+{
+  "type": "way",
+  "id": 1304434602,
+  "center": {
+    "lat": 47.8719074,
+    "lon": 11.9827138
+  },
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "3a",
+    "addr:postcode": "83043",
+    "addr:street": "Gewerbepark Markfeld",
+    "craft": "construction_engines",
+    "man_made": "works",
+    "name": "Wacker Neuson",
+    "opening_hours": "Mo-Th 07:00-17:00; Fr 07:00-16:00; PH off",
+    "phone": "+49 8061 350 500",
+    "service": "repair;parts;tyres;electrical;body",
+    "website": "https://www.wackerneuson.de/"
+  }
+},
+{
+  "type": "way",
+  "id": 1304434603,
+  "center": {
+    "lat": 47.8711328,
+    "lon": 11.9848957
+  },
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "7",
+    "addr:postcode": "83043",
+    "addr:street": "Gewerbepark Markfeld",
+    "addr:suburb": "Markfeld",
+    "craft": "builder",
+    "email": "info@schwaiger-bau.de",
+    "fax": "+49 8061 49 510 10",
+    "industrial": "depot",
+    "man_made": "works",
+    "name": "Schwaiger Bau",
+    "opening_hours": "Mo-Th 07:30-17:00; Fr 07:30-13:00; PH off",
+    "phone": "+49 8061 49 510 0",
+    "website": "https://schwaiger-bau.de/"
+  }
+},
+{
+  "type": "way",
+  "id": 1304434604,
+  "center": {
+    "lat": 47.8706342,
+    "lon": 11.9863945
+  },
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "9",
+    "addr:postcode": "83043",
+    "addr:street": "Gewerbepark Markfeld",
+    "addr:suburb": "Markfeld",
+    "craft": "sun_protection",
+    "email": "info@folgner-rolladen.de",
+    "fax": "+49 8061 93 60 50",
+    "man_made": "works",
+    "name": "Folgner GmbH",
+    "opening_hours": "Mo-Fr 07:30-12:00, Mo-Th 13:00-17:00; Sa,PH off",
+    "phone": "+49 8061 93 60 0",
+    "product": "sun_protection",
+    "website": "https://www.folgner-rolladen.de/"
+  }
+},
+{
+  "type": "way",
+  "id": 1304434605,
+  "center": {
+    "lat": 47.8692295,
+    "lon": 11.9847898
+  },
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "10",
+    "addr:postcode": "83043",
+    "addr:street": "Gewerbepark Markfeld",
+    "addr:suburb": "Markfeld",
+    "building:levels": "2",
+    "building:part": "warehouse",
+    "craft": "high_pressure_cleaner",
+    "email": "falch-muenchen@falch.com",
+    "height": "5",
+    "name": "falch",
+    "phone": "+49 8061 939 79 78",
+    "website": "https://www.falch.com/de/company/company-tour/falch-competence-center/competence-center-muenchen"
+  }
+},
+{
+  "type": "way",
+  "id": 1304434607,
+  "center": {
+    "lat": 47.8685113,
+    "lon": 11.9856428
+  },
+  "tags": {
+    "addr:city": "Bad Aibling",
+    "addr:country": "DE",
+    "addr:housenumber": "15",
+    "addr:postcode": "83043",
+    "addr:street": "Gewerbepark Markfeld",
+    "craft": "carpenter",
+    "fax": "+49 8061 93 707 11",
+    "man_made": "works",
+    "name": "Holzbau Glas",
+    "phone": "+49 8061 93 707 10",
+    "product": "house",
+    "website": "https://www.holzbau-glas.de"
+  }
+},
+{
+  "type": "way",
+  "id": 1306575070,
+  "center": {
+    "lat": 47.8728747,
+    "lon": 11.9530239
+  },
+  "tags": {
+    "addr:city": "Bruckmühl",
+    "addr:country": "DE",
+    "addr:housenumber": "4a",
+    "addr:postcode": "83052",
+    "addr:street": "Gutenbergstraße",
+    "addr:suburb": "Heufeld",
+    "building": "warehouse",
+    "craft": "signmaker",
+    "name": "Winkler Reklamebau",
+    "opening_hours": "Mo-Fr 09:00-17:00; PH,Sa,Su off",
+    "phone": "+49 8062 800 595",
+    "website": "http://winkler-reklamebau.de/"
+  }
+},
+{
+  "type": "way",
+  "id": 1493809179,
+  "center": {
+    "lat": 47.8486397,
+    "lon": 12.0150426
+  },
+  "tags": {
+    "addr:city": "Kolbermoor",
+    "addr:country": "DE",
+    "addr:housenumber": "4b",
+    "addr:place": "Pullach",
+    "addr:postcode": "83059",
+    "building": "warehouse",
+    "craft": "metal_construction",
+    "email": "info@towa-tec.de",
+    "fax": "+49 8061 350 50 86",
+    "name": "ToWaTec GmbH",
+    "opening_hours": "Mo-Th 08:30-16:00, Fr 08:30-12:30; PH,Sa,Su off",
+    "phone": "+49 8061 350 50 81",
+    "website": "https://www.towa-tec.de/",
+    "wheelchair": "yes"
+  }
+}
+
+  ]
+}
