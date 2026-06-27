@@ -15,7 +15,6 @@ import {
 import {
   approveClaim as approveClaimAction,
   approveResearchCandidate as approveResearchCandidateAction,
-  approveSubmission as approveSubmissionAction,
   createCompany as createCompanyAction,
   deleteCompany as deleteCompanyAction,
   deletePlannerContact as deletePlannerContactAction,
@@ -29,6 +28,7 @@ import {
 } from "@/lib/actions/approval-required";
 import { submitBusinessEntry as submitBusinessEntryAction } from "@/lib/actions/business-entry";
 import { submitClaim as submitClaimAction } from "@/lib/actions/claims";
+import { approveSubmission as approveSubmissionAction } from "@/lib/actions/submissions";
 import { parseTradeName } from "@/lib/validation";
 
 export async function importPlannerContacts(

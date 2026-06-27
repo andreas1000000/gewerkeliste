@@ -23,6 +23,7 @@ export default async function SubmissionDetailPage({ params, searchParams }: Pag
     const submission = await getCompanySubmission(id);
     const duplicates = await getSubmissionDuplicates(submission);
     const approvedSlug = typeof query.approved === "string" ? query.approved : null;
+    const errorMessage = typeof query.error === "string" ? query.error : null;
     const media = await getSubmissionMedia(submission);
 
     return (
@@ -46,6 +47,12 @@ export default async function SubmissionDetailPage({ params, searchParams }: Pag
             <Link className="ml-1 underline" href={`/firma/${approvedSlug}` as Route}>
               Profil ansehen
             </Link>
+          </div>
+        ) : null}
+
+        {errorMessage ? (
+          <div className="mb-6 rounded-lg border border-[#f0b4b4] bg-[#fff5f5] p-4 text-sm font-semibold text-[#8a1f1f]">
+            Freigabe nicht abgeschlossen: {errorMessage}
           </div>
         ) : null}
 
