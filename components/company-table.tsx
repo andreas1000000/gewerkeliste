@@ -34,7 +34,9 @@ export function CompanyTable({ companies }: { companies: CompanyWithTrade[] }) {
                   <div className="font-semibold text-ink">{company.name}</div>
                   <div className="mt-1 max-w-md text-sm text-muted">{company.description}</div>
                 </td>
-                <td className="px-4 py-4 text-ink">{company.trades?.name || "Ohne Gewerk"}</td>
+                <td className="px-4 py-4 text-ink">
+                  <TradeTags company={company} />
+                </td>
                 <td className="px-4 py-4">
                   <div className="font-medium text-ink">{company.city}</div>
                   <div className="text-muted">{company.postal_code}</div>
@@ -70,6 +72,38 @@ export function CompanyTable({ companies }: { companies: CompanyWithTrade[] }) {
           </tbody>
         </table>
       </div>
+    </div>
+  );
+}
+
+function TradeTags({ company }: { company: CompanyWithTrade }) {
+  const tradeMap = new Map<string, { name: string; confidence: number }>();
+
+  if (company.trades) {
+    tradeMap.set(company.trades.id, { name: company.trades.name, confidence: 100 });
+  }
+
+  for (const relation of company.company_trades || []) {
+    const trade = relation.trades;
+    if (!trade || relation.status === "rejected") continue;
+    if (relation.visibility_level === "internal") continue;
+    tradeMap.set(trade.id, {
+      name: trade.name,
+      confidence: relation.confidence_score || 0,
+    });
+  }
+
+  const trades = [...tradeMap.values()].sort((a, b) => b.confidence - a.confidence || a.name.localeCompare(b.name, "de"));
+
+  if (trades.length === 0) return <span className="text-muted">Ohne Gewerk</span>;
+
+  return (
+    <div className="flex max-w-sm flex-wrap gap-1.5">
+      {trades.map((trade) => (
+        <span key={trade.name} className="rounded-full border border-line bg-panel px-2 py-1 text-xs font-semibold text-ink">
+          {trade.name}
+        </span>
+      ))}
     </div>
   );
 }

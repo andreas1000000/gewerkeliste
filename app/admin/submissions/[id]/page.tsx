@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { Shell } from "@/components/shell";
 import { approveSubmission, setSubmissionStatus, updateSubmission } from "@/lib/actions";
 import { getCompanySubmission, getSubmissionDuplicates } from "@/lib/data";
+import { getSupabaseAdmin } from "@/lib/supabase";
 import { tradeTaxonomy } from "@/lib/trade-taxonomy";
 import type { CompanySubmission } from "@/lib/types";
 
@@ -22,6 +23,7 @@ export default async function SubmissionDetailPage({ params, searchParams }: Pag
     const submission = await getCompanySubmission(id);
     const duplicates = await getSubmissionDuplicates(submission);
     const approvedSlug = typeof query.approved === "string" ? query.approved : null;
+    const media = await getSubmissionMedia(submission);
 
     return (
       <Shell>
@@ -92,6 +94,40 @@ export default async function SubmissionDetailPage({ params, searchParams }: Pag
               <Data label="Funktion" value={submission.contact_role} />
               <Data label="E-Mail" value={submission.contact_person_email} />
               <Data label="Telefon" value={submission.contact_person_phone} />
+            </ReadSection>
+
+            <ReadSection title="Medien zur Prüfung">
+              <div className="grid gap-4 md:grid-cols-2">
+                <MediaPreview
+                  alt={`${submission.company_name} Firmenlogo`}
+                  emptyText="Kein Firmenlogo hochgeladen."
+                  label="Firmenlogo"
+                  note="Logo kann nach fachlicher Prüfung in den öffentlichen Betriebseintrag übernommen werden."
+                  src={media.logo.previewUrl}
+                  storedValue={submission.logo_url}
+                  status={submission.logo_url ? "Neu hochgeladen" : "Nicht vorhanden"}
+                />
+                <MediaPreview
+                  alt={submission.profile_image_alt || `${submission.company_name} Ansprechpartnerbild`}
+                  emptyText="Kein Ansprechpartnerbild hochgeladen."
+                  label="Ansprechpartnerbild / Kontaktbild"
+                  note="Personenbild nur veröffentlichen, wenn Berechtigung und Zustimmung plausibel sind. Nicht automatisch bei unbestätigten Basisprofilen anzeigen."
+                  src={media.profileImage.previewUrl}
+                  storedValue={submission.profile_image_url}
+                  status={submission.profile_image_url ? "Zur Prüfung" : "Nicht vorhanden"}
+                />
+              </div>
+              <div className="rounded-md border border-line bg-panel p-4 text-xs leading-5 text-muted">
+                <div className="font-semibold text-ink">Datenschutz-Hinweis</div>
+                <p className="mt-1">
+                  Firmenlogo und Ansprechpartnerbild wurden vom Einreicher hochgeladen. Ein Ansprechpartnerbild ist
+                  personenbezogen und darf erst nach plausibler Berechtigung/Zustimmung öffentlich verwendet werden.
+                </p>
+                <p className="mt-2">
+                  Zustimmung laut Formular: {submission.image_consent_given ? "ja" : "nein"}
+                  {submission.image_consent_timestamp ? ` · ${formatDate(submission.image_consent_timestamp)}` : ""}
+                </p>
+              </div>
             </ReadSection>
 
             <ReadSection title="Standort">
@@ -258,6 +294,67 @@ function TagList({ label, items }: { label: string; items: string[] }) {
       </div>
     </div>
   );
+}
+
+function MediaPreview({
+  alt,
+  emptyText,
+  label,
+  note,
+  src,
+  storedValue,
+  status,
+}: {
+  alt: string;
+  emptyText: string;
+  label: string;
+  note: string;
+  src?: string | null;
+  storedValue?: string | null;
+  status: string;
+}) {
+  return (
+    <div className="rounded-md border border-line bg-[#fbfcff] p-4">
+      <div className="flex items-center justify-between gap-3">
+        <div className="text-sm font-semibold text-ink">{label}</div>
+        <span className="rounded-full border border-line bg-white px-2 py-1 text-xs font-semibold text-muted">{status}</span>
+      </div>
+      {src ? (
+        <>
+          <a className="mt-3 block overflow-hidden rounded-md border border-line bg-white" href={src} rel="noreferrer" target="_blank">
+            <img alt={alt} className="h-44 w-full object-contain p-3" src={src} />
+          </a>
+          <div className="mt-2 break-all text-xs text-muted">{storedValue || src}</div>
+        </>
+      ) : (
+        <div className="mt-3 rounded-md border border-dashed border-line bg-white px-4 py-8 text-center text-sm text-muted">
+          {emptyText}
+        </div>
+      )}
+      <p className="mt-3 text-xs leading-5 text-muted">{note}</p>
+    </div>
+  );
+}
+
+async function getSubmissionMedia(submission: CompanySubmission) {
+  const [logo, profileImage] = await Promise.all([
+    resolveSubmissionMedia(submission.logo_url),
+    resolveSubmissionMedia(submission.profile_image_url),
+  ]);
+
+  return { logo, profileImage };
+}
+
+async function resolveSubmissionMedia(value: string | null) {
+  if (!value) return { previewUrl: null as string | null };
+  if (/^https?:\/\//i.test(value)) return { previewUrl: value };
+
+  const supabase = getSupabaseAdmin();
+  const path = value.replace(/^company-media\//, "");
+  const { data, error } = await supabase.storage.from("company-media").createSignedUrl(path, 60 * 60);
+  if (error || !data?.signedUrl) return { previewUrl: null as string | null };
+
+  return { previewUrl: data.signedUrl };
 }
 
 function InfoCard({ title, value }: { title: string; value: string }) {

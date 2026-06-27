@@ -407,7 +407,13 @@ function CheckFact({ value }: { value: string }) {
 function getExecutedTrades(company: PublicCompanyWithTrade) {
   const tradeNames = [
     ...(company.company_trades || [])
-      .filter((match) => (match.confidence_score || 0) >= 70)
+      .filter(
+        (match) =>
+          (match.confidence_score || 0) >= 70 &&
+          match.status !== "rejected" &&
+          match.visibility_level !== "internal" &&
+          Boolean(match.trades?.name),
+      )
       .sort((a, b) => (b.confidence_score || 0) - (a.confidence_score || 0))
       .map((match) => match.trades?.name),
     company.trades?.name,

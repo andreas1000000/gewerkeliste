@@ -32,6 +32,13 @@ export type Company = {
 
 export type CompanyWithTrade = Company & {
   trades: Pick<Trade, "id" | "name" | "slug"> | null;
+  company_trades?: Array<{
+    id: string;
+    confidence_score: number | null;
+    status: string | null;
+    visibility_level: string | null;
+    trades: Pick<Trade, "id" | "name" | "slug"> | null;
+  }> | null;
 };
 
 export type CompanyTradeMatch = {
@@ -82,6 +89,13 @@ export type CompanySubmission = {
   contact_role: string | null;
   contact_person_email: string | null;
   contact_person_phone: string | null;
+  logo_url: string | null;
+  profile_image_url: string | null;
+  profile_image_alt: string | null;
+  contact_person_name: string | null;
+  contact_person_role: string | null;
+  image_consent_given: boolean;
+  image_consent_timestamp: string | null;
   street: string | null;
   house_number: string | null;
   postal_code: string;

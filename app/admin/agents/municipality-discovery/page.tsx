@@ -14,11 +14,12 @@ export default async function MunicipalityDiscoveryPage() {
     <Shell>
       <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div>
-          <p className="text-sm font-semibold uppercase tracking-normal text-brand">Municipality Discovery Agent</p>
-          <h1 className="mt-2 text-3xl font-semibold text-ink">Gemeinde starten</h1>
+          <p className="text-sm font-semibold uppercase tracking-normal text-brand">Gemeinde-Agent</p>
+          <h1 className="mt-2 text-3xl font-semibold text-ink">Region kontrolliert bearbeiten</h1>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-muted">
-            Starte einen kontrollierten Agentenlauf fuer eine Gemeinde. Der Agent nutzt vorhandene Kandidaten, klassifiziert Tier A/B/C,
-            erzeugt Review Items, Freigaben oder begrenzte unbestaetigte Basis-Eintraege. E-Mails werden nie automatisch gesendet.
+            Starte einen kontrollierten Lauf fuer eine Gemeinde. Der Agent nutzt vorhandene Kandidaten, ordnet sie nach
+            Datenqualitaet ein und erzeugt Review Items, Freigaben oder begrenzte unbestaetigte Basis-Eintraege.
+            E-Mails werden nicht automatisch gesendet.
           </p>
         </div>
         <Link className="w-fit rounded-md border border-line bg-white px-4 py-2 text-sm font-semibold text-ink hover:bg-panel" href="/admin/agents">
@@ -42,53 +43,53 @@ export default async function MunicipalityDiscoveryPage() {
             <Field label="Landkreis / Region">
               <input className="mt-1 w-full rounded-md border border-line px-3 py-2 text-sm outline-none focus:border-brand" defaultValue="Landkreis Rosenheim" name="county" />
             </Field>
-            <Field label="Gewerke-Scope">
+            <Field help="Begrenzt den Lauf auf die wichtigsten Gewerke oder ein einzelnes Gewerk." label="Gewerke-Auswahl">
               <select className="mt-1 w-full rounded-md border border-line px-3 py-2 text-sm outline-none focus:border-brand" defaultValue="prio1" name="trade_scope">
-                <option value="prio1">Prio 1 Gewerke</option>
-                <option value="all">Alle gespeicherten Kandidaten</option>
+                <option value="prio1">Priorisierte Baugewerke</option>
+                <option value="all">Alle vorhandenen Kandidaten</option>
                 <option value="elektroinstallation">Einzelnes Gewerk: Elektroinstallation</option>
                 <option value="sanitaer-heizung-klima">Einzelnes Gewerk: SHK</option>
                 <option value="maurerarbeiten">Einzelnes Gewerk: Maurerarbeiten</option>
                 <option value="dachdeckerarbeiten">Einzelnes Gewerk: Dachdeckerarbeiten</option>
               </select>
             </Field>
-            <Field label="Discovery-Modus">
+            <Field help="Legt fest, ob der Agent nur intern arbeitet oder eine freigegebene Websuche vorbereiten darf." label="Recherchemodus">
               <select className="mt-1 w-full rounded-md border border-line px-3 py-2 text-sm outline-none focus:border-brand" defaultValue="web_search_discovery" name="discovery_mode">
-                <option value="web_search_discovery">web_search_discovery - Search API mit Gate</option>
-                <option value="human_search_assist">human_search_assist - nur Suchliste erzeugen</option>
-                <option value="local_candidates">local_candidates - vorhandene Kandidaten nutzen</option>
+                <option value="web_search_discovery">Websuche vorbereiten, nur mit API-Freigabe</option>
+                <option value="human_search_assist">Manuelle Suchliste erzeugen, keine externen Abrufe</option>
+                <option value="local_candidates">Nur vorhandene Kandidaten prüfen</option>
               </select>
             </Field>
-            <Field label="Publish-Modus">
+            <Field help="Steuert, ob nur Review entsteht oder ob begrenzte unbestätigte Basis-Einträge angelegt werden dürfen." label="Ergebnisverarbeitung">
               <select className="mt-1 w-full rounded-md border border-line px-3 py-2 text-sm outline-none focus:border-brand" defaultValue="manual_approval" name="publish_mode">
-                <option value="manual_approval">manual_approval - Freigaben erzeugen</option>
-                <option value="review_only">review_only - nur Review</option>
-                <option value="tier_a_unverified_basis">tier_a_unverified_basis - Tier A begrenzt live</option>
+                <option value="manual_approval">Freigaben anlegen, nichts automatisch veröffentlichen</option>
+                <option value="review_only">Nur Review Items erzeugen</option>
+                <option value="tier_a_unverified_basis">Tier A begrenzt als unbestätigte Basis-Einträge anlegen</option>
               </select>
             </Field>
-            <Field label="E-Mail-Modus">
+            <Field help="Outbox bedeutet Entwurf. Es wird keine E-Mail gesendet." label="Outbox">
               <select className="mt-1 w-full rounded-md border border-line px-3 py-2 text-sm outline-none focus:border-brand" defaultValue="draft_only" name="email_mode">
-                <option value="draft_only">draft_only - Entwuerfe, kein Versand</option>
-                <option value="none">none - keine Entwuerfe</option>
+                <option value="draft_only">Entwürfe vorbereiten, kein Versand</option>
+                <option value="none">Keine Entwürfe</option>
                 <option disabled value="send_after_approval">
-                  send_after_approval - dokumentiert, noch nicht aktiv
+                  Versand nach Freigabe - noch nicht aktiv
                 </option>
               </select>
             </Field>
-            <Field label="Max. Queries">
+            <Field help="Kosten- und Umfangsgrenze fuer Suchabfragen." label="Max. Suchabfragen">
               <input className="mt-1 w-full rounded-md border border-line px-3 py-2 text-sm outline-none focus:border-brand" defaultValue="20" min="0" max="500" name="max_queries" type="number" />
             </Field>
-            <Field label="Max. Veroeffentlichungen">
+            <Field help="Gilt nur, wenn Tier-A-Live bewusst gewählt wird." label="Max. neue Basis-Einträge">
               <input className="mt-1 w-full rounded-md border border-line px-3 py-2 text-sm outline-none focus:border-brand" defaultValue="5" min="0" max="250" name="max_publications" type="number" />
             </Field>
-            <Field label="Max. Kosten EUR">
+            <Field help="Der Lauf bricht ab, bevor dieses Budget überschritten wird." label="Max. Kosten EUR">
               <input className="mt-1 w-full rounded-md border border-line px-3 py-2 text-sm outline-none focus:border-brand" defaultValue="1" min="0" max="25" name="max_cost_eur" step="0.5" type="number" />
             </Field>
           </div>
 
           <div className="mt-5 rounded-md border border-line bg-panel p-4 text-sm leading-6 text-muted">
-            <strong className="text-ink">Sicherheitslogik:</strong> Dry Run veroeffentlicht nichts. Manual Approval erzeugt nur Freigaben.
-            Tier-A-Live legt nur unbestaetigte Basis-Eintraege bis zum Limit an. E-Mails bleiben Outbox-Entwuerfe. Externe Suche laeuft nur mit
+            <strong className="text-ink">Sicherheitslogik:</strong> Dry Run veröffentlicht nichts. Freigabe-Modus erzeugt nur Approvals.
+            Tier-A-Live legt nur unbestätigte Basis-Einträge bis zum Limit an. E-Mails bleiben Outbox-Entwürfe. Externe Suche läuft nur mit
             gesetztem API-Key und <code>GEWERKELISTE_ALLOW_EXTERNAL_API=true</code>.
           </div>
 
@@ -100,7 +101,7 @@ export default async function MunicipalityDiscoveryPage() {
               type="submit"
               value="dry_run"
             >
-              Dry Run starten
+              Dry Run speichern
             </button>
             <button
               className="rounded-md bg-brand px-4 py-2 text-sm font-semibold text-white hover:bg-[#265a4d] disabled:cursor-not-allowed disabled:opacity-50"
@@ -109,7 +110,7 @@ export default async function MunicipalityDiscoveryPage() {
               type="submit"
               value="run"
             >
-              Agent mit Freigabe starten
+              Mit gewähltem Modus starten
             </button>
           </div>
         </form>
@@ -117,9 +118,9 @@ export default async function MunicipalityDiscoveryPage() {
         <aside className="rounded-lg border border-line bg-white p-5 shadow-soft">
           <h2 className="text-xl font-semibold text-ink">Was passiert beim Start?</h2>
           <div className="mt-4 grid gap-3 text-sm text-muted">
-            <Guardrail title="Tier A" body="Plausibler Firmenname, Ort, Gewerk, Quelle und keine Dublette. Nur diese Kandidaten duerfen bei bewusstem Live-Modus als unbestaetigte Basis-Eintraege entstehen." />
-            <Guardrail title="Tier B" body="Bleibt im Review. Typisch: schwache Quelle, unsicheres Gewerk oder moegliche Dublette." />
-            <Guardrail title="Tier C" body="Wird blockiert. Behoerden, News, Toplisten, Google-Maps-Scrapes oder private Daten werden nicht veroeffentlicht." />
+            <Guardrail title="Tier A" body="Plausibler Firmenname, Ort, Gewerk, Quelle und keine Dublette. Nur diese Kandidaten dürfen bei bewusstem Live-Modus als unbestätigte Basis-Einträge entstehen." />
+            <Guardrail title="Tier B" body="Bleibt im Review. Typisch: schwache Quelle, unsicheres Gewerk oder mögliche Dublette." />
+            <Guardrail title="Tier C" body="Wird blockiert. Behörden, News, Toplisten, Google-Maps-Scrapes oder private Daten werden nicht veröffentlicht." />
             <Guardrail title="Suchmaschine" body="Suchtreffer sind nur Wegweiser. Gespeichert wird bevorzugt die eigene Firmenwebsite als Quelle." />
             <Guardrail title="E-Mail" body="Drafts nur in agent_outbox. Kein automatischer Versand, keine Massen-E-Mail." />
           </div>
@@ -160,11 +161,12 @@ async function loadCockpitData() {
   }
 }
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, help, children }: { label: string; help?: string; children: React.ReactNode }) {
   return (
     <label className="text-sm font-semibold text-ink">
       {label}
       {children}
+      {help ? <span className="mt-1 block text-xs font-medium leading-5 text-muted">{help}</span> : null}
     </label>
   );
 }

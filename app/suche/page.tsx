@@ -8,6 +8,7 @@ import { getPublicCompanies } from "@/lib/data/public-directory";
 import { createTradeSearchEntry, normalizeSearchTerm, rankTradeEntries } from "@/lib/trade-search";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { canonicalTradeSlug, publicTradeTaxonomy } from "@/lib/trade-taxonomy";
+import type { PublicCompanyWithTrade } from "@/lib/types/public-directory";
 
 export const dynamic = "force-dynamic";
 
@@ -143,15 +144,12 @@ export default async function SearchPage({ searchParams }: PageProps) {
 
         <section className="mt-8 grid gap-4">
           {companies.length === 0 ? (
-            <div className="rounded-lg border border-line bg-white p-8 text-center text-sm font-medium text-muted shadow-soft">
-              {hasActiveSearch
-                ? "Keine Firmen gefunden."
-                : "Noch keine öffentlichen Betriebseinträge sichtbar. Sobald die ersten Einträge freigegeben sind, erscheinen sie hier."}
-            </div>
+            <SearchEmptyState hasActiveSearch={hasActiveSearch} location={location} query={q} />
           ) : (
             companies.map((company) => {
               const description = publicResultDescription(company.description);
               const imageUrl = publicResultImage(company);
+              const tradeNames = visibleTradeNames(company);
 
               return (
                 <Link
@@ -171,7 +169,15 @@ export default async function SearchPage({ searchParams }: PageProps) {
                         </div>
                       ) : null}
                       <div className="min-w-0">
-                        <div className="text-sm font-semibold text-brand">{company.trades?.name}</div>
+                        {tradeNames.length ? (
+                          <div className="flex flex-wrap gap-1.5">
+                            {tradeNames.slice(0, 4).map((tradeName) => (
+                              <span key={tradeName} className="rounded-md bg-[#eef4fb] px-2 py-1 text-xs font-semibold text-brand">
+                                {tradeName}
+                              </span>
+                            ))}
+                          </div>
+                        ) : null}
                         <h2 className="mt-1 text-xl font-semibold text-ink">{company.name}</h2>
                         <p className="mt-2 text-sm text-muted">
                           {company.postal_code} {company.city}
@@ -249,4 +255,63 @@ function tradeSlugsForQuery(query: string) {
   const normalizedQuery = normalizeSearchTerm(query);
   if (!normalizedQuery) return [];
   return rankTradeEntries(publicTradeTaxonomy().map((trade) => createTradeSearchEntry(trade)), normalizedQuery).map((entry) => entry.trade.slug);
+}
+
+function visibleTradeNames(company: PublicCompanyWithTrade) {
+  const names = [
+    ...(company.company_trades || [])
+      .filter(
+        (match) =>
+          (match.confidence_score || 0) >= 70 &&
+          match.status !== "rejected" &&
+          match.visibility_level !== "internal" &&
+          Boolean(match.trades?.name),
+      )
+      .sort((a, b) => (b.confidence_score || 0) - (a.confidence_score || 0))
+      .map((match) => match.trades?.name),
+    company.trades?.name,
+  ].filter((name): name is string => Boolean(name));
+
+  return Array.from(new Set(names));
+}
+
+function SearchEmptyState({
+  hasActiveSearch,
+  location,
+  query,
+}: {
+  hasActiveSearch: boolean;
+  location?: string;
+  query?: string;
+}) {
+  if (!hasActiveSearch) {
+    return (
+      <div className="rounded-lg border border-line bg-white p-8 shadow-soft">
+        <h2 className="text-xl font-semibold text-ink">Starte mit Gewerk, Leistung oder Ort.</h2>
+        <p className="mt-3 max-w-3xl text-sm leading-6 text-muted">
+          Suche zum Beispiel nach einem Gewerk, einer konkreten Leistung oder einem Ort. Öffentliche Basis-Einträge und
+          übernommene Profile erscheinen hier, sobald sie zur Suche passen.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-lg border border-line bg-white p-8 shadow-soft">
+      <h2 className="text-xl font-semibold text-ink">Noch kein passender Betrieb gefunden.</h2>
+      <p className="mt-3 max-w-3xl text-sm leading-6 text-muted">
+        Für {query ? `"${query}"` : "diese Suche"}
+        {location ? ` in ${location}` : ""} ist aktuell kein öffentlicher Eintrag sichtbar. Prüfe den Ort, erweitere den
+        Umkreis oder schlage einen Betrieb vor.
+      </p>
+      <div className="mt-5 flex flex-wrap gap-3">
+        <Link className="inline-flex min-h-10 items-center rounded-md bg-brand px-4 text-sm font-semibold text-white hover:bg-[#265a4d]" href={"/betrieb-eintragen" as Route}>
+          Betrieb vorschlagen
+        </Link>
+        <Link className="inline-flex min-h-10 items-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-action hover:border-action" href={"/suche" as Route}>
+          Suche zurücksetzen
+        </Link>
+      </div>
+    </div>
+  );
 }

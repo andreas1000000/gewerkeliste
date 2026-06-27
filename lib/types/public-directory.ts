@@ -18,6 +18,8 @@ export type PublicCompanyTradeRelation = {
   confidence_score: number;
   source: string | null;
   evidence: string | null;
+  status?: string | null;
+  visibility_level?: string | null;
   trades: Pick<Trade, "id" | "name" | "slug"> | null;
 };
 
@@ -28,6 +30,8 @@ export type PublicCompanyTradeMatch = {
   confidence_score: number;
   source: string;
   evidence: string | null;
+  status?: string | null;
+  visibility_level?: string | null;
   created_at: string;
   updated_at: string;
   companies: PublicCompanyWithTrade | null;

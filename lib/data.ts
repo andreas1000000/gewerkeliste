@@ -27,7 +27,7 @@ export async function getCompanies(params?: {
   const supabase = getSupabaseAdmin();
   let query = supabase
     .from("companies")
-    .select("*, trades!inner(id, name, slug)")
+    .select("*, trades!inner(id, name, slug), company_trades(id, confidence_score, status, visibility_level, trades(id, name, slug))")
     .order("updated_at", { ascending: false });
 
   if (params?.query) {
@@ -469,6 +469,13 @@ function normalizeSubmission(item: unknown) {
     memberships: arrayField(raw.memberships),
     certificates: arrayField(raw.certificates),
     manufacturer_certificates: arrayField(raw.manufacturer_certificates),
+    logo_url: typeof raw.logo_url === "string" ? raw.logo_url : null,
+    profile_image_url: typeof raw.profile_image_url === "string" ? raw.profile_image_url : null,
+    profile_image_alt: typeof raw.profile_image_alt === "string" ? raw.profile_image_alt : null,
+    contact_person_name: typeof raw.contact_person_name === "string" ? raw.contact_person_name : null,
+    contact_person_role: typeof raw.contact_person_role === "string" ? raw.contact_person_role : null,
+    image_consent_given: raw.image_consent_given === true,
+    image_consent_timestamp: typeof raw.image_consent_timestamp === "string" ? raw.image_consent_timestamp : null,
   } as CompanySubmission;
 }
 

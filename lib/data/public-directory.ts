@@ -18,7 +18,9 @@ export async function getPublicCompanies(params?: {
   const supabase = getSupabaseAdmin();
   let query = supabase
     .from("companies")
-    .select("*, trades!inner(id, name, slug)")
+    .select(
+      "*, trades!inner(id, name, slug), company_trades(confidence_score, source, evidence, status, visibility_level, trades(id, name, slug))",
+    )
     .eq("public_visible", true)
     .order("verified", { ascending: false })
     .order("name", { ascending: true });
@@ -52,7 +54,7 @@ export async function getPublicCompaniesByTrade(
 
   let query = supabase
     .from("company_trades")
-    .select("id, confidence_score, source, evidence, companies!inner(*, trades(id, name, slug)), trades(id, name, slug)")
+    .select("id, confidence_score, source, evidence, status, visibility_level, companies!inner(*, trades(id, name, slug)), trades(id, name, slug)")
     .eq("trade_id", trade.id)
     .eq("companies.public_visible", true)
     .order("confidence_score", { ascending: false });
@@ -73,6 +75,7 @@ export async function getPublicCompaniesByTrade(
   }
 
   return ((data || []) as unknown as PublicCompanyTradeMatch[])
+    .filter((match) => match.status !== "rejected" && match.visibility_level !== "internal")
     .map((match) => ({
       ...match.companies,
       trades: match.trades || match.companies?.trades || null,
@@ -90,7 +93,7 @@ export async function getPublicCompanyTradeCounts() {
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("company_trades")
-    .select("trades(slug), companies!inner(public_visible)")
+    .select("status, visibility_level, trades(slug), companies!inner(public_visible)")
     .eq("companies.public_visible", true);
 
   if (error) {
@@ -104,7 +107,12 @@ export async function getPublicCompanyTradeCounts() {
   }
 
   return (data || []).reduce<Record<string, number>>((counts, row) => {
-    const raw = row as unknown as { trades: { slug: string } | { slug: string }[] | null };
+    const raw = row as unknown as {
+      status?: string | null;
+      visibility_level?: string | null;
+      trades: { slug: string } | { slug: string }[] | null;
+    };
+    if (raw.status === "rejected" || raw.visibility_level === "internal") return counts;
     const trade = Array.isArray(raw.trades) ? raw.trades[0] : raw.trades;
     if (!trade?.slug) return counts;
     counts[trade.slug] = (counts[trade.slug] || 0) + 1;
@@ -124,7 +132,7 @@ export async function getCompanyBySlug(slug: string) {
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("companies")
-    .select("*, trades(id, name, slug), company_trades(confidence_score, source, evidence, trades(id, name, slug))")
+    .select("*, trades(id, name, slug), company_trades(confidence_score, source, evidence, status, visibility_level, trades(id, name, slug))")
     .eq("slug", slug)
     .eq("public_visible", true)
     .single();
