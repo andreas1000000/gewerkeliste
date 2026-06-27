@@ -43,8 +43,8 @@ export function CompanyTable({ companies }: { companies: CompanyWithTrade[] }) {
                   <div className="text-muted">{company.postal_code}</div>
                 </td>
                 <td className="px-4 py-4 text-muted">
-                  <div>{company.latitude.toFixed(6)}</div>
-                  <div>{company.longitude.toFixed(6)}</div>
+                  <div>{formatCoordinate(company.latitude)}</div>
+                  <div>{formatCoordinate(company.longitude)}</div>
                 </td>
                 <td className="px-4 py-4">
                   <VisibilityBadge visible={company.public_visible} />
@@ -87,6 +87,10 @@ export function CompanyTable({ companies }: { companies: CompanyWithTrade[] }) {
       </div>
     </div>
   );
+}
+
+function formatCoordinate(value: number | null | undefined) {
+  return typeof value === "number" && Number.isFinite(value) ? value.toFixed(6) : "nicht hinterlegt";
 }
 
 function VisibilityBadge({ visible }: { visible: boolean }) {

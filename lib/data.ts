@@ -54,6 +54,46 @@ export async function getCompanies(params?: {
   }
 
   const { data, error } = await query;
+  if (error) return getCompaniesFallback(params);
+  return data as CompanyWithTrade[];
+}
+
+async function getCompaniesFallback(params?: {
+  query?: string;
+  tradeId?: string;
+  claimStatus?: string;
+  verified?: string;
+}) {
+  const supabase = getSupabaseAdmin();
+  let query = supabase
+    .from("companies")
+    .select("*, trades!inner(id, name, slug)")
+    .order("updated_at", { ascending: false });
+
+  if (params?.query) {
+    const value = params.query.trim();
+    query = query.or(
+      `name.ilike.%${value}%,city.ilike.%${value}%,postal_code.ilike.%${value}%,description.ilike.%${value}%`,
+    );
+  }
+
+  if (params?.tradeId) {
+    query = query.eq("trade_id", params.tradeId);
+  }
+
+  if (params?.claimStatus) {
+    query = query.eq("claim_status", params.claimStatus);
+  }
+
+  if (params?.verified === "true") {
+    query = query.eq("verified", true);
+  }
+
+  if (params?.verified === "false") {
+    query = query.eq("verified", false);
+  }
+
+  const { data, error } = await query;
   if (error) throw error;
   return data as CompanyWithTrade[];
 }
