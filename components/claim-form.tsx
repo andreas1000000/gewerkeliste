@@ -7,17 +7,9 @@ import { submitClaim } from "@/lib/actions/claims";
 import type { CompanyFormState } from "@/lib/types";
 
 const initialState: CompanyFormState = { ok: false, message: "" };
-const supportOptions = [
-  { value: "none", label: "Ohne Förderbeitrag abschließen" },
-  { value: "49", label: "49 € Förderbeitrag" },
-  { value: "99", label: "99 € Förderbeitrag" },
-  { value: "199", label: "199 € Förderbeitrag" },
-  { value: "custom", label: "Eigenen Betrag wählen" },
-];
 
 export function ClaimForm({ companyId, initialTrades }: { companyId: string; initialTrades: string[] }) {
   const [state, formAction, pending] = useActionState(submitClaim, initialState);
-  const [supportContribution, setSupportContribution] = useState("none");
   const [selectedTrades, setSelectedTrades] = useState(initialTrades);
   const errors = state.fieldErrors || {};
 
@@ -74,58 +66,10 @@ export function ClaimForm({ companyId, initialTrades }: { companyId: string; ini
         <p className="text-sm font-semibold text-[#07173d]">Startphase: kostenloser Basiseintrag</p>
         <p className="mt-3 text-sm leading-6 text-muted">
           Fachbetriebe können ihren Betriebseintrag kostenlos übernehmen und bestätigen. GewerkeListe.com befindet sich
-          im Aufbau und wächst mit Unterstützung regionaler Betriebe.
+          im Aufbau und wächst Region für Region.
         </p>
-        <p className="mt-3 text-sm leading-6 text-muted">
-          Ein freiwilliger Förderbeitrag hat keinen Einfluss auf die Prüfung, Darstellung oder Verifizierung des Eintrags.
-        </p>
-
-        <fieldset className="mt-5">
-          <legend className="text-sm font-semibold text-ink">GewerkeListe.com freiwillig unterstützen</legend>
-          <div className="mt-3 grid gap-3">
-            {supportOptions.map((option) => (
-              <label
-                key={option.value}
-                className="flex min-h-12 cursor-pointer items-center gap-3 rounded-md border border-line bg-white px-4 py-3 text-sm font-semibold text-ink"
-              >
-                <input
-                  checked={supportContribution === option.value}
-                  className="h-4 w-4 accent-[#1f5fd4]"
-                  name="support_contribution"
-                  onChange={() => setSupportContribution(option.value)}
-                  type="radio"
-                  value={option.value}
-                />
-                {option.label}
-              </label>
-            ))}
-          </div>
-        </fieldset>
-
-        {supportContribution === "custom" ? (
-          <Field label="Eigener Betrag in Euro" error={errors.support_custom_amount}>
-            <input
-              className="w-full rounded-md border border-line px-3 py-2 outline-none focus:border-brand"
-              inputMode="decimal"
-              min="1"
-              name="support_custom_amount"
-              placeholder="z. B. 75"
-              type="number"
-            />
-          </Field>
-        ) : (
-          <input name="support_custom_amount" type="hidden" value="" />
-        )}
-
-        <label className="mt-4 flex items-start gap-3 text-sm font-medium leading-6 text-ink">
-          <input className="mt-1 h-4 w-4 accent-[#1f5fd4]" name="support_invoice_requested" type="checkbox" />
-          Rechnung auf Wunsch
-        </label>
-
-        <p className="mt-4 rounded-md border border-line bg-white px-4 py-3 text-xs leading-5 text-muted">
-          Es handelt sich nicht um einen steuerbegünstigten Beitrag. Auf Wunsch kann eine Rechnung über den freiwilligen
-          Förderbeitrag ausgestellt werden. An dieser Stelle wird automatisch nichts berechnet.
-        </p>
+        <input name="support_contribution" type="hidden" value="none" />
+        <input name="support_custom_amount" type="hidden" value="" />
       </section>
 
       <p className="mt-4 text-xs leading-5 text-muted">

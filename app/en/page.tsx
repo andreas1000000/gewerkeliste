@@ -122,7 +122,6 @@ export default async function EnglishHomePage() {
               <div className="mt-4 flex flex-wrap gap-3">
                 <BlueLink href="/betrieb-eintragen">Add company</BlueLink>
                 <OutlineLink href="/eintrag-beanspruchen">Claim profile</OutlineLink>
-                <OutlineLink href="/preise">Pricing</OutlineLink>
               </div>
             </form>
           </div>

@@ -179,7 +179,6 @@ export default async function HomePage() {
               <div className="mt-4 flex flex-wrap gap-3">
                 <BlueLink href="/betrieb-eintragen">Kostenlosen Basiseintrag sichern</BlueLink>
                 <OutlineLink href="/eintrag-beanspruchen">Eintrag beanspruchen</OutlineLink>
-                <OutlineLink href="/preise">Gründungsmitglied werden</OutlineLink>
               </div>
             </form>
           </div>
@@ -243,7 +242,7 @@ export default async function HomePage() {
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="grid gap-5 lg:grid-cols-3">
+        <div className="grid gap-5 lg:grid-cols-2">
           <Card>
             <p className="text-sm font-semibold uppercase tracking-normal text-brand">Kostenlose Grundsichtbarkeit</p>
             <h2 className="mt-2 text-2xl font-semibold text-[#07173d]">Der Basiseintrag bleibt offen.</h2>
@@ -264,17 +263,6 @@ export default async function HomePage() {
             </p>
             <Link className="mt-5 inline-flex text-sm font-semibold text-[#1f5fd4] hover:underline" href="/ueber-gewerkeliste">
               Warum GewerkeListe?
-            </Link>
-          </Card>
-          <Card>
-            <p className="text-sm font-semibold uppercase tracking-normal text-brand">Landkreis Rosenheim startet jetzt</p>
-            <h2 className="mt-2 text-2xl font-semibold text-[#07173d]">Erster echter Markt statt Streuverlust.</h2>
-            <p className="mt-4 text-sm leading-6 text-muted">
-              Rosenheim/Chiemgau wird als erster Proof-of-Market aufgebaut: regionale Dichte, geprüfte Kandidaten,
-              Claims, Sichtbarkeit und erste zahlende Unterstützer.
-            </p>
-            <Link className="mt-5 inline-flex text-sm font-semibold text-[#1f5fd4] hover:underline" href="/preise">
-              Gründungsmitglied werden
             </Link>
           </Card>
         </div>
@@ -378,45 +366,11 @@ export default async function HomePage() {
           <div className="mt-6 rounded-lg bg-white p-5 text-ink lg:mt-0">
             <h3 className="text-lg font-semibold text-[#07173d]">Jetzt im Landkreis Rosenheim starten</h3>
             <p className="mt-3 text-sm leading-6 text-muted">
-              Kostenlosen Basiseintrag sichern, Profil übernehmen oder als Gründungsmitglied den Aufbau der regionalen
-              Gewerke-Suche unterstützen.
+              Kostenlosen Basiseintrag sichern, Profil übernehmen und Leistungen sowie Wirkungskreis klar darstellen.
             </p>
             <div className="mt-5 grid gap-3">
               <BlueLink href="/betrieb-eintragen">Kostenlosen Basiseintrag sichern</BlueLink>
               <OutlineLink href="/betrieb-eintragen">Betrieb eintragen</OutlineLink>
-              <OutlineLink href="/preise">Gründungsmitglied werden</OutlineLink>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="rounded-lg border border-[#b9dec8] bg-[#eef9f2] p-6 shadow-soft sm:p-8 lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-8">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-normal text-brand">Gründungsmitglied Landkreis Rosenheim</p>
-            <h2 className="mt-2 text-3xl font-semibold text-[#07173d]">Sichtbarkeit aufbauen, bevor der Markt sortiert ist.</h2>
-            <p className="mt-4 text-sm leading-6 text-muted">
-              Das Gründungsmitglied-Angebot richtet sich an Betriebe, die GewerkeListe.com in Rosenheim/Chiemgau früh
-              unterstützen und ihr Profil als professionelle Website-Ergänzung ausbauen möchten.
-            </p>
-            <div className="mt-5 grid gap-2 text-sm text-ink sm:grid-cols-2">
-              <CheckLine>Founding-Member-Badge</CheckLine>
-              <CheckLine>Logo und erweiterte Beschreibung</CheckLine>
-              <CheckLine>Projektbilder und Referenzen später</CheckLine>
-              <CheckLine>QR-Code und Kurz-URL geplant</CheckLine>
-            </div>
-            <p className="mt-4 text-xs leading-5 text-muted">
-              Kein Qualitäts-, Auftrags- oder Verfügbarkeitsversprechen. Der Basiseintrag bleibt unabhängig davon
-              kostenlos sichtbar.
-            </p>
-          </div>
-          <div className="mt-6 rounded-lg border border-line bg-white p-5 lg:mt-0">
-            <div className="text-sm font-semibold uppercase tracking-normal text-brand">Startangebot</div>
-            <div className="mt-2 text-4xl font-semibold text-[#07173d]">99 €</div>
-            <div className="mt-1 text-sm text-muted">pro Jahr, erste 100 Betriebe im Landkreis Rosenheim</div>
-            <div className="mt-5 grid gap-3">
-              <BlueLink href="/preise">Jetzt Gründungsmitglied werden</BlueLink>
-              <OutlineLink href="/eintrag-beanspruchen">Profil beanspruchen</OutlineLink>
             </div>
           </div>
         </div>

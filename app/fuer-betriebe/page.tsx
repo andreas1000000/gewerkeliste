@@ -154,13 +154,12 @@ export default function ForCompaniesPage() {
 
         <section className="mt-8 grid gap-4 lg:grid-cols-2">
           <div className="rounded-lg border border-[#b9dec8] bg-[#eef9f2] p-6">
-            <h2 className="text-2xl font-semibold text-brand">Erweiterte Darstellung unterstützen</h2>
+            <h2 className="text-2xl font-semibold text-brand">Leistungsspektrum vollständig darstellen</h2>
             <p className="mt-4 text-sm leading-6 text-muted">
-              Wer das Projekt gut findet, kann GewerkeListe.com freiwillig unterstützen. Zusätzliche
-              Darstellungsmöglichkeiten können später Bilder, Referenzen, persönliche Vorstellung, Projektbeispiele oder
-              Sichtbarkeitsauswertungen umfassen.
+              Betriebe sollen ihre Gewerke, Leistungen, Spezialisierungen und Tätigkeitsgebiete klar benennen können.
+              Diese grundlegende Darstellung wird nicht künstlich begrenzt.
             </p>
-            <p className="mt-4 text-sm font-semibold text-brand">Der kostenlose Basiseintrag bleibt davon unberührt.</p>
+            <p className="mt-4 text-sm font-semibold text-brand">Der Basiseintrag bleibt sachlich und offen zugänglich.</p>
           </div>
           <div className="rounded-lg border border-line bg-white p-6 shadow-soft">
             <h2 className="text-2xl font-semibold text-brand">Für alle Betriebe offen.</h2>

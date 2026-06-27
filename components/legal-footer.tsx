@@ -36,9 +36,6 @@ export function LegalFooter() {
             <Link className="hover:text-white" href="/fuer-betriebe">
               Für Betriebe
             </Link>
-            <Link className="hover:text-white" href="/preise">
-              Preise
-            </Link>
             <Link className="hover:text-white" href="/betrieb-eintragen">
               Betrieb eintragen
             </Link>

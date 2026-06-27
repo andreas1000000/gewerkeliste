@@ -9,13 +9,6 @@ import type { CompanyFormState } from "@/lib/types";
 import type { TaxonomyTrade } from "@/lib/trade-taxonomy";
 
 const initialState: CompanyFormState = { ok: false, message: "" };
-const supportOptions = [
-  { value: "none", label: "Ohne Förderbeitrag einreichen" },
-  { value: "49", label: "49 € Förderbeitrag" },
-  { value: "99", label: "99 € Förderbeitrag" },
-  { value: "199", label: "199 € Förderbeitrag" },
-  { value: "custom", label: "Eigenen Betrag wählen" },
-];
 
 export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
   const [state, formAction, pending] = useActionState(submitBusinessEntry, initialState);
@@ -23,7 +16,6 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
   const [selectedTrades, setSelectedTrades] = useState<string[]>([]);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [founderVerification, setFounderVerification] = useState(true);
-  const [supportContribution, setSupportContribution] = useState("none");
   const [companyLogoSelected, setCompanyLogoSelected] = useState(false);
   const [contactProfileImageSelected, setContactProfileImageSelected] = useState(false);
   const errors = state.fieldErrors || {};
@@ -48,7 +40,6 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
     setSelectedTrades([restoredPrimaryTrade, ...restoredSecondary].filter(Boolean));
     setSelectedServices(arrayValue(restoredValues, "selectedServices"));
     setFounderVerification(booleanValue(restoredValues, "wantsFounderVerification", true));
-    setSupportContribution(textValue(restoredValues, "supportContribution", "none"));
   }, [state.values, trades]);
 
   function toggleService(service: string) {
@@ -326,44 +317,8 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
           />
           Ich möchte meinen kostenlosen Basiseintrag prüfen und bestätigen lassen.
         </label>
-
-        <section className="mt-5 rounded-lg border border-line bg-[#fbfcff] p-4">
-          <h3 className="text-sm font-semibold text-brand">GewerkeListe.com freiwillig unterstützen</h3>
-          <p className="mt-2 text-sm leading-6 text-muted">
-            Der freiwillige Förderbeitrag hilft beim Aufbau des regionalen Verzeichnisses. Er hat keinen Einfluss auf
-            Prüfung, Darstellung oder Verifizierung des Basiseintrags.
-          </p>
-          <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
-            {supportOptions.map((option) => (
-              <label key={option.value} className="flex items-center gap-2 rounded-md border border-line bg-white px-3 py-2 text-sm font-semibold text-ink">
-                <input
-                  checked={supportContribution === option.value}
-                  className="h-4 w-4 accent-action"
-                  name="supportContribution"
-                  onChange={() => setSupportContribution(option.value)}
-                  type="radio"
-                  value={option.value}
-                />
-                {option.label}
-              </label>
-            ))}
-          </div>
-          {supportContribution === "custom" ? (
-            <Field label="Eigener Betrag in Euro" error={errors.supportCustomAmount}>
-              <input className={inputClass} defaultValue={textValue(values, "supportCustomAmount")} name="supportCustomAmount" type="number" min="1" />
-            </Field>
-          ) : (
-            <input name="supportCustomAmount" type="hidden" value="" />
-          )}
-          <label className="mt-4 flex items-start gap-3 text-sm font-medium leading-6 text-ink">
-            <input className="mt-1 h-4 w-4 accent-action" defaultChecked={booleanValue(values, "supportInvoiceRequested")} name="supportInvoiceRequested" type="checkbox" />
-            Rechnung auf Wunsch
-          </label>
-          <p className="mt-3 text-xs leading-5 text-muted">
-            Es handelt sich nicht um einen steuerbegünstigten Beitrag. Auf Wunsch kann eine Rechnung über den freiwilligen
-            Förderbeitrag ausgestellt werden. An dieser Stelle wird automatisch nichts berechnet.
-          </p>
-        </section>
+        <input name="supportContribution" type="hidden" value="none" />
+        <input name="supportCustomAmount" type="hidden" value="" />
 
         <div className="mt-5 grid gap-3">
           <Consent checked={booleanValue(values, "consentAuthorized")} name="consentAuthorized" error={errors.consentAuthorized}>
