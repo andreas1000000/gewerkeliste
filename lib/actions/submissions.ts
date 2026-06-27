@@ -196,11 +196,14 @@ function normalizeSubmissionWebsite(value: string | null) {
 
 function readableApprovalError(error: unknown) {
   if (error instanceof Error && error.message) return error.message;
+  const message = (error as { message?: unknown })?.message;
+  if (typeof message === "string" && message) return message;
   return "Der Betrieb konnte nicht freigegeben werden. Die Einreichung bleibt im Review.";
 }
 
 function isRedirectError(error: unknown) {
-  if (!(error instanceof Error)) return false;
-  const digest = (error as Error & { digest?: string }).digest;
-  return error.message === "NEXT_REDIRECT" || typeof digest === "string" && digest.startsWith("NEXT_REDIRECT");
+  const candidate = error as { digest?: unknown; message?: unknown };
+  const digest = typeof candidate?.digest === "string" ? candidate.digest : "";
+  const message = typeof candidate?.message === "string" ? candidate.message : "";
+  return digest.startsWith("NEXT_REDIRECT") || message.includes("NEXT_REDIRECT");
 }
