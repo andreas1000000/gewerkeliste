@@ -32,7 +32,27 @@ export async function submitBusinessEntry(
   const supabase = getSupabaseAdmin();
   const companyLogo = fileFromForm(formData, "companyLogo");
   const contactProfileImage = fileFromForm(formData, "contactProfileImage");
+  const companyLogoSelected = formData.get("companyLogoSelected") === "true";
+  const contactProfileImageSelected = formData.get("contactProfileImageSelected") === "true";
   const mediaSelected = Boolean(companyLogo || contactProfileImage);
+
+  if (companyLogoSelected && !companyLogo) {
+    return {
+      ok: false,
+      message:
+        "Das Firmenlogo wurde im Formular ausgewaehlt, aber nicht an den Server uebertragen. Bitte die Datei erneut auswaehlen und den Eintrag noch einmal absenden.",
+      fieldErrors: { companyLogo: "Logo-Datei wurde nicht uebertragen." },
+    };
+  }
+
+  if (contactProfileImageSelected && !contactProfileImage) {
+    return {
+      ok: false,
+      message:
+        "Das Ansprechpartnerbild wurde im Formular ausgewaehlt, aber nicht an den Server uebertragen. Bitte die Datei erneut auswaehlen und den Eintrag noch einmal absenden.",
+      fieldErrors: { contactProfileImage: "Profilbild wurde nicht uebertragen." },
+    };
+  }
 
   if (contactProfileImage && !input.imageConsentGiven) {
     return {
@@ -149,8 +169,18 @@ export async function submitBusinessEntry(
 
 function fileFromForm(formData: FormData, key: string) {
   const value = formData.get(key);
-  if (!(value instanceof File) || value.size === 0) return null;
+  if (!isUploadedFile(value) || value.size === 0) return null;
   return value;
+}
+
+function isUploadedFile(value: FormDataEntryValue | null): value is File {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    typeof (value as File).arrayBuffer === "function" &&
+    typeof (value as File).size === "number" &&
+    typeof (value as File).type === "string"
+  );
 }
 
 async function ensureSubmissionMediaColumns() {
