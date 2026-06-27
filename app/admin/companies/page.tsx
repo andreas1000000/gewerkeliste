@@ -25,6 +25,8 @@ export default async function AdminCompaniesPage({ searchParams }: PageProps) {
   const verifiedCount = companies.filter((company) => company.verified).length;
   const pendingClaims = companies.filter((company) => company.claim_status === "pending").length;
   const cities = new Set(companies.map((company) => company.city)).size;
+  const publicCount = companies.filter((company) => company.public_visible).length;
+  const hiddenCount = companies.length - publicCount;
 
   return (
     <Shell>
@@ -40,8 +42,8 @@ export default async function AdminCompaniesPage({ searchParams }: PageProps) {
 
       <section className="mb-6 grid gap-4 md:grid-cols-4">
         <Metric label="Betriebe" value={companies.length} />
-        <Metric label="Gewerke" value={trades.length} />
-        <Metric label="Orte" value={cities} />
+        <Metric label="Öffentlich" value={publicCount} />
+        <Metric label="Ausgeblendet" value={hiddenCount} />
         <Metric label="Offene Übernahmen" value={pendingClaims} />
       </section>
 
@@ -49,7 +51,9 @@ export default async function AdminCompaniesPage({ searchParams }: PageProps) {
         <CompanyFilters trades={trades} searchParams={params} />
       </div>
 
-      <div className="mb-3 text-sm font-medium text-muted">{verifiedCount} verifiziert</div>
+      <div className="mb-3 text-sm font-medium text-muted">
+        {verifiedCount} verifiziert · {trades.length} Gewerke · {cities} Orte
+      </div>
       <CompanyTable companies={companies} />
     </Shell>
   );
