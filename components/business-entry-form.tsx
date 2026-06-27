@@ -88,7 +88,7 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
   }
 
   return (
-    <form action={formAction} className="grid gap-6" key={formKey} noValidate>
+    <form action={formAction} className="grid gap-6" encType="multipart/form-data" key={formKey} noValidate>
       <input className="hidden" name="websiteExtra" tabIndex={-1} autoComplete="off" />
 
       <FormSection number="1" title="Betriebsdaten" help="Diese Angaben bilden die Grundlage Ihres Betriebseintrags.">

@@ -112,7 +112,7 @@ export default async function SubmissionDetailPage({ params, searchParams }: Pag
                   note="Logo kann nach fachlicher Prüfung in den öffentlichen Betriebseintrag übernommen werden."
                   src={media.logo.previewUrl}
                   storedValue={submission.logo_url}
-                  status={submission.logo_url ? "Neu hochgeladen" : "Nicht vorhanden"}
+                  status={mediaStatusLabel(media.logo.status, "Neu hochgeladen")}
                 />
                 <MediaPreview
                   alt={submission.profile_image_alt || `${submission.company_name} Ansprechpartnerbild`}
@@ -121,7 +121,7 @@ export default async function SubmissionDetailPage({ params, searchParams }: Pag
                   note="Personenbild nur veröffentlichen, wenn Berechtigung und Zustimmung plausibel sind. Nicht automatisch bei unbestätigten Basisprofilen anzeigen."
                   src={media.profileImage.previewUrl}
                   storedValue={submission.profile_image_url}
-                  status={submission.profile_image_url ? "Zur Prüfung" : "Nicht vorhanden"}
+                  status={mediaStatusLabel(media.profileImage.status, "Zur Prüfung")}
                 />
               </div>
               <div className="rounded-md border border-line bg-panel p-4 text-xs leading-5 text-muted">
@@ -333,9 +333,14 @@ function MediaPreview({
           </a>
           <div className="mt-2 break-all text-xs text-muted">{storedValue || src}</div>
         </>
+      ) : storedValue ? (
+        <div className="mt-3 rounded-md border border-[#f1d08a] bg-[#fff8e8] px-4 py-6 text-sm leading-6 text-[#6d4a00]">
+          Upload-Pfad gespeichert, aber Datei aktuell nicht abrufbar.
+          <div className="mt-2 break-all text-xs">{storedValue}</div>
+        </div>
       ) : (
         <div className="mt-3 rounded-md border border-dashed border-line bg-white px-4 py-8 text-center text-sm text-muted">
-          {emptyText}
+          Kein Upload gespeichert. {emptyText}
         </div>
       )}
       <p className="mt-3 text-xs leading-5 text-muted">{note}</p>
@@ -353,15 +358,21 @@ async function getSubmissionMedia(submission: CompanySubmission) {
 }
 
 async function resolveSubmissionMedia(value: string | null) {
-  if (!value) return { previewUrl: null as string | null };
-  if (/^https?:\/\//i.test(value)) return { previewUrl: value };
+  if (!value) return { previewUrl: null as string | null, status: "missing" as const };
+  if (/^https?:\/\//i.test(value)) return { previewUrl: value, status: "available" as const };
 
   const supabase = getSupabaseAdmin();
   const path = value.replace(/^company-media\//, "");
   const { data, error } = await supabase.storage.from("company-media").createSignedUrl(path, 60 * 60);
-  if (error || !data?.signedUrl) return { previewUrl: null as string | null };
+  if (error || !data?.signedUrl) return { previewUrl: null as string | null, status: "unavailable" as const };
 
-  return { previewUrl: data.signedUrl };
+  return { previewUrl: data.signedUrl, status: "available" as const };
+}
+
+function mediaStatusLabel(status: "missing" | "available" | "unavailable", availableLabel: string) {
+  if (status === "available") return availableLabel;
+  if (status === "unavailable") return "Pfad vorhanden, nicht abrufbar";
+  return "Nicht vorhanden";
 }
 
 function InfoCard({ title, value }: { title: string; value: string }) {
