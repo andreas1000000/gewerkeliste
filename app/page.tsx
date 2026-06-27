@@ -79,7 +79,7 @@ const exampleServiceArea: ServiceAreaGeoJson = {
 };
 
 export default async function HomePage() {
-  const companies = isSupabaseConfigured() ? await getPublicCompanies() : [];
+  const companies = await getHomepageCompanies();
   const preferredTradeSlugs = [
     "pflasterbau",
     "bauwerksabdichtung",
@@ -530,6 +530,19 @@ export default async function HomePage() {
       />
     </main>
   );
+}
+
+async function getHomepageCompanies() {
+  if (!isSupabaseConfigured()) {
+    return [];
+  }
+
+  try {
+    return await getPublicCompanies();
+  } catch (error) {
+    console.error("Homepage company data could not be loaded", error);
+    return [];
+  }
 }
 
 function Card({ children }: { children: React.ReactNode }) {
