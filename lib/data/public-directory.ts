@@ -36,7 +36,7 @@ export async function getPublicCompanies(params?: {
   }
 
   const { data, error } = await query;
-  if (error) throw error;
+  if (error) return getPublicCompaniesFallback(params);
   return data as PublicCompanyWithTrade[];
 }
 
@@ -137,7 +137,7 @@ export async function getCompanyBySlug(slug: string) {
     .eq("public_visible", true)
     .single();
 
-  if (error) throw error;
+  if (error) return getCompanyBySlugFallback(slug);
   return data as PublicCompanyWithTrade;
 }
 
@@ -198,6 +198,46 @@ async function getPublicCompaniesByPrimaryTradeFallback(
   const { data, error } = await query;
   if (error) throw error;
   return data as PublicCompanyWithTrade[];
+}
+
+async function getPublicCompaniesFallback(params?: {
+  query?: string;
+  location?: string;
+}) {
+  const supabase = getSupabaseAdmin();
+  let query = supabase
+    .from("companies")
+    .select("*, trades!inner(id, name, slug)")
+    .eq("public_visible", true)
+    .order("verified", { ascending: false })
+    .order("name", { ascending: true });
+
+  if (params?.query) {
+    const value = params.query.trim();
+    query = query.or(`name.ilike.%${value}%,description.ilike.%${value}%`);
+  }
+
+  if (params?.location) {
+    const value = params.location.trim();
+    query = query.or(`city.ilike.%${value}%,postal_code.ilike.%${value}%`);
+  }
+
+  const { data, error } = await query;
+  if (error) throw error;
+  return data as PublicCompanyWithTrade[];
+}
+
+async function getCompanyBySlugFallback(slug: string) {
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("companies")
+    .select("*, trades(id, name, slug)")
+    .eq("slug", slug)
+    .eq("public_visible", true)
+    .single();
+
+  if (error) throw error;
+  return data as PublicCompanyWithTrade;
 }
 
 function sortMatchedCompanies(
