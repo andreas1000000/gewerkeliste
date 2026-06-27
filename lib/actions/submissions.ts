@@ -91,6 +91,10 @@ function companyPayload(submission: CompanySubmission, tradeId: string, publicVi
     verified: false,
     public_visible: publicVisible,
     logo_url: submission.logo_url || null,
+    profile_image_url: submission.profile_image_url || null,
+    profile_image_alt: submission.profile_image_alt || null,
+    contact_person_name: submission.contact_person_name,
+    contact_person_role: submission.contact_person_role,
   };
 }
 
@@ -165,7 +169,7 @@ async function insertSubmissionSource(companyId: string, submission: CompanySubm
       submission_id: submission.id,
       logo_uploaded: Boolean(submission.logo_url),
       profile_image_uploaded: Boolean(submission.profile_image_url),
-      profile_image_publication: "not_auto_published",
+      profile_image_publication: submission.profile_image_url ? "copied_to_company_profile_after_admin_approval" : "not_uploaded",
     }),
   });
 }

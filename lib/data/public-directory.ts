@@ -5,6 +5,9 @@ import type {
   PublicCompanyWithTrade,
 } from "@/lib/types/public-directory";
 
+const COMPANY_MEDIA_BUCKET = "company-media";
+const MEDIA_SIGNED_URL_TTL_SECONDS = 60 * 60;
+
 export async function getPublicCompanies(params?: {
   query?: string;
   tradeSlug?: string;
@@ -37,7 +40,7 @@ export async function getPublicCompanies(params?: {
 
   const { data, error } = await query;
   if (error) return getPublicCompaniesFallback(params);
-  return data as PublicCompanyWithTrade[];
+  return resolveCompanyMedia(data as PublicCompanyWithTrade[]);
 }
 
 export async function getPublicCompaniesByTrade(
@@ -74,7 +77,7 @@ export async function getPublicCompaniesByTrade(
     return getPublicCompaniesByPrimaryTradeFallback(tradeSlug, params);
   }
 
-  return ((data || []) as unknown as PublicCompanyTradeMatch[])
+  const companies = ((data || []) as unknown as PublicCompanyTradeMatch[])
     .filter((match) => match.status !== "rejected" && match.visibility_level !== "internal")
     .map((match) => ({
       ...match.companies,
@@ -87,6 +90,8 @@ export async function getPublicCompaniesByTrade(
     }))
     .filter((company): company is PublicCompanyWithTrade & { trade_match: { confidence_score: number; source: string; evidence: string | null } } => Boolean(company?.id))
     .sort(sortMatchedCompanies);
+
+  return resolveCompanyMedia(companies);
 }
 
 export async function getPublicCompanyTradeCounts() {
@@ -138,7 +143,7 @@ export async function getCompanyBySlug(slug: string) {
     .single();
 
   if (error) return getCompanyBySlugFallback(slug);
-  return data as PublicCompanyWithTrade;
+  return resolveSingleCompanyMedia(data as PublicCompanyWithTrade);
 }
 
 export async function getCompanyBySlugForMetadata(slug: string): Promise<PublicCompanyMetadata | null> {
@@ -197,7 +202,7 @@ async function getPublicCompaniesByPrimaryTradeFallback(
 
   const { data, error } = await query;
   if (error) throw error;
-  return data as PublicCompanyWithTrade[];
+  return resolveCompanyMedia(data as PublicCompanyWithTrade[]);
 }
 
 async function getPublicCompaniesFallback(params?: {
@@ -224,7 +229,7 @@ async function getPublicCompaniesFallback(params?: {
 
   const { data, error } = await query;
   if (error) throw error;
-  return data as PublicCompanyWithTrade[];
+  return resolveCompanyMedia(data as PublicCompanyWithTrade[]);
 }
 
 async function getCompanyBySlugFallback(slug: string) {
@@ -237,7 +242,38 @@ async function getCompanyBySlugFallback(slug: string) {
     .single();
 
   if (error) throw error;
-  return data as PublicCompanyWithTrade;
+  return resolveSingleCompanyMedia(data as PublicCompanyWithTrade);
+}
+
+async function resolveCompanyMedia<T extends PublicCompanyWithTrade>(companies: T[]) {
+  return Promise.all(companies.map((company) => resolveSingleCompanyMedia(company)));
+}
+
+async function resolveSingleCompanyMedia<T extends PublicCompanyWithTrade>(company: T) {
+  const [logoUrl, profileImageUrl] = await Promise.all([
+    resolveCompanyMediaUrl(company.logo_url),
+    resolveCompanyMediaUrl(company.profile_image_url),
+  ]);
+
+  return {
+    ...company,
+    logo_url: logoUrl,
+    profile_image_url: profileImageUrl,
+  };
+}
+
+async function resolveCompanyMediaUrl(value?: string | null) {
+  if (!value) return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  if (/^https?:\/\//i.test(trimmed) || trimmed.startsWith("/")) return trimmed;
+
+  const path = trimmed.replace(/^company-media\//, "").replace(/^\/+/, "");
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase.storage.from(COMPANY_MEDIA_BUCKET).createSignedUrl(path, MEDIA_SIGNED_URL_TTL_SECONDS);
+
+  if (error || !data?.signedUrl) return null;
+  return data.signedUrl;
 }
 
 function sortMatchedCompanies(
