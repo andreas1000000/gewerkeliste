@@ -35,6 +35,7 @@ export async function approveSubmission(formData: FormData) {
 
     redirect(`/admin/submissions/${id}?approved=${company.slug}`);
   } catch (error) {
+    if (isRedirectError(error)) throw error;
     const message = readableApprovalError(error);
     redirect(`/admin/submissions/${id}?error=${encodeURIComponent(message)}`);
   }
@@ -196,4 +197,10 @@ function normalizeSubmissionWebsite(value: string | null) {
 function readableApprovalError(error: unknown) {
   if (error instanceof Error && error.message) return error.message;
   return "Der Betrieb konnte nicht freigegeben werden. Die Einreichung bleibt im Review.";
+}
+
+function isRedirectError(error: unknown) {
+  if (!(error instanceof Error)) return false;
+  const digest = (error as Error & { digest?: string }).digest;
+  return error.message === "NEXT_REDIRECT" || typeof digest === "string" && digest.startsWith("NEXT_REDIRECT");
 }
