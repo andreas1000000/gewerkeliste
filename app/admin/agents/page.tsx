@@ -28,10 +28,10 @@ export default async function AdminAgentsPage() {
       <div className="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div>
           <p className="text-sm font-semibold uppercase tracking-normal text-brand">Agent Operating System</p>
-          <h1 className="mt-2 text-3xl font-semibold text-ink">Founder Cockpit</h1>
+          <h1 className="mt-2 text-3xl font-semibold text-ink">GewerkeListe OS Start</h1>
           <p className="mt-2 max-w-3xl text-sm leading-6 text-muted">
-            Kontrollierte Agenten-Firma fuer regionale Abdeckung, Datenqualitaet, Freigaben und spaetere Automatisierung.
-            Riskante Aktionen bleiben Human-in-the-Loop.
+            Dein interner Arbeitsplatz fuer Betriebseinträge, regionale Abdeckung, Freigaben und kontrollierte Agentenläufe.
+            Alles, was etwas veröffentlicht, löscht oder versendet, bleibt freigabepflichtig.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -43,6 +43,33 @@ export default async function AdminAgentsPage() {
           </a>
         </div>
       </div>
+
+      <section className="mb-6 grid gap-4 lg:grid-cols-4">
+        <ActionCard
+          title="Neue Einreichungen prüfen"
+          description="Betriebe ansehen, Medien prüfen, Angaben korrigieren und erst danach freigeben."
+          href="/admin/submissions"
+          action="Einreichungen öffnen"
+        />
+        <ActionCard
+          title="Region aufbauen"
+          description="Kandidaten pro Gemeinde und Gewerk prüfen. Anlegen oder Löschen erzeugt nur Freigabeanforderungen."
+          href="/admin/coverage?region=stephanskirchen"
+          action="Coverage öffnen"
+        />
+        <ActionCard
+          title="Gemeinde-Agent vorbereiten"
+          description="Kontrollierte Discovery-Dry-Runs starten. Keine E-Mails, keine Veröffentlichung ohne Freigabe."
+          href="/admin/agents/municipality-discovery"
+          action="Agent öffnen"
+        />
+        <ActionCard
+          title="Öffentliche Ansicht prüfen"
+          description="Schnell zur Website wechseln und sehen, wie Betriebe und Suche für Nutzer wirken."
+          href="/"
+          action="Website ansehen"
+        />
+      </section>
 
       <section className="mb-6 grid gap-4 md:grid-cols-5">
         <Metric label="Registrierte Agenten" value={agentRegistry.length} />
@@ -67,10 +94,18 @@ export default async function AdminAgentsPage() {
       <section className="mb-6 rounded-lg border border-line bg-white p-5 shadow-soft">
         <div className="mb-4 flex flex-col justify-between gap-3 md:flex-row md:items-start">
           <div>
-            <h2 className="text-xl font-semibold text-ink">Regional Coverage Dry Run</h2>
+            <h2 className="text-xl font-semibold text-ink">Regionale Abdeckung prüfen</h2>
             <p className="mt-1 text-sm text-muted">
-              Region {defaultAgentRegionName} wird gelesen und bewertet. Speichern erzeugt nur interne Agent-Runs und Agent-Tasks.
+              Standardregion: {defaultAgentRegionName}. Ein Dry Run liest lokale Daten und erzeugt nur interne Runs, Tasks und Review Items.
             </p>
+            <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold">
+              <Link className="rounded-md border border-line bg-panel px-3 py-1.5 text-muted hover:bg-white hover:text-brand" href="/admin/coverage?region=stephanskirchen">
+                Stephanskirchen-Kandidaten ansehen
+              </Link>
+              <Link className="rounded-md border border-line bg-panel px-3 py-1.5 text-muted hover:bg-white hover:text-brand" href="/admin/coverage?region=riedering">
+                Riedering-Kandidaten ansehen
+              </Link>
+            </div>
           </div>
           <div className="flex flex-wrap gap-2">
             <form action={persistDefaultCoverageDryRun}>
@@ -94,7 +129,7 @@ export default async function AdminAgentsPage() {
           </div>
         </div>
         <p className="mb-4 rounded-md border border-line bg-panel p-3 text-xs font-semibold text-muted">
-          Discovery Dry Run nutzt nur lokale Daten. Keine Websuche, keine externe API, keine Firmenanlage, keine E-Mail.
+          Sicherheitsstatus: lokale Daten, keine Websuche, keine externe API, keine Firmenanlage, keine E-Mail.
         </p>
         {cockpit.coverageError ? (
           <pre className="overflow-auto rounded-md bg-panel p-4 text-xs text-muted">{cockpit.coverageError}</pre>
@@ -182,49 +217,52 @@ export default async function AdminAgentsPage() {
         </Panel>
       </section>
 
-      <section className="mb-6 grid gap-6 lg:grid-cols-3">
-        <Panel title="Run Steps">
-          <div className="grid gap-3">
-            {(cockpit.persisted?.steps || []).map((step) => (
-              <div key={step.id} className="rounded-md border border-line bg-panel p-4">
-                <div className="font-semibold text-ink">{step.step_name}</div>
-                <div className="mt-1 text-xs text-muted">
-                  {step.step_key} · {step.status} · Confidence {step.confidence_score ?? "offen"}
+      <details className="mb-6 rounded-lg border border-line bg-white p-5 shadow-soft">
+        <summary className="cursor-pointer text-xl font-semibold text-ink">Technische Agenten-Details anzeigen</summary>
+        <div className="mt-5 grid gap-6 lg:grid-cols-3">
+          <Panel title="Run Steps">
+            <div className="grid gap-3">
+              {(cockpit.persisted?.steps || []).map((step) => (
+                <div key={step.id} className="rounded-md border border-line bg-panel p-4">
+                  <div className="font-semibold text-ink">{step.step_name}</div>
+                  <div className="mt-1 text-xs text-muted">
+                    {step.step_key} · {step.status} · Confidence {step.confidence_score ?? "offen"}
+                  </div>
                 </div>
-              </div>
-            ))}
-            {empty(cockpit.persisted?.steps, "Noch keine gespeicherten Run Steps.")}
-          </div>
-        </Panel>
+              ))}
+              {empty(cockpit.persisted?.steps, "Noch keine gespeicherten Run Steps.")}
+            </div>
+          </Panel>
 
-        <Panel title="Tool Calls">
-          <div className="grid gap-3">
-            {(cockpit.persisted?.toolCalls || []).map((toolCall) => (
-              <div key={toolCall.id} className="rounded-md border border-line bg-panel p-4">
-                <div className="font-semibold text-ink">{toolCall.tool_name}</div>
-                <div className="mt-1 text-xs text-muted">
-                  {toolCall.tool_class} · {toolCall.status} · {toolCall.actual_cost} EUR
+          <Panel title="Tool Calls">
+            <div className="grid gap-3">
+              {(cockpit.persisted?.toolCalls || []).map((toolCall) => (
+                <div key={toolCall.id} className="rounded-md border border-line bg-panel p-4">
+                  <div className="font-semibold text-ink">{toolCall.tool_name}</div>
+                  <div className="mt-1 text-xs text-muted">
+                    {toolCall.tool_class} · {toolCall.status} · {toolCall.actual_cost} EUR
+                  </div>
                 </div>
-              </div>
-            ))}
-            {empty(cockpit.persisted?.toolCalls, "Noch keine gespeicherten Tool Calls.")}
-          </div>
-        </Panel>
+              ))}
+              {empty(cockpit.persisted?.toolCalls, "Noch keine gespeicherten Tool Calls.")}
+            </div>
+          </Panel>
 
-        <Panel title="Kostenereignisse">
-          <div className="grid gap-3">
-            {(cockpit.persisted?.costEvents || []).map((event) => (
-              <div key={event.id} className="rounded-md border border-line bg-panel p-4">
-                <div className="font-semibold text-ink">{event.tool_name || event.provider || event.cost_center}</div>
-                <div className="mt-1 text-xs text-muted">
-                  {event.agent_id} · {event.actual_cost} {event.currency}
+          <Panel title="Kostenereignisse">
+            <div className="grid gap-3">
+              {(cockpit.persisted?.costEvents || []).map((event) => (
+                <div key={event.id} className="rounded-md border border-line bg-panel p-4">
+                  <div className="font-semibold text-ink">{event.tool_name || event.provider || event.cost_center}</div>
+                  <div className="mt-1 text-xs text-muted">
+                    {event.agent_id} · {event.actual_cost} {event.currency}
+                  </div>
                 </div>
-              </div>
-            ))}
-            {empty(cockpit.persisted?.costEvents, "Noch keine Kostenereignisse.")}
-          </div>
-        </Panel>
-      </section>
+              ))}
+              {empty(cockpit.persisted?.costEvents, "Noch keine Kostenereignisse.")}
+            </div>
+          </Panel>
+        </div>
+      </details>
 
       <section className="mb-6 grid gap-6 lg:grid-cols-3">
         <Panel title="Approvals">
@@ -279,8 +317,8 @@ export default async function AdminAgentsPage() {
         </Panel>
       </section>
 
-      <section className="rounded-lg border border-line bg-white p-5 shadow-soft">
-        <h2 className="text-xl font-semibold text-ink">Agent Registry</h2>
+      <details className="rounded-lg border border-line bg-white p-5 shadow-soft">
+        <summary className="cursor-pointer text-xl font-semibold text-ink">Agent Registry anzeigen</summary>
         <div className="mt-4 grid gap-3">
           {agentRegistry.map((agent) => (
             <article key={agent.agent_id} className="rounded-md border border-line p-4">
@@ -307,7 +345,7 @@ export default async function AdminAgentsPage() {
             </article>
           ))}
         </div>
-      </section>
+      </details>
     </Shell>
   );
 }
@@ -353,6 +391,26 @@ function Metric({ label, value }: { label: string; value: number }) {
       <div className="text-3xl font-semibold text-brand">{value}</div>
       <div className="mt-1 text-sm text-muted">{label}</div>
     </div>
+  );
+}
+
+function ActionCard({
+  title,
+  description,
+  href,
+  action,
+}: {
+  title: string;
+  description: string;
+  href: string;
+  action: string;
+}) {
+  return (
+    <Link className="group rounded-lg border border-line bg-white p-5 shadow-soft hover:border-brand hover:bg-[#fbfcff]" href={href as Route}>
+      <h2 className="text-lg font-semibold text-ink group-hover:text-brand">{title}</h2>
+      <p className="mt-2 min-h-16 text-sm leading-6 text-muted">{description}</p>
+      <div className="mt-4 text-sm font-semibold text-action">{action}</div>
+    </Link>
   );
 }
 

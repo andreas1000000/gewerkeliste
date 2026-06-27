@@ -107,7 +107,7 @@ export default async function AdminCoveragePage({ searchParams }: PageProps) {
           </Link>
         </div>
 
-        <form className="mb-6 grid gap-3 rounded-lg border border-line bg-white p-4 shadow-soft lg:grid-cols-[1fr_180px_220px_auto]">
+        <form className="mb-3 grid gap-3 rounded-lg border border-line bg-white p-4 shadow-soft lg:grid-cols-[1fr_180px_220px_auto_auto]">
           <input name="region" type="hidden" value={regionSlug} />
           <input className="rounded-md border border-line px-3 py-2 text-sm outline-none focus:border-brand" defaultValue={query || ""} name="q" placeholder="Kandidat suchen" />
           <select className="rounded-md border border-line px-3 py-2 text-sm outline-none focus:border-brand" defaultValue={status || ""} name="status">
@@ -126,7 +126,22 @@ export default async function AdminCoveragePage({ searchParams }: PageProps) {
             ))}
           </select>
           <button className="rounded-md bg-brand px-4 py-2 text-sm font-semibold text-white">Filtern</button>
+          <Link className="inline-flex items-center justify-center rounded-md border border-line bg-white px-4 py-2 text-sm font-semibold text-ink hover:bg-panel" href={`/admin/coverage?region=${regionSlug}` as Route}>
+            Filter zurücksetzen
+          </Link>
         </form>
+
+        {status || trade || query ? (
+          <div className="mb-6 rounded-md border border-line bg-panel px-4 py-3 text-sm text-muted">
+            Aktive Filter: {query ? `Suche "${query}" ` : ""}
+            {status ? `Status "${statuses.find(([value]) => value === status)?.[1] || status}" ` : ""}
+            {trade ? `Gewerk "${tradeTaxonomy.find((item) => item.slug === trade)?.name || trade}" ` : ""}
+          </div>
+        ) : (
+          <div className="mb-6 rounded-md border border-line bg-panel px-4 py-3 text-sm text-muted">
+            Es werden alle Kandidaten dieser Region angezeigt. Du kannst nach Status, Gewerk oder Name filtern.
+          </div>
+        )}
 
         <section className="space-y-4">
           {candidates.map((candidate) => (
