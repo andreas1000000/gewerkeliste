@@ -818,10 +818,131 @@ export function serviceTradeHierarchy(): TradeHierarchyGroup[] {
   return serviceTaxonomy.map((group) => ({
     code: String(group.sortOrder).padStart(2, "0"),
     title: group.name,
+    shortTitle: serviceGroupUx[group.sortOrder]?.title || group.name,
+    description: serviceGroupUx[group.sortOrder]?.description || group.description,
+    examples: serviceGroupUx[group.sortOrder]?.examples || [],
+    phase: serviceGroupUx[group.sortOrder]?.phase,
     defaultOpen: group.sortOrder <= 5,
     items: group.trades.map((trade) => ({ label: trade.name, slug: trade.slug })),
   }));
 }
+
+const serviceGroupUx: Record<number, { title: string; description: string; examples: string[]; phase: string }> = {
+  1: {
+    title: "Planung & Beratung",
+    description: "Für Entwurf, Genehmigung, Statik, Gutachten, Bauleitung und fachliche Prüfung vor oder während des Bauprojekts.",
+    examples: ["Architekt", "Statiker", "Energieberatung", "Brandschutzplanung", "Vermessung", "Gutachten"],
+    phase: "Planung",
+  },
+  2: {
+    title: "Baustelle einrichten & sichern",
+    description: "Alles, damit eine Baustelle vorbereitet, erreichbar, geschützt und sicher betrieben werden kann.",
+    examples: ["Gerüst", "Baustelleneinrichtung", "Baulogistik", "Baukran", "Container", "Sicherung"],
+    phase: "Vorbereitung",
+  },
+  3: {
+    title: "Abbruch & Schadstoffe",
+    description: "Für Rückbau, Entkernung, Abbruch, Schadstoffsanierung und fachgerechte Entsorgung im Bestand.",
+    examples: ["Abbruch", "Entkernung", "Asbest", "Schadstoffe", "Rückbau", "Entsorgung"],
+    phase: "Vorbereitung / Sanierung",
+  },
+  4: {
+    title: "Erdarbeiten & Tiefbau",
+    description: "Für Baugrube, Leitungen, Entwässerung, Bodenarbeiten, Kanalbau und Arbeiten unter der Geländeoberfläche.",
+    examples: ["Erdarbeiten", "Baggerarbeiten", "Kanalbau", "Drainage", "Leitungsbau", "Spezialtiefbau"],
+    phase: "Erdarbeiten",
+  },
+  5: {
+    title: "Rohbau & Tragwerk",
+    description: "Alles, was das Gebäude trägt: Mauerwerk, Beton, Stahl, Fundamente und tragende Bauteile.",
+    examples: ["Maurer", "Betonbau", "Fundament", "Bodenplatte", "Kernbohrung", "Abdichtung"],
+    phase: "Rohbau",
+  },
+  6: {
+    title: "Dach & Holzbau",
+    description: "Für Dachstuhl, Holzbau, Zimmererarbeiten, Fertigbau und tragende Konstruktionen aus Holz.",
+    examples: ["Zimmerer", "Holzbau", "Dachstuhl", "Holzrahmenbau", "Carport", "Fertigbau"],
+    phase: "Gebäudehülle",
+  },
+  7: {
+    title: "Dachdeckung & Spenglerei",
+    description: "Für Dacheindeckung, Flachdach, Abdichtung, Dachfenster, Dachrinnen und Arbeiten rund ums Dach.",
+    examples: ["Dachdecker", "Flachdach", "Spengler", "Dachfenster", "Dachsanierung", "PV-Dach"],
+    phase: "Gebäudehülle",
+  },
+  8: {
+    title: "Fassade, Putz & Dämmung",
+    description: "Für Außenputz, Fassade, Wärmedämmung, Stuck, Sockel, Fassadensanierung und Gebäudehülle.",
+    examples: ["Fassade", "WDVS", "Außenputz", "Stuck", "Dämmung", "Fassadensanierung"],
+    phase: "Gebäudehülle",
+  },
+  9: {
+    title: "Fenster, Türen & Sonnenschutz",
+    description: "Für Öffnungen am Gebäude: Fenster, Türen, Glas, Tore, Beschattung und Zugangssysteme.",
+    examples: ["Fenster", "Haustür", "Glas", "Rollläden", "Sonnenschutz", "Tore"],
+    phase: "Gebäudehülle / Ausbau",
+  },
+  10: {
+    title: "Heizung, Sanitär, Klima & Lüftung",
+    description: "Technische Anlagen für Wasser, Wärme, Bad, Luft, Kühlung und Energie im Gebäude.",
+    examples: ["Sanitär", "Bad", "Heizung", "Wärmepumpe", "Lüftung", "Klima"],
+    phase: "Technische Gebäudeausrüstung",
+  },
+  11: {
+    title: "Elektro, PV & Smart Home",
+    description: "Für Strom, Beleuchtung, Photovoltaik, Wallbox, Netzwerk, Sicherheitstechnik und Gebäudeautomation.",
+    examples: ["Elektriker", "PV", "Wallbox", "KNX", "Netzwerk", "Blitzschutz"],
+    phase: "Technische Gebäudeausrüstung",
+  },
+  12: {
+    title: "Innenausbau & Trockenbau",
+    description: "Wände, Decken, Verkleidungen, Akustik, Brandschutz und Ausbauarbeiten im Innenraum.",
+    examples: ["Trockenbau", "Rigips", "Akustikdecke", "Innenwand", "Brandschutzwand", "Doppelboden"],
+    phase: "Innenausbau",
+  },
+  13: {
+    title: "Böden, Fliesen & Naturstein",
+    description: "Für Estrich, Bodenbeläge, Fliesen, Parkett, Naturstein und beschichtete Bodenflächen.",
+    examples: ["Estrich", "Fliesen", "Parkett", "Vinyl", "Naturstein", "Bodenbeschichtung"],
+    phase: "Innenausbau",
+  },
+  14: {
+    title: "Maler, Oberflächen & Kunstmalerei",
+    description: "Für Malerarbeiten, Beschichtungen, dekorative Oberflächen, Kunstmalerei und Schutzanstriche.",
+    examples: ["Maler", "Lackieren", "Tapezieren", "Kunstmalerei", "Betonoptik", "Korrosionsschutz"],
+    phase: "Innenausbau / Oberfläche",
+  },
+  15: {
+    title: "Metallbau, Glas & Stahl",
+    description: "Für Geländer, Treppen, Tore, Stahlbau, Schlosserei, Glas-Metall-Systeme und Sonderkonstruktionen.",
+    examples: ["Metallbau", "Schlosser", "Geländer", "Stahltreppe", "Loftwand", "Stahlbau"],
+    phase: "Rohbau / Ausbau",
+  },
+  16: {
+    title: "Außenanlagen, Garten & Verkehr",
+    description: "Für Einfahrten, Wege, Pflaster, Gartenbau, Mauern, Entwässerung und Verkehrsflächen.",
+    examples: ["Gartenbau", "Pflaster", "Terrasse", "Naturstein", "Asphalt", "Zaun"],
+    phase: "Außenanlagen",
+  },
+  17: {
+    title: "Sanierung & Spezialarbeiten",
+    description: "Für Bestandsschäden, Abdichtung, Trocknung, Restaurierung, Spezialreinigung und besondere Verfahren.",
+    examples: ["Betonsanierung", "Bautrocknung", "Denkmalpflege", "Strahlen", "Schimmel", "Brandschutz"],
+    phase: "Sanierung",
+  },
+  18: {
+    title: "Reinigung, Wartung & Gebäudeservice",
+    description: "Für laufenden Betrieb, Pflege, Reinigung, Hausmeisterservice, Wartung und Instandhaltung.",
+    examples: ["Gebäudereinigung", "Hausmeister", "Winterdienst", "Wartung", "Objektbetreuung", "Service"],
+    phase: "Betrieb / Wartung",
+  },
+  19: {
+    title: "Möbel, Küchen & Sonderausbau",
+    description: "Für Schreinerarbeiten, Küchen, Einbaumöbel, Raumausstattung, Ladenbau und individuelle Ausstattung.",
+    examples: ["Schreiner", "Küche", "Einbaumöbel", "Raumausstattung", "Ladenbau", "Messebau"],
+    phase: "Ausbau / Ausstattung",
+  },
+};
 
 export function serviceTermsByTradeSlug() {
   const map = new Map<string, string[]>();

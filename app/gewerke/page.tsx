@@ -10,9 +10,9 @@ import { publicTradeTaxonomy } from "@/lib/trade-taxonomy";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Baugewerke und Leistungen finden | GewerkeListe.com",
+  title: "Gewerke am Bau: Übersicht, Leistungen & Betriebe finden | GewerkeListe.com",
   description:
-    "Bauleistungsnahe Suche nach Gewerken, Spezialisierungen und passenden Fachbetrieben, mit DIN-276-orientierter Struktur und praxisnahen Vergabeeinheiten.",
+    "Alle wichtigen Bau- und Handwerksgewerke verständlich erklärt. Finden Sie passende Betriebe nach Gewerk, Leistung und Region auf GewerkeListe.com.",
 };
 
 type PageProps = {

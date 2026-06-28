@@ -12,6 +12,10 @@ export type TradeHierarchySubgroup = {
 export type TradeHierarchyGroup = {
   code: string;
   title: string;
+  shortTitle?: string;
+  description?: string;
+  examples?: string[];
+  phase?: string;
   defaultOpen: boolean;
   items?: TradeHierarchyItem[];
   subgroups?: TradeHierarchySubgroup[];

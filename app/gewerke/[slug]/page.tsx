@@ -7,6 +7,7 @@ import { ClaimBadge } from "@/components/status-badge";
 import { publicResultDescription, publicResultImage } from "@/lib/company-display";
 import { getPublicCompaniesByTrade } from "@/lib/data/public-directory";
 import { breadcrumbJsonLd, collectionPageJsonLd, itemListJsonLd, jsonLd } from "@/lib/seo";
+import { popularServicesForTrade } from "@/lib/service-taxonomy";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { canonicalTradeSlug, findTaxonomyTrade, tradeTaxonomy, type TaxonomyTrade } from "@/lib/trade-taxonomy";
 
@@ -30,7 +31,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   return {
     title: `${trade.name}: Betriebe, Leistungen & Regionen | GewerkeListe.com`,
-    description: `Finde Betriebe aus dem Bereich ${trade.name}. GewerkeListe.com macht Bau- und Handwerksbetriebe strukturiert auffindbar.`,
+    description: `Finden Sie Betriebe aus dem Bereich ${trade.name}. GewerkeListe.com macht Bau- und Handwerksbetriebe strukturiert auffindbar.`,
     alternates: {
       canonical: `/gewerke/${trade.slug}`,
     },
@@ -49,6 +50,7 @@ export default async function TradeDetailPage({ params }: PageProps) {
 
   if (!trade) notFound();
   const companies = isSupabaseConfigured() ? await getPublicCompaniesByTrade(trade.slug) : [];
+  const typicalServices = popularServicesForTrade(trade.slug, 12);
   const breadcrumb = breadcrumbJsonLd([
     { name: "Startseite", path: "/" },
     { name: "Gewerke", path: "/gewerke" },
@@ -103,7 +105,7 @@ export default async function TradeDetailPage({ params }: PageProps) {
                 className="inline-flex min-h-11 items-center justify-center rounded-md bg-[#1f5fd4] px-5 text-sm font-semibold text-white hover:bg-[#174eb2]"
                 href={`/suche?gewerk=${encodeURIComponent(trade.slug)}` as Route}
               >
-                Fachbetrieb suchen
+                Betriebe in meiner Region suchen
               </Link>
               <Link
                 className="inline-flex min-h-11 items-center justify-center rounded-md border border-line bg-white px-5 text-sm font-semibold text-[#1f5fd4] hover:border-[#1f5fd4]"
@@ -136,6 +138,27 @@ export default async function TradeDetailPage({ params }: PageProps) {
             </form>
           </aside>
         </div>
+
+        {typicalServices.length > 0 ? (
+          <section className="mt-8 rounded-lg border border-line bg-white p-6 shadow-soft">
+            <h2 className="text-xl font-semibold text-[#07173d]">Typische Leistungen in diesem Gewerk</h2>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-muted">
+              Typische Leistungsbegriffe in diesem Gewerk sind unter anderem die folgenden. Nicht jeder Betrieb bietet
+              jede Leistung an; maßgeblich ist das jeweilige Betriebsprofil.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {typicalServices.map((service) => (
+                <Link
+                  key={service.slug}
+                  className="rounded-md border border-line bg-[#fbfcff] px-3 py-2 text-sm font-medium text-ink hover:border-action hover:text-action"
+                  href={`/suche?gewerk=${trade.slug}&q=${encodeURIComponent(service.name)}` as Route}
+                >
+                  {service.name}
+                </Link>
+              ))}
+            </div>
+          </section>
+        ) : null}
 
         <section className="mt-8 rounded-lg border border-line bg-white p-6 shadow-soft">
           <div className="flex flex-col justify-between gap-3 border-b border-line pb-4 sm:flex-row sm:items-end">
@@ -275,7 +298,7 @@ function EmptyCompanies({ trade }: { trade: TaxonomyTrade }) {
     <div className="py-8 text-center">
       <h3 className="text-xl font-semibold text-[#07173d]">Für dieses Gewerk sind noch keine Betriebe öffentlich gelistet.</h3>
       <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-muted">
-        Suche erweitern oder einen passenden Betrieb vorschlagen.
+        Für dieses Gewerk sind in dieser Region noch keine Betriebe gelistet. GewerkeListe wird laufend erweitert.
       </p>
       <div className="mt-5 flex flex-wrap justify-center gap-3">
         <Link className="inline-flex min-h-10 items-center justify-center rounded-md bg-action px-4 text-sm font-semibold text-white hover:bg-brand" href="/betrieb-eintragen">
@@ -283,6 +306,9 @@ function EmptyCompanies({ trade }: { trade: TaxonomyTrade }) {
         </Link>
         <Link className="inline-flex min-h-10 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-action hover:border-action" href={`/suche?gewerk=${trade.slug}&umkreis=100` as Route}>
           Umkreis erweitern
+        </Link>
+        <Link className="inline-flex min-h-10 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-action hover:border-action" href="/gewerke">
+          Ähnliche Gewerke ansehen
         </Link>
       </div>
     </div>
