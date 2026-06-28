@@ -14,7 +14,6 @@ import {
 import { getCompanyBySlug, getCompanyBySlugForMetadata } from "@/lib/data/public-directory";
 import { breadcrumbJsonLd, jsonLd, localBusinessJsonLd } from "@/lib/seo";
 import { serviceTaxonomy } from "@/lib/service-taxonomy";
-import { siteConfig } from "@/lib/site-config";
 import type { PublicClaimStatus, PublicCompanyWithTrade } from "@/lib/types/public-directory";
 
 export const dynamic = "force-dynamic";
@@ -82,6 +81,7 @@ export default async function CompanyPublicPage({ params }: PageProps) {
       !(company.latitude === 0 && company.longitude === 0);
     const hasDirectContact = Boolean(company.email || company.phone || websiteHref);
     const profileCompletionItems = getProfileCompletionItems(company, visibleDescription, services.length, hasCoordinates);
+    const completionScore = getProfileCompletionScore(company, visibleDescription, services.length, hasCoordinates);
     const headline = trade === "Gewerk" ? `Bau- und Handwerksbetrieb in ${company.city}` : `${trade} in ${company.city}`;
 
     const breadcrumb = breadcrumbJsonLd([
@@ -121,7 +121,12 @@ export default async function CompanyPublicPage({ params }: PageProps) {
           </nav>
 
           <section className="mt-5 overflow-hidden rounded-lg border border-line bg-white shadow-soft">
-            <div className="h-28 bg-[linear-gradient(135deg,#07173d_0%,#174b8f_48%,#eef4fb_100%)] sm:h-36" />
+            <div className="relative h-32 bg-[linear-gradient(135deg,#07173d_0%,#174b8f_44%,#e8f1fb_100%)] sm:h-44">
+              <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_30%,rgba(255,255,255,0.18),transparent_24%),radial-gradient(circle_at_84%_26%,rgba(47,143,91,0.24),transparent_28%)]" />
+              <div className="absolute bottom-4 left-5 rounded-md bg-white/90 px-3 py-1 text-xs font-semibold text-brand shadow-soft sm:left-7">
+                Öffentliches Unternehmensprofil
+              </div>
+            </div>
             <div className="px-5 pb-6 sm:px-7">
               <div className="-mt-12 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
@@ -135,12 +140,16 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                     </div>
                     <h1 className="mt-3 text-3xl font-semibold tracking-normal text-ink sm:text-4xl">{company.name}</h1>
                     <p className="mt-2 text-lg font-medium text-[#30415f]">{headline}</p>
-                    <p className="mt-2 text-sm text-muted">
-                      {company.city} · {trade} · {status.shortLabel}
-                    </p>
+                    <p className="mt-2 text-sm text-muted">{[company.city, trade, status.shortLabel].filter(Boolean).join(" · ")}</p>
                   </div>
                 </div>
                 <ActionBar company={company} websiteHref={websiteHref} canClaim={canClaim} />
+              </div>
+              <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                <ProfileMetric label="Standort" value={location || company.city} />
+                <ProfileMetric label="Schwerpunkt" value={trade} />
+                <ProfileMetric label="Profilstatus" value={status.shortLabel} />
+                <ProfileMetric label="Profilvollständigkeit" value={`${completionScore}%`} />
               </div>
             </div>
           </section>
@@ -149,6 +158,11 @@ export default async function CompanyPublicPage({ params }: PageProps) {
             <div className="grid gap-5">
               <ProfileCard title="Über den Betrieb">
                 <p className="max-w-4xl text-base leading-7 text-ink">{profileDescription}</p>
+                <div className="mt-5 grid gap-3 sm:grid-cols-3">
+                  <Fact label="Gewerk" value={trade} />
+                  <Fact label="Region" value={company.city} />
+                  <Fact label="Kontaktstatus" value={hasDirectContact ? "Kontaktdaten hinterlegt" : "Kontaktdaten ergänzbar"} />
+                </div>
               </ProfileCard>
 
               <ProfileCard
@@ -265,12 +279,12 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                   >
                     Profil kostenlos übernehmen
                   </Link>
-                  <a
+                  <Link
                     className="mt-3 inline-flex w-full min-h-10 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-action hover:border-action"
-                    href={`mailto:${siteConfig.publicContactEmail}?subject=Datenkorrektur ${encodeURIComponent(company.name)}`}
+                    href={`/betriebe/${company.slug}/profil-ergaenzen` as Route}
                   >
-                    Daten korrigieren
-                  </a>
+                    Korrektur oder Ergänzung anfragen
+                  </Link>
                   <p className="mt-3 text-xs leading-5 text-muted">
                     Der kostenlose Basiseintrag bleibt erhalten. Erweiterte Profilfunktionen sind optional.
                   </p>
@@ -290,7 +304,7 @@ export default async function CompanyPublicPage({ params }: PageProps) {
               {company.trades?.slug ? (
                 <Link
                   className="inline-flex min-h-11 items-center justify-center rounded-md bg-action px-5 text-sm font-semibold text-white hover:bg-brand"
-                  href={`/gewerke/${company.trades.slug}` as Route}
+                  href={`/betriebe?gewerk=${company.trades.slug}` as Route}
                 >
                   Weitere Betriebe in diesem Gewerk suchen
                 </Link>
@@ -298,7 +312,7 @@ export default async function CompanyPublicPage({ params }: PageProps) {
               {company.trades?.slug ? (
                 <Link
                   className="inline-flex min-h-11 items-center justify-center rounded-md border border-line bg-white px-5 text-sm font-semibold text-action hover:border-action"
-                  href={`/gewerke/${company.trades.slug}/${locationSlug(company.city)}` as Route}
+                  href={`/betriebe?gewerk=${company.trades.slug}&ort=${encodeURIComponent(company.city)}` as Route}
                 >
                   Gewerke in der Region durchsuchen
                 </Link>
@@ -450,12 +464,12 @@ function ActionBar({
           Profil übernehmen
         </Link>
       ) : null}
-      <a
+      <Link
         className="inline-flex min-h-11 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-action hover:border-action"
-        href={`mailto:${siteConfig.publicContactEmail}?subject=Datenkorrektur ${encodeURIComponent(company.name)}`}
+        href={`/betriebe/${company.slug}/profil-ergaenzen` as Route}
       >
         Daten korrigieren
-      </a>
+      </Link>
     </div>
   );
 }
@@ -647,6 +661,15 @@ function Fact({ label, value }: { label: string; value: string }) {
   );
 }
 
+function ProfileMetric({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-md border border-line bg-[#fbfcff] px-4 py-3">
+      <div className="text-xs font-semibold uppercase tracking-normal text-muted">{label}</div>
+      <div className="mt-1 truncate text-sm font-semibold text-ink">{value}</div>
+    </div>
+  );
+}
+
 function getExecutedTrades(company: PublicCompanyWithTrade) {
   const tradeNames = [
     company.trades?.name,
@@ -731,6 +754,27 @@ function getProfileCompletionItems(company: PublicCompanyWithTrade, description:
     hasCoordinates ? "Wirkungskreis präzisieren" : "Wirkungskreis markieren",
     "Referenzen und Projektbeispiele später ergänzen",
   ];
+}
+
+function getProfileCompletionScore(
+  company: PublicCompanyWithTrade,
+  description: string,
+  serviceCount: number,
+  hasCoordinates: boolean,
+) {
+  const checks = [
+    Boolean(company.name),
+    Boolean(company.city),
+    Boolean(company.trades?.name),
+    Boolean(company.website_url || company.phone || company.email),
+    Boolean(description),
+    serviceCount > 0,
+    Boolean(company.logo_url),
+    Boolean(company.profile_image_url),
+    hasCoordinates,
+  ];
+
+  return Math.round((checks.filter(Boolean).length / checks.length) * 100);
 }
 
 function DataRow({
