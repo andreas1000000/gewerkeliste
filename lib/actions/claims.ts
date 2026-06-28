@@ -12,7 +12,7 @@ export async function submitClaim(_prevState: CompanyFormState, formData: FormDa
   if (formData.get("is_authorized") !== "on") {
     return {
       ok: false,
-      message: "Bitte bestaetige, dass du berechtigt bist, diesen Betrieb zu vertreten.",
+      message: "Bitte bestaetigen Sie, dass Sie berechtigt sind, diesen Betrieb zu vertreten.",
       fieldErrors: { is_authorized: "Berechtigung ist erforderlich." },
     };
   }
@@ -60,6 +60,9 @@ export async function submitClaim(_prevState: CompanyFormState, formData: FormDa
   const proposedEmail = emptyStringToNull(String(formData.get("proposed_email") || company.email || ""));
   const proposedWebsite = emptyStringToNull(String(formData.get("proposed_website") || company.website_url || ""));
   const proposedDescription = String(formData.get("proposed_description") || company.description || "").trim();
+  const selectedServices = Array.from(new Set(formData.getAll("selectedServices").map((value) => String(value).trim()).filter(Boolean)));
+  const missingServices = String(formData.get("missing_services") || "").trim();
+  const requestedSpecializations = splitList(missingServices);
   const verificationNotes = [
     formData.get("verification_website") === "on" ? "Website entspricht Betrieb" : "",
     formData.get("verification_email_domain") === "on" ? "Geschaeftliche E-Mail-Domain passt zur Website" : "",
@@ -67,14 +70,19 @@ export async function submitClaim(_prevState: CompanyFormState, formData: FormDa
     formData.get("verification_document_later") === "on" ? "Gewerbenachweis kann bei Bedarf nachgereicht werden" : "",
   ].filter(Boolean);
   const requestedPrimaryTrade = canonicalTradeSlug(String(formData.get("primaryTrade") || company.trades?.slug || ""));
+  if (!findTaxonomyTrade(requestedPrimaryTrade)) {
+    return {
+      ok: false,
+      message: "Bitte waehle mindestens ein passendes Gewerk aus.",
+      fieldErrors: { primaryTrade: "Mindestens ein Gewerk ist erforderlich." },
+    };
+  }
   const requestedSecondaryTrades = formData
     .getAll("secondaryTrades")
     .map((value) => canonicalTradeSlug(String(value)))
     .filter((slug) => slug && slug !== requestedPrimaryTrade && findTaxonomyTrade(slug))
     .slice(0, 4);
-  const companyTradeSlug =
-    findTaxonomyTrade(requestedPrimaryTrade)?.slug ||
-    canonicalTradeSlug(company.trades?.slug || slugify(company.trades?.name || "fachbetrieb"));
+  const companyTradeSlug = findTaxonomyTrade(requestedPrimaryTrade)?.slug || slugify(company.trades?.name || "fachbetrieb");
   const { error: submissionError } = await supabase.from("company_submissions").insert({
     status: "submitted",
     company_name: proposedCompanyName,
@@ -96,8 +104,8 @@ export async function submitClaim(_prevState: CompanyFormState, formData: FormDa
     country: "Deutschland",
     primary_trade: companyTradeSlug,
     secondary_trades: requestedSecondaryTrades,
-    selected_services: [],
-    specializations: [],
+    selected_services: selectedServices,
+    specializations: requestedSpecializations,
     service_radius_km: 50,
     service_regions: [proposedCity],
     postal_codes: [proposedPostalCode],
@@ -109,6 +117,8 @@ export async function submitClaim(_prevState: CompanyFormState, formData: FormDa
       claim.message,
       "",
       proposedDescription ? `Vorgeschlagener Profiltext:\n${proposedDescription}` : "",
+      selectedServices.length ? `Ausgewaehlte Leistungen:\n- ${selectedServices.join("\n- ")}` : "Hinweis: keine konkreten Leistungen ausgewaehlt.",
+      requestedSpecializations.length ? `Fehlende Leistungen / Spezialisierungen vorgeschlagen:\n- ${requestedSpecializations.join("\n- ")}` : "",
       verificationNotes.length ? `Nachweisangaben:\n- ${verificationNotes.join("\n- ")}` : "",
       supportSummary,
     ].filter(Boolean).join("\n"),
@@ -129,7 +139,7 @@ export async function submitClaim(_prevState: CompanyFormState, formData: FormDa
           ? support_custom_amount
           : Number(support_contribution),
     support_invoice_requested,
-    consent_authorized: false,
+    consent_authorized: true,
     consent_data_correct: false,
     consent_privacy: true,
     source: `claim:${company.id}`,
@@ -148,6 +158,13 @@ export async function submitClaim(_prevState: CompanyFormState, formData: FormDa
 function emptyStringToNull(value: string) {
   const trimmed = value.trim();
   return trimmed ? trimmed : null;
+}
+
+function splitList(value: string) {
+  return value
+    .split(/[\n,;]+/)
+    .map((item) => item.trim())
+    .filter(Boolean);
 }
 
 function formatSupportContribution(contribution: "none" | "49" | "99" | "199" | "custom", customAmount: number | null, invoiceRequested: boolean) {
