@@ -81,7 +81,7 @@ export default async function CompanyPublicPage({ params }: PageProps) {
       Number.isFinite(company.longitude) &&
       !(company.latitude === 0 && company.longitude === 0);
     const hasDirectContact = Boolean(company.email || company.phone || websiteHref);
-    const missingProfileItems = getMissingProfileItems(company, visibleDescription, services.length, hasCoordinates);
+    const profileCompletionItems = getProfileCompletionItems(company, visibleDescription, services.length, hasCoordinates);
     const headline = trade === "Gewerk" ? `Bau- und Handwerksbetrieb in ${company.city}` : `${trade} in ${company.city}`;
 
     const breadcrumb = breadcrumbJsonLd([
@@ -251,7 +251,7 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                 </dl>
               </ProfileCard>
 
-              <ProfileMediaCard company={company} canClaim={canClaim} />
+              <ContactTrustCard company={company} canClaim={canClaim} />
 
               {canClaim ? (
                 <section className="rounded-lg border border-[#b9dec8] bg-[#f1fbf5] p-5 shadow-soft">
@@ -277,19 +277,7 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                 </section>
               ) : null}
 
-              {missingProfileItems.length ? (
-                <ProfileCard title="Profil vervollständigen">
-                  <p className="text-sm leading-6 text-muted">Dieses Profil ist noch unvollständig.</p>
-                  <ul className="mt-4 grid gap-2 text-sm leading-6 text-muted">
-                    {missingProfileItems.map((item) => (
-                      <li key={item} className="flex gap-2">
-                        <span aria-hidden="true">-</span>
-                        <span>{item}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </ProfileCard>
-              ) : null}
+              <ProfileCompletionCard company={company} canClaim={canClaim} items={profileCompletionItems} />
             </aside>
           </div>
 
@@ -331,41 +319,26 @@ function ProfileMark({ company }: { company: PublicCompanyWithTrade }) {
       {company.logo_url ? (
         <img alt={`Logo von ${company.name}`} className="h-full w-full rounded-md object-contain" src={company.logo_url} />
       ) : (
-        <div className="grid h-full w-full place-items-center rounded-md border border-dashed border-line bg-[#fbfcff] px-2 text-center">
-          <span className="text-xs font-semibold leading-5 text-muted">Hier können Sie Ihr Logo einfügen</span>
+        <div className="grid h-full w-full place-items-center rounded-md bg-[#07173d] px-3 text-center text-white">
+          <div>
+            <div className="text-4xl font-semibold">{initials(company.name)}</div>
+            <div className="mt-2 text-[10px] font-semibold leading-4 text-white/75">Logo nach Profilübernahme ergänzen</div>
+          </div>
         </div>
       )}
     </div>
   );
 }
 
-function ProfileMediaCard({ company, canClaim }: { company: PublicCompanyWithTrade; canClaim: boolean }) {
+function ContactTrustCard({ company, canClaim }: { company: PublicCompanyWithTrade; canClaim: boolean }) {
   const claimHref = `/betriebe/${company.slug}/claim` as Route;
 
   return (
-    <ProfileCard title="Profilmedien ergänzen">
+    <ProfileCard title="Ansprechpartner & Vertrauen">
       <div className="grid gap-3">
         <div className="rounded-md border border-line bg-[#fbfcff] p-4">
           <div className="flex gap-3">
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-md border border-dashed border-line bg-white p-2 text-center text-[11px] font-semibold leading-4 text-muted">
-              {company.logo_url ? (
-                <img alt={`Logo von ${company.name}`} className="h-full w-full object-contain" src={company.logo_url} />
-              ) : (
-                "Logo einfügen"
-              )}
-            </div>
-            <div>
-              <h3 className="text-sm font-semibold text-ink">Firmenlogo</h3>
-              <p className="mt-1 text-sm leading-6 text-muted">
-                Ein Logo macht den Betrieb schneller wiedererkennbar und lässt das Profil vollständiger wirken.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="rounded-md border border-line bg-[#fbfcff] p-4">
-          <div className="flex gap-3">
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full border border-dashed border-line bg-white text-center text-[11px] font-semibold leading-4 text-muted">
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full border border-line bg-white text-center text-lg font-semibold leading-4 text-brand">
               {company.profile_image_url ? (
                 <img
                   alt={company.profile_image_alt || `Ansprechpartner von ${company.name}`}
@@ -373,29 +346,62 @@ function ProfileMediaCard({ company, canClaim }: { company: PublicCompanyWithTra
                   src={company.profile_image_url}
                 />
               ) : (
-                "Bild"
+                initials(company.name)
               )}
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-ink">Persönlicher Ansprechpartner</h3>
+              <h3 className="text-sm font-semibold text-ink">
+                {company.profile_image_url ? "Persönlicher Ansprechpartner" : "Ansprechpartner sichtbar machen"}
+              </h3>
               <p className="mt-1 text-sm leading-6 text-muted">
-                Menschen kaufen von Menschen. Ein Ansprechpartnerbild kann Vertrauen schaffen und Rückfragen erleichtern.
+                Menschen arbeiten mit Menschen. Nach Profilübernahme kann der Betrieb hier einen Ansprechpartner, ein Teamfoto
+                oder eine kurze persönliche Vorstellung ergänzen.
               </p>
             </div>
           </div>
         </div>
 
-        <Link
-          className="inline-flex min-h-10 items-center justify-center rounded-md bg-action px-4 text-sm font-semibold text-white hover:bg-brand"
-          href={claimHref}
-        >
-          {canClaim ? "Eintrag übernehmen und Profil ergänzen" : "Profilmedien ergänzen"}
+        <Link className="inline-flex min-h-10 items-center justify-center rounded-md bg-action px-4 text-sm font-semibold text-white hover:bg-brand" href={claimHref}>
+          {canClaim ? "Ansprechpartner ergänzen" : "Profil ergänzen"}
         </Link>
         <p className="text-xs leading-5 text-muted">
-          Medien werden erst nach Profilübernahme bzw. Prüfung veröffentlicht. Ein späterer Login-Bereich kann diese
-          Pflege direkt im Betriebskonto ermöglichen.
+          Es werden keine privaten Ansprechpartnerdaten erfunden oder aus fremden Quellen übernommen. Veröffentlichungen erfolgen erst nach Prüfung.
         </p>
       </div>
+    </ProfileCard>
+  );
+}
+
+function ProfileCompletionCard({
+  company,
+  canClaim,
+  items,
+}: {
+  company: PublicCompanyWithTrade;
+  canClaim: boolean;
+  items: string[];
+}) {
+  return (
+    <ProfileCard title="Profil vervollständigen">
+      <p className="text-sm leading-6 text-muted">Dieses Profil kann vom Betrieb übernommen und weiter ausgebaut werden.</p>
+      <ul className="mt-4 grid gap-2 text-sm leading-6 text-muted">
+        {items.map((item) => (
+          <li key={item} className="flex gap-2">
+            <span aria-hidden="true">-</span>
+            <span>{item}</span>
+          </li>
+        ))}
+      </ul>
+      <Link
+        className="mt-5 inline-flex w-full min-h-11 items-center justify-center rounded-md bg-action px-4 text-sm font-semibold text-white hover:bg-brand"
+        href={`/betriebe/${company.slug}/claim` as Route}
+      >
+        {canClaim ? "Profil kostenlos übernehmen" : "Profil ergänzen"}
+      </Link>
+      <p className="mt-3 text-xs leading-5 text-muted">
+        Kostenlos bleiben Basisprofil, Stammdaten, Gewerke, Leistungen und Kontaktwege. Erweiterte Darstellung wie
+        Referenzen, Projektgalerie, Sichtbarkeitsreport oder visuelle Wirkungskreise kann später optional ergänzt werden.
+      </p>
     </ProfileCard>
   );
 }
@@ -698,13 +704,15 @@ function sourceLabel(value: string) {
   return value.replace(/[-_]+/g, " ");
 }
 
-function getMissingProfileItems(company: PublicCompanyWithTrade, description: string, serviceCount: number, hasCoordinates: boolean) {
-  const items: string[] = [];
-  if (!company.email && !company.phone && !company.website_url) items.push("Kontaktdaten fehlen");
-  if (!description) items.push("Leistungsbeschreibung fehlt");
-  if (!serviceCount) items.push("Leistungen fehlen");
-  if (!hasCoordinates) items.push("Einsatzgebiet fehlt");
-  return items;
+function getProfileCompletionItems(company: PublicCompanyWithTrade, description: string, serviceCount: number, hasCoordinates: boolean) {
+  return [
+    company.logo_url ? "Logo ist hinterlegt" : "Logo hinzufügen",
+    company.profile_image_url ? "Ansprechpartner oder Team ist sichtbar" : "Ansprechpartner oder Team vorstellen",
+    serviceCount ? "Leistungen weiter schärfen" : "Leistungen ergänzen",
+    description ? "Kurzbeschreibung aktuell halten" : "Kurzbeschreibung ergänzen",
+    hasCoordinates ? "Wirkungskreis präzisieren" : "Wirkungskreis markieren",
+    "Referenzen und Projektbeispiele später ergänzen",
+  ];
 }
 
 function DataRow({
