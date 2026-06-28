@@ -1,13 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useActionState } from "react";
 import { TradeCheckboxGroups } from "@/components/trade-checkbox-groups";
+import { TradeServiceSelection } from "@/components/trade-service-selection";
 import { submitBusinessEntry } from "@/lib/actions/business-entry";
 import type { CompanyFormState } from "@/lib/types";
 import type { TaxonomyTrade } from "@/lib/trade-taxonomy";
-import { serviceOptionsForTrade } from "@/lib/service-taxonomy";
 
 const initialState: CompanyFormState = { ok: false, message: "" };
 
@@ -22,20 +22,6 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
   const errors = state.fieldErrors || {};
   const values = state.values || {};
   const formKey = JSON.stringify(values);
-
-  const selectedTrade = useMemo(
-    () => trades.find((trade) => trade.slug === primaryTrade),
-    [primaryTrade, trades],
-  );
-  const serviceOptions = useMemo(() => {
-    if (!selectedTrade) return [];
-    return Array.from(new Set([
-      ...serviceOptionsForTrade(selectedTrade.slug),
-      ...selectedTrade.subTrades,
-      ...selectedTrade.coreServices,
-      ...selectedTrade.specializations,
-    ]));
-  }, [selectedTrade]);
 
   useEffect(() => {
     if (!state.values) return;
@@ -70,15 +56,15 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
         <p className="text-sm font-semibold uppercase tracking-normal text-[#2f8f5b]">Einreichung gespeichert</p>
         <h2 className="mt-3 text-3xl font-semibold text-brand">Vielen Dank. Ihr Betriebseintrag wurde eingereicht.</h2>
         <p className="mt-4 max-w-2xl text-sm leading-6 text-muted">
-          Wir prüfen die Angaben und melden uns, falls Rückfragen bestehen. Nach erfolgreicher Prüfung kann der
-          Betriebseintrag auf GewerkeListe.com veröffentlicht werden.
+          Danke. Ihre Angaben wurden übermittelt und werden geprüft. Der kostenlose Basiseintrag bleibt erhalten. Wir
+          melden uns, falls Rückfragen bestehen.
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
           <Link className="inline-flex min-h-11 items-center rounded-md bg-action px-5 text-sm font-semibold text-white" href="/suche">
             Zur Suche
           </Link>
-          <Link className="inline-flex min-h-11 items-center rounded-md border border-line bg-white px-5 text-sm font-semibold text-action" href="/fuer-betriebe">
-            Weitere Informationen für Betriebe
+          <Link className="inline-flex min-h-11 items-center rounded-md border border-line bg-white px-5 text-sm font-semibold text-action" href="/betriebe">
+            Betriebe suchen
           </Link>
         </div>
       </section>
@@ -116,8 +102,8 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
 
       <FormSection
         number="2"
-        title="Ansprechpartner"
-        help="Der Ansprechpartner wird für Rückfragen zur Prüfung des Eintrags verwendet. Er muss nicht öffentlich angezeigt werden."
+        title="Kontakt und Ansprechpartner"
+        help="Diese Angaben helfen bei Rückfragen zur Prüfung des Eintrags. Angaben zum Ansprechpartner müssen nicht öffentlich angezeigt werden."
       >
         <div className="grid gap-4 md:grid-cols-2">
           <Field label="Vorname" error={errors.contactFirstName}>
@@ -156,7 +142,7 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
               />
             </label>
             <p className="mt-3 text-sm leading-6 text-muted">
-              Ein professionelles Firmenlogo erhöht den Wiedererkennungswert und macht dein Profil vertrauenswürdiger.
+              Ein professionelles Firmenlogo erhöht den Wiedererkennungswert und macht Ihr Profil vertrauenswürdiger.
             </p>
           </div>
           <div className="rounded-lg border border-line bg-[#fbfcff] p-4">
@@ -226,29 +212,14 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
         {errors.secondaryTrades ? <p className="mt-2 text-xs font-semibold text-[#a4442b]">{errors.secondaryTrades}</p> : null}
       </FormSection>
 
-      <FormSection number="5" title="Leistungen auswählen" help="Benennen Sie die Leistungen und Spezialisierungen, die Auftraggeber bei Ihrem Betrieb erkennen sollen.">
-        <div className="rounded-md border border-line bg-[#fbfcff] p-4 text-sm leading-6 text-muted">
-          {selectedTrade ? (
-            <>
-              Strukturierendes Gewerk: <span className="font-semibold text-ink">{selectedTrade.name}</span>. Wählen Sie
-              die passenden Leistungen aus und ergänzen Sie weitere Spezialisierungen im Freitext.
-            </>
-          ) : (
-            "Wählen Sie zuerst oben ein Gewerk aus. Danach erscheinen hier passende Leistungen und Spezialisierungen."
-          )}
-        </div>
-        <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-          {serviceOptions.map((service) => (
-            <CheckCard
-              key={service}
-              checked={selectedServices.includes(service)}
-              label={service}
-              name="selectedServices"
-              onChange={() => toggleService(service)}
-              value={service}
-            />
-          ))}
-        </div>
+      <FormSection number="5" title="Leistungen auswählen" help="Wählen Sie die konkreten Leistungen aus, die Ihr Betrieb innerhalb der gewählten Gewerke tatsächlich anbietet.">
+        <TradeServiceSelection selectedServices={selectedServices} selectedTrades={selectedTrades} onToggleService={toggleService} />
+        {selectedTrades.length && !selectedServices.length ? (
+          <p className="mt-4 rounded-md border border-[#f2d3a7] bg-[#fff8ea] px-4 py-3 text-sm leading-6 text-[#7a4a00]">
+            Sie haben noch keine konkreten Leistungen ausgewählt. Detailleistungen verbessern die Auffindbarkeit Ihres
+            Betriebs.
+          </p>
+        ) : null}
         {errors.selectedServices ? <p className="mt-2 text-xs font-semibold text-[#a4442b]">{errors.selectedServices}</p> : null}
         <Field label="Spezialisierungen ergänzen" error={errors.additionalSpecializations}>
           <input className={inputClass} defaultValue={textValue(values, "additionalSpecializations")} name="additionalSpecializations" placeholder="z. B. Altbausanierung, Naturstein, Gewerbeflächen" />
@@ -257,8 +228,8 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
 
       <FormSection
         number="6"
-        title="Tätigkeitsgebiet"
-        help="Das Tätigkeitsgebiet hilft Auftraggebern einzuschätzen, ob Ihr Betrieb für eine Region relevant ist."
+        title="Region und Wirkungskreis"
+        help="Der Wirkungskreis hilft Auftraggebern einzuschätzen, in welchen Orten und Regionen Ihr Betrieb tätig werden möchte."
       >
         <div className="grid gap-4 md:grid-cols-2">
           <Field label="Einsatzradius in km" error={errors.serviceRadiusKm} required>
@@ -312,7 +283,7 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
         </div>
       </FormSection>
 
-      <FormSection number="9" title="Eintrag zur Prüfung einreichen" help="Die Angaben werden vor der Veröffentlichung geprüft. Ein verifizierter Eintrag zeigt, dass Betriebsdaten bestätigt wurden. Es wird dadurch keine Aussage über Qualität, Zuverlässigkeit oder Ausführung garantiert.">
+      <FormSection number="9" title="Prüfung und Absenden" help="Die Angaben werden vor der Veröffentlichung geprüft. Eine spätere Datenbestätigung bedeutet nur, dass Profildaten bestätigt wurden. Sie ist keine Qualitätsbewertung.">
         <label className="flex items-start gap-3 text-sm font-medium leading-6 text-ink">
           <input
             checked={founderVerification}
@@ -412,41 +383,6 @@ function Field({ label, error, required, children }: { label: string; error?: st
       </span>
       {children}
       {error ? <span className="text-xs font-semibold text-[#a4442b]">{error}</span> : null}
-    </label>
-  );
-}
-
-function CheckCard({
-  checked,
-  disabled,
-  label,
-  name,
-  onChange,
-  value,
-}: {
-  checked: boolean;
-  disabled?: boolean;
-  label: string;
-  name: string;
-  onChange: () => void;
-  value: string;
-}) {
-  return (
-    <label
-      className={`flex min-h-11 items-center gap-3 rounded-md border px-3 py-2 text-sm font-medium ${
-        checked ? "border-action bg-[#eef4ff] text-brand" : "border-line bg-white text-ink"
-      } ${disabled ? "opacity-50" : ""}`}
-    >
-      <input
-        checked={checked}
-        className="h-4 w-4 accent-action"
-        disabled={disabled}
-        name={name}
-        onChange={onChange}
-        type="checkbox"
-        value={value}
-      />
-      {label}
     </label>
   );
 }

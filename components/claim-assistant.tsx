@@ -3,23 +3,84 @@
 import { useState } from "react";
 import { useActionState } from "react";
 import { TradeCheckboxGroups } from "@/components/trade-checkbox-groups";
+import { TradeServiceSelection } from "@/components/trade-service-selection";
 import { submitClaim } from "@/lib/actions/claims";
 import type { CompanyFormState, CompanyWithTrade } from "@/lib/types";
+import { publicTradeTaxonomy } from "@/lib/trade-taxonomy";
 
 const initialState: CompanyFormState = { ok: false, message: "" };
 
 export function ClaimAssistant({ company, initialTrades }: { company: CompanyWithTrade; initialTrades: string[] }) {
   const [state, formAction, pending] = useActionState(submitClaim, initialState);
   const [selectedTrades, setSelectedTrades] = useState(initialTrades);
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [missingServices, setMissingServices] = useState("");
+  const [contact, setContact] = useState({
+    name: "",
+    email: "",
+    phone: company.phone || "",
+    role: "",
+  });
+  const [profile, setProfile] = useState({
+    companyName: company.name,
+    legalForm: "",
+    street: company.street || "",
+    postalCode: company.postal_code,
+    city: company.city,
+    publicEmail: company.email || "",
+    website: company.website_url || "",
+    description: company.description || "",
+  });
   const errors = state.fieldErrors || {};
+  const tradeLabels = new Map(publicTradeTaxonomy().map((trade) => [trade.slug, trade.name]));
+
+  if (state.ok) {
+    return (
+      <section className="rounded-lg border border-[#b9dec8] bg-white p-6 shadow-soft sm:p-8">
+        <p className="text-sm font-semibold uppercase tracking-normal text-[#2f8f5b]">Übernahme eingereicht</p>
+        <h2 className="mt-3 text-3xl font-semibold text-brand">Vielen Dank. Ihre Angaben wurden übermittelt.</h2>
+        <p className="mt-4 max-w-2xl text-sm leading-6 text-muted">
+          Danke. Ihre Angaben wurden übermittelt und werden geprüft. Der kostenlose Basiseintrag bleibt erhalten. Wir
+          melden uns, falls Rückfragen bestehen.
+        </p>
+        <p className="mt-4 rounded-md border border-line bg-[#fbfcff] px-4 py-3 text-xs leading-5 text-muted">
+          Die Übernahme bestätigt keine fachliche Qualität und ist keine Empfehlung. Sie dient der Prüfung und
+          Bestätigung der Profildaten.
+        </p>
+      </section>
+    );
+  }
 
   function toggleTrade(slug: string) {
     setSelectedTrades((current) => {
       if (current.includes(slug)) {
-        return current.filter((item) => item !== slug);
+        const next = current.filter((item) => item !== slug);
+        pruneServicesForTrades(next);
+        return next;
       }
       return [...current, slug];
     });
+  }
+
+  function toggleService(service: string) {
+    setSelectedServices((current) =>
+      current.includes(service) ? current.filter((item) => item !== service) : [...current, service],
+    );
+  }
+
+  function pruneServicesForTrades(trades: string[]) {
+    if (!trades.length) {
+      setSelectedServices([]);
+      return;
+    }
+  }
+
+  function updateContact(field: keyof typeof contact, value: string) {
+    setContact((current) => ({ ...current, [field]: value }));
+  }
+
+  function updateProfile(field: keyof typeof profile, value: string) {
+    setProfile((current) => ({ ...current, [field]: value }));
   }
 
   return (
@@ -29,25 +90,102 @@ export function ClaimAssistant({ company, initialTrades }: { company: CompanyWit
       <input name="support_contribution" type="hidden" value="none" />
       <input name="support_custom_amount" type="hidden" value="" />
       <input name="primaryTrade" type="hidden" value={selectedTrades[0] || ""} />
+      <input name="proposed_phone" type="hidden" value={contact.phone} />
       {selectedTrades.slice(1).map((slug) => (
         <input key={slug} name="secondaryTrades" type="hidden" value={slug} />
       ))}
 
-      <WizardSection eyebrow="Schritt 1" title="Identität">
+      <WizardSection eyebrow="Schritt 1" title="Betrieb prüfen">
+        <p className="mb-5 text-sm leading-6 text-muted">
+          Prüfen Sie die vorhandenen Betriebsdaten. Korrigieren Sie nur Angaben, die öffentlich für den Betrieb verwendet werden
+          sollen.
+        </p>
         <div className="grid gap-4 md:grid-cols-2">
-          <Field label="Name Ansprechpartner" error={errors.name}>
-            <input className={inputClass} name="name" required />
+          <Field label="Firmenname">
+            <input className={inputClass} name="proposed_company_name" onChange={(event) => updateProfile("companyName", event.target.value)} value={profile.companyName} />
           </Field>
-          <Field label="E-Mail" error={errors.email}>
-            <input className={inputClass} name="email" type="email" required />
+          <Field label="Rechtsform">
+            <input className={inputClass} name="proposed_legal_form" onChange={(event) => updateProfile("legalForm", event.target.value)} placeholder="z. B. GmbH, Einzelunternehmen" value={profile.legalForm} />
           </Field>
-          <Field label="Telefonnummer" error={errors.phone}>
-            <input className={inputClass} name="phone" />
+          <Field label="Straße">
+            <input className={inputClass} name="proposed_street" onChange={(event) => updateProfile("street", event.target.value)} value={profile.street} />
           </Field>
-          <Field label="Funktion im Betrieb">
-            <input className={inputClass} name="requester_role" placeholder="z. B. Inhaber, Geschäftsführung, Büro" />
+          <Field label="PLZ">
+            <input className={inputClass} name="proposed_postal_code" onChange={(event) => updateProfile("postalCode", event.target.value)} value={profile.postalCode} />
+          </Field>
+          <Field label="Ort">
+            <input className={inputClass} name="proposed_city" onChange={(event) => updateProfile("city", event.target.value)} value={profile.city} />
+          </Field>
+          <Field label="Öffentliche E-Mail">
+            <input className={inputClass} name="proposed_email" onChange={(event) => updateProfile("publicEmail", event.target.value)} type="email" value={profile.publicEmail} />
+          </Field>
+          <Field label="Website">
+            <input className={inputClass} name="proposed_website" onChange={(event) => updateProfile("website", event.target.value)} value={profile.website} />
           </Field>
         </div>
+      </WizardSection>
+
+      <WizardSection eyebrow="Schritt 2" title="Welche Gewerke bietet Ihr Betrieb an?">
+        <p className="text-sm leading-6 text-muted">
+          Bereits erkannte Gewerke sind vorausgewählt. Entfernen Sie unpassende Gewerke und ergänzen Sie alle Gewerke,
+          die Ihr Betrieb tatsächlich anbietet.
+        </p>
+        <div className="mt-4">
+          <TradeCheckboxGroups defaultOpen={false} name="claimTradeSelection" onToggle={toggleTrade} selected={selectedTrades} />
+        </div>
+        {!selectedTrades.length ? (
+          <p className="mt-3 rounded-md border border-[#f2d3a7] bg-[#fff8ea] px-4 py-3 text-sm font-semibold text-[#7a4a00]">
+            Bitte wählen Sie mindestens ein Gewerk aus.
+          </p>
+        ) : null}
+      </WizardSection>
+
+      <WizardSection eyebrow="Schritt 3" title="Welche konkreten Leistungen bietet Ihr Betrieb an?">
+        <TradeServiceSelection selectedServices={selectedServices} selectedTrades={selectedTrades} onToggleService={toggleService} />
+        {selectedTrades.length && !selectedServices.length ? (
+          <p className="mt-4 rounded-md border border-[#f2d3a7] bg-[#fff8ea] px-4 py-3 text-sm leading-6 text-[#7a4a00]">
+            Sie haben noch keine konkreten Leistungen ausgewählt. Detailleistungen verbessern die Auffindbarkeit Ihres
+            Betriebs. Falls für Ihr Gewerk noch keine passende Leistung vorhanden ist, schlagen Sie sie unten vor.
+          </p>
+        ) : null}
+        <Field label="Fehlt eine Leistung? Leistung oder Spezialisierung vorschlagen">
+          <textarea
+            className="min-h-24 w-full rounded-md border border-line px-3 py-2 outline-none focus:border-action"
+            name="missing_services"
+            onChange={(event) => setMissingServices(event.target.value)}
+            placeholder="z. B. Akustikdecken, Brandschutzwände, Trockenestrich"
+            value={missingServices}
+          />
+        </Field>
+      </WizardSection>
+
+      <WizardSection eyebrow="Schritt 4" title="Ansprechpartner und öffentliche Kontaktdaten">
+        <div className="grid gap-4 md:grid-cols-2">
+          <Field label="Name Ansprechpartner" error={errors.name}>
+            <input className={inputClass} name="name" onChange={(event) => updateContact("name", event.target.value)} required value={contact.name} />
+          </Field>
+          <Field label="E-Mail für Rückfragen" error={errors.email}>
+            <input className={inputClass} name="email" onChange={(event) => updateContact("email", event.target.value)} required type="email" value={contact.email} />
+          </Field>
+          <Field label="Telefon öffentlich / Rückruf" error={errors.phone}>
+            <input className={inputClass} name="phone" onChange={(event) => updateContact("phone", event.target.value)} value={contact.phone} />
+          </Field>
+          <Field label="Funktion im Betrieb">
+            <input className={inputClass} name="requester_role" onChange={(event) => updateContact("role", event.target.value)} placeholder="z. B. Inhaber, Geschäftsführung, Büro" value={contact.role} />
+          </Field>
+        </div>
+        <Field label="Kurzbeschreibung">
+          <textarea
+            className="min-h-36 w-full rounded-md border border-line px-3 py-2 outline-none focus:border-action"
+            name="proposed_description"
+            onChange={(event) => updateProfile("description", event.target.value)}
+            value={profile.description}
+          />
+        </Field>
+        <p className="mt-3 text-sm leading-6 text-muted">
+          Beschreiben Sie kurz und sachlich, welche Leistungen Sie anbieten. Keine Werbetexte, keine irreführenden
+          Angaben.
+        </p>
         <label className="mt-5 flex items-start gap-3 text-sm font-medium leading-6 text-ink">
           <input className="mt-1 h-4 w-4 accent-action" name="is_authorized" required type="checkbox" />
           Ich bin berechtigt, diesen Betrieb zu vertreten.
@@ -55,78 +193,57 @@ export function ClaimAssistant({ company, initialTrades }: { company: CompanyWit
         {errors.is_authorized ? <p className="mt-2 text-xs font-semibold text-[#a4442b]">{errors.is_authorized}</p> : null}
       </WizardSection>
 
-      <WizardSection eyebrow="Schritt 2" title="Basisdaten prüfen">
-        <div className="grid gap-4 md:grid-cols-2">
-          <Field label="Firmenname">
-            <input className={inputClass} defaultValue={company.name} name="proposed_company_name" />
-          </Field>
-          <Field label="Rechtsform">
-            <input className={inputClass} name="proposed_legal_form" placeholder="z. B. GmbH, Einzelunternehmen" />
-          </Field>
-          <Field label="Straße">
-            <input className={inputClass} defaultValue={company.street || ""} name="proposed_street" />
-          </Field>
-          <Field label="PLZ">
-            <input className={inputClass} defaultValue={company.postal_code} name="proposed_postal_code" />
-          </Field>
-          <Field label="Ort">
-            <input className={inputClass} defaultValue={company.city} name="proposed_city" />
-          </Field>
-          <Field label="Telefon">
-            <input className={inputClass} defaultValue={company.phone || ""} name="proposed_phone" />
-          </Field>
-          <Field label="Öffentliche E-Mail">
-            <input className={inputClass} defaultValue={company.email || ""} name="proposed_email" type="email" />
-          </Field>
-          <Field label="Website">
-            <input className={inputClass} defaultValue={company.website_url || ""} name="proposed_website" />
-          </Field>
+      <WizardSection eyebrow="Schritt 5" title="Zusammenfassung prüfen">
+        <div className="grid gap-4">
+          <SummaryBlock title="Betrieb">
+            <SummaryLine label="Firmenname" value={profile.companyName} />
+            <SummaryLine label="Ort" value={`${profile.postalCode} ${profile.city}`.trim()} />
+            <SummaryLine label="Website" value={profile.website || "Nicht hinterlegt"} />
+            <SummaryLine label="Öffentliche E-Mail" value={profile.publicEmail || "Nicht hinterlegt"} />
+          </SummaryBlock>
+          <SummaryBlock title="Ausgewählte Gewerke">
+            {selectedTrades.length ? (
+              <div className="flex flex-wrap gap-2">
+                {selectedTrades.map((slug) => (
+                  <span key={slug} className="rounded-md border border-line bg-[#fbfcff] px-3 py-1 text-sm font-semibold text-ink">
+                    {tradeLabels.get(slug) || slug}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm font-semibold text-[#a4442b]">Noch kein Gewerk ausgewählt.</p>
+            )}
+          </SummaryBlock>
+          <SummaryBlock title="Ausgewählte Leistungen">
+            {selectedServices.length ? (
+              <ul className="grid gap-2 sm:grid-cols-2">
+                {selectedServices.map((service) => (
+                  <li key={service} className="rounded-md border border-line bg-[#fbfcff] px-3 py-2 text-sm text-ink">
+                    {service}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm leading-6 text-[#7a4a00]">
+                Noch keine konkrete Leistung ausgewählt. Das Profil kann eingereicht werden, aber Detailleistungen
+                verbessern die Auffindbarkeit.
+              </p>
+            )}
+            {missingServices ? <p className="mt-3 text-sm leading-6 text-muted">Vorgeschlagen: {missingServices}</p> : null}
+          </SummaryBlock>
+          <SummaryBlock title="Ansprechpartner">
+            <SummaryLine label="Name" value={contact.name || "Nicht eingetragen"} />
+            <SummaryLine label="E-Mail" value={contact.email || "Nicht eingetragen"} />
+            <SummaryLine label="Telefon" value={contact.phone || "Nicht eingetragen"} />
+            <SummaryLine label="Funktion" value={contact.role || "Nicht eingetragen"} />
+          </SummaryBlock>
         </div>
-      </WizardSection>
-
-      <WizardSection eyebrow="Schritt 3" title="Leistungen und Gewerke bestätigen">
-        <p className="text-sm leading-6 text-muted">
-          Bereits erkannte Gewerke sind vorausgewählt. Bestätigen oder ergänzen Sie alle Gewerke, Leistungen und
-          Spezialisierungen, die Ihr Betrieb tatsächlich anbietet.
+        <input name="verification_document_later" type="hidden" value="on" />
+        <p className="mt-5 rounded-md border border-line bg-[#fbfcff] px-4 py-3 text-xs leading-5 text-muted">
+          Die Angaben werden als Korrekturvorschlag eingereicht und geprüft, bevor Änderungen veröffentlicht werden.
+          Das bestehende öffentliche Profil bleibt bis dahin unverändert. Eine spätere Datenbestätigung ist keine
+          Qualitätsbewertung und keine Empfehlung.
         </p>
-        <div className="mt-4">
-          <TradeCheckboxGroups defaultOpen name="claimTradeSelection" onToggle={toggleTrade} selected={selectedTrades} />
-        </div>
-      </WizardSection>
-
-      <WizardSection eyebrow="Schritt 4" title="Profiltext">
-        <Field label="Kurzbeschreibung">
-          <textarea
-            className="min-h-36 w-full rounded-md border border-line px-3 py-2 outline-none focus:border-action"
-            defaultValue={company.description || ""}
-            name="proposed_description"
-          />
-        </Field>
-        <p className="mt-3 text-sm leading-6 text-muted">
-          Beschreiben Sie kurz und sachlich, welche Leistungen Sie anbieten. Keine Werbetexte, keine irreführenden
-          Angaben.
-        </p>
-      </WizardSection>
-
-      <WizardSection eyebrow="Schritt 5" title="Nachweis und Prüfung">
-        <div className="grid gap-3">
-          <Check name="verification_website">Website entspricht Betrieb</Check>
-          <Check name="verification_email_domain">Geschäftliche E-Mail-Domain passt zur Website</Check>
-          <Check name="verification_phone_callback">Telefonnummer-Rückfrage möglich</Check>
-          <Check name="verification_document_later">Gewerbenachweis kann bei Bedarf nachgereicht werden</Check>
-        </div>
-        <p className="mt-4 rounded-md border border-line bg-[#fbfcff] px-4 py-3 text-xs leading-5 text-muted">
-          Änderungen werden geprüft, bevor sie veröffentlicht werden. Das bestehende öffentliche Profil bleibt bis dahin
-          unverändert.
-        </p>
-      </WizardSection>
-
-      <WizardSection eyebrow="Schritt 6" title="Zur Prüfung einreichen">
-        <div className="grid gap-3 sm:grid-cols-3">
-          <Benefit>Kostenloses Basisprofil sichern</Benefit>
-          <Benefit>Kontaktdaten korrigieren</Benefit>
-          <Benefit>Leistungen sichtbar machen</Benefit>
-        </div>
         {state.message ? (
           <div
             className={`mt-5 rounded-md border px-4 py-3 text-sm font-medium ${
@@ -167,17 +284,22 @@ function Field({ label, error, children }: { label: string; error?: string; chil
   );
 }
 
-function Check({ name, children }: { name: string; children: React.ReactNode }) {
+function SummaryBlock({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <label className="flex items-start gap-3 rounded-md border border-line bg-[#fbfcff] px-4 py-3 text-sm font-medium leading-6 text-ink">
-      <input className="mt-1 h-4 w-4 accent-action" name={name} type="checkbox" />
-      {children}
-    </label>
+    <section className="rounded-lg border border-line bg-[#fbfcff] p-4">
+      <h3 className="text-sm font-semibold text-brand">{title}</h3>
+      <div className="mt-3">{children}</div>
+    </section>
   );
 }
 
-function Benefit({ children }: { children: React.ReactNode }) {
-  return <div className="rounded-md border border-line bg-[#fbfcff] px-4 py-3 text-sm font-semibold text-ink">{children}</div>;
+function SummaryLine({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="grid gap-1 border-b border-line py-2 text-sm last:border-b-0 sm:grid-cols-[180px_minmax(0,1fr)]">
+      <span className="font-semibold text-muted">{label}</span>
+      <span className="text-ink">{value}</span>
+    </div>
+  );
 }
 
 const inputClass = "w-full rounded-md border border-line px-3 py-2 outline-none focus:border-action";

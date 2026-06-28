@@ -52,16 +52,20 @@ export default async function CompanyClaimWizardPage({ params }: PageProps) {
           <h1 className="mt-3 text-4xl font-semibold tracking-normal text-[#07173d]">Profil kostenlos übernehmen</h1>
           <p className="mt-4 max-w-3xl text-base leading-7 text-ink">
             Übernehmen Sie den bestehenden Betriebseintrag für <span className="font-semibold">{company.name}</span>,
-            korrigieren Sie Ihre Angaben und zeigen Sie Auftraggebern klar, welche Leistungen Sie anbieten.
+            korrigieren Sie Angaben und ergänzen Sie Gewerke, Leistungen und Kontaktinformationen zur Prüfung.
           </p>
           <div className="mt-5 grid gap-3 sm:grid-cols-3">
             <Benefit>Kontaktdaten korrigieren</Benefit>
             <Benefit>Leistungen sichtbar machen</Benefit>
-            <Benefit>Vertrauen durch geprüfte Betriebsdaten aufbauen</Benefit>
+            <Benefit>Datenbestätigung nachvollziehbar machen</Benefit>
           </div>
           <p className="mt-5 rounded-md border border-[#bde7cc] bg-[#f1fbf5] px-4 py-3 text-sm leading-6 text-[#24523a]">
             Die Übernahme des Basisprofils ist kostenlos. Änderungen werden geprüft, bevor sie veröffentlicht werden.
             Freiwillige Förderbeiträge haben keinen Einfluss auf Prüfung, Darstellung oder Verifizierung.
+          </p>
+          <p className="mt-3 rounded-md border border-line bg-[#fbfcff] px-4 py-3 text-xs leading-5 text-muted">
+            Eine Profilübernahme bestätigt Profildaten. Sie ist keine Empfehlung, keine Qualitätsgarantie und keine
+            Bewertung der ausgeführten Arbeiten.
           </p>
         </section>
 
