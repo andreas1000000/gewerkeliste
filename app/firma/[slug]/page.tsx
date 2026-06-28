@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import { publicResultDescription } from "@/lib/company-display";
 import { getCompanyBySlug, getCompanyBySlugForMetadata } from "@/lib/data/public-directory";
+import { breadcrumbJsonLd, jsonLd, localBusinessJsonLd } from "@/lib/seo";
 import { siteConfig } from "@/lib/site-config";
 import type { PublicCompanyWithTrade, PublicClaimStatus } from "@/lib/types/public-directory";
 
@@ -31,9 +32,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const trade = company.trades?.name || "Handwerk";
   return {
     title: `${company.name} – ${trade} in ${company.city} | GewerkeListe.com`,
-    description: `${company.name}: ${trade}, Leistungen und Tätigkeitsgebiet in ${company.city} und Umgebung. Kontakt und Verifizierungsstatus auf GewerkeListe.com.`,
+    description: `Informationen zu ${company.name} in ${company.city}: Gewerke, Leistungen, Kontakt und Unternehmensprofil auf GewerkeListe.com.`,
     alternates: {
       canonical: `/firma/${slug}`,
+    },
+    openGraph: {
+      title: `${company.name} | ${trade} in ${company.city}`,
+      description: `Unternehmensprofil von ${company.name} auf GewerkeListe.com.`,
+      url: `/firma/${slug}`,
+      type: "website",
     },
   };
 }
@@ -54,10 +61,19 @@ export default async function CompanyPublicPage({ params }: PageProps) {
       Number.isFinite(company.latitude) &&
       Number.isFinite(company.longitude) &&
       !(company.latitude === 0 && company.longitude === 0);
+    const breadcrumb = breadcrumbJsonLd([
+      { name: "Startseite", path: "/" },
+      { name: trade, path: `/gewerke/${company.trades?.slug || ""}` },
+      { name: company.city, path: `/gewerke/${company.trades?.slug || ""}/${locationSlug(company.city)}` },
+      { name: company.name, path: `/firma/${company.slug}` },
+    ]);
+    const localBusiness = localBusinessJsonLd(company, `/firma/${company.slug}`);
 
     return (
       <main className="min-h-screen bg-[#f7f8fb] text-ink">
         <SiteHeader />
+        <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(breadcrumb)} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(localBusiness)} />
 
         <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
           <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-sm text-muted">
@@ -81,7 +97,7 @@ export default async function CompanyPublicPage({ params }: PageProps) {
               <div className="grid gap-6 md:grid-cols-[180px_minmax(0,1fr)]">
                 <div className="flex aspect-square items-center justify-center rounded-lg border border-line bg-[#fbfaf7] p-5">
                   {company.logo_url ? (
-                    <img alt={`${company.name} Firmenlogo`} className="h-full w-full rounded-md object-contain" src={company.logo_url} />
+                    <img alt={`Logo von ${company.name}`} className="h-full w-full rounded-md object-contain" src={company.logo_url} />
                   ) : (
                     <div className="grid h-full w-full place-items-center rounded-md border border-line bg-white text-center">
                       <div className="mx-auto grid h-16 w-16 place-items-center rounded-md bg-brand text-2xl font-semibold text-white">
@@ -170,7 +186,7 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                 <div className="mt-4 flex gap-4">
                   {company.profile_image_url ? (
                     <img
-                      alt={company.profile_image_alt || company.contact_person_name || "Ansprechpartner"}
+                      alt={company.profile_image_alt || `Ansprechpartner von ${company.name}`}
                       className="h-20 w-20 shrink-0 rounded-lg object-cover"
                       src={company.profile_image_url}
                     />
@@ -512,4 +528,17 @@ function normalizeWebsiteUrl(url: string | null) {
   if (!url) return undefined;
   if (/^https?:\/\//i.test(url)) return url;
   return `https://${url}`;
+}
+
+function locationSlug(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/ä/g, "ae")
+    .replace(/ö/g, "oe")
+    .replace(/ü/g, "ue")
+    .replace(/ß/g, "ss")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }

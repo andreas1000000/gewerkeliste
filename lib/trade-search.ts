@@ -1,4 +1,5 @@
 import type { TaxonomyTrade } from "@/lib/trade-taxonomy";
+import { serviceTermsByTradeSlug } from "@/lib/service-taxonomy";
 
 export type TradeSearchEntry<T extends TaxonomyTrade = TaxonomyTrade> = {
   trade: T;
@@ -33,7 +34,10 @@ const weakExpansionTokens = new Set([
   "ausfuehrung",
 ]);
 
+const serviceSearchTerms = serviceTermsByTradeSlug();
+
 export function createTradeSearchEntry<T extends TaxonomyTrade>(trade: T, extraTerms: string[] = []): TradeSearchEntry<T> {
+  const serviceTerms = serviceSearchTerms.get(trade.slug) || [];
   const searchableTerms = [
     trade.name,
     trade.slug,
@@ -48,6 +52,7 @@ export function createTradeSearchEntry<T extends TaxonomyTrade>(trade: T, extraT
     ...trade.projectTypes,
     ...trade.relatedTrades,
     ...trade.typicalBusinessTypes,
+    ...serviceTerms,
     ...extraTerms,
   ];
   const expansionTerms = [
@@ -60,6 +65,7 @@ export function createTradeSearchEntry<T extends TaxonomyTrade>(trade: T, extraT
     ...trade.projectTypes,
     ...trade.relatedTrades,
     ...trade.typicalBusinessTypes,
+    ...serviceTerms,
     ...extraTerms,
   ];
 

@@ -6,6 +6,7 @@ import { SiteHeader } from "@/components/site-header";
 import { ClaimBadge } from "@/components/status-badge";
 import { publicResultDescription, publicResultImage } from "@/lib/company-display";
 import { getPublicCompaniesByTrade } from "@/lib/data/public-directory";
+import { breadcrumbJsonLd, collectionPageJsonLd, itemListJsonLd, jsonLd } from "@/lib/seo";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { canonicalTradeSlug, findTaxonomyTrade, tradeTaxonomy, type TaxonomyTrade } from "@/lib/trade-taxonomy";
 
@@ -28,8 +29,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 
   return {
-    title: trade.seoTitle,
-    description: trade.seoDescription,
+    title: `${trade.name}: Betriebe, Leistungen & Regionen | GewerkeListe.com`,
+    description: `Finde Betriebe aus dem Bereich ${trade.name}. GewerkeListe.com macht Bau- und Handwerksbetriebe strukturiert auffindbar.`,
+    alternates: {
+      canonical: `/gewerke/${trade.slug}`,
+    },
+    openGraph: {
+      title: `${trade.name} finden | GewerkeListe.com`,
+      description: trade.shortDescription,
+      url: `/gewerke/${trade.slug}`,
+      type: "website",
+    },
   };
 }
 
@@ -39,10 +49,29 @@ export default async function TradeDetailPage({ params }: PageProps) {
 
   if (!trade) notFound();
   const companies = isSupabaseConfigured() ? await getPublicCompaniesByTrade(trade.slug) : [];
+  const breadcrumb = breadcrumbJsonLd([
+    { name: "Startseite", path: "/" },
+    { name: "Gewerke", path: "/gewerke" },
+    { name: trade.name, path: `/gewerke/${trade.slug}` },
+  ]);
+  const collectionPage = collectionPageJsonLd({
+    name: `${trade.name} Fachbetriebe finden`,
+    description: trade.shortDescription,
+    path: `/gewerke/${trade.slug}`,
+  });
+  const itemList = itemListJsonLd(
+    companies.slice(0, 50).map((company) => ({
+      name: company.name,
+      path: `/firma/${company.slug}`,
+    })),
+  );
 
   return (
     <main className="min-h-screen bg-[#f7f8fb] text-ink">
       <SiteHeader />
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(breadcrumb)} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(collectionPage)} />
+      {companies.length ? <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(itemList)} /> : null}
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <nav className="text-sm text-muted">
           <Link className="hover:text-[#1f5fd4]" href="/">
@@ -132,7 +161,7 @@ export default async function TradeDetailPage({ params }: PageProps) {
                         {imageUrl ? (
                           <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-line bg-[#fbfcff]">
                             <img
-                              alt={`${company.name} Profilbild`}
+                              alt={company.logo_url ? `Logo von ${company.name}` : `Ansprechpartner von ${company.name}`}
                               className="h-full w-full object-cover"
                               src={imageUrl}
                             />

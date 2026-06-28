@@ -6,6 +6,7 @@ import type { Route } from "next";
 import type { TradeHierarchyGroup, TradeHierarchyItem } from "@/lib/trade-hierarchy";
 import { createTradeSearchEntry, normalizeSearchTerm, rankTradeEntries, type TradeSearchEntry } from "@/lib/trade-search";
 import type { TaxonomyTrade } from "@/lib/trade-taxonomy";
+import { popularServicesForTrade } from "@/lib/service-taxonomy";
 
 export type TradeViewMode = "kostengruppen" | "alphabetisch" | "haeufig";
 
@@ -89,10 +90,10 @@ export function TradeBrowser({
               <h1 className="max-w-4xl text-4xl font-semibold tracking-normal text-brand sm:text-5xl">
                 Baugewerke und Leistungen strukturiert finden
               </h1>
-              <p className="mt-5 max-w-4xl text-base leading-7 text-muted">
-                GewerkeListe.com ordnet Fachbetriebe nach bauleistungsnahen Gewerken, Spezialisierungen, Leistungen und
-                Region. Die Struktur orientiert sich an der Baupraxis und nutzt DIN-276-nahe Ordnung nur als Hilfe, nicht
-                als starre Gewerkeliste.
+          <p className="mt-5 max-w-4xl text-base leading-7 text-muted">
+                GewerkeListe.com ordnet Fachbetriebe nach Hauptgruppen, Gewerken, Leistungsfamilien und konkreten
+                Spezialleistungen. So werden auch Begriffe wie Lehmputz, Gastherme, Kernbohrung, KNX, WDVS oder
+                Fußbodenheizung fräsen direkt auffindbar.
               </p>
               {claimIntent ? (
                 <div className="mt-5 rounded-lg border border-[#b9dec8] bg-[#eef9f2] p-4 text-sm leading-6 text-ink">
@@ -276,7 +277,7 @@ function HierarchyView({
   return (
     <section className="mt-6">
       <div className="mb-4 grid grid-cols-[minmax(0,1fr)_auto] gap-4 px-3 text-xs font-semibold uppercase tracking-normal text-muted">
-        <span>Kostengruppe / Vergabeeinheit</span>
+        <span>Hauptgruppe / Gewerk</span>
         <span>Betriebe</span>
       </div>
       <div className="overflow-hidden rounded-lg border border-line bg-white shadow-soft">
@@ -292,7 +293,7 @@ function HierarchyView({
                   <span className="font-semibold text-brand">{group.code}</span>
                   <span className="ml-3 font-semibold text-[#07173d]">{group.title}</span>
                 </span>
-                <span className="text-sm text-muted">{countItems(group.items, group.subgroups)} Einheiten</span>
+        <span className="text-sm text-muted">{countItems(group.items, group.subgroups)} Gewerke</span>
               </button>
               {queryActive || openGroups[group.code] ? (
                 <div className="divide-y divide-line">
@@ -429,6 +430,7 @@ function TradeList({
                     {trade.name}
                   </Link>
                   <p className="mt-1 text-sm leading-5 text-muted">{trade.shortDescription}</p>
+                  <PopularServiceChips slug={trade.slug} />
                 </div>
                 <div className="text-sm text-muted">
                   {indexEntry?.hierarchyCodes.length ? indexEntry.hierarchyCodes.join(" / ") : trade.category}
@@ -447,6 +449,21 @@ function TradeList({
         )}
       </div>
     </section>
+  );
+}
+
+function PopularServiceChips({ slug }: { slug: string }) {
+  const services = popularServicesForTrade(slug, 6);
+  if (services.length === 0) return null;
+
+  return (
+    <div className="mt-2 flex flex-wrap gap-1.5" aria-label="Häufig gesuchte Leistungen">
+      {services.map((service) => (
+        <span key={service.slug} className="rounded-md border border-line bg-[#fbfcff] px-2 py-1 text-xs font-medium text-muted">
+          {service.name}
+        </span>
+      ))}
+    </div>
   );
 }
 

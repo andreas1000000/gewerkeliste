@@ -7,6 +7,7 @@ import { TradeCheckboxGroups } from "@/components/trade-checkbox-groups";
 import { submitBusinessEntry } from "@/lib/actions/business-entry";
 import type { CompanyFormState } from "@/lib/types";
 import type { TaxonomyTrade } from "@/lib/trade-taxonomy";
+import { serviceOptionsForTrade } from "@/lib/service-taxonomy";
 
 const initialState: CompanyFormState = { ok: false, message: "" };
 
@@ -28,7 +29,12 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
   );
   const serviceOptions = useMemo(() => {
     if (!selectedTrade) return [];
-    return Array.from(new Set([...selectedTrade.subTrades, ...selectedTrade.coreServices, ...selectedTrade.specializations]));
+    return Array.from(new Set([
+      ...serviceOptionsForTrade(selectedTrade.slug),
+      ...selectedTrade.subTrades,
+      ...selectedTrade.coreServices,
+      ...selectedTrade.specializations,
+    ]));
   }, [selectedTrade]);
 
   useEffect(() => {

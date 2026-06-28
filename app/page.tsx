@@ -98,6 +98,9 @@ export default async function HomePage() {
     .map((slug) => tradeTaxonomy.find((trade) => trade.slug === slug))
     .filter((trade): trade is (typeof tradeTaxonomy)[number] => Boolean(trade));
   const latestCompanies = companies.slice(0, 3);
+  const visibleLocations = Array.from(new Set(companies.map((company) => company.city).filter(Boolean)))
+    .sort((a, b) => a.localeCompare(b, "de"))
+    .slice(0, 12);
   const verifiedCount = companies.filter((company) => company.verified).length;
   const regionCount = new Set(companies.map((company) => company.city)).size;
   const showRealMetrics = companies.length > 0 || tradeTaxonomy.length > 0;
@@ -303,12 +306,36 @@ export default async function HomePage() {
             <Link
               key={trade.slug}
               className="rounded-lg border border-line bg-white p-5 text-sm font-semibold text-[#07173d] shadow-soft hover:border-[#1f5fd4]"
-              href={`/suche?gewerk=${trade.slug}` as Route}
+              href={`/gewerke/${trade.slug}` as Route}
             >
               {trade.name}
             </Link>
           ))}
         </div>
+        {visibleLocations.length ? (
+          <div className="mt-8 rounded-lg border border-line bg-white p-5 shadow-soft">
+            <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+              <div>
+                <h3 className="text-lg font-semibold text-[#07173d]">Regionen entdecken</h3>
+                <p className="mt-2 text-sm text-muted">Orte mit bereits öffentlich sichtbaren Betriebseinträgen.</p>
+              </div>
+              <Link className="text-sm font-semibold text-[#1f5fd4] hover:underline" href={"/orte" as Route}>
+                Alle Orte anzeigen
+              </Link>
+            </div>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {visibleLocations.map((city) => (
+                <Link
+                  key={city}
+                  className="rounded-md border border-line bg-[#fbfcff] px-3 py-2 text-sm font-semibold text-action hover:border-action"
+                  href={`/orte/${locationSlug(city)}` as Route}
+                >
+                  {city}
+                </Link>
+              ))}
+            </div>
+          </div>
+        ) : null}
       </section>
 
       <section className="mx-auto grid max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_480px] lg:items-center lg:px-8">
@@ -548,6 +575,19 @@ function Metric({ label, value }: { label: string; value: number }) {
       <div className="text-xs text-muted">{label}</div>
     </div>
   );
+}
+
+function locationSlug(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/ä/g, "ae")
+    .replace(/ö/g, "oe")
+    .replace(/ü/g, "ue")
+    .replace(/ß/g, "ss")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
 function BlueLink({ href, children }: { href: Route; children: React.ReactNode }) {

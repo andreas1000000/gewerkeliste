@@ -15,6 +15,10 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "Fachbetriebe suchen | GewerkeListe.com",
   description: "Betriebseinträge nach Gewerk, Leistung, Ort oder PLZ im Gewerkeregister suchen.",
+  robots: {
+    index: false,
+    follow: true,
+  },
 };
 
 type PageProps = {
@@ -162,7 +166,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
                       {imageUrl ? (
                         <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-line bg-[#fbfcff]">
                           <img
-                            alt={`${company.name} Profilbild`}
+                            alt={company.logo_url ? `Logo von ${company.name}` : `Ansprechpartner von ${company.name}`}
                             className="h-full w-full object-cover"
                             src={imageUrl}
                           />

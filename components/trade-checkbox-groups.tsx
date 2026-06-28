@@ -1,7 +1,8 @@
 "use client";
 
 import type { TaxonomyTrade } from "@/lib/trade-taxonomy";
-import { groupedTradeSelection } from "@/lib/trade-taxonomy";
+import { publicTradeTaxonomy } from "@/lib/trade-taxonomy";
+import { serviceTaxonomy } from "@/lib/service-taxonomy";
 
 type TradeCheckboxGroupsProps = {
   selected: string[];
@@ -12,7 +13,7 @@ type TradeCheckboxGroupsProps = {
 };
 
 export function TradeCheckboxGroups({ selected, name, onToggle, defaultOpen = true }: TradeCheckboxGroupsProps) {
-  const groups = groupedTradeSelection();
+  const groups = groupedTradeSelectionByServiceTaxonomy();
 
   return (
     <div className="grid gap-3">
@@ -36,6 +37,16 @@ export function TradeCheckboxGroups({ selected, name, onToggle, defaultOpen = tr
       ))}
     </div>
   );
+}
+
+function groupedTradeSelectionByServiceTaxonomy() {
+  const tradesBySlug = new Map(publicTradeTaxonomy().map((trade) => [trade.slug, trade]));
+  return serviceTaxonomy
+    .map((group) => ({
+      name: group.name,
+      trades: group.trades.map((taxonomyTrade) => tradesBySlug.get(taxonomyTrade.slug)).filter((trade): trade is TaxonomyTrade => Boolean(trade)),
+    }))
+    .filter((group) => group.trades.length > 0);
 }
 
 function TradeCheckRow({

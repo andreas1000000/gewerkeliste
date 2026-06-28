@@ -4,8 +4,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import { getPublicCompanies } from "@/lib/data/public-directory";
+import { breadcrumbJsonLd, collectionPageJsonLd, itemListJsonLd, jsonLd } from "@/lib/seo";
 import { isSupabaseConfigured } from "@/lib/supabase";
-import { findTaxonomyTrade, type TaxonomyTrade } from "@/lib/trade-taxonomy";
+import { canonicalTradeSlug, findTaxonomyTrade, type TaxonomyTrade } from "@/lib/trade-taxonomy";
 
 type PageProps = {
   params: Promise<{ slug: string; ort: string }>;
@@ -21,10 +22,25 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!trade) {
     return { title: "Gewerk nicht gefunden | GewerkeListe.com" };
   }
+  const companies = isSupabaseConfigured() ? await getPublicCompanies({ tradeSlug: trade.slug, location }) : [];
+  const hasCompanies = companies.length > 0;
 
   return {
     title: `${trade.name} in ${location} finden | GewerkeListe.com`,
-    description: `${trade.name}: Fachbetriebe und Betriebseinträge in ${location} nach Leistung, Standort und Wirkungskreis finden.`,
+    description: `Finde passende Betriebe für ${trade.name} in ${location} und Umgebung. Strukturiert nach Leistungen, Region und Unternehmensprofil.`,
+    alternates: {
+      canonical: `/gewerke/${trade.slug}/${ort}`,
+    },
+    robots: {
+      index: hasCompanies,
+      follow: true,
+    },
+    openGraph: {
+      title: `${trade.name} in ${location} | GewerkeListe.com`,
+      description: `Betriebe für ${trade.name} in ${location} strukturiert finden.`,
+      url: `/gewerke/${trade.slug}/${ort}`,
+      type: "website",
+    },
   };
 }
 
@@ -36,10 +52,30 @@ export default async function TradeLocationPage({ params }: PageProps) {
   if (!trade) notFound();
 
   const companies = isSupabaseConfigured() ? await getPublicCompanies({ tradeSlug: trade.slug, location }) : [];
+  const breadcrumb = breadcrumbJsonLd([
+    { name: "Startseite", path: "/" },
+    { name: "Gewerke", path: "/gewerke" },
+    { name: trade.name, path: `/gewerke/${trade.slug}` },
+    { name: location, path: `/gewerke/${trade.slug}/${ort}` },
+  ]);
+  const collectionPage = collectionPageJsonLd({
+    name: `${trade.name} in ${location} finden`,
+    description: `Regionale Suche nach ${trade.name} in ${location}.`,
+    path: `/gewerke/${trade.slug}/${ort}`,
+  });
+  const itemList = itemListJsonLd(
+    companies.slice(0, 50).map((company) => ({
+      name: company.name,
+      path: `/firma/${company.slug}`,
+    })),
+  );
 
   return (
     <main className="min-h-screen bg-[#f7f8fb] text-ink">
       <SiteHeader />
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(breadcrumb)} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(collectionPage)} />
+      {companies.length ? <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(itemList)} /> : null}
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <nav className="text-sm text-muted">
           <Link className="hover:text-action" href="/">
@@ -131,7 +167,7 @@ export default async function TradeLocationPage({ params }: PageProps) {
 }
 
 function findTrade(slug: string): TaxonomyTrade | undefined {
-  return findTaxonomyTrade(slug);
+  return findTaxonomyTrade(canonicalTradeSlug(slug));
 }
 
 function displayLocation(value: string) {

@@ -6,10 +6,20 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: "*",
-      allow: ["/", "/suche", "/firma/"],
-      disallow: ["/admin/", "/companies/", "/trades/"],
+      allow: ["/", "/gewerke", "/gewerke/", "/orte", "/orte/", "/firma/", "/betrieb-eintragen", "/eintrag-beanspruchen"],
+      disallow: [
+        "/admin/",
+        "/api/",
+        "/claim/",
+        "/companies/",
+        "/trades/",
+        "/planner/",
+        "/betriebe/*/claim",
+        "/zahlung-erfolgreich",
+        "/zahlung-abgebrochen",
+        "/preise",
+      ],
     },
     sitemap: `${baseUrl}/sitemap.xml`,
   };
 }
-

@@ -3,7 +3,8 @@ import { SiteHeader } from "@/components/site-header";
 import { TradeBrowser, type TradeViewMode } from "@/components/trade-browser";
 import { getPublicCompanyTradeCounts } from "@/lib/data/public-directory";
 import { isSupabaseConfigured } from "@/lib/supabase";
-import { frequentTradeSlugs, tradeHierarchy } from "@/lib/trade-hierarchy";
+import { frequentTradeSlugs } from "@/lib/trade-hierarchy";
+import { serviceTradeHierarchy } from "@/lib/service-taxonomy";
 import { publicTradeTaxonomy } from "@/lib/trade-taxonomy";
 
 export const dynamic = "force-dynamic";
@@ -37,7 +38,7 @@ export default async function TradesPage({ searchParams }: PageProps) {
         claimIntent={claimIntent}
         companyCounts={companyCounts}
         frequentSlugs={[...frequentTradeSlugs]}
-        hierarchy={tradeHierarchy}
+        hierarchy={serviceTradeHierarchy()}
         initialLocation={params?.ort?.trim() || ""}
         initialQuery={params?.q?.trim() || ""}
         initialView={viewMode}

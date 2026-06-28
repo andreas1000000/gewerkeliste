@@ -133,6 +133,72 @@ export async function getAllPublicCompanySlugs() {
   return (data || []).map((item) => item.slug as string);
 }
 
+export async function getPublicCompanySitemapEntries() {
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase.from("companies").select("slug, updated_at").eq("public_visible", true);
+
+  if (error) throw error;
+  return (data || [])
+    .filter((item) => typeof item.slug === "string" && item.slug)
+    .map((item) => ({
+      slug: item.slug as string,
+      updatedAt: typeof item.updated_at === "string" ? item.updated_at : null,
+    }));
+}
+
+export async function getPublicTradeLocationSitemapEntries(limit = 500) {
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("company_trades")
+    .select("trades(slug), companies!inner(city, public_visible)")
+    .eq("companies.public_visible", true)
+    .neq("visibility_level", "internal")
+    .limit(limit * 4);
+
+  if (error) return getPublicTradeLocationSitemapEntriesFallback(limit);
+
+  const entries = new Map<string, { tradeSlug: string; city: string }>();
+  for (const row of data || []) {
+    const raw = row as unknown as {
+      trades: { slug: string } | { slug: string }[] | null;
+      companies: { city: string } | { city: string }[] | null;
+    };
+    const trade = Array.isArray(raw.trades) ? raw.trades[0] : raw.trades;
+    const company = Array.isArray(raw.companies) ? raw.companies[0] : raw.companies;
+    if (!trade?.slug || !company?.city) continue;
+    const citySlug = slugifyLocation(company.city);
+    if (!citySlug) continue;
+    entries.set(`${trade.slug}/${citySlug}`, { tradeSlug: trade.slug, city: citySlug });
+    if (entries.size >= limit) break;
+  }
+
+  return Array.from(entries.values());
+}
+
+export async function getPublicLocationSitemapEntries(limit = 300) {
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("companies")
+    .select("city")
+    .eq("public_visible", true)
+    .not("city", "is", null)
+    .limit(limit * 4);
+
+  if (error) throw error;
+
+  const entries = new Map<string, { city: string; slug: string }>();
+  for (const row of data || []) {
+    const city = typeof row.city === "string" ? row.city.trim() : "";
+    if (!city) continue;
+    const slug = slugifyLocation(city);
+    if (!slug) continue;
+    entries.set(slug, { city, slug });
+    if (entries.size >= limit) break;
+  }
+
+  return Array.from(entries.values()).sort((a, b) => a.city.localeCompare(b.city, "de"));
+}
+
 export async function getCompanyBySlug(slug: string) {
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
@@ -243,6 +309,43 @@ async function getCompanyBySlugFallback(slug: string) {
 
   if (error) throw error;
   return resolveSingleCompanyMedia(data as PublicCompanyWithTrade);
+}
+
+async function getPublicTradeLocationSitemapEntriesFallback(limit: number) {
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("companies")
+    .select("city, trades(slug)")
+    .eq("public_visible", true)
+    .limit(limit * 2);
+
+  if (error) throw error;
+
+  const entries = new Map<string, { tradeSlug: string; city: string }>();
+  for (const row of data || []) {
+    const raw = row as unknown as { city: string; trades: { slug: string } | { slug: string }[] | null };
+    const trade = Array.isArray(raw.trades) ? raw.trades[0] : raw.trades;
+    if (!trade?.slug || !raw.city) continue;
+    const citySlug = slugifyLocation(raw.city);
+    if (!citySlug) continue;
+    entries.set(`${trade.slug}/${citySlug}`, { tradeSlug: trade.slug, city: citySlug });
+    if (entries.size >= limit) break;
+  }
+
+  return Array.from(entries.values());
+}
+
+function slugifyLocation(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/ä/g, "ae")
+    .replace(/ö/g, "oe")
+    .replace(/ü/g, "ue")
+    .replace(/ß/g, "ss")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
 async function resolveCompanyMedia<T extends PublicCompanyWithTrade>(companies: T[]) {
