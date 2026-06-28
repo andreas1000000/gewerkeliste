@@ -332,7 +332,7 @@ function ProfileMark({ company }: { company: PublicCompanyWithTrade }) {
 
 function ContactTrustCard({ company, canClaim }: { company: PublicCompanyWithTrade; canClaim: boolean }) {
   const claimHref = `/betriebe/${company.slug}/claim` as Route;
-  const updateHref = profileUpdateMailto(company.name, "Profilmedien ergänzen");
+  const updateHref = `/betriebe/${company.slug}/profil-ergaenzen` as Route;
 
   return (
     <ProfileCard title="Ansprechpartner & Vertrauen">
@@ -367,9 +367,9 @@ function ContactTrustCard({ company, canClaim }: { company: PublicCompanyWithTra
             Ansprechpartner nach Profilübernahme ergänzen
           </Link>
         ) : (
-          <a className="inline-flex min-h-10 items-center justify-center rounded-md bg-action px-4 text-sm font-semibold text-white hover:bg-brand" href={updateHref}>
+          <Link className="inline-flex min-h-10 items-center justify-center rounded-md bg-action px-4 text-sm font-semibold text-white hover:bg-brand" href={updateHref}>
             Ansprechpartner ergänzen anfragen
-          </a>
+          </Link>
         )}
         <p className="text-xs leading-5 text-muted">
           Es werden keine privaten Ansprechpartnerdaten erfunden oder aus fremden Quellen übernommen. Veröffentlichungen erfolgen erst nach Prüfung.
@@ -388,7 +388,7 @@ function ProfileCompletionCard({
   canClaim: boolean;
   items: string[];
 }) {
-  const updateHref = profileUpdateMailto(company.name, "Profil ergänzen");
+  const updateHref = `/betriebe/${company.slug}/profil-ergaenzen` as Route;
 
   return (
     <ProfileCard title="Profil vervollständigen">
@@ -409,12 +409,12 @@ function ProfileCompletionCard({
           Profil kostenlos übernehmen
         </Link>
       ) : (
-        <a
+        <Link
           className="mt-5 inline-flex w-full min-h-11 items-center justify-center rounded-md bg-action px-4 text-sm font-semibold text-white hover:bg-brand"
           href={updateHref}
         >
           Profilergänzung anfragen
-        </a>
+        </Link>
       )}
       <p className="mt-3 text-xs leading-5 text-muted">
         Kostenlos bleiben Basisprofil, Stammdaten, Gewerke, Leistungen und Kontaktwege. Erweiterte Darstellung wie
@@ -786,10 +786,6 @@ function ContactButton({
       {children}
     </a>
   );
-}
-
-function profileUpdateMailto(companyName: string, topic: string) {
-  return `mailto:${siteConfig.publicContactEmail}?subject=${encodeURIComponent(`${topic}: ${companyName}`)}`;
 }
 
 function claimStatusLabel(status: PublicClaimStatus) {

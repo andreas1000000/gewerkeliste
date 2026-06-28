@@ -9,9 +9,19 @@ import type { CompanyFormState, CompanyWithTrade } from "@/lib/types";
 import { publicTradeTaxonomy } from "@/lib/trade-taxonomy";
 
 const initialState: CompanyFormState = { ok: false, message: "" };
+type ClaimAssistantIntent = "claim" | "update";
 
-export function ClaimAssistant({ company, initialTrades }: { company: CompanyWithTrade; initialTrades: string[] }) {
+export function ClaimAssistant({
+  company,
+  initialTrades,
+  intent = "claim",
+}: {
+  company: CompanyWithTrade;
+  initialTrades: string[];
+  intent?: ClaimAssistantIntent;
+}) {
   const [state, formAction, pending] = useActionState(submitClaim, initialState);
+  const isUpdate = intent === "update";
   const [selectedTrades, setSelectedTrades] = useState(initialTrades);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [missingServices, setMissingServices] = useState("");
@@ -37,7 +47,9 @@ export function ClaimAssistant({ company, initialTrades }: { company: CompanyWit
   if (state.ok) {
     return (
       <section className="rounded-lg border border-[#b9dec8] bg-white p-6 shadow-soft sm:p-8">
-        <p className="text-sm font-semibold uppercase tracking-normal text-[#2f8f5b]">Übernahme eingereicht</p>
+        <p className="text-sm font-semibold uppercase tracking-normal text-[#2f8f5b]">
+          {isUpdate ? "Profilergänzung eingereicht" : "Übernahme eingereicht"}
+        </p>
         <h2 className="mt-3 text-3xl font-semibold text-brand">Vielen Dank. Ihre Angaben wurden übermittelt.</h2>
         <p className="mt-4 max-w-2xl text-sm leading-6 text-muted">
           Danke. Ihre Angaben wurden übermittelt und werden geprüft. Der kostenlose Basiseintrag bleibt erhalten. Wir
@@ -86,7 +98,15 @@ export function ClaimAssistant({ company, initialTrades }: { company: CompanyWit
   return (
     <form action={formAction} className="grid gap-5">
       <input name="company_id" type="hidden" value={company.id} />
-      <input name="message" type="hidden" value={`Profilübernahme und Datenprüfung für ${company.name}.`} />
+      <input
+        name="message"
+        type="hidden"
+        value={
+          isUpdate
+            ? `Profilergänzung und Datenpflege für ${company.name}.`
+            : `Profilübernahme und Datenprüfung für ${company.name}.`
+        }
+      />
       <input name="support_contribution" type="hidden" value="none" />
       <input name="support_custom_amount" type="hidden" value="" />
       <input name="primaryTrade" type="hidden" value={selectedTrades[0] || ""} />
@@ -95,7 +115,7 @@ export function ClaimAssistant({ company, initialTrades }: { company: CompanyWit
         <input key={slug} name="secondaryTrades" type="hidden" value={slug} />
       ))}
 
-      <WizardSection eyebrow="Schritt 1" title="Betrieb prüfen">
+      <WizardSection eyebrow="Schritt 1" title={isUpdate ? "Profildaten prüfen" : "Betrieb prüfen"}>
         <p className="mb-5 text-sm leading-6 text-muted">
           Prüfen Sie die vorhandenen Betriebsdaten. Korrigieren Sie nur Angaben, die öffentlich für den Betrieb verwendet werden
           sollen.
@@ -257,7 +277,7 @@ export function ClaimAssistant({ company, initialTrades }: { company: CompanyWit
           className="mt-5 inline-flex min-h-12 items-center justify-center rounded-md bg-action px-5 text-sm font-semibold text-white hover:bg-brand disabled:opacity-60"
           disabled={pending || state.ok}
         >
-          {pending ? "Wird eingereicht..." : "Profil zur Prüfung einreichen"}
+          {pending ? "Wird eingereicht..." : isUpdate ? "Profilergänzung zur Prüfung einreichen" : "Profil zur Prüfung einreichen"}
         </button>
       </WizardSection>
     </form>
