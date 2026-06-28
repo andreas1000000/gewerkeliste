@@ -6,7 +6,7 @@ import type { Route } from "next";
 import type { TradeHierarchyGroup, TradeHierarchyItem } from "@/lib/trade-hierarchy";
 import { createTradeSearchEntry, normalizeSearchTerm, rankTradeEntries, type TradeSearchEntry } from "@/lib/trade-search";
 import type { TaxonomyTrade } from "@/lib/trade-taxonomy";
-import { popularServicesForTrade } from "@/lib/service-taxonomy";
+import { popularServicesForTrade, serviceTaxonomy, type ServiceFamily } from "@/lib/service-taxonomy";
 
 export type TradeViewMode = "kostengruppen" | "alphabetisch" | "haeufig";
 
@@ -62,6 +62,7 @@ export function TradeBrowser({
   const rankedTrades = useMemo(() => rankTradeEntries(tradeIndex, search), [tradeIndex, search]);
   const rankedSlugs = new Set(rankedTrades.map((entry) => entry.trade.slug));
   const filteredHierarchy = useMemo(() => filterHierarchy(hierarchy, rankedSlugs, Boolean(search)), [hierarchy, rankedSlugs, search]);
+  const serviceFamiliesByTrade = useMemo(() => buildServiceFamiliesByTrade(), []);
   const frequentTrades = useMemo(() => {
     const slugs = Array.from(new Set([...curatedFrequentSlugs, ...frequentSlugs]));
     return slugs
@@ -162,6 +163,7 @@ export function TradeBrowser({
                 title="Gefundene Gewerke"
                 trades={rankedTrades.slice(0, 40).map((entry) => entry.trade)}
                 tradeIndex={tradeIndex}
+                serviceFamiliesByTrade={serviceFamiliesByTrade}
               />
             ) : null}
             <HierarchyView
@@ -170,6 +172,7 @@ export function TradeBrowser({
               location={location}
               onToggle={toggleTrade}
               queryActive={Boolean(search)}
+              serviceFamiliesByTrade={serviceFamiliesByTrade}
               selectedSlugs={selectedSlugs}
             />
           </>
@@ -183,6 +186,7 @@ export function TradeBrowser({
             onToggle={toggleTrade}
             selectedSlugs={selectedSlugs}
             title="Alphabetische Gewerkeliste"
+            serviceFamiliesByTrade={serviceFamiliesByTrade}
             trades={rankedTrades.map((entry) => entry.trade).sort((a, b) => a.name.localeCompare(b.name, "de"))}
             tradeIndex={tradeIndex}
           />
@@ -196,6 +200,7 @@ export function TradeBrowser({
             onToggle={toggleTrade}
             selectedSlugs={selectedSlugs}
             title="Häufig gesuchte Baugewerke"
+            serviceFamiliesByTrade={serviceFamiliesByTrade}
             trades={frequentTrades}
             tradeIndex={tradeIndex}
           />
@@ -262,6 +267,7 @@ function HierarchyView({
   companyCounts,
   selectedSlugs,
   queryActive,
+  serviceFamiliesByTrade,
   onToggle,
 }: {
   groups: TradeHierarchyGroup[];
@@ -269,6 +275,7 @@ function HierarchyView({
   companyCounts: Record<string, number>;
   selectedSlugs: string[];
   queryActive: boolean;
+  serviceFamiliesByTrade: Map<string, ServiceFamily[]>;
   onToggle: (slug: string) => void;
 }) {
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
@@ -304,6 +311,7 @@ function HierarchyView({
                       count={companyCounts[item.slug] || 0}
                       item={item}
                       location={location}
+                      serviceFamilies={serviceFamiliesByTrade.get(item.slug) || []}
                       onToggle={onToggle}
                     />
                   ))}
@@ -332,6 +340,7 @@ function HierarchyView({
                                 item={item}
                                 location={location}
                                 nested
+                                serviceFamilies={serviceFamiliesByTrade.get(item.slug) || []}
                                 onToggle={onToggle}
                               />
                             ))}
@@ -358,6 +367,7 @@ function TradeRow({
   count,
   nested = false,
   checked,
+  serviceFamilies,
   onToggle,
 }: {
   item: TradeHierarchyItem;
@@ -365,26 +375,49 @@ function TradeRow({
   count: number;
   nested?: boolean;
   checked: boolean;
+  serviceFamilies: ServiceFamily[];
   onToggle: (slug: string) => void;
 }) {
+  const [openServices, setOpenServices] = useState(false);
+  const serviceCount = countServices(serviceFamilies);
+
   return (
-    <div className={`grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 ${nested ? "md:pl-12" : ""}`}>
-      <input
-        aria-label={`${item.label} auswählen`}
-        checked={checked}
-        className="h-4 w-4 rounded-none accent-action"
-        onChange={() => onToggle(item.slug)}
-        type="checkbox"
-      />
-      <Link className="min-w-0 text-sm font-medium text-ink hover:text-action" href={tradeHref(item.slug, location) as Route}>
-        {item.label}
-      </Link>
-      <div className="flex shrink-0 items-center gap-3 text-sm">
-        {count > 0 ? <span className="hidden text-muted sm:inline">{count} Betriebe</span> : null}
-        <Link className="font-semibold text-action hover:underline" href={searchHref(item.slug, location) as Route}>
-          Betriebe finden
-        </Link>
+    <div className="bg-white">
+      <div className={`grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 ${nested ? "md:pl-12" : ""}`}>
+        <input
+          aria-label={`${item.label} auswählen`}
+          checked={checked}
+          className="h-4 w-4 rounded-none accent-action"
+          onChange={() => onToggle(item.slug)}
+          type="checkbox"
+        />
+        <div className="min-w-0">
+          <Link className="min-w-0 text-sm font-medium text-ink hover:text-action" href={tradeHref(item.slug, location) as Route}>
+            {item.label}
+          </Link>
+          {serviceCount > 0 ? (
+            <div className="mt-1 text-xs text-muted">
+              {serviceFamilies.length} Leistungsfamilien · {serviceCount} Detailleistungen
+            </div>
+          ) : null}
+        </div>
+        <div className="flex shrink-0 items-center gap-3 text-sm">
+          {serviceCount > 0 ? (
+            <button
+              className="rounded-md border border-line px-3 py-1.5 text-xs font-semibold text-brand hover:border-action hover:text-action"
+              onClick={() => setOpenServices((current) => !current)}
+              type="button"
+            >
+              {openServices ? "Leistungen schließen" : "Leistungen öffnen"}
+            </button>
+          ) : null}
+          {count > 0 ? <span className="hidden text-muted sm:inline">{count} Betriebe</span> : null}
+          <Link className="font-semibold text-action hover:underline" href={searchHref(item.slug, location) as Route}>
+            Betriebe finden
+          </Link>
+        </div>
       </div>
+      {openServices ? <ServiceDepthPanel families={serviceFamilies} nested={nested} /> : null}
     </div>
   );
 }
@@ -396,6 +429,7 @@ function TradeList({
   companyCounts,
   selectedSlugs,
   tradeIndex,
+  serviceFamiliesByTrade,
   claimIntent,
   onToggle,
 }: {
@@ -405,10 +439,12 @@ function TradeList({
   companyCounts: Record<string, number>;
   selectedSlugs: string[];
   tradeIndex: TradeIndexEntry[];
+  serviceFamiliesByTrade: Map<string, ServiceFamily[]>;
   claimIntent: boolean;
   onToggle: (slug: string) => void;
 }) {
   const bySlug = new Map(tradeIndex.map((entry) => [entry.trade.slug, entry]));
+  const [openTrades, setOpenTrades] = useState<Record<string, boolean>>({});
   return (
     <section className="mt-6">
       <h2 className="text-2xl font-semibold text-[#07173d]">{title}</h2>
@@ -416,31 +452,51 @@ function TradeList({
         {trades.length > 0 ? (
           trades.map((trade) => {
             const indexEntry = bySlug.get(trade.slug);
+            const serviceFamilies = serviceFamiliesByTrade.get(trade.slug) || [];
+            const serviceCount = countServices(serviceFamilies);
+            const open = Boolean(openTrades[trade.slug]);
             return (
-              <div key={trade.slug} className="grid gap-3 border-b border-line px-4 py-3 last:border-b-0 md:grid-cols-[auto_minmax(0,1fr)_minmax(170px,240px)_auto] md:items-center">
-                <input
-                  aria-label={`${trade.name} auswählen`}
-                  checked={selectedSlugs.includes(trade.slug)}
-                  className="h-4 w-4 rounded-none accent-action"
-                  onChange={() => onToggle(trade.slug)}
-                  type="checkbox"
-                />
-                <div className="min-w-0">
-                  <Link className="font-semibold text-ink hover:text-action" href={tradeHref(trade.slug, location) as Route}>
-                    {trade.name}
-                  </Link>
-                  <p className="mt-1 text-sm leading-5 text-muted">{trade.shortDescription}</p>
-                  <PopularServiceChips slug={trade.slug} />
+              <div key={trade.slug} className="border-b border-line last:border-b-0">
+                <div className="grid gap-3 px-4 py-3 md:grid-cols-[auto_minmax(0,1fr)_minmax(170px,240px)_auto] md:items-center">
+                  <input
+                    aria-label={`${trade.name} auswählen`}
+                    checked={selectedSlugs.includes(trade.slug)}
+                    className="h-4 w-4 rounded-none accent-action"
+                    onChange={() => onToggle(trade.slug)}
+                    type="checkbox"
+                  />
+                  <div className="min-w-0">
+                    <Link className="font-semibold text-ink hover:text-action" href={tradeHref(trade.slug, location) as Route}>
+                      {trade.name}
+                    </Link>
+                    <p className="mt-1 text-sm leading-5 text-muted">{trade.shortDescription}</p>
+                    <PopularServiceChips slug={trade.slug} />
+                    {serviceCount > 0 ? (
+                      <p className="mt-2 text-xs text-muted">
+                        {serviceFamilies.length} Leistungsfamilien · {serviceCount} Detailleistungen
+                      </p>
+                    ) : null}
+                  </div>
+                  <div className="text-sm text-muted">
+                    {indexEntry?.hierarchyCodes.length ? indexEntry.hierarchyCodes.join(" / ") : trade.category}
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3 text-sm md:justify-end">
+                    {serviceCount > 0 ? (
+                      <button
+                        className="rounded-md border border-line px-3 py-1.5 text-xs font-semibold text-brand hover:border-action hover:text-action"
+                        onClick={() => setOpenTrades((current) => ({ ...current, [trade.slug]: !current[trade.slug] }))}
+                        type="button"
+                      >
+                        {open ? "Leistungen schließen" : "Leistungen öffnen"}
+                      </button>
+                    ) : null}
+                    {(companyCounts[trade.slug] || 0) > 0 ? <span className="text-muted">{companyCounts[trade.slug]} Betriebe</span> : null}
+                    <Link className="font-semibold text-action hover:underline" href={searchHref(trade.slug, location) as Route}>
+                      {claimIntent ? "Eintrag suchen" : "Betriebe finden"}
+                    </Link>
+                  </div>
                 </div>
-                <div className="text-sm text-muted">
-                  {indexEntry?.hierarchyCodes.length ? indexEntry.hierarchyCodes.join(" / ") : trade.category}
-                </div>
-                <div className="flex flex-wrap items-center gap-3 text-sm md:justify-end">
-                  {(companyCounts[trade.slug] || 0) > 0 ? <span className="text-muted">{companyCounts[trade.slug]} Betriebe</span> : null}
-                  <Link className="font-semibold text-action hover:underline" href={searchHref(trade.slug, location) as Route}>
-                    {claimIntent ? "Eintrag suchen" : "Betriebe finden"}
-                  </Link>
-                </div>
+                {open ? <ServiceDepthPanel families={serviceFamilies} /> : null}
               </div>
             );
           })
@@ -449,6 +505,60 @@ function TradeList({
         )}
       </div>
     </section>
+  );
+}
+
+function ServiceDepthPanel({ families, nested = false }: { families: ServiceFamily[]; nested?: boolean }) {
+  if (families.length === 0) return null;
+
+  return (
+    <div className={`border-t border-line bg-[#fbfcff] px-4 py-4 ${nested ? "md:pl-12" : ""}`}>
+      <div className="grid gap-3">
+        {families.map((family) => (
+          <details key={family.slug} className="overflow-hidden rounded-lg border border-line bg-white">
+            <summary className="cursor-pointer px-4 py-3 text-sm font-semibold text-brand hover:bg-[#f7f8fb]">
+              {family.name}
+              <span className="ml-2 text-xs font-medium text-muted">{family.services.length} Leistungen</span>
+            </summary>
+            <div className="divide-y divide-line border-t border-line">
+              {family.services.map((service) => (
+                <details key={service.slug} className="group">
+                  <summary className="cursor-pointer px-4 py-2.5 text-sm font-medium text-ink hover:bg-[#fbfcff]">
+                    {service.name}
+                    {service.aliases.length || service.activities.length || service.contexts.length || service.crosslinks.length ? (
+                      <span className="ml-2 text-xs font-normal text-muted">Details</span>
+                    ) : null}
+                  </summary>
+                  <div className="grid gap-3 bg-[#fbfcff] px-4 pb-4 text-xs leading-5 text-muted md:grid-cols-2">
+                    <DetailList title="Suchbegriffe" items={service.aliases} />
+                    <DetailList title="Tätigkeiten" items={service.activities} />
+                    <DetailList title="Kontexte" items={service.contexts} />
+                    <DetailList title="Verknüpfte Gewerke" items={service.crosslinks} />
+                  </div>
+                </details>
+              ))}
+            </div>
+          </details>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function DetailList({ title, items }: { title: string; items: string[] }) {
+  if (items.length === 0) return null;
+
+  return (
+    <div>
+      <div className="font-semibold uppercase tracking-normal text-[#5c6f8c]">{title}</div>
+      <div className="mt-1 flex flex-wrap gap-1.5">
+        {items.map((item) => (
+          <span key={item} className="rounded-md border border-line bg-white px-2 py-1">
+            {item}
+          </span>
+        ))}
+      </div>
+    </div>
   );
 }
 
@@ -505,6 +615,20 @@ function buildTradeIndex(trades: TaxonomyTrade[], hierarchy: TradeHierarchyGroup
   });
 
   return Array.from(index.values()) as Array<TradeIndexEntry & TradeSearchEntry>;
+}
+
+function buildServiceFamiliesByTrade() {
+  const map = new Map<string, ServiceFamily[]>();
+  serviceTaxonomy.forEach((group) => {
+    group.trades.forEach((trade) => {
+      map.set(trade.slug, trade.families);
+    });
+  });
+  return map;
+}
+
+function countServices(families: ServiceFamily[]) {
+  return families.reduce((sum, family) => sum + family.services.length, 0);
 }
 
 function addHierarchy(index: Map<string, TradeIndexEntry>, slug: string, label: string, code: string, title: string) {

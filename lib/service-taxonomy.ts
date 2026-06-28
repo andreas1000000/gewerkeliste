@@ -4,6 +4,7 @@ export type ServiceActivity =
   | "Beratung"
   | "Planung"
   | "Lieferung"
+  | "Fertigung"
   | "Montage"
   | "Einbau"
   | "Austausch"
@@ -12,6 +13,8 @@ export type ServiceActivity =
   | "Prüfung"
   | "Reinigung"
   | "Sanierung"
+  | "Restaurierung"
+  | "Gestaltung"
   | "Modernisierung"
   | "Rückbau"
   | "Entsorgung"
@@ -27,6 +30,8 @@ export type ServiceActivity =
   | "Schleifen"
   | "Trocknung"
   | "Analyse"
+  | "Entwurf"
+  | "Ausführung"
   | "Gutachten"
   | "Abnahme";
 
@@ -77,6 +82,7 @@ export const serviceActivities: ServiceActivity[] = [
   "Beratung",
   "Planung",
   "Lieferung",
+  "Fertigung",
   "Montage",
   "Einbau",
   "Austausch",
@@ -85,6 +91,8 @@ export const serviceActivities: ServiceActivity[] = [
   "Prüfung",
   "Reinigung",
   "Sanierung",
+  "Restaurierung",
+  "Gestaltung",
   "Modernisierung",
   "Rückbau",
   "Entsorgung",
@@ -100,6 +108,8 @@ export const serviceActivities: ServiceActivity[] = [
   "Schleifen",
   "Trocknung",
   "Analyse",
+  "Entwurf",
+  "Ausführung",
   "Gutachten",
   "Abnahme",
 ];
@@ -125,6 +135,16 @@ export const serviceContexts: ServiceContext[] = [
     "Tiefgarage",
     "Halle",
     "Außenanlage",
+    "Fassade",
+    "Innenraum",
+    "Dach",
+    "Bad",
+    "Serverraum",
+    "Rechenzentrum",
+    "Parkplatz",
+    "Hof",
+    "Zufahrt",
+    "Straße",
   ]),
   ...contextList("use_case", [
     "barrierefrei",
@@ -140,6 +160,9 @@ export const serviceContexts: ServiceContext[] = [
     "gewerblich",
     "privat",
     "industriell",
+    "künstlerisch",
+    "historisch",
+    "technisch",
   ]),
 ];
 
@@ -546,6 +569,12 @@ export const serviceTaxonomy: ServiceTaxonomyGroup[] = [
         activities: ["Planung", "Montage", "Sanierung"],
         contexts: ["Gewerbe", "Praxis", "Altbau"],
       }),
+      family("Systemböden & Hohlraumböden", ["Doppelboden", "Hohlboden", "Hohlraumboden", "Systemboden", "Installationsboden", "Trockenhohlboden", "Nasshohlboden", "Revisionsboden", "Kabelboden", "EDV-Boden", "Doppelbodenplatten", "Doppelbodensanierung", "Doppelbodenmontage", "Hohlbodensanierung"], {
+        aliases: ["Raised Floor", "Access Floor", "Computerboden", "Serverraum Doppelboden", "Technikboden", "Installationshohlraum", "Büro Doppelboden", "Rechenzentrum Doppelboden", "Kabelmanagement Boden", "Hohlraumboden", "Hohlraumböden"],
+        activities: ["Beratung", "Planung", "Lieferung", "Montage", "Einbau", "Austausch", "Reparatur", "Sanierung", "Prüfung"],
+        contexts: ["Büro", "Gewerbe", "Industrie", "Serverraum", "Rechenzentrum", "Bestand", "Neubau", "brandschutzrelevant", "schallschutzrelevant", "technisch"],
+        crosslinks: ["bodenlegerarbeiten", "netzwerktechnik", "kaelte-klima"],
+      }),
     ]),
   ]),
   group(13, "Estrich, Boden, Fliesen & Naturstein", "Bodenaufbau, Beläge, Fliesen, Parkett, Naturstein und Beschichtungen.", [
@@ -600,11 +629,16 @@ export const serviceTaxonomy: ServiceTaxonomyGroup[] = [
         contexts: ["Wohnung", "Fassade", "Bestand"],
       }),
     ]),
-    trade("malerarbeiten", "Dekorative Oberflächen", "Gestalterische Wand- und Oberflächentechniken.", [
+    trade("malerarbeiten", "Dekorative Oberflächen & Kunstmalerei", "Gestalterische Wand-, Fassaden- und Oberflächentechniken.", [
       family("Gestaltung", ["Lasurtechnik", "Spachteltechnik", "Betonoptik", "Rostoptik", "Marmorspachtel", "Stucco Veneziano", "Designoberflächen", "Wandgestaltung", "Farbkonzept"], {
         aliases: ["Wandgestaltung", "Designwand", "Betonlook"],
         activities: ["Beratung", "Beschichtung", "Planung"],
         contexts: ["Wohnung", "Hotel", "Gastronomie"],
+      }),
+      family("Kunstmalerei", ["Kunstmalerei", "Wandmalerei", "Fassadenmalerei", "Graffiti-Gestaltung", "Graffiti-Kunst", "Street-Art", "Lüftlmalerei", "Illusionsmalerei", "Trompe-l'œil", "Ornamentmalerei", "Schablonenmalerei", "Kirchenmalerei", "Restaurationsmalerei", "Airbrush", "Schriftmalerei", "Logo-Malerei", "Deckenmalerei", "Historische Farbfassung", "Vergoldung", "Marmorierung", "Holzmaserierung"], {
+        aliases: ["Mural", "Murals", "Wandbild", "Fassadenbild", "Graffiti Maler", "Graffiti Künstler", "Streetart", "Lüftlmaler", "Lüftlmalerei Bayern", "Bauernmalerei", "Trompe l oeil", "Illusionswand", "Ornament", "Schriftenmaler", "Sign Painting", "Kirchenmaler", "Restaurationsmaler", "historische Maltechnik", "dekorative Maltechnik"],
+        activities: ["Beratung", "Entwurf", "Planung", "Ausführung", "Restaurierung", "Sanierung", "Gestaltung"],
+        contexts: ["Fassade", "Innenraum", "Denkmal", "Altbau", "Gastronomie", "Hotel", "Gewerbe", "privat", "künstlerisch", "historisch"],
       }),
     ]),
     trade("korrosionsschutz", "Schutzbeschichtungen & Korrosionsschutz", "Schutzbeschichtungen für Stahl, Beton und Holz.", [
@@ -621,6 +655,12 @@ export const serviceTaxonomy: ServiceTaxonomyGroup[] = [
         aliases: ["Metallbauer", "Schlosser", "Schlosserei", "Geländerbauer"],
         activities: ["Montage", "Reparatur", "Schneiden"],
         contexts: ["Wohnung", "Gewerbe", "Bestand"],
+      }),
+      family("Loftwände & Stahl-Glas-Systeme", ["Loftwand", "Stahl-Glas-Trennwand", "Stahl-Glas-Wand", "Glas-Metall-Trennwand", "Stahlrahmentür", "Lofttür", "Industrietrennwand", "Metall-Glas-Trennwand"], {
+        aliases: ["Loftwände", "Stahlglaswand", "Stahl Glas Wand", "Stahl Glas Trennwand", "Industrie Glaswand", "Industrial Style Wand", "Industrial Loftwand", "Loft Trennwand", "Glaswand mit Stahlrahmen", "Schlosser Loftwand", "Metallbauer Loftwand"],
+        activities: ["Beratung", "Planung", "Fertigung", "Lieferung", "Montage", "Einbau", "Reparatur"],
+        contexts: ["Wohnung", "Büro", "Gewerbe", "Gastronomie", "Altbau", "Bestand", "Innenausbau"],
+        crosslinks: ["glaserarbeiten", "innenausbau"],
       }),
     ]),
     trade("stahlbau", "Stahlbau", "Tragende Stahlkonstruktionen und Hallenbau.", [
@@ -668,10 +708,10 @@ export const serviceTaxonomy: ServiceTaxonomyGroup[] = [
       }),
     ]),
     trade("strassenbau", "Straßenbau, Asphalt & Markierung", "Straßen, Zufahrten, Asphalt und Markierungen.", [
-      family("Verkehrsflächen", ["Straßenbau", "Asphaltarbeiten", "Hof asphaltieren", "Zufahrt asphaltieren", "Asphaltreparatur", "Fahrbahnmarkierung", "Parkplatzbau"], {
-        aliases: ["Asphaltbauer", "Straßenbauer"],
-        activities: ["Montage", "Reparatur", "Sanierung"],
-        contexts: ["Kommune", "Gewerbe", "Außenanlage"],
+      family("Verkehrsflächen", ["Asphaltarbeiten", "Asphaltbau", "Asphaltbelag", "Asphaltdeckschicht", "Asphalttragschicht", "Asphaltfeinbelag", "Walzasphalt", "Gussasphalt", "Kaltasphalt", "Splittmastixasphalt", "Asphaltreparatur", "Asphaltfräsen", "Asphalt schneiden", "Asphaltabdichtung", "Fahrbahnsanierung", "Parkplatzbau", "Straßenbau", "Wege- und Verkehrsflächenbau", "Fahrbahnmarkierung"], {
+        aliases: ["Hof asphaltieren", "Zufahrt asphaltieren", "Einfahrt asphaltieren", "Parkplatz asphaltieren", "Asphalt Firma", "Asphaltbauer", "Asphaltieren", "Teerarbeiten", "Teeren", "Schwarzdecke", "Fahrbahnbelag", "Asphaltfläche", "Straßenbauer"],
+        activities: ["Beratung", "Planung", "Lieferung", "Einbau", "Sanierung", "Reparatur", "Fräsen", "Schneiden", "Abdichtung"],
+        contexts: ["Außenanlage", "Gewerbe", "Kommune", "Industrie", "Parkplatz", "Hof", "Zufahrt", "Straße", "Bestand", "Neubau"],
       }),
     ]),
   ]),
