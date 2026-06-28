@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { Route } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ServiceAreaPreview } from "@/components/map/service-area-preview";
 import { SiteHeader } from "@/components/site-header";
 import {
   cleanCompanyDescription,
@@ -12,6 +13,7 @@ import {
 } from "@/lib/company-display";
 import { getCompanyBySlug, getCompanyBySlugForMetadata } from "@/lib/data/public-directory";
 import { breadcrumbJsonLd, jsonLd, localBusinessJsonLd } from "@/lib/seo";
+import { serviceTaxonomy } from "@/lib/service-taxonomy";
 import { siteConfig } from "@/lib/site-config";
 import type { PublicClaimStatus, PublicCompanyWithTrade } from "@/lib/types/public-directory";
 
@@ -71,6 +73,7 @@ export default async function CompanyPublicPage({ params }: PageProps) {
     const executedTrades = getExecutedTrades(company);
     const services = getRecognizableServices(company, executedTrades);
     const groupedServices = groupServicesForDisplay(services);
+    const detailServiceFamilies = getDetailedServiceFamilies(company, services);
     const topServices = services.slice(0, 12);
     const sourceItems = getSourceItems(company, websiteHref);
     const hasCoordinates =
@@ -169,42 +172,26 @@ export default async function CompanyPublicPage({ params }: PageProps) {
               {groupedServices.length ? (
                 <ProfileCard
                   title="Leistungsspektrum im Detail"
-                  subtitle="Detailleistungen werden nach fachlichen Bereichen gruppiert. Die Angaben beschreiben genannte oder öffentlich erkennbare Leistungen, keine Qualitätsbewertung."
+                  subtitle="Detailleistungen werden nach fachlichen Bereichen gruppiert. Grundlage sind vom Betrieb angegebene oder öffentlich erkennbare Leistungsbereiche."
                 >
-                  <DetailServiceGroups groups={groupedServices} />
+                  <DetailServiceFamilies families={detailServiceFamilies} fallbackGroups={groupedServices} />
                 </ProfileCard>
               ) : null}
 
-              <ProfileCard title="Gewerke">
-                <div className="flex flex-wrap gap-2">
-                  {executedTrades.map((item, index) =>
-                    index === 0 && company.trades?.slug ? (
-                      <Link
-                        key={item}
-                        className="rounded-md bg-[#07173d] px-3 py-2 text-sm font-semibold text-white hover:bg-brand"
-                        href={`/gewerke/${company.trades.slug}` as Route}
-                      >
-                        {item}
-                      </Link>
-                    ) : (
-                      <span key={item} className="rounded-md border border-line bg-[#fbfcff] px-3 py-2 text-sm font-semibold text-ink">
-                        {item}
-                      </span>
-                    ),
-                  )}
-                </div>
-              </ProfileCard>
-
-              <ProfileCard title="Standort und Einsatzgebiet">
+              <ProfileCard title="Wirkungskreis">
                 <div className="grid gap-4 sm:grid-cols-2">
                   <Fact label="Standort" value={location} />
                   <Fact
-                    label="Wirkungskreis"
-                    value={
-                      hasCoordinates
-                        ? "Standortdaten vorhanden. Ein konkreter Wirkungskreis ist noch nicht hinterlegt."
-                        : "Noch nicht hinterlegt. Der Betrieb kann Einsatzgebiete nach Profilübernahme ergänzen."
-                    }
+                    label="Einsatzgebiet"
+                    value="Demnächst verfügbar. Betriebe können ihren tatsächlichen Wirkungskreis nach Profilübernahme ergänzen."
+                  />
+                </div>
+                <div className="mt-5">
+                  <ServiceAreaPreview
+                    label={`${company.name} Wirkungskreis Vorschau`}
+                    type="region"
+                    status="draft"
+                    regionNames={[company.city]}
                   />
                 </div>
               </ProfileCard>
@@ -405,10 +392,45 @@ function TopServiceOverview({ services, totalCount }: { services: string[]; tota
   );
 }
 
-function DetailServiceGroups({ groups }: { groups: Array<{ label: string; items: string[] }> }) {
+function DetailServiceFamilies({
+  families,
+  fallbackGroups,
+}: {
+  families: Array<{ label: string; description: string; items: string[] }>;
+  fallbackGroups: Array<{ label: string; items: string[] }>;
+}) {
+  if (families.length) {
+    return (
+      <div className="grid gap-3">
+        {families.map((family, index) => (
+          <details key={family.label} className="rounded-md border border-line bg-[#fbfcff] p-4" open={index === 0}>
+            <summary className="cursor-pointer list-none">
+              <span className="flex items-center justify-between gap-4">
+                <span>
+                  <span className="block text-sm font-semibold text-ink">{family.label}</span>
+                  <span className="mt-1 block text-xs leading-5 text-muted">
+                    {family.items.length} Detailleistungen · {family.description}
+                  </span>
+                </span>
+                <span className="rounded-md border border-line bg-white px-3 py-1 text-xs font-semibold text-action">Details öffnen</span>
+              </span>
+            </summary>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {family.items.map((item) => (
+                <span key={item} className="rounded-md border border-line bg-white px-3 py-2 text-sm font-semibold text-ink">
+                  {item}
+                </span>
+              ))}
+            </div>
+          </details>
+        ))}
+      </div>
+    );
+  }
+
   return (
     <div className="grid gap-3">
-      {groups.map((group, index) => (
+      {fallbackGroups.map((group, index) => (
         <details key={group.label} className="rounded-md border border-line bg-[#fbfcff] p-4" open={index === 0}>
           <summary className="cursor-pointer list-none">
             <span className="flex items-center justify-between gap-4">
@@ -416,7 +438,7 @@ function DetailServiceGroups({ groups }: { groups: Array<{ label: string; items:
                 <span className="block text-sm font-semibold text-ink">{group.label}</span>
                 <span className="mt-1 block text-xs text-muted">{group.items.length} Detailleistungen</span>
               </span>
-              <span className="text-sm font-semibold text-action">aufklappen</span>
+              <span className="rounded-md border border-line bg-white px-3 py-1 text-xs font-semibold text-action">Details öffnen</span>
             </span>
           </summary>
           <div className="mt-4 flex flex-wrap gap-2">
@@ -430,6 +452,58 @@ function DetailServiceGroups({ groups }: { groups: Array<{ label: string; items:
       ))}
     </div>
   );
+}
+
+function getDetailedServiceFamilies(company: PublicCompanyWithTrade, services: string[]) {
+  const relatedSlugs = serviceSlugsForCompany(company, services);
+  const selectedFamilies: Array<{ label: string; description: string; items: string[] }> = [];
+
+  for (const group of serviceTaxonomy) {
+    for (const trade of group.trades) {
+      if (!relatedSlugs.has(trade.slug)) continue;
+      for (const family of trade.families) {
+        selectedFamilies.push({
+          label: `${trade.name} · ${family.name}`,
+          description: family.description,
+          items: family.services.map((service) => service.name),
+        });
+      }
+    }
+  }
+
+  return dedupeServiceFamilies(selectedFamilies).slice(0, 8);
+}
+
+function serviceSlugsForCompany(company: PublicCompanyWithTrade, services: string[]) {
+  const slugs = new Set<string>();
+  if (company.trades?.slug && company.trades.slug !== "bauunternehmen") slugs.add(company.trades.slug);
+
+  const text = [company.trades?.slug, company.trades?.name, ...services].join(" ").toLowerCase();
+  const mappings: Array<{ slugs: string[]; signals: string[] }> = [
+    { slugs: ["maurerarbeiten", "betonbau"], signals: ["bauunternehmen", "hochbau", "maurer", "mauerwerk", "rohbau"] },
+    { slugs: ["betonbau", "bauwerksabdichtung"], signals: ["beton", "fundament", "bodenplatte", "abdichtung"] },
+    { slugs: ["erdarbeiten"], signals: ["erdarbeiten", "aushub", "bagger", "baugrube"] },
+    { slugs: ["garten-landschaftsbau", "pflasterarbeiten"], signals: ["garten", "landschaft", "galabau", "pflaster", "außenanlagen", "aussenanlagen"] },
+    { slugs: ["architektur-entwurf"], signals: ["bauantrag", "entwurf", "planung"] },
+  ];
+
+  for (const mapping of mappings) {
+    if (mapping.signals.some((signal) => text.includes(signal))) {
+      mapping.slugs.forEach((slug) => slugs.add(slug));
+    }
+  }
+
+  return slugs;
+}
+
+function dedupeServiceFamilies(families: Array<{ label: string; description: string; items: string[] }>) {
+  const seen = new Set<string>();
+  return families.filter((family) => {
+    const key = family.label;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 
 function ProfileCard({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
