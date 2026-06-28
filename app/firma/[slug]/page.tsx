@@ -332,6 +332,7 @@ function ProfileMark({ company }: { company: PublicCompanyWithTrade }) {
 
 function ContactTrustCard({ company, canClaim }: { company: PublicCompanyWithTrade; canClaim: boolean }) {
   const claimHref = `/betriebe/${company.slug}/claim` as Route;
+  const updateHref = profileUpdateMailto(company.name, "Profilmedien ergänzen");
 
   return (
     <ProfileCard title="Ansprechpartner & Vertrauen">
@@ -361,9 +362,15 @@ function ContactTrustCard({ company, canClaim }: { company: PublicCompanyWithTra
           </div>
         </div>
 
-        <Link className="inline-flex min-h-10 items-center justify-center rounded-md bg-action px-4 text-sm font-semibold text-white hover:bg-brand" href={claimHref}>
-          {canClaim ? "Ansprechpartner ergänzen" : "Profil ergänzen"}
-        </Link>
+        {canClaim ? (
+          <Link className="inline-flex min-h-10 items-center justify-center rounded-md bg-action px-4 text-sm font-semibold text-white hover:bg-brand" href={claimHref}>
+            Ansprechpartner nach Profilübernahme ergänzen
+          </Link>
+        ) : (
+          <a className="inline-flex min-h-10 items-center justify-center rounded-md bg-action px-4 text-sm font-semibold text-white hover:bg-brand" href={updateHref}>
+            Ansprechpartner ergänzen anfragen
+          </a>
+        )}
         <p className="text-xs leading-5 text-muted">
           Es werden keine privaten Ansprechpartnerdaten erfunden oder aus fremden Quellen übernommen. Veröffentlichungen erfolgen erst nach Prüfung.
         </p>
@@ -381,6 +388,8 @@ function ProfileCompletionCard({
   canClaim: boolean;
   items: string[];
 }) {
+  const updateHref = profileUpdateMailto(company.name, "Profil ergänzen");
+
   return (
     <ProfileCard title="Profil vervollständigen">
       <p className="text-sm leading-6 text-muted">Dieses Profil kann vom Betrieb übernommen und weiter ausgebaut werden.</p>
@@ -392,12 +401,21 @@ function ProfileCompletionCard({
           </li>
         ))}
       </ul>
-      <Link
-        className="mt-5 inline-flex w-full min-h-11 items-center justify-center rounded-md bg-action px-4 text-sm font-semibold text-white hover:bg-brand"
-        href={`/betriebe/${company.slug}/claim` as Route}
-      >
-        {canClaim ? "Profil kostenlos übernehmen" : "Profil ergänzen"}
-      </Link>
+      {canClaim ? (
+        <Link
+          className="mt-5 inline-flex w-full min-h-11 items-center justify-center rounded-md bg-action px-4 text-sm font-semibold text-white hover:bg-brand"
+          href={`/betriebe/${company.slug}/claim` as Route}
+        >
+          Profil kostenlos übernehmen
+        </Link>
+      ) : (
+        <a
+          className="mt-5 inline-flex w-full min-h-11 items-center justify-center rounded-md bg-action px-4 text-sm font-semibold text-white hover:bg-brand"
+          href={updateHref}
+        >
+          Profilergänzung anfragen
+        </a>
+      )}
       <p className="mt-3 text-xs leading-5 text-muted">
         Kostenlos bleiben Basisprofil, Stammdaten, Gewerke, Leistungen und Kontaktwege. Erweiterte Darstellung wie
         Referenzen, Projektgalerie, Sichtbarkeitsreport oder visuelle Wirkungskreise kann später optional ergänzt werden.
@@ -768,6 +786,10 @@ function ContactButton({
       {children}
     </a>
   );
+}
+
+function profileUpdateMailto(companyName: string, topic: string) {
+  return `mailto:${siteConfig.publicContactEmail}?subject=${encodeURIComponent(`${topic}: ${companyName}`)}`;
 }
 
 function claimStatusLabel(status: PublicClaimStatus) {
