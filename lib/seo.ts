@@ -62,7 +62,7 @@ export function collectionPageJsonLd({
   };
 }
 
-export function localBusinessJsonLd(company: PublicCompanyWithTrade, path: string) {
+export function localBusinessJsonLd(company: PublicCompanyWithTrade, path: string, description?: string) {
   const tradeNames = [
     ...(company.company_trades || [])
       .filter((match) => match.status !== "rejected" && match.visibility_level !== "internal" && Boolean(match.trades?.name))
@@ -83,7 +83,7 @@ export function localBusinessJsonLd(company: PublicCompanyWithTrade, path: strin
     "@type": "LocalBusiness",
     name: company.name,
     url: siteUrl(path),
-    description: company.description || undefined,
+    description: description || undefined,
     telephone: company.phone || undefined,
     email: company.email || undefined,
     image: company.profile_image_url || company.logo_url || undefined,
