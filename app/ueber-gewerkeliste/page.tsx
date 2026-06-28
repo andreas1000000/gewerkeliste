@@ -301,7 +301,7 @@ export default function AboutGewerkeListePage() {
         title="Kostenlos starten. Echten Mehrwert später ausbauen."
         body={
           <>
-            <p>Der Basiseintrag soll niedrigschwellig bleiben, damit möglichst viele Betriebe sichtbar werden können.</p>
+            <p>Der Basiseintrag bleibt kostenlos, damit alle Betriebe sichtbar werden können.</p>
             <p>
               Der Aufbau einer guten Plattform kostet trotzdem Geld: Entwicklung, Hosting, Datenpflege, Prüfung,
               Verbesserung und Support.
