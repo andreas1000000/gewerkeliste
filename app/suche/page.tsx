@@ -13,8 +13,8 @@ import type { PublicCompanyWithTrade } from "@/lib/types/public-directory";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Fachbetriebe suchen | GewerkeListe.com",
-  description: "Betriebseinträge nach Gewerk, Leistung, Ort oder PLZ im Gewerkeregister suchen.",
+  title: "Bau- und Handwerksbetriebe suchen | GewerkeListe.com",
+  description: "Bau- und Handwerksbetriebe nach Gewerk, Leistung, Firmenname, Ort oder PLZ auf GewerkeListe.com suchen.",
   robots: {
     index: false,
     follow: true,
@@ -69,14 +69,18 @@ export default async function SearchPage({ searchParams }: PageProps) {
       <div className="mx-auto max-w-6xl px-5 py-8">
         <div className="mb-8">
           <p className="text-sm font-semibold uppercase tracking-normal text-brand">GewerkeListe.com</p>
-          <h1 className="mt-2 text-4xl font-semibold text-ink">Fachbetriebe suchen</h1>
+          <h1 className="mt-2 text-4xl font-semibold text-ink">Betriebe nach Gewerk, Leistung und Region suchen</h1>
+          <p className="mt-3 max-w-3xl text-sm leading-6 text-muted">
+            Suchen Sie nach Firmenname, Gewerk, Leistung, Ort oder PLZ. Die Treffer zeigen öffentliche Basis-Einträge
+            und vom Betrieb bestätigte Profildaten getrennt an.
+          </p>
         </div>
 
         <form className="grid gap-3 rounded-lg border border-line bg-white p-4 shadow-soft md:grid-cols-[1fr_1fr_1fr_140px_auto]">
           <input
             name="q"
             defaultValue={q || ""}
-            placeholder="Betrieb oder Leistung"
+            placeholder="Betrieb, Gewerk oder Leistung"
             className="rounded-md border border-line px-3 py-2 outline-none focus:border-brand"
           />
           <select name="gewerk" defaultValue={selectedTrade || ""} className="rounded-md border border-line px-3 py-2 outline-none focus:border-brand">
@@ -156,9 +160,8 @@ export default async function SearchPage({ searchParams }: PageProps) {
               const tradeNames = visibleTradeNames(company);
 
               return (
-                <Link
+                <article
                   key={company.id}
-                  href={`/firma/${company.slug}` as Route}
                   className="rounded-lg border border-line bg-white p-5 shadow-soft transition hover:border-brand"
                 >
                   <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
@@ -187,6 +190,40 @@ export default async function SearchPage({ searchParams }: PageProps) {
                           {company.postal_code} {company.city}
                         </p>
                         {description ? <p className="mt-3 max-w-3xl text-sm leading-6 text-ink">{description}</p> : null}
+                        <div className="mt-4 flex flex-wrap gap-2">
+                          <Link
+                            className="inline-flex min-h-9 items-center rounded-md bg-action px-3 text-sm font-semibold text-white hover:bg-brand"
+                            href={`/firma/${company.slug}` as Route}
+                          >
+                            Profil ansehen
+                          </Link>
+                          {company.claim_status === "unclaimed" || company.claim_status === "rejected" ? (
+                            <Link
+                              className="inline-flex min-h-9 items-center rounded-md border border-line bg-white px-3 text-sm font-semibold text-action hover:border-action"
+                              href={`/betriebe/${company.slug}/claim` as Route}
+                            >
+                              Profil übernehmen
+                            </Link>
+                          ) : null}
+                          {company.website_url ? (
+                            <a
+                              className="inline-flex min-h-9 items-center rounded-md border border-line bg-white px-3 text-sm font-semibold text-action hover:border-action"
+                              href={normalizeWebsiteUrl(company.website_url)}
+                              rel="noreferrer"
+                              target="_blank"
+                            >
+                              Website
+                            </a>
+                          ) : null}
+                          {company.phone ? (
+                            <a
+                              className="inline-flex min-h-9 items-center rounded-md border border-line bg-white px-3 text-sm font-semibold text-action hover:border-action"
+                              href={`tel:${company.phone}`}
+                            >
+                              Telefon
+                            </a>
+                          ) : null}
+                        </div>
                       </div>
                     </div>
                     <div className="flex shrink-0 flex-wrap gap-2">
@@ -202,7 +239,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
                       <ClaimBadge status={company.claim_status} />
                     </div>
                   </div>
-                </Link>
+                </article>
               );
             })
           )}
@@ -252,7 +289,7 @@ async function getCompaniesForSearch({
   results.flat().forEach((company) => {
     if (!unique.has(company.id)) unique.set(company.id, company);
   });
-  return Array.from(unique.values());
+  return Array.from(unique.values()).sort((a, b) => scoreCompanySearchMatch(b, q, location) - scoreCompanySearchMatch(a, q, location));
 }
 
 function tradeSlugsForQuery(query: string) {
@@ -277,6 +314,44 @@ function visibleTradeNames(company: PublicCompanyWithTrade) {
   ].filter((name): name is string => Boolean(name));
 
   return Array.from(new Set(names));
+}
+
+function scoreCompanySearchMatch(company: PublicCompanyWithTrade, query?: string, location?: string) {
+  const haystack = normalizeSearchTerm(
+    [
+      company.name,
+      company.city,
+      company.postal_code,
+      company.description,
+      company.website_url,
+      company.trades?.name,
+      company.trades?.slug,
+      ...(company.company_trades || []).flatMap((match) => [match.trades?.name, match.trades?.slug, match.evidence]),
+    ]
+      .filter(Boolean)
+      .join(" "),
+  );
+  const queryTokens = normalizeSearchTerm(query || "")
+    .split(" ")
+    .filter((token) => token.length > 1);
+  const locationTokens = normalizeSearchTerm(location || "")
+    .split(" ")
+    .filter((token) => token.length > 1);
+
+  let score = company.verified ? 20 : 0;
+  if (company.claim_status === "claimed") score += 8;
+  for (const token of queryTokens) {
+    if (haystack.includes(token)) score += 12;
+  }
+  for (const token of locationTokens) {
+    if (haystack.includes(token)) score += 25;
+  }
+  return score;
+}
+
+function normalizeWebsiteUrl(url: string) {
+  if (/^https?:\/\//i.test(url)) return url;
+  return `https://${url}`;
 }
 
 function SearchEmptyState({
@@ -304,16 +379,30 @@ function SearchEmptyState({
     <div className="rounded-lg border border-line bg-white p-8 shadow-soft">
       <h2 className="text-xl font-semibold text-ink">Noch kein passender Betrieb gefunden.</h2>
       <p className="mt-3 max-w-3xl text-sm leading-6 text-muted">
-        Für {query ? `"${query}"` : "diese Suche"}
-        {location ? ` in ${location}` : ""} ist aktuell kein öffentlicher Eintrag sichtbar. Prüfe den Ort, erweitere den
-        Umkreis oder schlage einen Betrieb vor.
+        Zu dieser Suche haben wir noch keinen passenden Betrieb gefunden. GewerkeListe wird laufend erweitert.
+        {query ? ` Gesucht wurde nach "${query}".` : ""}
+        {location ? ` Ort/PLZ: ${location}.` : ""}
       </p>
+      <div className="mt-4 rounded-md border border-line bg-[#fbfcff] p-4 text-sm leading-6 text-muted">
+        <div className="font-semibold text-ink">Suchvorschläge</div>
+        <ul className="mt-2 grid gap-1">
+          <li>Ort entfernen oder einen größeren Umkreis wählen.</li>
+          <li>Gewerk breiter suchen, z. B. „SHK“ statt „Badsanierung“.</li>
+          <li>Synonym ausprobieren, z. B. „Zimmerei“, „Holzbau“ oder „Zimmerer“.</li>
+        </ul>
+      </div>
       <div className="mt-5 flex flex-wrap gap-3">
         <Link className="inline-flex min-h-10 items-center rounded-md bg-brand px-4 text-sm font-semibold text-white hover:bg-[#265a4d]" href={"/betrieb-eintragen" as Route}>
           Betrieb vorschlagen
         </Link>
+        <Link className="inline-flex min-h-10 items-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-action hover:border-action" href={"/betrieb-eintragen" as Route}>
+          Kostenlosen Basiseintrag anlegen
+        </Link>
         <Link className="inline-flex min-h-10 items-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-action hover:border-action" href={"/suche" as Route}>
           Suche zurücksetzen
+        </Link>
+        <Link className="inline-flex min-h-10 items-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-action hover:border-action" href={"/gewerke" as Route}>
+          Andere Gewerke anzeigen
         </Link>
       </div>
     </div>

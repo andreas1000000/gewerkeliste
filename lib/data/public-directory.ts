@@ -43,6 +43,33 @@ export async function getPublicCompanies(params?: {
   return resolveCompanyMedia(data as PublicCompanyWithTrade[]);
 }
 
+export async function getBusinessDirectoryCompanies(params?: { query?: string; limit?: number }) {
+  const search = params?.query?.trim();
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("companies")
+    .select(
+      "*, trades(id, name, slug), company_trades(confidence_score, source, evidence, status, visibility_level, trades(id, name, slug))",
+    )
+    .eq("public_visible", true)
+    .order("created_at", { ascending: false })
+    .limit(search ? 500 : params?.limit || 40);
+
+  if (error) {
+    return getBusinessDirectoryCompaniesFallback(params);
+  }
+
+  const companies = await resolveCompanyMedia(data as PublicCompanyWithTrade[]);
+  if (!search) return companies.slice(0, params?.limit || 40);
+
+  return companies
+    .map((company) => ({ company, score: scoreBusinessDirectoryMatch(company, search) }))
+    .filter((entry) => entry.score > 0)
+    .sort((a, b) => b.score - a.score || newestFirst(a.company, b.company))
+    .map((entry) => entry.company)
+    .slice(0, params?.limit || 50);
+}
+
 export async function getPublicCompaniesByTrade(
   tradeSlug: string,
   params?: {
@@ -111,7 +138,8 @@ export async function getPublicCompanyTradeCounts() {
     }, {});
   }
 
-  return (data || []).reduce<Record<string, number>>((counts, row) => {
+  const rows = (data || []) as unknown[];
+  return rows.reduce<Record<string, number>>((counts, row) => {
     const raw = row as unknown as {
       status?: string | null;
       visibility_level?: string | null;
@@ -130,7 +158,7 @@ export async function getAllPublicCompanySlugs() {
   const { data, error } = await supabase.from("companies").select("slug").eq("public_visible", true);
 
   if (error) throw error;
-  return (data || []).map((item) => item.slug as string);
+  return ((data || []) as Array<{ slug: string }>).map((item) => item.slug);
 }
 
 export async function getPublicCompanySitemapEntries() {
@@ -138,7 +166,7 @@ export async function getPublicCompanySitemapEntries() {
   const { data, error } = await supabase.from("companies").select("slug, updated_at").eq("public_visible", true);
 
   if (error) throw error;
-  return (data || [])
+  return ((data || []) as Array<{ slug: unknown; updated_at: unknown }>)
     .filter((item) => typeof item.slug === "string" && item.slug)
     .map((item) => ({
       slug: item.slug as string,
@@ -298,6 +326,29 @@ async function getPublicCompaniesFallback(params?: {
   return resolveCompanyMedia(data as PublicCompanyWithTrade[]);
 }
 
+async function getBusinessDirectoryCompaniesFallback(params?: { query?: string; limit?: number }) {
+  const search = params?.query?.trim();
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("companies")
+    .select("*, trades(id, name, slug)")
+    .eq("public_visible", true)
+    .order("created_at", { ascending: false })
+    .limit(search ? 500 : params?.limit || 40);
+
+  if (error) throw error;
+
+  const companies = await resolveCompanyMedia(data as PublicCompanyWithTrade[]);
+  if (!search) return companies.slice(0, params?.limit || 40);
+
+  return companies
+    .map((company) => ({ company, score: scoreBusinessDirectoryMatch(company, search) }))
+    .filter((entry) => entry.score > 0)
+    .sort((a, b) => b.score - a.score || newestFirst(a.company, b.company))
+    .map((entry) => entry.company)
+    .slice(0, params?.limit || 50);
+}
+
 async function getCompanyBySlugFallback(slug: string) {
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
@@ -390,4 +441,97 @@ function sortMatchedCompanies(
   const bClaimed = b.claim_status === "claimed";
   if (aClaimed !== bClaimed) return aClaimed ? -1 : 1;
   return a.name.localeCompare(b.name, "de");
+}
+
+function scoreBusinessDirectoryMatch(company: PublicCompanyWithTrade, query: string) {
+  const normalizedQuery = normalizeForDirectorySearch(query);
+  if (!normalizedQuery) return 0;
+  const queryTokens = expandDirectoryQuery(normalizedQuery);
+
+  const tradeNames = [
+    company.trades?.name,
+    ...(company.company_trades || [])
+      .filter((match) => match.status !== "rejected" && match.visibility_level !== "internal")
+      .map((match) => match.trades?.name),
+  ].filter((value): value is string => Boolean(value));
+
+  const fields: Array<[string | null | undefined, number]> = [
+    [company.name, 100],
+    [company.website_url, 80],
+    [company.city, 70],
+    [company.postal_code, 60],
+    [company.description, 55],
+    [company.email, 45],
+    [company.phone, 35],
+    [tradeNames.join(" "), 75],
+    [
+      (company.company_trades || [])
+        .filter((match) => match.status !== "rejected" && match.visibility_level !== "internal")
+        .map((match) => match.evidence || "")
+        .join(" "),
+      50,
+    ],
+  ];
+
+  return fields.reduce((score, [value, weight]) => {
+    const normalizedValue = normalizeForDirectorySearch(value || "");
+    if (!normalizedValue) return score;
+    if (normalizedValue === normalizedQuery) return Math.max(score, weight + 25);
+    if (normalizedValue.startsWith(normalizedQuery)) return Math.max(score, weight + 15);
+    if (normalizedValue.includes(normalizedQuery)) return Math.max(score, weight);
+    if (queryTokens.some((token) => normalizedValue.includes(token))) return Math.max(score, Math.max(20, weight - 10));
+    return score;
+  }, 0);
+}
+
+const directorySynonymGroups = [
+  ["shk", "heizung", "sanitaer", "sanitar", "sanitaerinstallation", "heizungsbau"],
+  ["elektro", "elektriker", "elektrotechnik", "elektroinstallation", "photovoltaik", "netzwerktechnik"],
+  ["zimmerei", "zimmerer", "zimmererarbeiten", "holzbau", "dachstuhl"],
+  ["gartenbau", "galabau", "garten landschaftsbau", "landschaftsbau", "aussenanlagen"],
+  ["pflaster", "pflasterbau", "pflasterarbeiten", "aussenanlagen", "einfahrt", "terrasse"],
+  ["tiefbau", "erdbau", "kanalbau", "entwaesserung", "leitungsbau", "bagger"],
+  ["maler", "malerarbeiten", "anstrich", "fassade", "beschichtung"],
+  ["fenster", "fensterbau", "tueren", "tuer", "glaser", "schreiner"],
+  ["metallbau", "schlosserei", "stahlbau", "schlosser"],
+  ["rohbau", "maurer", "maurerarbeiten", "bauunternehmen", "hochbau", "betonbau"],
+];
+
+function expandDirectoryQuery(normalizedQuery: string) {
+  const tokens = new Set(
+    normalizedQuery
+      .split(" ")
+      .map((token) => token.trim())
+      .filter((token) => token.length > 1),
+  );
+
+  for (const group of directorySynonymGroups) {
+    const normalizedGroup = group.map(normalizeForDirectorySearch);
+    if (normalizedGroup.some((term) => normalizedQuery.includes(term) || tokens.has(term))) {
+      normalizedGroup.flatMap((term) => term.split(" ")).forEach((token) => {
+        if (token.length > 1) tokens.add(token);
+      });
+    }
+  }
+
+  return Array.from(tokens);
+}
+
+function normalizeForDirectorySearch(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/ä/g, "ae")
+    .replace(/ö/g, "oe")
+    .replace(/ü/g, "ue")
+    .replace(/ß/g, "ss")
+    .replace(/https?:\/\//g, "")
+    .replace(/www\./g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+function newestFirst(a: PublicCompanyWithTrade, b: PublicCompanyWithTrade) {
+  return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
 }

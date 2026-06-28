@@ -10,12 +10,12 @@ type SiteHeaderProps = {
 const navItems = {
   de: [
     { label: "Gewerke", href: "/gewerke" },
-    { label: "Für Betriebe", href: "/fuer-betriebe" },
+    { label: "Betriebe", href: "/betriebe" },
     { label: "Über uns", href: "/ueber-gewerkeliste" },
   ],
   en: [
     { label: "Trades", href: "/gewerke" },
-    { label: "For Companies", href: "/fuer-betriebe" },
+    { label: "Companies", href: "/betriebe" },
     { label: "About", href: "/ueber-gewerkeliste" },
   ],
 };
