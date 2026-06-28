@@ -17,8 +17,6 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
   const [selectedTrades, setSelectedTrades] = useState<string[]>([]);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [founderVerification, setFounderVerification] = useState(true);
-  const [companyLogoSelected, setCompanyLogoSelected] = useState(false);
-  const [contactProfileImageSelected, setContactProfileImageSelected] = useState(false);
   const errors = state.fieldErrors || {};
   const values = state.values || {};
   const formKey = JSON.stringify(values);
@@ -74,8 +72,6 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
   return (
     <form action={formAction} className="grid gap-6" encType="multipart/form-data" key={formKey} method="post" noValidate>
       <input className="hidden" name="websiteExtra" tabIndex={-1} autoComplete="off" />
-      <input name="companyLogoSelected" type="hidden" value={companyLogoSelected ? "true" : ""} />
-      <input name="contactProfileImageSelected" type="hidden" value={contactProfileImageSelected ? "true" : ""} />
 
       <FormSection number="1" title="Betriebsdaten" help="Diese Angaben bilden die Grundlage Ihres Betriebseintrags.">
         <div className="grid gap-4 md:grid-cols-2">
@@ -122,57 +118,6 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
             <input className={inputClass} defaultValue={textValue(values, "contactPersonPhone")} name="contactPersonPhone" inputMode="tel" />
           </Field>
         </div>
-      </FormSection>
-
-      <FormSection
-        number="2a"
-        title="Logo und persönlicher Ansprechpartner"
-        help="Menschen kaufen von Menschen. Ein persönliches Bild und ein professionelles Logo schaffen Vertrauen."
-      >
-        <div className="grid gap-4 lg:grid-cols-2">
-          <div className="rounded-lg border border-line bg-[#fbfcff] p-4">
-            <label className="grid gap-2 text-sm font-semibold text-ink">
-              Firmenlogo hochladen
-              <input
-                className="rounded-md border border-line bg-white px-3 py-2 text-sm"
-                name="companyLogo"
-                type="file"
-                accept="image/png,image/jpeg,image/webp,image/svg+xml"
-                onChange={(event) => setCompanyLogoSelected(Boolean(event.target.files?.length))}
-              />
-            </label>
-            <p className="mt-3 text-sm leading-6 text-muted">
-              Ein professionelles Firmenlogo erhöht den Wiedererkennungswert und macht Ihr Profil vertrauenswürdiger.
-            </p>
-          </div>
-          <div className="rounded-lg border border-line bg-[#fbfcff] p-4">
-            <label className="grid gap-2 text-sm font-semibold text-ink">
-              Profilbild des Ansprechpartners
-              <input
-                className="rounded-md border border-line bg-white px-3 py-2 text-sm"
-                name="contactProfileImage"
-                type="file"
-                accept="image/png,image/jpeg,image/webp"
-                onChange={(event) => setContactProfileImageSelected(Boolean(event.target.files?.length))}
-              />
-            </label>
-            <p className="mt-3 text-sm font-semibold text-brand">Menschen kaufen von Menschen.</p>
-            <p className="mt-2 text-sm leading-6 text-muted">
-              Ein persönliches Bild schafft Vertrauen und erhöht die Wahrscheinlichkeit, dass Auftraggeber Kontakt aufnehmen.
-              Geeignet sind Geschäftsführer, Inhaber, Meister, Bauleiter oder Ansprechpartner.
-            </p>
-            <p className="mt-2 text-xs leading-5 text-muted">
-              Keine privaten Bilder, keine Urlaubsbilder, keine Gruppenbilder und keine unscharfen Bilder.
-            </p>
-            <label className="mt-4 flex items-start gap-3 text-sm font-medium leading-6 text-ink">
-              <input className="mt-1 h-4 w-4 accent-action" name="imageConsentGiven" type="checkbox" required={contactProfileImageSelected} />
-              Ich bestätige, dass ich berechtigt bin, dieses Bild hochzuladen und die abgebildete Person der Veröffentlichung zugestimmt hat.
-            </label>
-          </div>
-        </div>
-        <p className="mt-3 rounded-md border border-line bg-white px-4 py-3 text-xs leading-5 text-muted">
-          Medien werden erst nach Prüfung und technischer Freigabe der Profilverwaltung veröffentlicht.
-        </p>
       </FormSection>
 
       <FormSection number="3" title="Standort" help="Der Standort hilft Auftraggebern, Betriebe regional einzuordnen.">

@@ -251,6 +251,8 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                 </dl>
               </ProfileCard>
 
+              <ProfileMediaCard company={company} canClaim={canClaim} />
+
               {canClaim ? (
                 <section className="rounded-lg border border-[#b9dec8] bg-[#f1fbf5] p-5 shadow-soft">
                   <h2 className="text-xl font-semibold text-[#07173d]">Sind Sie dieser Betrieb?</h2>
@@ -329,11 +331,72 @@ function ProfileMark({ company }: { company: PublicCompanyWithTrade }) {
       {company.logo_url ? (
         <img alt={`Logo von ${company.name}`} className="h-full w-full rounded-md object-contain" src={company.logo_url} />
       ) : (
-        <div className="grid h-full w-full place-items-center rounded-md bg-[#07173d] text-4xl font-semibold text-white">
-          {initials(company.name)}
+        <div className="grid h-full w-full place-items-center rounded-md border border-dashed border-line bg-[#fbfcff] px-2 text-center">
+          <span className="text-xs font-semibold leading-5 text-muted">Hier können Sie Ihr Logo einfügen</span>
         </div>
       )}
     </div>
+  );
+}
+
+function ProfileMediaCard({ company, canClaim }: { company: PublicCompanyWithTrade; canClaim: boolean }) {
+  const claimHref = `/betriebe/${company.slug}/claim` as Route;
+
+  return (
+    <ProfileCard title="Profilmedien ergänzen">
+      <div className="grid gap-3">
+        <div className="rounded-md border border-line bg-[#fbfcff] p-4">
+          <div className="flex gap-3">
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-md border border-dashed border-line bg-white p-2 text-center text-[11px] font-semibold leading-4 text-muted">
+              {company.logo_url ? (
+                <img alt={`Logo von ${company.name}`} className="h-full w-full object-contain" src={company.logo_url} />
+              ) : (
+                "Logo einfügen"
+              )}
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-ink">Firmenlogo</h3>
+              <p className="mt-1 text-sm leading-6 text-muted">
+                Ein Logo macht den Betrieb schneller wiedererkennbar und lässt das Profil vollständiger wirken.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-md border border-line bg-[#fbfcff] p-4">
+          <div className="flex gap-3">
+            <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full border border-dashed border-line bg-white text-center text-[11px] font-semibold leading-4 text-muted">
+              {company.profile_image_url ? (
+                <img
+                  alt={company.profile_image_alt || `Ansprechpartner von ${company.name}`}
+                  className="h-full w-full object-cover"
+                  src={company.profile_image_url}
+                />
+              ) : (
+                "Bild"
+              )}
+            </div>
+            <div>
+              <h3 className="text-sm font-semibold text-ink">Persönlicher Ansprechpartner</h3>
+              <p className="mt-1 text-sm leading-6 text-muted">
+                Menschen kaufen von Menschen. Ein Ansprechpartnerbild kann Vertrauen schaffen und Rückfragen erleichtern.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <Link
+          className="inline-flex min-h-10 items-center justify-center rounded-md bg-action px-4 text-sm font-semibold text-white hover:bg-brand"
+          href={claimHref}
+        >
+          {canClaim ? "Eintrag übernehmen und Profil ergänzen" : "Profilmedien ergänzen"}
+        </Link>
+        <p className="text-xs leading-5 text-muted">
+          Medien werden erst nach Profilübernahme bzw. Prüfung veröffentlicht. Ein späterer Login-Bereich kann diese
+          Pflege direkt im Betriebskonto ermöglichen.
+        </p>
+      </div>
+    </ProfileCard>
   );
 }
 
