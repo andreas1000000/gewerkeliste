@@ -6,14 +6,13 @@ import { SiteHeader } from "@/components/site-header";
 import { getPublicCompanies } from "@/lib/data/public-directory";
 import type { ServiceAreaGeoJson } from "@/lib/geo/types";
 import { isSupabaseConfigured } from "@/lib/supabase";
-import { tradeTaxonomy } from "@/lib/trade-taxonomy";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "GewerkeListe.com – Regionale Gewerke-Suche für Bauprojekte",
+  title: "GewerkeListe.com – Bau- und Handwerksbetriebe nach Gewerk, Leistung und Region finden",
   description:
-    "Regionale B2B-Suche für Baugewerke: passende Fachbetriebe nach Gewerk, Leistung, Spezialisierung und Region finden – ohne Leadportal und ohne Preisdruck.",
+    "Finden Sie Bau- und Handwerksbetriebe nach Gewerk, Leistung und Region. Strukturierte Betriebsdaten, direkte Kontaktaufnahme und transparente Profilinformationen.",
   alternates: {
     canonical: "/",
   },
@@ -28,16 +27,10 @@ const benefits = [
     title: "Region und Wirkungskreis einordnen",
     text: "Nicht nur Sitz und Radius zählen. GewerkeListe.com macht sichtbar, in welchen Regionen ein Betrieb fachlich relevant ist.",
   },
-];
-
-const registerFields = [
-  "Gewerk",
-  "Ort und Region",
-  "angebotene Leistungen",
-  "Wirkungskreis und Tätigkeitsgebiet",
-  "Kontakt",
-  "Verifizierungsstatus ohne Qualitätsgarantie",
-  "Referenzen, soweit vorhanden",
+  {
+    title: "Datenstatus transparent sehen",
+    text: "Basisprofil, Profilübernahme und Datenbestätigung werden klar unterschieden. Verifizierung ist keine Qualitätsgarantie.",
+  },
 ];
 
 const comparisons = [
@@ -80,30 +73,13 @@ const exampleServiceArea: ServiceAreaGeoJson = {
 
 export default async function HomePage() {
   const companies = await getHomepageCompanies();
-  const preferredTradeSlugs = [
-    "pflasterbau",
-    "bauwerksabdichtung",
-    "metallbau",
-    "trockenbau",
-    "dachdecker",
-    "elektroinstallation",
-    "sanitaer",
-    "heizung",
-    "malerarbeiten",
-    "fliesenarbeiten",
-    "garten-landschaftsbau",
-    "maurerarbeiten",
-  ];
-  const visibleTrades = preferredTradeSlugs
-    .map((slug) => tradeTaxonomy.find((trade) => trade.slug === slug))
-    .filter((trade): trade is (typeof tradeTaxonomy)[number] => Boolean(trade));
   const latestCompanies = companies.slice(0, 3);
   const visibleLocations = Array.from(new Set(companies.map((company) => company.city).filter(Boolean)))
     .sort((a, b) => a.localeCompare(b, "de"))
     .slice(0, 12);
   const verifiedCount = companies.filter((company) => company.verified).length;
-  const regionCount = new Set(companies.map((company) => company.city)).size;
-  const showRealMetrics = companies.length > 0 || tradeTaxonomy.length > 0;
+  const regionCount = new Set(companies.map((company) => company.city).filter(Boolean)).size;
+  const showRealMetrics = companies.length > 0;
 
   return (
     <main className="min-h-screen bg-[#f7f8fb] text-ink">
@@ -130,11 +106,11 @@ export default async function HomePage() {
           <div className="max-w-5xl">
             <p className="text-sm font-semibold uppercase tracking-normal text-brand">Die digitale Infrastruktur der Bauwirtschaft</p>
             <h1 className="mt-4 text-4xl font-semibold tracking-normal text-brand sm:text-5xl">
-              Die regionale Gewerke-Suche für professionelle Bauprojekte.
+              Bau- und Handwerksbetriebe nach Gewerk, Leistung und Region finden.
             </h1>
             <p className="mt-6 text-lg leading-8 text-ink">
-              Finden Sie passende Bau- und Handwerksbetriebe nach Gewerk, Leistung, Spezialisierung und Region –
-              ohne Leadportal, ohne Preisdruck, mit strukturierter Datenbasis.
+              Suchen Sie nach Gewerk oder Leistung und finden Sie passende Betriebe in Ihrer Region: strukturiert,
+              direkt kontaktierbar und ohne Leadportal-Logik.
             </p>
 
             <div className="mt-6 flex flex-wrap gap-4 text-sm font-semibold text-brand">
@@ -143,9 +119,8 @@ export default async function HomePage() {
               <TrustItem text="Direkte Kontaktaufnahme" />
             </div>
             <p className="mt-4 max-w-3xl text-sm leading-6 text-muted">
-              GewerkeListe.com ersetzt keine persönlichen Empfehlungen. Die Plattform macht den Markt davor besser
-              sichtbar: strukturierte Betriebsdaten, nachvollziehbare Quellen, Claim-Prozess und später Wirkungskreis,
-              Kapazitätsbezug und Sichtbarkeitsreport.
+              GewerkeListe.com macht sichtbar, welche Betriebe welche Leistungen anbieten, wo sie tätig sind und wie
+              sie erreichbar sind. Persönliche Empfehlungen werden nicht ersetzt, sondern fachlich besser auffindbar.
             </p>
 
             <form action="/suche" className="mt-8 rounded-lg border border-line bg-white p-4 shadow-soft">
@@ -171,17 +146,19 @@ export default async function HomePage() {
                 </button>
               </div>
               <div className="mt-4 flex flex-wrap gap-2 text-xs font-medium text-muted">
-                <span>Strukturierte Betriebsdaten</span>
-                <span>·</span>
-                <span>Leistungen</span>
-                <span>·</span>
-                <span>Einsatzgebiet</span>
-                <span>·</span>
-                <span>Datenbestätigung</span>
+                {["Trockenbau Rosenheim", "Elektro Stephanskirchen", "Pflasterbau Bad Aibling"].map((example) => (
+                  <Link
+                    key={example}
+                    className="rounded-md border border-line bg-[#fbfcff] px-3 py-2 font-semibold text-action hover:border-action"
+                    href={`/suche?q=${encodeURIComponent(example)}` as Route}
+                  >
+                    {example}
+                  </Link>
+                ))}
               </div>
               <div className="mt-4 flex flex-wrap gap-3">
-                <BlueLink href="/betrieb-eintragen">Kostenlosen Basiseintrag sichern</BlueLink>
                 <OutlineLink href="/betriebe">Betriebe suchen</OutlineLink>
+                <OutlineLink href="/betrieb-eintragen">Betrieb eintragen</OutlineLink>
               </div>
             </form>
           </div>
@@ -198,26 +175,6 @@ export default async function HomePage() {
             </Card>
           ))}
         </div>
-      </section>
-
-      <section className="mx-auto grid max-w-7xl gap-5 px-4 py-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_420px] lg:px-8">
-        <Card>
-          <h2 className="text-2xl font-semibold text-[#07173d]">
-            Der Markt ist nicht leer. Er ist schlecht sortiert.
-          </h2>
-          <p className="mt-4 text-base leading-7 text-ink">
-            In der Baupraxis geht viel Zeit verloren, weil Informationen zu Fachbetrieben verstreut sind: Website,
-            Empfehlung, Branchenbuch, Suchmaschine oder persönliche Kontaktliste. GewerkeListe.com bringt diese
-            Informationen in eine fachliche B2B-Suchlogik vor Ausschreibung, Anfrage und Vergabe.
-          </p>
-        </Card>
-        <Card>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {registerFields.map((field) => (
-              <CheckLine key={field}>{field}</CheckLine>
-            ))}
-          </div>
-        </Card>
       </section>
 
       <section className="mx-auto grid max-w-7xl gap-5 px-4 py-4 sm:px-6 lg:grid-cols-2 lg:px-8">
@@ -244,76 +201,9 @@ export default async function HomePage() {
         </Card>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="grid gap-5 lg:grid-cols-2">
-          <Card>
-            <p className="text-sm font-semibold uppercase tracking-normal text-brand">Kostenlose Grundsichtbarkeit</p>
-            <h2 className="mt-2 text-2xl font-semibold text-[#07173d]">Der Basiseintrag bleibt offen.</h2>
-            <p className="mt-4 text-sm leading-6 text-muted">
-              Betriebe können Gewerke, Leistungen, Spezialisierungen, Standort und Kontaktwege sichtbar machen. Die
-              vollständige Leistungsbreite wird nicht hinter eine Paywall gestellt.
-            </p>
-            <Link className="mt-5 inline-flex text-sm font-semibold text-[#1f5fd4] hover:underline" href="/betrieb-eintragen">
-              Basiseintrag sichern
-            </Link>
-          </Card>
-          <Card>
-            <p className="text-sm font-semibold uppercase tracking-normal text-brand">Kein Leadportal</p>
-            <h2 className="mt-2 text-2xl font-semibold text-[#07173d]">Keine Auktion. Kein Preisdruck.</h2>
-            <p className="mt-4 text-sm leading-6 text-muted">
-              GewerkeListe.com verkauft keine einzelnen Kontakte. Die Plattform schafft strukturierte B2B-Sichtbarkeit
-              vor Ausschreibung, Anfrage und Vergabe.
-            </p>
-            <Link className="mt-5 inline-flex text-sm font-semibold text-[#1f5fd4] hover:underline" href="/ueber-gewerkeliste">
-              Warum GewerkeListe?
-            </Link>
-          </Card>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-        <div className="rounded-lg border border-line bg-white p-6 shadow-soft sm:p-8 lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-8">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-normal text-brand">Für Bauprojekte</p>
-            <h2 className="mt-2 text-3xl font-semibold text-[#07173d]">Finden Sie Betriebe, die zur Aufgabe und zur Region passen.</h2>
-            <p className="mt-4 text-base font-semibold leading-7 text-ink">
-              GewerkeListe.com ordnet Leistungen, Standorte und Wirkungskreise so, dass Projektbeteiligte schneller
-              eine belastbare Vorauswahl treffen können.
-            </p>
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-muted">
-              Der Wert entsteht nicht durch Druck oder Preiskampf, sondern durch bessere Marktübersicht: welches Gewerk,
-              welche Leistung, welche Region, welcher Kontaktweg.
-            </p>
-          </div>
-          <div className="mt-6 flex items-center lg:mt-0 lg:justify-end">
-            <BlueLink href="/suche">Gewerk suchen</BlueLink>
-          </div>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
-          <div>
-            <h2 className="text-2xl font-semibold text-[#07173d]">Gewerke entdecken</h2>
-            <p className="mt-2 text-sm text-muted">Wichtige Baugewerke als strukturierter Einstieg in die Suche.</p>
-          </div>
-          <Link className="text-sm font-semibold text-[#1f5fd4] hover:underline" href={"/gewerke" as Route}>
-            Alle Gewerke anzeigen
-          </Link>
-        </div>
-        <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {visibleTrades.map((trade) => (
-            <Link
-              key={trade.slug}
-              className="rounded-lg border border-line bg-white p-5 text-sm font-semibold text-[#07173d] shadow-soft hover:border-[#1f5fd4]"
-              href={`/gewerke/${trade.slug}` as Route}
-            >
-              {trade.name}
-            </Link>
-          ))}
-        </div>
-        {visibleLocations.length ? (
-          <div className="mt-8 rounded-lg border border-line bg-white p-5 shadow-soft">
+      {visibleLocations.length ? (
+        <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+          <div className="rounded-lg border border-line bg-white p-5 shadow-soft">
             <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
               <div>
                 <h3 className="text-lg font-semibold text-[#07173d]">Regionen entdecken</h3>
@@ -335,8 +225,8 @@ export default async function HomePage() {
               ))}
             </div>
           </div>
-        ) : null}
-      </section>
+        </section>
+      ) : null}
 
       <section className="mx-auto grid max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_480px] lg:items-center lg:px-8">
         <div className="rounded-lg border border-line bg-white p-6 shadow-soft sm:p-8">
@@ -391,7 +281,7 @@ export default async function HomePage() {
             </p>
           </div>
           <div className="mt-6 rounded-lg bg-white p-5 text-ink lg:mt-0">
-            <h3 className="text-lg font-semibold text-[#07173d]">Jetzt im Landkreis Rosenheim starten</h3>
+            <h3 className="text-lg font-semibold text-[#07173d]">Jetzt mit dem Betrieb starten</h3>
             <p className="mt-3 text-sm leading-6 text-muted">
               Kostenlosen Basiseintrag sichern, Profil übernehmen und Leistungen sowie Wirkungskreis klar darstellen.
             </p>
@@ -401,25 +291,6 @@ export default async function HomePage() {
             </div>
           </div>
         </div>
-      </section>
-
-      <section className="mx-auto grid max-w-7xl gap-5 px-4 py-6 sm:px-6 lg:grid-cols-3 lg:px-8">
-        <Card>
-          <p className="text-sm font-semibold uppercase tracking-normal text-brand">Marktübersicht</p>
-          <h2 className="mt-2 text-2xl font-semibold text-[#07173d]">Für den gesamten Bau- und Handwerksmarkt.</h2>
-          <p className="mt-4 text-sm leading-6 text-muted">
-            Jeder Betrieb soll unabhängig von Region, Größe oder Unternehmensalter die Möglichkeit haben, seine
-            Leistungen klar darzustellen und gefunden zu werden.
-          </p>
-        </Card>
-        <Card>
-          <p className="text-sm font-semibold uppercase tracking-normal text-brand">Kein Lead-Portal</p>
-          <h2 className="mt-2 text-2xl font-semibold text-[#07173d]">Passende Betriebe statt Preiskampf.</h2>
-          <p className="mt-4 text-sm leading-6 text-muted">
-            GewerkeListe.com soll nicht den billigsten Anbieter finden, sondern passende Betriebe sichtbar machen:
-            nach Gewerk, Leistung, Region und nachvollziehbaren Betriebsdaten.
-          </p>
-        </Card>
       </section>
 
       <section className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
@@ -485,7 +356,6 @@ export default async function HomePage() {
               {companies.length > 0 ? <Metric label="Betriebe" value={companies.length} /> : null}
               {verifiedCount > 0 ? <Metric label="Bestätigt" value={verifiedCount} /> : null}
               {regionCount > 0 ? <Metric label="Regionen" value={regionCount} /> : null}
-              <Metric label="Gewerke" value={tradeTaxonomy.length} />
             </div>
           ) : null}
         </Card>
