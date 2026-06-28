@@ -26,11 +26,21 @@ type PageProps = {
 
 export default async function BusinessesPage({ searchParams }: PageProps) {
   const params = await searchParams;
-  const query = stringParam(params.q);
+  const query = stringParam(params.query) || stringParam(params.q);
+  const tradeSlug = stringParam(params.gewerk);
+  const serviceSlug = stringParam(params.leistung);
+  const location = stringParam(params.ort);
+  const activeLabel = activeSearchLabel({ query, tradeSlug, serviceSlug, location });
   const companies = isSupabaseConfigured()
-    ? await getBusinessDirectoryCompanies({ query, limit: query ? 50 : 36 })
+    ? await getBusinessDirectoryCompanies({
+        query,
+        tradeSlug,
+        serviceSlug,
+        location,
+        limit: query || tradeSlug || serviceSlug || location ? 70 : 36,
+      })
     : [];
-  const hasSearch = Boolean(query);
+  const hasSearch = Boolean(query || tradeSlug || serviceSlug || location);
 
   return (
     <main className="min-h-screen bg-[#fbfaf7] text-ink">
@@ -67,14 +77,22 @@ export default async function BusinessesPage({ searchParams }: PageProps) {
             <label className="text-sm font-semibold text-[#24364d]" htmlFor="business-query">
               Betrieb suchen
             </label>
-            <div className="mt-3 grid gap-3">
+            <div className="mt-3 grid gap-3 sm:grid-cols-[minmax(0,1fr)_220px_auto]">
               <input
                 id="business-query"
-                name="q"
+                name="query"
                 defaultValue={query || ""}
                 placeholder="Betrieb suchen - z. B. Firmenname, Ort oder Gewerk"
                 className="min-h-12 rounded-md border border-line bg-white px-4 text-base outline-none focus:border-action"
               />
+              <input
+                name="ort"
+                defaultValue={location || ""}
+                placeholder="Ort oder PLZ"
+                className="min-h-12 rounded-md border border-line bg-white px-4 text-base outline-none focus:border-action"
+              />
+              <input name="gewerk" type="hidden" value={tradeSlug || ""} />
+              <input name="leistung" type="hidden" value={serviceSlug || ""} />
               <button className="min-h-12 rounded-md bg-action px-5 text-sm font-semibold text-white hover:bg-brand">
                 Betrieb suchen
               </button>
@@ -94,8 +112,14 @@ export default async function BusinessesPage({ searchParams }: PageProps) {
               {hasSearch ? "Suchergebnisse" : "Neue Betriebe auf GewerkeListe.com"}
             </p>
             <h2 className="mt-2 text-2xl font-semibold text-[#07173d]">
-              {hasSearch ? `Passende Betriebe${query ? ` für "${query}"` : ""}` : "Kürzlich eingetragene Betriebe"}
+              {hasSearch ? `Passende Betriebe${activeLabel ? ` für ${activeLabel}` : ""}` : "Kürzlich eingetragene Betriebe"}
             </h2>
+            {hasSearch ? (
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-muted">
+                Diese zentrale Ergebnisliste berücksichtigt Firmenname, Ort, Gewerk, Leistung, Beschreibung und
+                vorhandene Gewerkesignale.
+              </p>
+            ) : null}
           </div>
           <span className="text-sm font-semibold text-muted">
             {companies.length ? `${companies.length} ${companies.length === 1 ? "Betrieb" : "Betriebe"}` : "Noch kein Treffer"}
@@ -109,7 +133,7 @@ export default async function BusinessesPage({ searchParams }: PageProps) {
             ))}
           </div>
         ) : (
-          <BusinessEmptyState query={query} />
+          <BusinessEmptyState query={activeLabel || query} />
         )}
 
         <section className="mt-10 grid gap-4 rounded-lg border border-line bg-white p-6 shadow-soft lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
@@ -289,6 +313,38 @@ function normalizeWebsiteUrl(url: string | null) {
   if (!url) return undefined;
   if (/^https?:\/\//i.test(url)) return url;
   return `https://${url}`;
+}
+
+function activeSearchLabel({
+  query,
+  tradeSlug,
+  serviceSlug,
+  location,
+}: {
+  query?: string;
+  tradeSlug?: string;
+  serviceSlug?: string;
+  location?: string;
+}) {
+  const parts = [
+    serviceSlug ? `Leistung "${humanizeSlug(serviceSlug)}"` : undefined,
+    tradeSlug ? `Gewerk "${humanizeSlug(tradeSlug)}"` : undefined,
+    query ? `"${query}"` : undefined,
+    location ? `Ort/Region "${location}"` : undefined,
+  ].filter(Boolean);
+  return parts.join(", ");
+}
+
+function humanizeSlug(value: string) {
+  return value
+    .split(",")
+    .map((item) =>
+      item
+        .trim()
+        .replace(/-/g, " ")
+        .replace(/\b\p{L}/gu, (letter) => letter.toUpperCase()),
+    )
+    .join(", ");
 }
 
 function stringParam(value: string | string[] | undefined) {

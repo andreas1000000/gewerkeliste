@@ -3,8 +3,6 @@ import type { Route } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
-import { ClaimBadge } from "@/components/status-badge";
-import { publicResultDescription, publicResultImage } from "@/lib/company-display";
 import { getPublicCompaniesByTrade } from "@/lib/data/public-directory";
 import { breadcrumbJsonLd, collectionPageJsonLd, itemListJsonLd, jsonLd } from "@/lib/seo";
 import { popularServicesForTrade } from "@/lib/service-taxonomy";
@@ -103,7 +101,7 @@ export default async function TradeDetailPage({ params }: PageProps) {
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
                 className="inline-flex min-h-11 items-center justify-center rounded-md bg-[#1f5fd4] px-5 text-sm font-semibold text-white hover:bg-[#174eb2]"
-                href={`/suche?gewerk=${encodeURIComponent(trade.slug)}` as Route}
+                href={`/betriebe?gewerk=${encodeURIComponent(trade.slug)}` as Route}
               >
                 Betriebe in meiner Region suchen
               </Link>
@@ -118,7 +116,7 @@ export default async function TradeDetailPage({ params }: PageProps) {
 
           <aside className="rounded-lg border border-line bg-white p-6 shadow-soft">
             <h2 className="text-lg font-semibold text-[#07173d]">Fachbetrieb suchen</h2>
-            <form action="/suche" className="mt-5 grid gap-3">
+            <form action="/betriebe" className="mt-5 grid gap-3">
               <input name="gewerk" type="hidden" value={trade.slug} />
               <label className="grid gap-2 text-sm font-semibold text-ink">
                 Ort oder PLZ
@@ -151,7 +149,7 @@ export default async function TradeDetailPage({ params }: PageProps) {
                 <Link
                   key={service.slug}
                   className="rounded-md border border-line bg-[#fbfcff] px-3 py-2 text-sm font-medium text-ink hover:border-action hover:text-action"
-                  href={`/suche?gewerk=${trade.slug}&q=${encodeURIComponent(service.name)}` as Route}
+                  href={`/betriebe?gewerk=${trade.slug}&leistung=${service.slug}&query=${encodeURIComponent(service.name)}` as Route}
                 >
                   {service.name}
                 </Link>
@@ -161,88 +159,25 @@ export default async function TradeDetailPage({ params }: PageProps) {
         ) : null}
 
         <section className="mt-8 rounded-lg border border-line bg-white p-6 shadow-soft">
-          <div className="flex flex-col justify-between gap-3 border-b border-line pb-4 sm:flex-row sm:items-end">
+          <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
             <div>
-              <h2 className="text-xl font-semibold text-[#07173d]">Öffentlich gelistete Betriebe</h2>
-              <p className="mt-2 text-sm leading-6 text-muted">
-                Zuordnung über bestätigte oder öffentlich erkennbare Gewerkesignale. Verifiziert bedeutet nur:
-                Betriebsdaten bestätigt, keine Qualitäts- oder Ausführungsgarantie.
+              <h2 className="text-xl font-semibold text-[#07173d]">Betriebe in diesem Gewerk anzeigen</h2>
+              <p className="mt-2 max-w-3xl text-sm leading-6 text-muted">
+                Die Ergebnisliste wird zentral unter „Betriebe“ geführt. Dort können Sie zusätzlich nach Ort,
+                Leistung, Spezialisierung oder Firmenname filtern.
+              </p>
+              <p className="mt-3 text-sm font-semibold text-muted">
+                {companies.length > 0 ? `${companies.length} passende Betriebe aktuell sichtbar` : "Noch keine passenden Betriebe sichtbar"}
               </p>
             </div>
-            <span className="text-sm font-semibold text-muted">{companies.length > 0 ? `${companies.length} Betriebe` : "Betriebe finden"}</span>
-          </div>
-          <div className="divide-y divide-line">
-            {companies.length > 0 ? (
-              companies.map((company) => {
-                const description = publicResultDescription(company.description);
-                const imageUrl = publicResultImage(company);
-
-                return (
-                  <article key={company.id} className="py-5">
-                    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_auto]">
-                      <div className="flex min-w-0 gap-4">
-                        {imageUrl ? (
-                          <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-line bg-[#fbfcff]">
-                            <img
-                              alt={company.logo_url ? `Logo von ${company.name}` : `Ansprechpartner von ${company.name}`}
-                              className="h-full w-full object-cover"
-                              src={imageUrl}
-                            />
-                          </div>
-                        ) : null}
-                        <div className="min-w-0">
-                          <div className="flex flex-wrap items-center gap-2">
-                            <h3 className="text-lg font-semibold text-[#07173d]">{company.name}</h3>
-                            {company.verified ? (
-                              <span className="rounded-md border border-[#b9e2c2] bg-[#effaf2] px-2.5 py-1 text-xs font-semibold text-[#1f6b3d]">
-                                Betriebsdaten bestätigt
-                              </span>
-                            ) : (
-                              <span className="rounded-md border border-line bg-[#fbfcff] px-2.5 py-1 text-xs font-semibold text-muted">
-                                unbestätigt
-                              </span>
-                            )}
-                            <ClaimBadge status={company.claim_status} />
-                          </div>
-                          <p className="mt-2 text-sm text-muted">
-                            {company.postal_code} {company.city}
-                          </p>
-                          {description ? <p className="mt-3 max-w-3xl text-sm leading-6 text-ink">{description}</p> : null}
-                          <div className="mt-3 flex flex-wrap gap-2">
-                            <span className="rounded-md border border-line bg-white px-2.5 py-1 text-xs text-muted">{trade.name}</span>
-                            {company.trades?.name && company.trades.slug !== trade.slug ? (
-                              <span className="rounded-md border border-line bg-white px-2.5 py-1 text-xs text-muted">{company.trades.name}</span>
-                            ) : null}
-                            {tradeMatchFor(company)?.confidence_score ? (
-                              <span className="rounded-md border border-line bg-white px-2.5 py-1 text-xs text-muted">
-                                Score {tradeMatchFor(company)?.confidence_score}
-                              </span>
-                            ) : null}
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex flex-wrap gap-2 lg:justify-end">
-                        {company.phone ? (
-                          <a className="inline-flex min-h-10 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-action hover:border-action" href={`tel:${company.phone}`}>
-                            Anrufen
-                          </a>
-                        ) : null}
-                        {company.website_url ? (
-                          <a className="inline-flex min-h-10 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-action hover:border-action" href={company.website_url} rel="nofollow noopener noreferrer" target="_blank">
-                            Website
-                          </a>
-                        ) : null}
-                        <Link className="inline-flex min-h-10 items-center justify-center rounded-md bg-action px-4 text-sm font-semibold text-white hover:bg-brand" href={`/firma/${company.slug}` as Route}>
-                          Profil ansehen
-                        </Link>
-                      </div>
-                    </div>
-                  </article>
-                );
-              })
-            ) : (
-              <EmptyCompanies trade={trade} />
-            )}
+            <div className="flex flex-wrap gap-3 sm:justify-end">
+              <Link className="inline-flex min-h-11 items-center justify-center rounded-md bg-action px-5 text-sm font-semibold text-white hover:bg-brand" href={`/betriebe?gewerk=${trade.slug}` as Route}>
+                Betriebe anzeigen
+              </Link>
+              <Link className="inline-flex min-h-11 items-center justify-center rounded-md border border-line bg-white px-5 text-sm font-semibold text-action hover:border-action" href="/betrieb-eintragen">
+                Betrieb vorschlagen
+              </Link>
+            </div>
           </div>
         </section>
 
@@ -293,28 +228,6 @@ export default async function TradeDetailPage({ params }: PageProps) {
   );
 }
 
-function EmptyCompanies({ trade }: { trade: TaxonomyTrade }) {
-  return (
-    <div className="py-8 text-center">
-      <h3 className="text-xl font-semibold text-[#07173d]">Für dieses Gewerk sind noch keine Betriebe öffentlich gelistet.</h3>
-      <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-muted">
-        Für dieses Gewerk sind in dieser Region noch keine Betriebe gelistet. GewerkeListe wird laufend erweitert.
-      </p>
-      <div className="mt-5 flex flex-wrap justify-center gap-3">
-        <Link className="inline-flex min-h-10 items-center justify-center rounded-md bg-action px-4 text-sm font-semibold text-white hover:bg-brand" href="/betrieb-eintragen">
-          Betrieb vorschlagen
-        </Link>
-        <Link className="inline-flex min-h-10 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-action hover:border-action" href={`/suche?gewerk=${trade.slug}&umkreis=100` as Route}>
-          Umkreis erweitern
-        </Link>
-        <Link className="inline-flex min-h-10 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-action hover:border-action" href="/gewerke">
-          Ähnliche Gewerke ansehen
-        </Link>
-      </div>
-    </div>
-  );
-}
-
 function headlineForTrade(trade: TaxonomyTrade) {
   if (trade.slug === "maurerarbeiten") return "Maurerbetriebe finden";
   if (trade.slug === "pflasterbau") return "Pflasterbaubetriebe finden";
@@ -330,10 +243,6 @@ function InfoCard({ title, text }: { title: string; text: string }) {
       <p className="mt-2 text-sm leading-6 text-muted">{text}</p>
     </div>
   );
-}
-
-function tradeMatchFor(company: unknown) {
-  return (company as { trade_match?: { confidence_score: number; source: string; evidence: string | null } }).trade_match;
 }
 
 function findTrade(slug: string): TaxonomyTrade | undefined {

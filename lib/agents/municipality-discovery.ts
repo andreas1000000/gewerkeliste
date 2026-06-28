@@ -213,6 +213,7 @@ export async function runMunicipalityDiscovery(input: MunicipalityDiscoveryInput
     safeRevalidatePath("/admin/agents/municipality-discovery");
     if (stats.publications_created > 0) {
       safeRevalidatePath("/");
+      safeRevalidatePath("/betriebe");
       safeRevalidatePath("/suche");
       safeRevalidatePath("/admin/companies");
     }

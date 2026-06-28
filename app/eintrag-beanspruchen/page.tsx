@@ -39,7 +39,7 @@ export default async function LegacyClaimEntryPage({ searchParams }: PageProps) 
           <div className="mt-6 grid gap-3 sm:grid-cols-2">
             <Link
               className="inline-flex min-h-11 items-center justify-center rounded-md bg-action px-5 text-sm font-semibold text-white hover:bg-brand"
-              href={"/suche" as Route}
+              href={"/betriebe" as Route}
             >
               Betrieb suchen
             </Link>

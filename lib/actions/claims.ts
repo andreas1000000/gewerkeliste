@@ -149,6 +149,7 @@ export async function submitClaim(_prevState: CompanyFormState, formData: FormDa
   await supabase.from("companies").update({ claim_status: "pending" }).eq("id", parsed.data.company_id).neq("claim_status", "claimed");
 
   revalidatePath("/");
+  revalidatePath("/betriebe");
   revalidatePath("/suche");
   revalidatePath("/admin/claims");
   revalidatePath("/admin/submissions");

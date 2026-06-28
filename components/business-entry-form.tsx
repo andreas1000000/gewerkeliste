@@ -58,8 +58,8 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
           melden uns, falls Rückfragen bestehen.
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
-          <Link className="inline-flex min-h-11 items-center rounded-md bg-action px-5 text-sm font-semibold text-white" href="/suche">
-            Zur Suche
+          <Link className="inline-flex min-h-11 items-center rounded-md bg-action px-5 text-sm font-semibold text-white" href="/betriebe">
+            Zur Betriebe-Liste
           </Link>
           <Link className="inline-flex min-h-11 items-center rounded-md border border-line bg-white px-5 text-sm font-semibold text-action" href="/betriebe">
             Betriebe suchen

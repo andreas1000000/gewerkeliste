@@ -147,7 +147,7 @@ export default async function TradeLocationPage({ params }: PageProps) {
                 <Link
                   key={service.slug}
                   className="rounded-md border border-line bg-[#fbfcff] px-3 py-2 text-sm font-medium text-ink hover:border-action hover:text-action"
-                  href={`/suche?gewerk=${trade.slug}&ort=${encodeURIComponent(location)}&q=${encodeURIComponent(service.name)}` as Route}
+                  href={`/betriebe?gewerk=${trade.slug}&ort=${encodeURIComponent(location)}&leistung=${service.slug}&query=${encodeURIComponent(service.name)}` as Route}
                 >
                   {service.name}
                 </Link>
@@ -156,52 +156,27 @@ export default async function TradeLocationPage({ params }: PageProps) {
           </section>
         ) : null}
 
-        <section className="mt-8 overflow-hidden rounded-lg border border-line bg-white shadow-soft">
-          {companies.length > 0 ? (
-            companies.map((company) => (
-              <Link key={company.id} className="block border-b border-line px-5 py-4 last:border-b-0 hover:bg-[#fbfcff]" href={`/firma/${company.slug}` as Route}>
-                <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-start">
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h2 className="text-lg font-semibold text-[#07173d]">{company.name}</h2>
-                      {company.verified ? (
-                        <span className="rounded-md border border-[#b9e2c2] bg-[#effaf2] px-2.5 py-1 text-xs font-semibold text-[#1f6b3d]">
-                          Daten bestätigt
-                        </span>
-                      ) : (
-                        <span className="rounded-md border border-line bg-[#fbfcff] px-2.5 py-1 text-xs font-semibold text-muted">
-                          Basisprofil
-                        </span>
-                      )}
-                    </div>
-                    <p className="mt-1 text-sm text-muted">
-                      {company.postal_code} {company.city}
-                    </p>
-                  </div>
-                  <span className="text-sm font-semibold text-action">Profil ansehen</span>
-                </div>
-              </Link>
-            ))
-          ) : (
-            <div className="p-8 text-center">
-              <h2 className="text-xl font-semibold text-[#07173d]">Noch keine passenden Betriebseinträge sichtbar</h2>
-              <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-muted">
-                Für dieses Gewerk sind in dieser Region noch keine Betriebe öffentlich gelistet. Sie können die Suche
-                erweitern, einen Betrieb vorschlagen oder einen Betrieb kostenlos eintragen.
-              </p>
-              <div className="mt-5 flex flex-wrap justify-center gap-3">
-                <Link className="inline-flex min-h-10 items-center justify-center rounded-md bg-action px-4 text-sm font-semibold text-white hover:bg-brand" href={searchHref(trade.slug, location) as Route}>
-                  Suche im Umkreis erweitern
-                </Link>
-                <Link className="inline-flex min-h-10 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-action hover:border-action" href="/betrieb-eintragen">
-                  Betrieb kostenlos eintragen
-                </Link>
-                <Link className="inline-flex min-h-10 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-action hover:border-action" href="/gewerke">
-                  Ähnliche Gewerke ansehen
-                </Link>
-              </div>
-            </div>
-          )}
+        <section className="mt-8 rounded-lg border border-line bg-white p-6 text-center shadow-soft">
+          <h2 className="text-xl font-semibold text-[#07173d]">
+            {companies.length > 0
+              ? `${companies.length} passende Betriebe in der zentralen Liste anzeigen`
+              : `Noch keine passenden Betriebe für ${trade.name} in ${location}`}
+          </h2>
+          <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-muted">
+            Die Treffer werden zentral in der Betriebe-Liste angezeigt. Dort können Sie zusätzlich nach Leistung,
+            Firmenname oder weiteren Orten filtern.
+          </p>
+          <div className="mt-5 flex flex-wrap justify-center gap-3">
+            <Link className="inline-flex min-h-10 items-center justify-center rounded-md bg-action px-4 text-sm font-semibold text-white hover:bg-brand" href={searchHref(trade.slug, location) as Route}>
+              Alle {trade.name} in {location} anzeigen
+            </Link>
+            <Link className="inline-flex min-h-10 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-action hover:border-action" href="/betrieb-eintragen">
+              Betrieb kostenlos eintragen
+            </Link>
+            <Link className="inline-flex min-h-10 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-action hover:border-action" href="/gewerke">
+              Ähnliche Gewerke ansehen
+            </Link>
+          </div>
         </section>
       </section>
     </main>
@@ -220,5 +195,5 @@ function displayLocation(value: string) {
 
 function searchHref(slug: string, location: string) {
   const params = new URLSearchParams({ gewerk: slug, ort: location });
-  return `/suche?${params.toString()}`;
+  return `/betriebe?${params.toString()}`;
 }

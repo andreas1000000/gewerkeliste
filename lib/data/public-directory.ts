@@ -1,4 +1,5 @@
 import { getSupabaseAdmin } from "@/lib/supabase";
+import { serviceTermsByTradeSlug, serviceTaxonomy } from "@/lib/service-taxonomy";
 import type {
   PublicCompanyMetadata,
   PublicCompanyTradeMatch,
@@ -43,8 +44,18 @@ export async function getPublicCompanies(params?: {
   return resolveCompanyMedia(data as PublicCompanyWithTrade[]);
 }
 
-export async function getBusinessDirectoryCompanies(params?: { query?: string; limit?: number }) {
+export async function getBusinessDirectoryCompanies(params?: {
+  query?: string;
+  tradeSlug?: string;
+  serviceSlug?: string;
+  location?: string;
+  limit?: number;
+}) {
   const search = params?.query?.trim();
+  const tradeSlugs = splitParamList(params?.tradeSlug).map(normalizeForDirectorySearch).filter(Boolean);
+  const service = findServiceSearchContext(params?.serviceSlug);
+  const location = params?.location?.trim();
+  const hasFilter = Boolean(search || tradeSlugs.length || service || location);
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("companies")
@@ -53,17 +64,25 @@ export async function getBusinessDirectoryCompanies(params?: { query?: string; l
     )
     .eq("public_visible", true)
     .order("created_at", { ascending: false })
-    .limit(search ? 500 : params?.limit || 40);
+    .limit(hasFilter ? 700 : params?.limit || 40);
 
   if (error) {
     return getBusinessDirectoryCompaniesFallback(params);
   }
 
   const companies = await resolveCompanyMedia(data as PublicCompanyWithTrade[]);
-  if (!search) return companies.slice(0, params?.limit || 40);
+  if (!hasFilter) return companies.slice(0, params?.limit || 40);
 
   return companies
-    .map((company) => ({ company, score: scoreBusinessDirectoryMatch(company, search) }))
+    .map((company) => ({
+      company,
+      score: scoreBusinessDirectoryMatch(company, {
+        query: search,
+        tradeSlugs,
+        service,
+        location,
+      }),
+    }))
     .filter((entry) => entry.score > 0)
     .sort((a, b) => b.score - a.score || newestFirst(a.company, b.company))
     .map((entry) => entry.company)
@@ -326,23 +345,41 @@ async function getPublicCompaniesFallback(params?: {
   return resolveCompanyMedia(data as PublicCompanyWithTrade[]);
 }
 
-async function getBusinessDirectoryCompaniesFallback(params?: { query?: string; limit?: number }) {
+async function getBusinessDirectoryCompaniesFallback(params?: {
+  query?: string;
+  tradeSlug?: string;
+  serviceSlug?: string;
+  location?: string;
+  limit?: number;
+}) {
   const search = params?.query?.trim();
+  const tradeSlugs = splitParamList(params?.tradeSlug).map(normalizeForDirectorySearch).filter(Boolean);
+  const service = findServiceSearchContext(params?.serviceSlug);
+  const location = params?.location?.trim();
+  const hasFilter = Boolean(search || tradeSlugs.length || service || location);
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("companies")
     .select("*, trades(id, name, slug)")
     .eq("public_visible", true)
     .order("created_at", { ascending: false })
-    .limit(search ? 500 : params?.limit || 40);
+    .limit(hasFilter ? 700 : params?.limit || 40);
 
   if (error) throw error;
 
   const companies = await resolveCompanyMedia(data as PublicCompanyWithTrade[]);
-  if (!search) return companies.slice(0, params?.limit || 40);
+  if (!hasFilter) return companies.slice(0, params?.limit || 40);
 
   return companies
-    .map((company) => ({ company, score: scoreBusinessDirectoryMatch(company, search) }))
+    .map((company) => ({
+      company,
+      score: scoreBusinessDirectoryMatch(company, {
+        query: search,
+        tradeSlugs,
+        service,
+        location,
+      }),
+    }))
     .filter((entry) => entry.score > 0)
     .sort((a, b) => b.score - a.score || newestFirst(a.company, b.company))
     .map((entry) => entry.company)
@@ -443,17 +480,50 @@ function sortMatchedCompanies(
   return a.name.localeCompare(b.name, "de");
 }
 
-function scoreBusinessDirectoryMatch(company: PublicCompanyWithTrade, query: string) {
-  const normalizedQuery = normalizeForDirectorySearch(query);
-  if (!normalizedQuery) return 0;
-  const queryTokens = expandDirectoryQuery(normalizedQuery);
+type DirectoryServiceSearchContext = {
+  slug: string;
+  name: string;
+  tradeSlugs: string[];
+  terms: string[];
+};
+
+function scoreBusinessDirectoryMatch(
+  company: PublicCompanyWithTrade,
+  params: {
+    query?: string;
+    tradeSlugs: string[];
+    service?: DirectoryServiceSearchContext;
+    location?: string;
+  },
+) {
+  const normalizedQuery = normalizeForDirectorySearch(params.query || "");
+  const locationQuery = normalizeForDirectorySearch(params.location || "");
+  const queryTokens = normalizedQuery ? expandDirectoryQuery(normalizedQuery) : [];
+  const locationTokens = locationQuery ? expandDirectoryQuery(locationQuery) : [];
 
   const tradeNames = [
     company.trades?.name,
+    company.trades?.slug,
     ...(company.company_trades || [])
       .filter((match) => match.status !== "rejected" && match.visibility_level !== "internal")
-      .map((match) => match.trades?.name),
+      .flatMap((match) => [match.trades?.name, match.trades?.slug]),
   ].filter((value): value is string => Boolean(value));
+  const companyTradeSlugs = new Set(tradeNames.map(normalizeForDirectorySearch));
+  const companySearchBlob = normalizeForDirectorySearch(
+    [
+      company.name,
+      company.website_url,
+      company.city,
+      company.postal_code,
+      company.description,
+      company.email,
+      company.phone,
+      tradeNames.join(" "),
+      ...(company.company_trades || [])
+        .filter((match) => match.status !== "rejected" && match.visibility_level !== "internal")
+        .map((match) => match.evidence || ""),
+    ].join(" "),
+  );
 
   const fields: Array<[string | null | undefined, number]> = [
     [company.name, 100],
@@ -473,15 +543,37 @@ function scoreBusinessDirectoryMatch(company: PublicCompanyWithTrade, query: str
     ],
   ];
 
-  return fields.reduce((score, [value, weight]) => {
+  let score = fields.reduce((currentScore, [value, weight]) => {
     const normalizedValue = normalizeForDirectorySearch(value || "");
-    if (!normalizedValue) return score;
-    if (normalizedValue === normalizedQuery) return Math.max(score, weight + 25);
-    if (normalizedValue.startsWith(normalizedQuery)) return Math.max(score, weight + 15);
-    if (normalizedValue.includes(normalizedQuery)) return Math.max(score, weight);
-    if (queryTokens.some((token) => normalizedValue.includes(token))) return Math.max(score, Math.max(20, weight - 10));
-    return score;
+    if (!normalizedValue || !normalizedQuery) return currentScore;
+    if (normalizedValue === normalizedQuery) return Math.max(currentScore, weight + 25);
+    if (normalizedValue.startsWith(normalizedQuery)) return Math.max(currentScore, weight + 15);
+    if (normalizedValue.includes(normalizedQuery)) return Math.max(currentScore, weight);
+    if (queryTokens.some((token) => normalizedValue.includes(token))) return Math.max(currentScore, Math.max(20, weight - 10));
+    return currentScore;
   }, 0);
+
+  if (locationQuery) {
+    const locationValue = normalizeForDirectorySearch([company.city, company.postal_code].filter(Boolean).join(" "));
+    if (locationValue.includes(locationQuery)) score += 90;
+    else if (locationTokens.some((token) => locationValue.includes(token))) score += 55;
+    else if (params.query || params.tradeSlugs.length || params.service) score -= 20;
+  }
+
+  for (const slug of params.tradeSlugs) {
+    if (companyTradeSlugs.has(slug)) score += 120;
+    else if (companySearchBlob.includes(slug)) score += 65;
+  }
+
+  if (params.service) {
+    const serviceTerms = params.service.terms.map(normalizeForDirectorySearch).filter(Boolean);
+    const directServiceHit = serviceTerms.some((term) => companySearchBlob.includes(term));
+    const tradeFallbackHit = params.service.tradeSlugs.some((slug) => companyTradeSlugs.has(normalizeForDirectorySearch(slug)));
+    if (directServiceHit) score += 140;
+    else if (tradeFallbackHit) score += 75;
+  }
+
+  return score;
 }
 
 const directorySynonymGroups = [
@@ -515,6 +607,49 @@ function expandDirectoryQuery(normalizedQuery: string) {
   }
 
   return Array.from(tokens);
+}
+
+function splitParamList(value?: string) {
+  if (!value) return [];
+  return value
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function findServiceSearchContext(serviceSlug?: string): DirectoryServiceSearchContext | undefined {
+  if (!serviceSlug) return undefined;
+  const normalizedSlug = normalizeForDirectorySearch(serviceSlug);
+  const termsByTrade = serviceTermsByTradeSlug();
+  for (const group of serviceTaxonomy) {
+    for (const trade of group.trades) {
+      for (const familyItem of trade.families) {
+        for (const service of familyItem.services) {
+          if (normalizeForDirectorySearch(service.slug) !== normalizedSlug) continue;
+          return {
+            slug: service.slug,
+            name: service.name,
+            tradeSlugs: [trade.slug, ...service.crosslinks],
+            terms: [
+              service.name,
+              service.description,
+              ...service.aliases,
+              ...service.activities,
+              ...service.contexts,
+              ...service.crosslinks,
+              ...(termsByTrade.get(trade.slug) || []),
+            ],
+          };
+        }
+      }
+    }
+  }
+  return {
+    slug: serviceSlug,
+    name: serviceSlug.replace(/-/g, " "),
+    tradeSlugs: [],
+    terms: [serviceSlug, serviceSlug.replace(/-/g, " ")],
+  };
 }
 
 function normalizeForDirectorySearch(value: string) {

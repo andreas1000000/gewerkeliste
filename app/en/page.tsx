@@ -97,12 +97,12 @@ export default async function EnglishHomePage() {
               <TrustItem text="Direct contact" />
             </div>
 
-            <form action="/suche" className="mt-8 rounded-lg border border-line bg-white p-4 shadow-soft">
+            <form action="/betriebe" className="mt-8 rounded-lg border border-line bg-white p-4 shadow-soft">
               <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
                 <label className="grid gap-1.5 text-xs font-semibold text-brand">
                   What are you looking for?
                   <input
-                    name="q"
+                    name="query"
                     className="h-12 rounded-md border border-line px-3 text-sm font-normal outline-none focus:border-action"
                     placeholder="e.g. paving, waterproofing, metalwork"
                   />
@@ -179,7 +179,7 @@ export default async function EnglishHomePage() {
           <Step number="2" text="Compare services, specialization and service area" />
           <Step number="3" text="Contact suitable companies directly" />
           <div className="mt-6">
-            <BlueLink href="/suche">Search companies</BlueLink>
+            <BlueLink href="/betriebe">Search companies</BlueLink>
           </div>
         </Panel>
         <Panel title="For trade companies">
@@ -207,7 +207,7 @@ export default async function EnglishHomePage() {
             <Link
               key={trade.slug}
               className="rounded-lg border border-line bg-white p-5 text-sm font-semibold text-[#07173d] shadow-soft hover:border-[#1f5fd4]"
-              href={`/suche?gewerk=${trade.slug}` as Route}
+              href={`/betriebe?gewerk=${trade.slug}` as Route}
             >
               {trade.name}
             </Link>
@@ -253,7 +253,7 @@ export default async function EnglishHomePage() {
             Start with a trade and a location, or claim your company profile.
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
-            <BlueLink href="/suche">Search companies</BlueLink>
+            <BlueLink href="/betriebe">Search companies</BlueLink>
             <OutlineLink href="/eintrag-beanspruchen">Claim profile</OutlineLink>
             <OutlineLink href="/betrieb-eintragen">Add company</OutlineLink>
           </div>

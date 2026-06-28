@@ -109,11 +109,11 @@ export default async function CompanyPublicPage({ params }: PageProps) {
               Betriebe
             </Link>
             <span aria-hidden="true">/</span>
-            <Link className="hover:text-ink" href={`/suche?gewerk=${company.trades?.slug || ""}` as Route}>
+            <Link className="hover:text-ink" href={`/betriebe?gewerk=${company.trades?.slug || ""}` as Route}>
               {trade}
             </Link>
             <span aria-hidden="true">/</span>
-            <Link className="hover:text-ink" href={`/suche?ort=${encodeURIComponent(company.city)}` as Route}>
+            <Link className="hover:text-ink" href={`/betriebe?ort=${encodeURIComponent(company.city)}` as Route}>
               {company.city}
             </Link>
             <span aria-hidden="true">/</span>

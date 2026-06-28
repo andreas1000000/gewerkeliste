@@ -27,8 +27,8 @@ export function LegalFooter() {
         <nav>
           <h2 className="font-semibold">Navigation</h2>
           <div className="mt-3 grid gap-2 text-blue-100">
-            <Link className="hover:text-white" href="/suche">
-              Suche
+            <Link className="hover:text-white" href="/betriebe">
+              Betriebe suchen
             </Link>
             <Link className="hover:text-white" href="/gewerke">
               Gewerke

@@ -29,6 +29,7 @@ export async function approveSubmission(formData: FormData) {
 
     revalidatePath("/admin/submissions");
     revalidatePath(`/admin/submissions/${id}`);
+    revalidatePath("/betriebe");
     revalidatePath("/suche");
     revalidatePath("/");
     revalidatePath(`/firma/${company.slug}`);

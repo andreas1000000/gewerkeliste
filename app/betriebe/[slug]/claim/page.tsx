@@ -36,8 +36,8 @@ export default async function CompanyClaimWizardPage({ params }: PageProps) {
       <SiteHeader />
       <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
         <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-sm text-muted">
-          <Link className="hover:text-ink" href={"/suche" as Route}>
-            Suche
+          <Link className="hover:text-ink" href={"/betriebe" as Route}>
+            Betriebe
           </Link>
           <span aria-hidden="true">/</span>
           <Link className="hover:text-ink" href={`/firma/${company.slug}` as Route}>

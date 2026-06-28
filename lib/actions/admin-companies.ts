@@ -37,6 +37,7 @@ export async function restoreCompanyToPublicDirectory(formData: FormData) {
 
 function revalidateCompanyViews(slug: string) {
   revalidatePath("/admin/companies");
+  revalidatePath("/betriebe");
   revalidatePath("/suche");
   revalidatePath("/gewerke");
   revalidatePath("/");

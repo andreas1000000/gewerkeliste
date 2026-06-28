@@ -60,13 +60,13 @@ export function SiteHeader({ locale = "de" }: SiteHeaderProps) {
           </span>
         </Link>
 
-        <form action="/suche" className="order-3 w-full lg:order-none">
+        <form action="/betriebe" className="order-3 w-full lg:order-none">
           <label className="sr-only" htmlFor="site-search">
             {copy.searchLabel}
           </label>
           <input
             id="site-search"
-            name="q"
+            name="query"
             className="h-11 w-full rounded-md border border-line bg-white px-4 text-sm outline-none focus:border-action"
             placeholder={copy.searchPlaceholder}
           />

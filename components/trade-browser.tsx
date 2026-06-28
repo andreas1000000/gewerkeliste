@@ -80,8 +80,8 @@ export function TradeBrowser({
   }, [frequentSlugs, rankedTrades]);
 
   const selectedQuery = selectedSlugs.join(",");
-  const selectedSearchHref = hrefWithParams("/suche", {
-    trades: selectedQuery || undefined,
+  const selectedSearchHref = hrefWithParams("/betriebe", {
+    gewerk: selectedQuery || undefined,
     ort: location || undefined,
     claimIntent: claimIntent ? "true" : undefined,
   });
@@ -165,7 +165,7 @@ export function TradeBrowser({
                 </Link>
                 <Link
                   className="inline-flex min-h-11 items-center justify-center rounded-md bg-action px-4 text-sm font-semibold text-white hover:bg-brand"
-                  href={hrefWithParams("/suche", { q: query || undefined, ort: location || undefined, claimIntent: claimIntent ? "true" : undefined }) as Route}
+                  href={hrefWithParams("/betriebe", { query: query || undefined, ort: location || undefined, claimIntent: claimIntent ? "true" : undefined }) as Route}
                 >
                   {claimIntent ? "Betrieb suchen" : "Fachbetrieb suchen"}
                 </Link>
@@ -590,19 +590,21 @@ function ServiceDepthPanel({ families, nested = false }: { families: ServiceFami
             </summary>
             <div className="divide-y divide-line border-t border-line">
               {family.services.map((service) => (
-                <details key={service.slug} className="group">
-                  <summary className="cursor-pointer px-4 py-2.5 text-sm font-medium text-ink hover:bg-[#fbfcff]">
+                <div key={service.slug} className="px-4 py-3">
+                  <Link
+                    className="inline-flex min-h-9 items-center rounded-md bg-action px-3 text-sm font-semibold text-white hover:bg-brand"
+                    href={hrefWithParams("/betriebe", { leistung: service.slug, query: service.name }) as Route}
+                  >
                     {service.name}
-                    {service.aliases.length || service.activities.length || service.contexts.length ? (
-                      <span className="ml-2 text-xs font-normal text-muted">Details</span>
-                    ) : null}
-                  </summary>
-                  <div className="grid gap-3 bg-[#fbfcff] px-4 pb-4 text-xs leading-5 text-muted md:grid-cols-2">
-                    <DetailList title="Suchbegriffe" items={service.aliases} />
-                    <DetailList title="Tätigkeiten" items={service.activities} />
-                    <DetailList title="Kontexte" items={service.contexts} />
-                  </div>
-                </details>
+                  </Link>
+                  {service.aliases.length || service.activities.length || service.contexts.length ? (
+                    <div className="mt-3 grid gap-3 text-xs leading-5 text-muted md:grid-cols-3">
+                      <DetailList title="Suchbegriffe" items={service.aliases} />
+                      <DetailList title="Tätigkeiten" items={service.activities} />
+                      <DetailList title="Kontexte" items={service.contexts} />
+                    </div>
+                  ) : null}
+                </div>
               ))}
             </div>
           </details>
@@ -679,7 +681,7 @@ function EmptyState({ query }: { query?: string }) {
         ))}
       </div>
       <div className="mt-4 flex flex-wrap justify-center gap-2">
-        <Link className="inline-flex min-h-10 items-center justify-center rounded-md bg-action px-4 text-sm font-semibold text-white hover:bg-brand" href="/suche">
+        <Link className="inline-flex min-h-10 items-center justify-center rounded-md bg-action px-4 text-sm font-semibold text-white hover:bg-brand" href="/betriebe">
           Zur Betriebssuche
         </Link>
         <Link className="inline-flex min-h-10 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-action hover:border-action" href="/betrieb-eintragen">
@@ -774,7 +776,7 @@ function tradeHref(slug: string, location: string) {
 }
 
 function searchHref(slug: string, location: string) {
-  return hrefWithParams("/suche", { gewerk: slug, ort: location || undefined });
+  return hrefWithParams("/betriebe", { gewerk: slug, ort: location || undefined });
 }
 
 function hrefWithParams(path: string, params: Record<string, string | undefined>) {

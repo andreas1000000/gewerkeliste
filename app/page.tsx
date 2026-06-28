@@ -123,12 +123,12 @@ export default async function HomePage() {
               sie erreichbar sind. Persönliche Empfehlungen werden nicht ersetzt, sondern fachlich besser auffindbar.
             </p>
 
-            <form action="/suche" className="mt-8 rounded-lg border border-line bg-white p-4 shadow-soft">
+            <form action="/betriebe" className="mt-8 rounded-lg border border-line bg-white p-4 shadow-soft">
               <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
                 <label className="grid gap-1.5 text-xs font-semibold text-brand">
                   Was suchen Sie?
                   <input
-                    name="q"
+                    name="query"
                     className="h-12 rounded-md border border-line px-3 text-sm font-normal outline-none focus:border-action"
                     placeholder="z. B. Pflasterbau, Abdichtung, Metallbau"
                   />
@@ -150,7 +150,7 @@ export default async function HomePage() {
                   <Link
                     key={example}
                     className="rounded-md border border-line bg-[#fbfcff] px-3 py-2 font-semibold text-action hover:border-action"
-                    href={`/suche?q=${encodeURIComponent(example)}` as Route}
+                    href={`/betriebe?query=${encodeURIComponent(example)}` as Route}
                   >
                     {example}
                   </Link>
@@ -184,7 +184,7 @@ export default async function HomePage() {
           <Step number="2" text="Leistung, Spezialisierung und Region einordnen" />
           <Step number="3" text="passende Betriebe direkt kontaktieren" />
           <div className="mt-6">
-            <BlueLink href="/suche">Fachbetrieb suchen</BlueLink>
+            <BlueLink href="/betriebe">Fachbetrieb suchen</BlueLink>
           </div>
         </Card>
         <Card>
@@ -368,7 +368,7 @@ export default async function HomePage() {
             Starten Sie mit Gewerk und Ort – oder übernehmen Sie den Eintrag Ihres Betriebs.
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
-            <BlueLink href="/suche">Fachbetrieb suchen</BlueLink>
+            <BlueLink href="/betriebe">Fachbetrieb suchen</BlueLink>
             <OutlineLink href="/eintrag-beanspruchen">Eintrag beanspruchen</OutlineLink>
             <OutlineLink href="/betriebe">Betriebe</OutlineLink>
           </div>
@@ -488,7 +488,7 @@ function structuredData() {
         url: baseUrl,
         potentialAction: {
           "@type": "SearchAction",
-          target: `${baseUrl}/suche?ort={search_term_string}`,
+          target: `${baseUrl}/betriebe?query={search_term_string}`,
           "query-input": "required name=search_term_string",
         },
       },
