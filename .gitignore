@@ -9,3 +9,4 @@ outputs
 .vercel
 tsconfig.tsbuildinfo
 .DS_Store
+.pnpm-store/
