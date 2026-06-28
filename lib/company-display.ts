@@ -15,7 +15,7 @@ export function publicResultDescription(description: string | null | undefined) 
 }
 
 export function cleanCompanyDescription(description: string | null | undefined) {
-  const text = removeInternalSubmissionFragments(description);
+  const text = dedupeRepeatedDescription(removeInternalSubmissionFragments(description));
   if (!text) return "";
 
   const withoutServiceIntro = text
@@ -74,13 +74,13 @@ export function groupServicesForDisplay(services: string[]) {
 }
 
 export function truncateDescription(description: string, maxLength = 420) {
-  const text = description.trim();
+  const text = ensureFinalPunctuation(tidyDescriptionEnding(description));
   if (text.length <= maxLength) return text;
   const shortened = text.slice(0, maxLength + 1);
   const sentenceEnd = Math.max(shortened.lastIndexOf("."), shortened.lastIndexOf("!"), shortened.lastIndexOf("?"));
-  if (sentenceEnd > 140) return shortened.slice(0, sentenceEnd + 1).trim();
+  if (sentenceEnd > 140) return ensureFinalPunctuation(tidyDescriptionEnding(shortened.slice(0, sentenceEnd + 1)));
   const wordEnd = shortened.lastIndexOf(" ");
-  return `${shortened.slice(0, wordEnd > 140 ? wordEnd : maxLength).trim()}...`;
+  return ensureFinalPunctuation(tidyDescriptionEnding(shortened.slice(0, wordEnd > 140 ? wordEnd : maxLength)));
 }
 
 export function removeInternalSubmissionFragments(description: string | null | undefined) {
@@ -135,6 +135,53 @@ function normalizeServiceLabel(value: string) {
 
 function uniqueList(values: string[]) {
   return [...new Set(values.map((value) => value.trim()).filter(Boolean))];
+}
+
+function dedupeRepeatedDescription(description: string) {
+  const text = dedupeRepeatedSentences(description.replace(/\s+/g, " ").trim());
+  if (!text) return "";
+
+  for (const length of [180, 160, 140, 120, 100, 80, 60]) {
+    const prefix = text.slice(0, length).trim();
+    if (prefix.length < 40) continue;
+
+    const secondIndex = text.indexOf(prefix, Math.max(20, Math.floor(length / 2)));
+    if (secondIndex > length) {
+      return tidyDescriptionEnding(text.slice(0, secondIndex));
+    }
+  }
+
+  return text;
+}
+
+function dedupeRepeatedSentences(description: string) {
+  const sentences = description.split(/(?<=[.!?])\s+/);
+  const seen = new Set<string>();
+  const result: string[] = [];
+
+  for (const sentence of sentences) {
+    const normalized = sentence.toLowerCase().replace(/\s+/g, " ").trim();
+    if (!normalized || seen.has(normalized)) continue;
+    seen.add(normalized);
+    result.push(sentence);
+  }
+
+  return result.join(" ").trim();
+}
+
+function tidyDescriptionEnding(description: string) {
+  return description
+    .replace(/\s+(und\s+)?machten\s+so\s*$/i, "")
+    .replace(/\s+(und\s+)?damit\s*$/i, "")
+    .replace(/[-–,:;\s]+$/g, "")
+    .trim();
+}
+
+function ensureFinalPunctuation(description: string) {
+  const text = description.trim();
+  if (!text) return "";
+  if (/[.!?)]$/.test(text)) return text;
+  return `${text}.`;
 }
 
 const serviceKeywordRules: Array<{ label: string; keywords: string[] }> = [
