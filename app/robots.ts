@@ -6,7 +6,18 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: "*",
-      allow: ["/", "/gewerke", "/gewerke/", "/orte", "/orte/", "/firma/", "/betrieb-eintragen", "/eintrag-beanspruchen"],
+      allow: [
+        "/",
+        "/betriebe",
+        "/fuer-betriebe",
+        "/gewerke",
+        "/gewerke/",
+        "/orte",
+        "/orte/",
+        "/firma/",
+        "/betrieb-eintragen",
+        "/eintrag-beanspruchen",
+      ],
       disallow: [
         "/admin/",
         "/api/",

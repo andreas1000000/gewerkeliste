@@ -96,7 +96,7 @@ export default function AboutGewerkeListePage() {
               </p>
               <p>Ich kenne die Frage aus der Praxis:</p>
               <p className="rounded-lg border border-line bg-panel px-5 py-4 text-xl font-semibold text-brand">
-                „Kennst du jemanden, der das machen kann?“
+                „Kennen Sie jemanden, der das machen kann?“
               </p>
               <p>Genau aus dieser Frage heraus entsteht GewerkeListe.com.</p>
             </div>
@@ -358,7 +358,7 @@ export default function AboutGewerkeListePage() {
         <div className="rounded-lg bg-[#082a63] p-6 text-white shadow-soft sm:p-8 lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-8">
           <div>
             <p className="text-sm font-semibold uppercase tracking-normal text-blue-100">Mitmachen</p>
-            <h2 className="mt-2 text-3xl font-semibold">Hilf mit, die GewerkeListe besser zu machen.</h2>
+            <h2 className="mt-2 text-3xl font-semibold">Helfen Sie mit, die GewerkeListe besser zu machen.</h2>
             <p className="mt-4 max-w-3xl text-sm leading-6 text-blue-50">
               Eine gute GewerkeListe entsteht nicht am Schreibtisch allein. Sie entsteht durch Hinweise aus der Praxis.
               Wenn ein Betrieb fehlt, ein Gewerk nicht sauber erfasst ist oder eine Leistung besser beschrieben werden

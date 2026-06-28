@@ -181,7 +181,7 @@ export default async function HomePage() {
               </div>
               <div className="mt-4 flex flex-wrap gap-3">
                 <BlueLink href="/betrieb-eintragen">Kostenlosen Basiseintrag sichern</BlueLink>
-                <OutlineLink href="/eintrag-beanspruchen">Eintrag beanspruchen</OutlineLink>
+                <OutlineLink href="/betriebe">Betriebe suchen</OutlineLink>
               </div>
             </form>
           </div>
@@ -236,7 +236,7 @@ export default async function HomePage() {
           <Step number="2" text="Betriebsdaten übernehmen oder korrigieren" />
           <Step number="3" text="volle Leistungsbreite und Wirkungskreis darstellen" />
           <p className="mt-5 rounded-md border border-[#b9dec8] bg-[#eef9f2] px-4 py-3 text-sm font-semibold text-brand">
-            Zeig, was dein Betrieb wirklich kann: Gewerke, Leistungen, Spezialisierungen und Tätigkeitsgebiet klar darstellen.
+            Zeigen Sie, was Ihr Betrieb wirklich kann: Gewerke, Leistungen, Spezialisierungen und Tätigkeitsgebiet klar darstellen.
           </p>
           <div className="mt-6">
             <BlueLink href="/eintrag-beanspruchen">Eintrag beanspruchen</BlueLink>
@@ -275,7 +275,7 @@ export default async function HomePage() {
         <div className="rounded-lg border border-line bg-white p-6 shadow-soft sm:p-8 lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-8">
           <div>
             <p className="text-sm font-semibold uppercase tracking-normal text-brand">Für Bauprojekte</p>
-            <h2 className="mt-2 text-3xl font-semibold text-[#07173d]">Finde Betriebe, die zur Aufgabe und zur Region passen.</h2>
+            <h2 className="mt-2 text-3xl font-semibold text-[#07173d]">Finden Sie Betriebe, die zur Aufgabe und zur Region passen.</h2>
             <p className="mt-4 text-base font-semibold leading-7 text-ink">
               GewerkeListe.com ordnet Leistungen, Standorte und Wirkungskreise so, dass Projektbeteiligte schneller
               eine belastbare Vorauswahl treffen können.
@@ -357,7 +357,7 @@ export default async function HomePage() {
             angegeben oder aus Quellen abgeleitet und geprüft werden.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
-            <BlueLink href="/suche">Gewerke suchen</BlueLink>
+            <BlueLink href="/betriebe">Betriebe suchen</BlueLink>
             <OutlineLink href="/betrieb-eintragen">Betrieb eintragen</OutlineLink>
           </div>
         </div>
@@ -500,7 +500,7 @@ export default async function HomePage() {
           <div className="mt-6 flex flex-wrap justify-center gap-3">
             <BlueLink href="/suche">Fachbetrieb suchen</BlueLink>
             <OutlineLink href="/eintrag-beanspruchen">Eintrag beanspruchen</OutlineLink>
-            <OutlineLink href="/betrieb-eintragen">Betrieb eintragen</OutlineLink>
+            <OutlineLink href="/betriebe">Betriebe</OutlineLink>
           </div>
         </div>
       </section>

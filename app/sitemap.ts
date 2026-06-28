@@ -54,10 +54,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.6,
     })),
     {
-      url: `${baseUrl}/fuer-betriebe`,
+      url: `${baseUrl}/betriebe`,
       lastModified: now,
       changeFrequency: "monthly",
-      priority: 0.6,
+      priority: 0.75,
     },
     {
       url: `${baseUrl}/eintrag-beanspruchen`,
@@ -70,6 +70,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.5,
+    },
+    {
+      url: `${baseUrl}/fuer-betriebe`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.55,
     },
     {
       url: `${baseUrl}/ueber-gewerkeliste`,
@@ -98,7 +104,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 }
 
-async function loadLocationEntries() {
+type LocationSitemapEntry = { city: string; slug: string };
+type CompanySitemapEntry = { slug: string; updatedAt: string | null };
+type TradeLocationSitemapEntry = { tradeSlug: string; city: string };
+
+async function loadLocationEntries(): Promise<LocationSitemapEntry[]> {
   if (!isSupabaseConfigured()) return [];
 
   try {
@@ -108,7 +118,7 @@ async function loadLocationEntries() {
   }
 }
 
-async function loadCompanyEntries() {
+async function loadCompanyEntries(): Promise<CompanySitemapEntry[]> {
   if (!isSupabaseConfigured()) return [];
 
   try {
@@ -118,7 +128,7 @@ async function loadCompanyEntries() {
   }
 }
 
-async function loadTradeLocationEntries() {
+async function loadTradeLocationEntries(): Promise<TradeLocationSitemapEntry[]> {
   if (!isSupabaseConfigured()) return [];
 
   try {
