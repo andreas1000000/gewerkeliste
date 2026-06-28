@@ -71,6 +71,7 @@ export default async function CompanyPublicPage({ params }: PageProps) {
     const executedTrades = getExecutedTrades(company);
     const services = getRecognizableServices(company, executedTrades);
     const groupedServices = groupServicesForDisplay(services);
+    const topServices = services.slice(0, 12);
     const sourceItems = getSourceItems(company, websiteHref);
     const hasCoordinates =
       Number.isFinite(company.latitude) &&
@@ -148,15 +149,15 @@ export default async function CompanyPublicPage({ params }: PageProps) {
               </ProfileCard>
 
               <ProfileCard
-                title="Leistungen"
+                title="Leistungsübersicht"
                 subtitle={
                   company.verified || company.claim_status === "claimed"
-                    ? "Vom Betrieb angegebene oder im Profil genannte Leistungen."
-                    : "Auf der Firmenwebsite oder in öffentlichen Unternehmensquellen erkennbare Leistungen."
+                    ? "Kompakte Übersicht der vom Betrieb angegebenen oder im Profil genannten Leistungen."
+                    : "Kompakte Übersicht der auf Firmenwebsite oder öffentlichen Unternehmensquellen erkennbaren Leistungen."
                 }
               >
-                {groupedServices.length ? (
-                  <ServiceGroups groups={groupedServices} />
+                {topServices.length ? (
+                  <TopServiceOverview services={topServices} totalCount={services.length} />
                 ) : (
                   <p className="text-sm leading-6 text-muted">
                     Für diesen Betrieb sind noch keine konkreten Leistungen strukturiert hinterlegt. Nach Profilübernahme
@@ -164,6 +165,15 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                   </p>
                 )}
               </ProfileCard>
+
+              {groupedServices.length ? (
+                <ProfileCard
+                  title="Leistungsspektrum im Detail"
+                  subtitle="Detailleistungen werden nach fachlichen Bereichen gruppiert. Die Angaben beschreiben genannte oder öffentlich erkennbare Leistungen, keine Qualitätsbewertung."
+                >
+                  <DetailServiceGroups groups={groupedServices} />
+                </ProfileCard>
+              ) : null}
 
               <ProfileCard title="Gewerke">
                 <div className="flex flex-wrap gap-2">
@@ -376,39 +386,48 @@ function ActionBar({
   );
 }
 
-function ServiceGroups({ groups }: { groups: Array<{ label: string; items: string[] }> }) {
-  const visibleGroups = groups.map((group) => ({ ...group, items: group.items.slice(0, 18) }));
-  const visibleCount = visibleGroups.reduce((sum, group) => sum + group.items.length, 0);
-  const allCount = groups.reduce((sum, group) => sum + group.items.length, 0);
-
+function TopServiceOverview({ services, totalCount }: { services: string[]; totalCount: number }) {
   return (
-    <div className="grid gap-5">
-      <div className="grid gap-4">
-        {visibleGroups.map((group) => (
-          <div key={group.label}>
-            <h3 className="text-sm font-semibold text-ink">{group.label}</h3>
-            <div className="mt-3 flex flex-wrap gap-2">
-              {group.items.map((item) => (
-                <span key={item} className="rounded-md border border-line bg-[#fbfcff] px-3 py-2 text-sm font-semibold text-ink">
-                  {item}
-                </span>
-              ))}
-            </div>
-          </div>
+    <div>
+      <div className="flex flex-wrap gap-2">
+        {services.map((item) => (
+          <span key={item} className="rounded-md border border-line bg-[#fbfcff] px-3 py-2 text-sm font-semibold text-ink">
+            {item}
+          </span>
         ))}
       </div>
-      {allCount > visibleCount ? (
-        <details className="rounded-md border border-line bg-[#fbfcff] p-4">
-          <summary className="cursor-pointer text-sm font-semibold text-action">Alle Leistungen anzeigen</summary>
+      {totalCount > services.length ? (
+        <p className="mt-4 text-sm leading-6 text-muted">
+          {totalCount - services.length} weitere Detailleistungen sind im Abschnitt „Leistungsspektrum im Detail“ zugeordnet.
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+function DetailServiceGroups({ groups }: { groups: Array<{ label: string; items: string[] }> }) {
+  return (
+    <div className="grid gap-3">
+      {groups.map((group, index) => (
+        <details key={group.label} className="rounded-md border border-line bg-[#fbfcff] p-4" open={index === 0}>
+          <summary className="cursor-pointer list-none">
+            <span className="flex items-center justify-between gap-4">
+              <span>
+                <span className="block text-sm font-semibold text-ink">{group.label}</span>
+                <span className="mt-1 block text-xs text-muted">{group.items.length} Detailleistungen</span>
+              </span>
+              <span className="text-sm font-semibold text-action">aufklappen</span>
+            </span>
+          </summary>
           <div className="mt-4 flex flex-wrap gap-2">
-            {groups.flatMap((group) => group.items.slice(18)).map((item) => (
+            {group.items.map((item) => (
               <span key={item} className="rounded-md border border-line bg-white px-3 py-2 text-sm font-semibold text-ink">
                 {item}
               </span>
             ))}
           </div>
         </details>
-      ) : null}
+      ))}
     </div>
   );
 }
