@@ -6,6 +6,7 @@ import { SiteHeader } from "@/components/site-header";
 import {
   cleanCompanyDescription,
   extractServiceListFromDescription,
+  extractServiceKeywordsFromText,
   groupServicesForDisplay,
   publicResultDescription,
 } from "@/lib/company-display";
@@ -497,7 +498,7 @@ function getProfileDescription(company: PublicCompanyWithTrade, trade: string, l
 function getRecognizableServices(company: PublicCompanyWithTrade, executedTrades: string[]) {
   const evidenceItems = (company.company_trades || [])
     .filter((match) => match.status !== "rejected" && match.visibility_level !== "internal")
-    .flatMap((match) => splitEvidence(match.evidence));
+    .flatMap((match) => [...splitEvidence(match.evidence), ...extractServiceKeywordsFromText(match.evidence)]);
 
   const descriptionItems = extractServiceListFromDescription(company.description);
   return [...new Set([...descriptionItems, ...evidenceItems, ...executedTrades])].slice(0, 42);

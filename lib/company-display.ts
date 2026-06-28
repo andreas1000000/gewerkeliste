@@ -31,13 +31,33 @@ export function extractServiceListFromDescription(description: string | null | u
   const raw = description?.trim();
   if (!raw) return [];
 
-  const serviceMatch = raw.match(/(?:Ausgewählte|Ausgewaehlte|Leistungen)\s+Leistungen?\s*:\s*([^.!?\n]+)/i) || raw.match(/Leistungen\s*:\s*([^.!?\n]+)/i);
-  if (!serviceMatch?.[1]) return [];
+  const serviceMatch =
+    raw.match(/(?:Ausgewählte|Ausgewaehlte)\s+Leistungen\s*:\s*([^.!?\n]+)/i) ||
+    raw.match(/Leistungen\s*:\s*([^.!?\n]+)/i);
+  if (!serviceMatch?.[1]) return extractServiceKeywordsFromText(raw);
 
-  return serviceMatch[1]
+  return uniqueList([
+    ...serviceMatch[1]
     .split(/[,;|/]+/)
     .map((item) => normalizeServiceLabel(item))
-    .filter((item): item is string => Boolean(item && item.length >= 3 && item.length <= 80));
+      .filter((item): item is string => Boolean(item && item.length >= 3 && item.length <= 80)),
+    ...extractServiceKeywordsFromText(raw),
+  ]);
+}
+
+export function extractServiceKeywordsFromText(text: string | null | undefined) {
+  const raw = text?.trim();
+  if (!raw) return [];
+  const normalized = raw.toLowerCase();
+  const services: string[] = [];
+
+  for (const rule of serviceKeywordRules) {
+    if (rule.keywords.some((keyword) => normalized.includes(keyword))) {
+      services.push(rule.label);
+    }
+  }
+
+  return uniqueList(services);
 }
 
 export function groupServicesForDisplay(services: string[]) {
@@ -112,6 +132,36 @@ function normalizeServiceLabel(value: string) {
   if (!text) return "";
   return text.charAt(0).toUpperCase() + text.slice(1);
 }
+
+function uniqueList(values: string[]) {
+  return [...new Set(values.map((value) => value.trim()).filter(Boolean))];
+}
+
+const serviceKeywordRules: Array<{ label: string; keywords: string[] }> = [
+  { label: "Hochbau", keywords: ["hochbau", "hochbaumeister"] },
+  { label: "Maurerarbeiten", keywords: ["maurer", "mauerwerk", "mauern"] },
+  { label: "Umbau", keywords: ["umbau", "umbauten"] },
+  { label: "Sanierung", keywords: ["sanierung", "sanieren", "modernisierung"] },
+  { label: "Verputzarbeiten", keywords: ["verputz", "putzarbeiten", "innenputz", "außenputz", "aussenputz"] },
+  { label: "Betonarbeiten", keywords: ["beton", "stahlbeton", "fundament", "bodenplatte"] },
+  { label: "Erdarbeiten", keywords: ["erdarbeiten", "aushub", "bagger", "baugrube"] },
+  { label: "Garten- und Landschaftsbau", keywords: ["landschaftsgärtner", "landschaftsgaertner", "galabau", "gartenbau", "garten- und landschaftsbau"] },
+  { label: "Pflasterarbeiten", keywords: ["pflaster", "pflastern", "pflasterarbeiten"] },
+  { label: "Außenanlagen", keywords: ["außenanlage", "aussenanlage", "außenanlagen", "aussenanlagen"] },
+  { label: "Dacharbeiten", keywords: ["dacharbeiten", "dachdecker", "steildach", "flachdach"] },
+  { label: "Zimmererarbeiten", keywords: ["zimmerer", "zimmerei", "holzbau", "dachstuhl"] },
+  { label: "Elektroinstallation", keywords: ["elektroinstallation", "elektroinstallateur", "elektriker"] },
+  { label: "Photovoltaik", keywords: ["photovoltaik", "pv-anlage", "solaranlage"] },
+  { label: "Sanitärinstallation", keywords: ["sanitär", "sanitaer", "badinstallation", "badsanierung"] },
+  { label: "Heizungsbau", keywords: ["heizung", "heizungsbau", "wärmepumpe", "waermepumpe"] },
+  { label: "Lüftungsbau", keywords: ["lüftung", "lueftung", "lüftungsbau", "lueftungsbau"] },
+  { label: "Trockenbau", keywords: ["trockenbau", "gipskarton", "akustikdecke"] },
+  { label: "Malerarbeiten", keywords: ["maler", "anstrich", "beschichtung"] },
+  { label: "Bodenarbeiten", keywords: ["bodenbelag", "bodenarbeiten", "parkett", "estrich"] },
+  { label: "Fliesenarbeiten", keywords: ["fliesen", "fliesenleger", "naturstein"] },
+  { label: "Schreinerarbeiten", keywords: ["schreiner", "schreinerei", "möbelbau", "moebelbau"] },
+  { label: "Metallbau", keywords: ["metallbau", "schlosserei", "stahlbau", "geländer", "gelaender"] },
+];
 
 function serviceGroupLabel(value: string) {
   const normalized = value.toLowerCase();
