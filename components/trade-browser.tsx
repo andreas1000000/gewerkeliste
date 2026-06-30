@@ -29,6 +29,11 @@ type TradeIndexEntry = {
   expansionText: string;
 };
 
+type FlatService = {
+  name: string;
+  slug: string;
+};
+
 const curatedFrequentSlugs = [
   "elektroinstallation",
   "sanitaerinstallation",
@@ -360,7 +365,7 @@ function HierarchyView({
                 <span className="flex flex-col items-start gap-1 text-sm text-muted md:items-end">
                   <span>{countItems(group.items, group.subgroups)} Gewerke</span>
                   <span>{countCompanies(group, companyCounts)} Betriebe</span>
-                  <span className="font-semibold text-action">{queryActive || openGroups[group.code] ? "Bereich schließen" : "Gewerke anzeigen"}</span>
+                  <span className="font-semibold text-action">{queryActive || openGroups[group.code] ? "Bereich schließen" : "Bereich öffnen"}</span>
                 </span>
               </button>
               {queryActive || openGroups[group.code] ? (
@@ -444,16 +449,16 @@ function TradeRow({
   serviceFamilies: ServiceFamily[];
   onToggle: (slug: string) => void;
 }) {
-  const [openServices, setOpenServices] = useState(false);
   const serviceCount = countServices(serviceFamilies);
+  const visibleServices = flattenServices(serviceFamilies);
 
   return (
     <div className="bg-white">
-      <div className={`grid grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 px-4 py-3 ${nested ? "md:pl-12" : ""}`}>
+      <div className={`grid gap-3 px-4 py-4 md:grid-cols-[auto_minmax(0,1fr)_auto] md:items-start ${nested ? "md:pl-12" : ""}`}>
         <input
           aria-label={`${item.label} auswählen`}
           checked={checked}
-          className="h-4 w-4 rounded-none accent-action"
+          className="mt-1 h-4 w-4 rounded-none accent-action"
           onChange={() => onToggle(item.slug)}
           type="checkbox"
         />
@@ -466,24 +471,15 @@ function TradeRow({
               {serviceFamilies.length} Leistungsfamilien · {serviceCount} Detailleistungen
             </div>
           ) : null}
+          {visibleServices.length > 0 ? <ServiceChipList services={visibleServices} location={location} nested /> : null}
         </div>
-        <div className="flex shrink-0 items-center gap-3 text-sm">
-          {serviceCount > 0 ? (
-            <button
-              className="rounded-md border border-line px-3 py-1.5 text-xs font-semibold text-brand hover:border-action hover:text-action"
-              onClick={() => setOpenServices((current) => !current)}
-              type="button"
-            >
-              {openServices ? "Leistungen schließen" : "Leistungen öffnen"}
-            </button>
-          ) : null}
+        <div className="flex shrink-0 items-center gap-3 text-sm md:justify-end">
           {count > 0 ? <span className="hidden text-muted sm:inline">{count} Betriebe</span> : null}
           <Link className="font-semibold text-action hover:underline" href={searchHref(item.slug, location) as Route}>
             Betriebe finden
           </Link>
         </div>
       </div>
-      {openServices ? <ServiceDepthPanel families={serviceFamilies} nested={nested} /> : null}
     </div>
   );
 }
@@ -512,7 +508,6 @@ function TradeList({
   onToggle: (slug: string) => void;
 }) {
   const bySlug = new Map(tradeIndex.map((entry) => [entry.trade.slug, entry]));
-  const [openTrades, setOpenTrades] = useState<Record<string, boolean>>({});
   return (
     <section className="mt-6">
       <h2 className="text-2xl font-semibold text-[#07173d]">{title}</h2>
@@ -522,14 +517,14 @@ function TradeList({
             const indexEntry = bySlug.get(trade.slug);
             const serviceFamilies = serviceFamiliesByTrade.get(trade.slug) || [];
             const serviceCount = countServices(serviceFamilies);
-            const open = Boolean(openTrades[trade.slug]);
+            const visibleServices = flattenServices(serviceFamilies);
             return (
               <div key={trade.slug} className="border-b border-line last:border-b-0">
-                <div className="grid gap-3 px-4 py-3 md:grid-cols-[auto_minmax(0,1fr)_minmax(170px,240px)_auto] md:items-center">
+                <div className="grid gap-3 px-4 py-4 md:grid-cols-[auto_minmax(0,1fr)_minmax(170px,240px)_auto] md:items-start">
                   <input
                     aria-label={`${trade.name} auswählen`}
                     checked={selectedSlugs.includes(trade.slug)}
-                    className="h-4 w-4 rounded-none accent-action"
+                    className="mt-1 h-4 w-4 rounded-none accent-action"
                     onChange={() => onToggle(trade.slug)}
                     type="checkbox"
                   />
@@ -538,33 +533,23 @@ function TradeList({
                       <HighlightText text={trade.name} query={query} />
                     </Link>
                     <p className="mt-1 text-sm leading-5 text-muted">{trade.shortDescription}</p>
-                    <PopularServiceChips slug={trade.slug} />
                     {serviceCount > 0 ? (
                       <p className="mt-2 text-xs text-muted">
                         {serviceFamilies.length} Leistungsfamilien · {serviceCount} Detailleistungen
                       </p>
                     ) : null}
+                    {visibleServices.length > 0 ? <ServiceChipList services={visibleServices} location={location} /> : <PopularServiceChips slug={trade.slug} location={location} />}
                   </div>
                   <div className="text-sm text-muted">
                     {indexEntry?.hierarchyCodes.length ? indexEntry.hierarchyCodes.join(" / ") : trade.category}
                   </div>
                   <div className="flex flex-wrap items-center gap-3 text-sm md:justify-end">
-                    {serviceCount > 0 ? (
-                      <button
-                        className="rounded-md border border-line px-3 py-1.5 text-xs font-semibold text-brand hover:border-action hover:text-action"
-                        onClick={() => setOpenTrades((current) => ({ ...current, [trade.slug]: !current[trade.slug] }))}
-                        type="button"
-                      >
-                        {open ? "Leistungen schließen" : "Leistungen öffnen"}
-                      </button>
-                    ) : null}
                     {(companyCounts[trade.slug] || 0) > 0 ? <span className="text-muted">{companyCounts[trade.slug]} Betriebe</span> : null}
                     <Link className="font-semibold text-action hover:underline" href={searchHref(trade.slug, location) as Route}>
                       {claimIntent ? "Eintrag suchen" : "Betriebe finden"}
                     </Link>
                   </div>
                 </div>
-                {open ? <ServiceDepthPanel families={serviceFamilies} /> : null}
               </div>
             );
           })
@@ -576,55 +561,21 @@ function TradeList({
   );
 }
 
-function ServiceDepthPanel({ families, nested = false }: { families: ServiceFamily[]; nested?: boolean }) {
-  if (families.length === 0) return null;
+function ServiceChipList({ services, location, nested = false }: { services: FlatService[]; location: string; nested?: boolean }) {
+  if (services.length === 0) return null;
 
   return (
-    <div className={`border-t border-line bg-[#fbfcff] px-4 py-4 ${nested ? "md:pl-12" : ""}`}>
-      <div className="grid gap-3">
-        {families.map((family) => (
-          <details key={family.slug} className="overflow-hidden rounded-lg border border-line bg-white">
-            <summary className="cursor-pointer px-4 py-3 text-sm font-semibold text-brand hover:bg-[#f7f8fb]">
-              {family.name}
-              <span className="ml-2 text-xs font-medium text-muted">{family.services.length} Leistungen</span>
-            </summary>
-            <div className="divide-y divide-line border-t border-line">
-              {family.services.map((service) => (
-                <div key={service.slug} className="px-4 py-3">
-                  <Link
-                    className="inline-flex min-h-9 items-center rounded-md bg-action px-3 text-sm font-semibold text-white hover:bg-brand"
-                    href={hrefWithParams("/betriebe", { leistung: service.slug, query: service.name }) as Route}
-                  >
-                    {service.name}
-                  </Link>
-                  {service.aliases.length || service.activities.length || service.contexts.length ? (
-                    <div className="mt-3 grid gap-3 text-xs leading-5 text-muted md:grid-cols-3">
-                      <DetailList title="Suchbegriffe" items={service.aliases} />
-                      <DetailList title="Tätigkeiten" items={service.activities} />
-                      <DetailList title="Kontexte" items={service.contexts} />
-                    </div>
-                  ) : null}
-                </div>
-              ))}
-            </div>
-          </details>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function DetailList({ title, items }: { title: string; items: string[] }) {
-  if (items.length === 0) return null;
-
-  return (
-    <div>
-      <div className="font-semibold uppercase tracking-normal text-[#5c6f8c]">{title}</div>
-      <div className="mt-1 flex flex-wrap gap-1.5">
-        {items.map((item) => (
-          <span key={item} className="rounded-md border border-line bg-white px-2 py-1">
-            {item}
-          </span>
+    <div className={`mt-3 ${nested ? "max-w-4xl" : ""}`}>
+      <div className="text-xs font-semibold uppercase tracking-normal text-muted">Leistungen</div>
+      <div className="mt-2 flex flex-wrap gap-1.5">
+        {services.map((service) => (
+          <Link
+            key={service.slug}
+            className="inline-flex min-h-9 items-center rounded-md border border-line bg-[#fbfcff] px-3 text-xs font-semibold text-action hover:border-action hover:bg-white"
+            href={serviceHref(service, location) as Route}
+          >
+            {service.name}
+          </Link>
         ))}
       </div>
     </div>
@@ -650,16 +601,20 @@ function HighlightText({ text, query }: { text: string; query: string }) {
   return <mark className="rounded-sm bg-[#fff4c2] px-0.5 text-inherit">{text}</mark>;
 }
 
-function PopularServiceChips({ slug }: { slug: string }) {
+function PopularServiceChips({ slug, location }: { slug: string; location: string }) {
   const services = popularServicesForTrade(slug, 6);
   if (services.length === 0) return null;
 
   return (
     <div className="mt-2 flex flex-wrap gap-1.5" aria-label="Häufig gesuchte Leistungen">
       {services.map((service) => (
-        <span key={service.slug} className="rounded-md border border-line bg-[#fbfcff] px-2 py-1 text-xs font-medium text-muted">
+        <Link
+          key={service.slug}
+          className="inline-flex min-h-8 items-center rounded-md border border-line bg-[#fbfcff] px-2 py-1 text-xs font-medium text-action hover:border-action hover:bg-white"
+          href={serviceHref(service, location) as Route}
+        >
           {service.name}
-        </span>
+        </Link>
       ))}
     </div>
   );
@@ -724,7 +679,7 @@ function buildServiceFamiliesByTrade() {
   const map = new Map<string, ServiceFamily[]>();
   serviceTaxonomy.forEach((group) => {
     group.trades.forEach((trade) => {
-      map.set(trade.slug, trade.families);
+      map.set(trade.slug, [...(map.get(trade.slug) || []), ...trade.families]);
     });
   });
   return map;
@@ -732,6 +687,23 @@ function buildServiceFamiliesByTrade() {
 
 function countServices(families: ServiceFamily[]) {
   return families.reduce((sum, family) => sum + family.services.length, 0);
+}
+
+function flattenServices(families: ServiceFamily[]): FlatService[] {
+  const services: FlatService[] = [];
+  const seen = new Set<string>();
+
+  families.forEach((family) => {
+    family.services.forEach((service) => {
+      const key = normalizeTaxonomyLabel(service.name);
+      if (!key || seen.has(key)) return;
+      if (family.services.length > 1 && key === normalizeTaxonomyLabel(family.name)) return;
+      seen.add(key);
+      services.push({ name: service.name, slug: service.slug });
+    });
+  });
+
+  return services;
 }
 
 function addHierarchy(index: Map<string, TradeIndexEntry>, slug: string, label: string, code: string, title: string) {
@@ -779,6 +751,14 @@ function searchHref(slug: string, location: string) {
   return hrefWithParams("/betriebe", { gewerk: slug, ort: location || undefined });
 }
 
+function serviceHref(service: FlatService, location: string) {
+  return hrefWithParams("/betriebe", {
+    leistung: service.slug || undefined,
+    query: service.slug ? undefined : service.name,
+    ort: location || undefined,
+  });
+}
+
 function hrefWithParams(path: string, params: Record<string, string | undefined>) {
   const searchParams = new URLSearchParams();
   Object.entries(params).forEach(([key, value]) => {
@@ -790,4 +770,8 @@ function hrefWithParams(path: string, params: Record<string, string | undefined>
 
 function slugifyLocation(value: string) {
   return normalizeSearchTerm(value).replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+
+function normalizeTaxonomyLabel(value: string) {
+  return normalizeSearchTerm(value).replace(/[^a-z0-9]+/g, "");
 }
