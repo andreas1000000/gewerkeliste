@@ -89,6 +89,13 @@ export function removeInternalSubmissionFragments(description: string | null | u
   const fragments = [
     /Ausgewählte Leistungen\s*:/gi,
     /Ausgewaehlte Leistungen\s*:/gi,
+    /Profiluebernahme fuer bestehenden Betriebseintrag\.?/gi,
+    /Profilübernahme für bestehenden Betriebseintrag\.?/gi,
+    /Profilergänzung fuer bestehenden Betriebseintrag\.?/gi,
+    /Profilergänzung für bestehenden Betriebseintrag\.?/gi,
+    /Profilergänzung und Datenpflege für [^.?!\n]*(?:[.!?]|$)/gi,
+    /Profilergänzung und Datenpflege fuer [^.?!\n]*(?:[.!?]|$)/gi,
+    /Vorgeschlagener Profiltext\s*:?\s*/gi,
     /Nachweisangaben\s*:[^.!?\n]*(?:[.!?]|$)/gi,
     /Gewerbenachweis kann bei Bedarf nachgereicht werden\.?/gi,
     /Startphase\s*:[^.!?\n]*(?:[.!?]|$)/gi,
