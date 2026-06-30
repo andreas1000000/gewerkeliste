@@ -21,6 +21,7 @@
     "enrich:queue": "node scripts/enrich-queue.mjs",
     "enrich:create-jobs": "node scripts/enrich-create-jobs.mjs",
     "research:publish:basis": "node scripts/publish-public-basis-entries.mjs",
+    "import:seed-companies": "node scripts/import-seed-companies.mjs",
     "research:map:trades": "node scripts/map-companies-to-trades.mjs",
     "research:discover:region": "node scripts/discover-region.mjs --dry-run",
     "taxonomy:sync": "node scripts/sync-trade-taxonomy.mjs",

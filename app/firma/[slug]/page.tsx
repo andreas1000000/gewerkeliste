@@ -247,6 +247,9 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                 <div className={`rounded-md border px-4 py-4 text-sm leading-6 ${statusBoxClass(status.tone)}`}>
                   <div className="font-semibold text-ink">{status.label}</div>
                   <p className="mt-2">{status.note}</p>
+                  {!company.verified ? (
+                    <p className="mt-2 font-semibold text-ink">Dieses Profil ist noch nicht vom Betrieb verifiziert.</p>
+                  ) : null}
                   <p className="mt-3 text-xs leading-5">
                     Datenstatus: Diese Seite ist ein Betriebsprofil. GewerkeListe gibt keine Qualitäts-, Auftrags- oder
                     Verfügbarkeitsgarantie.
@@ -279,7 +282,13 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                     className="mt-3 inline-flex w-full min-h-10 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-action hover:border-action"
                     href={`/betriebe/${company.slug}/profil-ergaenzen` as Route}
                   >
-                    Daten korrigieren
+                    Eintrag korrigieren oder löschen lassen
+                  </Link>
+                  <Link
+                    className="mt-3 inline-flex w-full min-h-10 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-action hover:border-action"
+                    href="/datenschutz"
+                  >
+                    Datenschutzhinweise
                   </Link>
                   <p className="mt-3 text-xs leading-5 text-muted">
                     Der kostenlose Basiseintrag bleibt erhalten. Erweiterte Profilfunktionen sind optional.
@@ -433,7 +442,13 @@ function ProfileCompletionCard({
         className="mt-3 inline-flex w-full min-h-10 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-action hover:border-action"
         href={updateHref}
       >
-        Daten korrigieren
+        Eintrag korrigieren oder löschen lassen
+      </Link>
+      <Link
+        className="mt-3 inline-flex w-full min-h-10 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-action hover:border-action"
+        href="/datenschutz"
+      >
+        Datenschutzhinweise
       </Link>
       <div className="mt-4 grid gap-3 text-xs leading-5 text-muted">
         <p>
@@ -477,7 +492,13 @@ function ActionBar({
         className="inline-flex min-h-11 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-action hover:border-action"
         href={`/betriebe/${company.slug}/profil-ergaenzen` as Route}
       >
-        Daten korrigieren
+        Eintrag korrigieren oder löschen lassen
+      </Link>
+      <Link
+        className="inline-flex min-h-11 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-action hover:border-action"
+        href="/datenschutz"
+      >
+        Datenschutzhinweise
       </Link>
     </div>
   );
