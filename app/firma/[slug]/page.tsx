@@ -117,11 +117,11 @@ export default async function CompanyPublicPage({ params }: PageProps) {
             <span className="font-medium text-ink">{company.name}</span>
           </nav>
 
-          <section className="mt-5 overflow-hidden rounded-lg border border-line bg-white shadow-soft">
-            <div className="relative min-h-36 bg-[#0d2447] sm:min-h-48">
+          <section className="mt-6 overflow-hidden rounded-lg border border-line bg-white shadow-soft">
+            <div className="relative min-h-28 bg-[#0d2447] sm:min-h-36">
               <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(7,23,61,0.96)_0%,rgba(24,78,133,0.9)_48%,rgba(226,239,248,0.9)_100%)]" />
               <div className="absolute inset-0 opacity-35 [background-image:linear-gradient(90deg,rgba(255,255,255,0.16)_1px,transparent_1px),linear-gradient(0deg,rgba(255,255,255,0.12)_1px,transparent_1px)] [background-size:48px_48px]" />
-              <div className="relative flex min-h-36 items-start justify-between gap-4 p-5 sm:min-h-48 sm:p-7">
+              <div className="relative flex min-h-28 items-start justify-between gap-4 p-5 sm:min-h-36 sm:p-7">
                 <div className="rounded-md bg-white/90 px-3 py-1 text-xs font-semibold text-brand shadow-soft">
                   Öffentliches Unternehmensprofil
                 </div>
@@ -130,11 +130,11 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                 </div>
               </div>
             </div>
-            <div className="px-5 pb-0 sm:px-7">
-              <div className="-mt-16 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
+            <div className="px-5 pt-5 pb-0 sm:px-7 sm:pt-6">
+              <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
                   <ProfileMark company={company} canClaim={canClaim} />
-                  <div className="pb-1">
+                  <div className="min-w-0 pb-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <StatusBadge status={status} />
                     </div>
@@ -354,7 +354,7 @@ function ContactTrustCard({ company, canClaim }: { company: PublicCompanyWithTra
   const updateHref = `/betriebe/${company.slug}/profil-ergaenzen` as Route;
 
   return (
-    <ProfileCard title="Ansprechpartner & Team">
+    <ProfileCard title="Ansprechpartner">
       <div className="grid gap-3">
         <div className="rounded-md border border-line bg-[#fbfcff] p-4">
           <div className="flex gap-3">
@@ -371,12 +371,12 @@ function ContactTrustCard({ company, canClaim }: { company: PublicCompanyWithTra
             </div>
             <div>
               <h3 className="text-sm font-semibold text-ink">
-                {company.profile_image_url ? "Persönlicher Ansprechpartner" : "Teamprofil ergänzbar"}
+                {company.profile_image_url ? "Persönlicher Ansprechpartner" : "Ansprechpartner ergänzbar"}
               </h3>
               <p className="mt-1 text-sm leading-6 text-muted">
                 {company.profile_image_url
-                  ? "Der Betrieb zeigt hier ein bereitgestelltes Ansprechpartner- oder Teamprofil."
-                  : "Dieser Betrieb hat noch kein Ansprechpartner- oder Teamprofil ergänzt. In der Startphase können Betriebe ihr Profil kostenlos vervollständigen und persönliche Ansprechpartner sichtbar machen. Später können erweiterte Team- und Vertrauenselemente Teil optionaler Profilfunktionen werden."}
+                  ? "Der Betrieb zeigt hier ein bereitgestelltes Ansprechpartnerprofil."
+                  : "Dieser Betrieb hat noch keinen Ansprechpartner im Profil ergänzt. Ein persönlicher Ansprechpartner macht das Profil greifbarer und schafft Vertrauen bei Planern, Bauleitern und Auftraggebern. Der Betrieb kann diese Angabe nach Profilübernahme ergänzen."}
               </p>
             </div>
           </div>
@@ -388,7 +388,7 @@ function ContactTrustCard({ company, canClaim }: { company: PublicCompanyWithTra
           </Link>
         ) : (
           <Link className="inline-flex min-h-10 items-center justify-center rounded-md bg-action px-4 text-sm font-semibold text-white hover:bg-brand" href={updateHref}>
-            Profil vervollständigen
+            Ansprechpartner ergänzen
           </Link>
         )}
       </div>
@@ -410,8 +410,7 @@ function ProfileCompletionCard({
   return (
     <ProfileCard title="Profil vervollständigen">
       <p className="text-sm leading-6 text-muted">
-        In der Startphase können Betriebe ihr Profil kostenlos vervollständigen. Erweiterte Profilfunktionen können später
-        optional als Gründungsmitgliedschaft oder Pro-Profil angeboten werden.
+        Das Basisprofil bleibt kostenlos. Betriebe können ihr Profil übernehmen, Stammdaten korrigieren und Leistungen vollständig darstellen.
       </p>
       <ul className="mt-4 grid gap-2 text-sm leading-6 text-muted">
         {items.map((item) => (
@@ -438,11 +437,10 @@ function ProfileCompletionCard({
       )}
       <div className="mt-4 grid gap-3 text-xs leading-5 text-muted">
         <p>
-          Kostenlos in der Startphase: Logo ergänzen, Stammdaten korrigieren, Leistungen ergänzen und Profil übernehmen.
+          In der Startphase kann auch das Logo kostenlos ergänzt werden. Später können erweiterte Profilfunktionen optional Teil eines Pro-Profils werden.
         </p>
         <p>
-          Optional später: Ansprechpartner-/Teamdarstellung, Referenzen, erweiterte Profilgestaltung, QR-Code/Kurzlink,
-          Sichtbarkeitsreport und visuelle Wirkungskreise.
+          Erweiterte Darstellungsfunktionen wie Ansprechpartnerbild, Referenzen, QR-Code, Sichtbarkeitsreport oder besondere Profilgestaltung können später optional als Gründungsmitgliedschaft oder Pro-Profil angeboten werden.
         </p>
       </div>
     </ProfileCard>
@@ -486,92 +484,59 @@ function ActionBar({
 }
 
 function ServiceGroups({ groups, totalCount }: { groups: Array<{ label: string; items: string[] }>; totalCount: number }) {
-  const visibleLimit = 18;
-  let shown = 0;
-
-  const visibleGroups = groups
-    .map((group) => {
-      const remaining = visibleLimit - shown;
-      if (remaining <= 0) return { ...group, items: [] };
-      const items = group.items.slice(0, remaining);
-      shown += items.length;
-      return { ...group, items };
-    })
-    .filter((group) => group.items.length);
-
-  const hiddenGroups = groups
-    .map((group) => ({ ...group, items: group.items.slice(Math.max(0, visibleLimit - countPreviousItems(groups, group.label))) }))
-    .filter((group) => group.items.length);
-
   return (
-    <div className="grid gap-4">
-      {visibleGroups.map((group) => (
-        <ServiceGroup key={group.label} group={group} />
+    <div className="grid gap-3">
+      {groups.map((group, index) => (
+        <ServiceAccordion key={group.label} group={group} open={index === 0} />
       ))}
-      {totalCount > visibleLimit ? (
-        <details className="group rounded-md border border-line bg-[#fbfcff] p-4">
-          <summary className="cursor-pointer list-none text-sm font-semibold text-action">
-            <span className="group-open:hidden">Alle Leistungen anzeigen</span>
-            <span className="hidden group-open:inline">Weniger anzeigen</span>
-          </summary>
-          <div className="mt-4 grid gap-4">
-            {hiddenGroups.map((group) => (
-              <ServiceGroup key={`all-${group.label}`} group={group} />
-            ))}
-          </div>
-        </details>
-      ) : null}
+      <p className="text-xs leading-5 text-muted">{totalCount} Leistungen in {groups.length} Gruppen dargestellt.</p>
     </div>
   );
 }
 
-function ServiceGroup({ group }: { group: { label: string; items: string[] } }) {
+function ServiceAccordion({ group, open }: { group: { label: string; items: string[] }; open: boolean }) {
   return (
-    <div>
-      <h3 className="text-sm font-semibold text-ink">{group.label}</h3>
-      <div className="mt-2 flex flex-wrap gap-2">
+    <details className="group rounded-md border border-line bg-[#fbfcff] p-4" open={open}>
+      <summary className="cursor-pointer list-none">
+        <span className="flex items-center justify-between gap-4">
+          <span>
+            <span className="block text-sm font-semibold text-ink">{group.label}</span>
+            <span className="mt-1 block text-xs text-muted">{group.items.length} Leistungen</span>
+          </span>
+          <span className="rounded-md border border-line bg-white px-3 py-1 text-xs font-semibold text-action">
+            <span className="group-open:hidden">Leistungen anzeigen</span>
+            <span className="hidden group-open:inline">Leistungen ausblenden</span>
+          </span>
+        </span>
+      </summary>
+      <div className="mt-4 flex flex-wrap gap-2">
         {group.items.map((item) => (
           <span key={item} className="rounded-md border border-line bg-[#fbfcff] px-3 py-2 text-sm font-semibold text-ink">
             {item}
           </span>
         ))}
       </div>
-    </div>
+    </details>
   );
-}
-
-function countPreviousItems(groups: Array<{ label: string; items: string[] }>, label: string) {
-  let count = 0;
-  for (const group of groups) {
-    if (group.label === label) return count;
-    count += group.items.length;
-  }
-  return count;
 }
 
 function TradeOverview({ primaryTrade, trades }: { primaryTrade: string; trades: string[] }) {
   const visibleTrades = [...new Set([primaryTrade, ...trades].filter(Boolean))];
 
   return (
-    <div>
-      <div className="flex flex-wrap gap-2">
-        {visibleTrades.map((item, index) => (
-          <span
-            key={item}
-            className={
-              index === 0
-                ? "rounded-md border border-[#b9dec8] bg-[#f1fbf5] px-3 py-2 text-sm font-semibold text-[#24523a]"
-                : "rounded-md border border-line bg-[#fbfcff] px-3 py-2 text-sm font-semibold text-ink"
-            }
-          >
-            {item}
-          </span>
-        ))}
-      </div>
-      <p className="mt-4 text-sm leading-6 text-muted">
-        Das Hauptgewerk wird prominent geführt. Weitere Gewerke ergeben sich aus bestätigten Zuordnungen oder öffentlich erkennbaren
-        Leistungssignalen und können nach Profilübernahme geschärft werden.
-      </p>
+    <div className="flex flex-wrap gap-2">
+      {visibleTrades.map((item, index) => (
+        <span
+          key={item}
+          className={
+            index === 0
+              ? "rounded-md border border-[#b9dec8] bg-[#f1fbf5] px-3 py-2 text-sm font-semibold text-[#24523a]"
+              : "rounded-md border border-line bg-[#fbfcff] px-3 py-2 text-sm font-semibold text-ink"
+          }
+        >
+          {item}
+        </span>
+      ))}
     </div>
   );
 }
@@ -699,7 +664,7 @@ function getRecognizableServices(company: PublicCompanyWithTrade, executedTrades
     .flatMap((match) => [...splitEvidence(match.evidence), ...extractServiceKeywordsFromText(match.evidence)]);
 
   const descriptionItems = extractServiceListFromDescription(company.description);
-  return [...new Set([...descriptionItems, ...evidenceItems, ...executedTrades])].slice(0, 42);
+  return [...new Set([...descriptionItems, ...evidenceItems, ...executedTrades])];
 }
 
 function splitEvidence(value: string | null) {
@@ -707,8 +672,7 @@ function splitEvidence(value: string | null) {
   return value
     .split(/[;,|/]+/)
     .map((item) => item.trim().replace(/^[✓\-–•\s]+/, ""))
-    .filter((item) => item.length >= 3 && item.length <= 80)
-    .slice(0, 12);
+    .filter((item) => item.length >= 3 && item.length <= 80);
 }
 
 function getSourceItems(company: PublicCompanyWithTrade, websiteHref?: string) {
@@ -743,7 +707,7 @@ function sourceLabel(value: string) {
 function getProfileCompletionItems(company: PublicCompanyWithTrade, description: string, serviceCount: number, hasCoordinates: boolean) {
   return [
     company.logo_url ? "Logo ist hinterlegt" : "Logo hinzufügen",
-    company.profile_image_url ? "Ansprechpartner oder Team ist sichtbar" : "Ansprechpartner oder Team vorstellen",
+    company.profile_image_url ? "Ansprechpartner ist sichtbar" : "Ansprechpartner ergänzen",
     serviceCount ? "Leistungen weiter schärfen" : "Leistungen ergänzen",
     description ? "Kurzbeschreibung aktuell halten" : "Kurzbeschreibung ergänzen",
     hasCoordinates ? "Wirkungskreis präzisieren" : "Wirkungskreis markieren",
