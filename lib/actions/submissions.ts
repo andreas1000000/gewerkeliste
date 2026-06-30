@@ -187,7 +187,7 @@ function companyDescription(submission: CompanySubmission) {
 }
 
 function claimCompanyIdFromSource(source: string) {
-  const match = source.match(/^claim:([0-9a-f-]{36})$/i);
+  const match = source.match(/^(?:claim|profile-update):([0-9a-f-]{36})$/i);
   return match?.[1] || null;
 }
 
