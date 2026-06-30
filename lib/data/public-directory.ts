@@ -256,7 +256,8 @@ export async function getCompanyBySlug(slug: string) {
     .single();
 
   if (error) return getCompanyBySlugFallback(slug);
-  return resolveSingleCompanyMedia(data as PublicCompanyWithTrade);
+  const company = await applyApprovedProfileUpdateMedia(data as PublicCompanyWithTrade);
+  return resolveSingleCompanyMedia(company);
 }
 
 export async function getCompanyBySlugForMetadata(slug: string): Promise<PublicCompanyMetadata | null> {
@@ -450,6 +451,32 @@ async function resolveSingleCompanyMedia<T extends PublicCompanyWithTrade>(compa
     ...company,
     logo_url: logoUrl,
     profile_image_url: profileImageUrl,
+  };
+}
+
+async function applyApprovedProfileUpdateMedia<T extends PublicCompanyWithTrade>(company: T) {
+  if (company.profile_image_url) return company;
+
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("company_submissions")
+    .select("logo_url, profile_image_url, profile_image_alt, contact_person_name, contact_person_role")
+    .eq("source", `profile-update:${company.id}`)
+    .eq("status", "approved")
+    .not("profile_image_url", "is", null)
+    .order("updated_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error || !data) return company;
+
+  return {
+    ...company,
+    logo_url: company.logo_url || (typeof data.logo_url === "string" ? data.logo_url : null),
+    profile_image_url: typeof data.profile_image_url === "string" ? data.profile_image_url : company.profile_image_url,
+    profile_image_alt: typeof data.profile_image_alt === "string" ? data.profile_image_alt : company.profile_image_alt,
+    contact_person_name: typeof data.contact_person_name === "string" ? data.contact_person_name : company.contact_person_name,
+    contact_person_role: typeof data.contact_person_role === "string" ? data.contact_person_role : company.contact_person_role,
   };
 }
 

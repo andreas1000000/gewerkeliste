@@ -354,13 +354,15 @@ function ProfileMark({ company, canClaim }: { company: PublicCompanyWithTrade; c
 function ContactTrustCard({ company, canClaim }: { company: PublicCompanyWithTrade; canClaim: boolean }) {
   const claimHref = `/betriebe/${company.slug}/claim` as Route;
   const updateHref = `/betriebe/${company.slug}/profil-ergaenzen` as Route;
+  const contactName = company.contact_person_name || company.contact_name || "Ansprechpartner";
+  const contactPhone = company.phone || "";
 
   return (
     <ProfileCard title="Ansprechpartner">
       <div className="grid gap-3">
         <div className="rounded-md border border-line bg-[#fbfcff] p-4">
-          <div className="flex gap-3">
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full border border-line bg-white text-center text-lg font-semibold leading-4 text-brand">
+          <div className="flex items-center gap-4">
+            <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full border border-line bg-white text-center text-xl font-semibold leading-4 text-brand shadow-soft">
               {company.profile_image_url ? (
                 <img
                   alt={company.profile_image_alt || `Ansprechpartner von ${company.name}`}
@@ -371,18 +373,21 @@ function ContactTrustCard({ company, canClaim }: { company: PublicCompanyWithTra
                 initials(company.name)
               )}
             </div>
-            <div>
-              <h3 className="text-sm font-semibold text-ink">
-                {company.profile_image_url ? company.contact_person_name || "Persönlicher Ansprechpartner" : "Ansprechpartner ergänzbar"}
+            <div className="min-w-0">
+              <h3 className="text-base font-semibold text-ink">
+                {company.profile_image_url ? contactName : "Ansprechpartner ergänzbar"}
               </h3>
               {company.profile_image_url && company.contact_person_role ? (
                 <p className="mt-1 text-sm font-semibold text-muted">{company.contact_person_role}</p>
               ) : null}
-              <p className="mt-1 text-sm leading-6 text-muted">
-                {company.profile_image_url
-                  ? "Dieses Ansprechpartnerprofil wurde vom Betrieb bereitgestellt und freigegeben."
-                  : "Dieser Betrieb hat noch keinen Ansprechpartner angegeben. Ein persönlicher Ansprechpartner macht das Profil greifbarer und schafft Vertrauen bei potentiellen Auftraggebern."}
-              </p>
+              {company.profile_image_url && contactPhone ? (
+                <a className="mt-2 inline-flex text-sm font-semibold text-action hover:underline" href={`tel:${contactPhone}`}>
+                  {contactPhone}
+                </a>
+              ) : null}
+              {!company.profile_image_url ? (
+                <p className="mt-1 text-sm leading-6 text-muted">Noch kein Ansprechpartnerbild freigegeben.</p>
+              ) : null}
             </div>
           </div>
         </div>
