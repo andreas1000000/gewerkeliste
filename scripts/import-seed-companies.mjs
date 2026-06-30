@@ -89,7 +89,13 @@ for (const candidate of candidates) {
       continue;
     }
     liveReport.skipped_duplicates += 1;
-    await insertDuplicateReview(candidate, existing);
+    try {
+      const trade = await getOrCreateTrade(candidate.tradeMapped);
+      await recordExistingCompanyTradeDetails(existing.id, trade.id, candidate);
+      await insertDuplicateReview(candidate, existing);
+    } catch (error) {
+      addLiveError(`${candidate.companyName}: ${error.message}`);
+    }
     continue;
   }
 
@@ -557,6 +563,18 @@ async function insertDuplicateReview(candidate, existing) {
   });
 }
 
+async function recordExistingCompanyTradeDetails(companyId, tradeId, candidate) {
+  await upsertCompanyTrade(companyId, tradeId, candidate);
+  liveReport.inserted_company_trade_links += 1;
+
+  const serviceRows = await mapServiceRows(candidate, companyId);
+  for (const row of serviceRows) {
+    const { error } = await supabase.from("company_services").upsert(row, { onConflict: "company_id,service_id" });
+    if (error) addLiveError(`${candidate.companyName}: company_services ${error.message}`);
+    else liveReport.inserted_company_service_links += 1;
+  }
+}
+
 async function upsertCompanyTrade(companyId, tradeId, candidate) {
   const row = {
     company_id: companyId,
@@ -567,7 +585,16 @@ async function upsertCompanyTrade(companyId, tradeId, candidate) {
     status: "agent_suggested",
     visibility_level: "basis_public",
   };
-  const { error } = await supabase.from("company_trades").upsert(row, { onConflict: "company_id,trade_id" });
+  let { error } = await supabase.from("company_trades").upsert(row, { onConflict: "company_id,trade_id" });
+  if (!error) return;
+
+  const legacyRow = { ...row };
+  if (error.message?.includes("'visibility_level' column")) delete legacyRow.visibility_level;
+  ({ error } = await supabase.from("company_trades").upsert(legacyRow, { onConflict: "company_id,trade_id" }));
+  if (!error) return;
+
+  if (error.message?.includes("'status' column")) delete legacyRow.status;
+  ({ error } = await supabase.from("company_trades").upsert(legacyRow, { onConflict: "company_id,trade_id" }));
   if (error) throw error;
 }
 
