@@ -25,6 +25,7 @@ export function ClaimAssistant({
   const [selectedTrades, setSelectedTrades] = useState(initialTrades);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [missingServices, setMissingServices] = useState("");
+  const [mediaDetailsEntered, setMediaDetailsEntered] = useState(false);
   const [contact, setContact] = useState({
     name: "",
     email: "",
@@ -96,7 +97,7 @@ export function ClaimAssistant({
   }
 
   return (
-    <form action={formAction} className="grid gap-5">
+    <form action={formAction} className="grid gap-5" encType="multipart/form-data">
       <input name="company_id" type="hidden" value={company.id} />
       <input
         name="message"
@@ -213,7 +214,44 @@ export function ClaimAssistant({
         {errors.is_authorized ? <p className="mt-2 text-xs font-semibold text-[#a4442b]">{errors.is_authorized}</p> : null}
       </WizardSection>
 
-      <WizardSection eyebrow="Schritt 5" title="Zusammenfassung prüfen">
+      <WizardSection eyebrow="Schritt 5" title="Profil vervollständigen">
+        <p className="mb-5 text-sm leading-6 text-muted">
+          Logo und Ansprechpartnerbild sind freiwillig. Diese Angaben werden geprüft, bevor sie öffentlich im Profil erscheinen.
+        </p>
+        <div className="grid gap-4 lg:grid-cols-2">
+          <MediaFileField
+            accept="image/jpeg,image/png,image/webp"
+            error={errors.companyLogo}
+            help="JPG, PNG oder WebP. Maximal 2 MB. SVG, GIF und PDF sind nicht erlaubt."
+            label="Logo hochladen"
+            maxBytes={2 * 1024 * 1024}
+            name="companyLogo"
+            onMediaChange={setMediaDetailsEntered}
+          />
+          <MediaFileField
+            accept="image/jpeg,image/png,image/webp"
+            error={errors.contactProfileImage}
+            help="JPG, PNG oder WebP. Maximal 5 MB. Nur mit Zustimmung der abgebildeten Person einreichen."
+            label="Ansprechpartnerbild hochladen"
+            maxBytes={5 * 1024 * 1024}
+            name="contactProfileImage"
+            onMediaChange={setMediaDetailsEntered}
+          />
+          <Field label="Ansprechpartner Name" error={errors.mediaContactName}>
+            <input className={inputClass} name="mediaContactName" onChange={(event) => event.target.value.trim() ? setMediaDetailsEntered(true) : undefined} />
+          </Field>
+          <Field label="Rolle/Funktion" error={errors.mediaContactRole}>
+            <input className={inputClass} name="mediaContactRole" onChange={(event) => event.target.value.trim() ? setMediaDetailsEntered(true) : undefined} placeholder="z. B. Inhaber, Geschäftsführung, Büro" />
+          </Field>
+        </div>
+        <label className="mt-5 flex items-start gap-3 text-sm font-medium leading-6 text-ink">
+          <input className="mt-1 h-4 w-4 accent-action" name="imageConsentGiven" required={mediaDetailsEntered} type="checkbox" />
+          Ich bin berechtigt, diese Bilder und Angaben für den Betrieb einzureichen.
+        </label>
+        {errors.imageConsentGiven ? <p className="mt-2 text-xs font-semibold text-[#a4442b]">{errors.imageConsentGiven}</p> : null}
+      </WizardSection>
+
+      <WizardSection eyebrow="Schritt 6" title="Zusammenfassung prüfen">
         <div className="grid gap-4">
           <SummaryBlock title="Betrieb">
             <SummaryLine label="Firmenname" value={profile.companyName} />
@@ -291,6 +329,51 @@ function WizardSection({ eyebrow, title, children }: { eyebrow: string; title: s
       <h2 className="mt-2 text-2xl font-semibold text-[#07173d]">{title}</h2>
       <div className="mt-5">{children}</div>
     </section>
+  );
+}
+
+function MediaFileField({
+  accept,
+  error,
+  help,
+  label,
+  maxBytes,
+  name,
+  onMediaChange,
+}: {
+  accept: string;
+  error?: string;
+  help: string;
+  label: string;
+  maxBytes: number;
+  name: string;
+  onMediaChange: (selected: boolean) => void;
+}) {
+  return (
+    <label className="grid gap-2 rounded-lg border border-line bg-[#fbfcff] p-4 text-sm font-semibold text-ink">
+      {label}
+      <input
+        accept={accept}
+        className="rounded-md border border-line bg-white px-3 py-2 text-sm"
+        name={name}
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+          const maxMb = Math.round(maxBytes / 1024 / 1024);
+          event.target.setCustomValidity("");
+          if (file && !allowedTypes.includes(file.type)) {
+            event.target.setCustomValidity("Bitte nur JPG, PNG oder WebP hochladen.");
+          } else if (file && file.size > maxBytes) {
+            event.target.setCustomValidity(`Die Datei ist zu groß. Maximal ${maxMb} MB sind erlaubt.`);
+          }
+          if (file) onMediaChange(true);
+          event.target.reportValidity();
+        }}
+        type="file"
+      />
+      <span className="text-xs font-normal leading-5 text-muted">{help}</span>
+      {error ? <span className="text-xs font-semibold text-[#a4442b]">{error}</span> : null}
+    </label>
   );
 }
 

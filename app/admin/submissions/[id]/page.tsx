@@ -124,6 +124,10 @@ export default async function SubmissionDetailPage({ params, searchParams }: Pag
                   status={mediaStatusLabel(media.profileImage.status, "Zur Prüfung")}
                 />
               </div>
+              <div className="grid gap-3 rounded-md border border-line bg-white p-4">
+                <Data label="Ansprechpartner Name pending" value={submission.contact_person_name} />
+                <Data label="Rolle/Funktion pending" value={submission.contact_person_role} />
+              </div>
               <div className="rounded-md border border-line bg-panel p-4 text-xs leading-5 text-muted">
                 <div className="font-semibold text-ink">Datenschutz-Hinweis</div>
                 <p className="mt-1">

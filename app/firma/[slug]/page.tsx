@@ -333,7 +333,7 @@ export default async function CompanyPublicPage({ params }: PageProps) {
 }
 
 function ProfileMark({ company, canClaim }: { company: PublicCompanyWithTrade; canClaim: boolean }) {
-  const logoLabel = canClaim ? "Logo nach Profilübernahme ergänzen" : "Logo ergänzen";
+  const logoLabel = canClaim ? "Profil übernehmen und Logo ergänzen" : "Logo ergänzen";
 
   return (
     <div className="flex h-28 w-28 shrink-0 items-center justify-center rounded-lg border border-line bg-white p-3 shadow-soft sm:h-32 sm:w-32">
@@ -373,11 +373,14 @@ function ContactTrustCard({ company, canClaim }: { company: PublicCompanyWithTra
             </div>
             <div>
               <h3 className="text-sm font-semibold text-ink">
-                {company.profile_image_url ? "Persönlicher Ansprechpartner" : "Ansprechpartner ergänzbar"}
+                {company.profile_image_url ? company.contact_person_name || "Persönlicher Ansprechpartner" : "Ansprechpartner ergänzbar"}
               </h3>
+              {company.profile_image_url && company.contact_person_role ? (
+                <p className="mt-1 text-sm font-semibold text-muted">{company.contact_person_role}</p>
+              ) : null}
               <p className="mt-1 text-sm leading-6 text-muted">
                 {company.profile_image_url
-                  ? "Der Betrieb zeigt hier ein bereitgestelltes Ansprechpartnerprofil."
+                  ? "Dieses Ansprechpartnerprofil wurde vom Betrieb bereitgestellt und freigegeben."
                   : "Dieser Betrieb hat noch keinen Ansprechpartner angegeben. Ein persönlicher Ansprechpartner macht das Profil greifbarer und schafft Vertrauen bei potentiellen Auftraggebern."}
               </p>
             </div>
@@ -452,10 +455,10 @@ function ProfileCompletionCard({
       </Link>
       <div className="mt-4 grid gap-3 text-xs leading-5 text-muted">
         <p>
-          In der Startphase kann auch das Logo kostenlos ergänzt werden. Später können erweiterte Profilfunktionen optional Teil eines Pro-Profils werden.
+          Betriebe können ihr Profil übernehmen, Stammdaten korrigieren und Leistungen vollständig darstellen.
         </p>
         <p>
-          Optionale Zusatzfunktionen wie Logo, Ansprechpartnerbild, Referenzen, QR-Code, Sichtbarkeitsreport oder erweiterte Profilgestaltung können später als Gründungsmitgliedschaft oder Pro-Profil angeboten werden. Das kostenlose Basisprofil bleibt davon unabhängig bestehen.
+          Erweiterte Darstellungsfunktionen wie Ansprechpartnerbild, Referenzen, QR-Code, Sichtbarkeitsreport oder besondere Profilgestaltung können später optional angeboten werden. Das kostenlose Basisprofil bleibt davon unabhängig bestehen.
         </p>
       </div>
     </ProfileCard>

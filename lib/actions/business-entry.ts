@@ -1,6 +1,8 @@
 "use server";
 
+import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
+import { prepareSubmissionMedia } from "@/lib/company-media-upload";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import type { CompanyFormState } from "@/lib/types";
 import { parseBusinessSubmissionForm } from "@/lib/validation";
@@ -16,9 +18,21 @@ export async function submitBusinessEntry(
   if (!input) return { ok: false, message: "Ungueltige Eingabe." };
 
   const supabase = getSupabaseAdmin();
+  const submissionId = randomUUID();
+  const mediaResult = await prepareSubmissionMedia(formData, submissionId, input.companyName);
+  if (!mediaResult.ok) {
+    return {
+      ok: false,
+      message: mediaResult.message,
+      fieldErrors: mediaResult.fieldErrors,
+    };
+  }
+  const media = mediaResult.media;
+
   const { data, error } = await supabase
     .from("company_submissions")
     .insert({
+      id: submissionId,
       status: "submitted",
       company_name: input.companyName,
       legal_form: input.legalForm,
@@ -31,8 +45,13 @@ export async function submitBusinessEntry(
       contact_role: input.contactRole,
       contact_person_email: input.contactPersonEmail,
       contact_person_phone: input.contactPersonPhone,
-      contact_person_name: [input.contactFirstName, input.contactLastName].filter(Boolean).join(" ") || null,
-      contact_person_role: input.contactRole,
+      logo_url: media.logoUrl,
+      profile_image_url: media.profileImageUrl,
+      profile_image_alt: media.profileImageAlt,
+      contact_person_name: media.contactPersonName || [input.contactFirstName, input.contactLastName].filter(Boolean).join(" ") || null,
+      contact_person_role: media.contactPersonRole || input.contactRole,
+      image_consent_given: media.imageConsentGiven,
+      image_consent_timestamp: media.imageConsentTimestamp,
       street: input.street,
       house_number: input.houseNumber,
       postal_code: input.postalCode,

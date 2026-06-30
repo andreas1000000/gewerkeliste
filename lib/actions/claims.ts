@@ -1,6 +1,8 @@
 "use server";
 
+import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
+import { prepareSubmissionMedia } from "@/lib/company-media-upload";
 import { getCompany } from "@/lib/data";
 import { slugify } from "@/lib/slug";
 import { getSupabaseAdmin } from "@/lib/supabase";
@@ -43,12 +45,6 @@ export async function submitClaim(_prevState: CompanyFormState, formData: FormDa
     support_custom_amount,
     support_invoice_requested,
   );
-  const { error } = await supabase.from("company_claims").insert({
-    ...claim,
-    message: `${claim.message}\n\n---\n${supportSummary}`,
-  });
-  if (error) return { ok: false, message: error.message };
-
   const company = await getCompany(parsed.data.company_id);
   const requesterRole = String(formData.get("requester_role") || "").trim();
   const proposedCompanyName = String(formData.get("proposed_company_name") || company.name).trim() || company.name;
@@ -83,7 +79,25 @@ export async function submitClaim(_prevState: CompanyFormState, formData: FormDa
     .filter((slug) => slug && slug !== requestedPrimaryTrade && findTaxonomyTrade(slug))
     .slice(0, 4);
   const companyTradeSlug = findTaxonomyTrade(requestedPrimaryTrade)?.slug || slugify(company.trades?.name || "fachbetrieb");
+  const submissionId = randomUUID();
+  const mediaResult = await prepareSubmissionMedia(formData, submissionId, proposedCompanyName);
+  if (!mediaResult.ok) {
+    return {
+      ok: false,
+      message: mediaResult.message,
+      fieldErrors: mediaResult.fieldErrors,
+    };
+  }
+  const media = mediaResult.media;
+
+  const { error } = await supabase.from("company_claims").insert({
+    ...claim,
+    message: `${claim.message}\n\n---\n${supportSummary}`,
+  });
+  if (error) return { ok: false, message: error.message };
+
   const { error: submissionError } = await supabase.from("company_submissions").insert({
+    id: submissionId,
     status: "submitted",
     company_name: proposedCompanyName,
     legal_form: proposedLegalForm,
@@ -96,6 +110,13 @@ export async function submitClaim(_prevState: CompanyFormState, formData: FormDa
     contact_role: requesterRole || "Eintragsuebernahme",
     contact_person_email: claim.email,
     contact_person_phone: claim.phone,
+    logo_url: media.logoUrl,
+    profile_image_url: media.profileImageUrl,
+    profile_image_alt: media.profileImageAlt,
+    contact_person_name: media.contactPersonName || claim.name,
+    contact_person_role: media.contactPersonRole || requesterRole || "Eintragsuebernahme",
+    image_consent_given: media.imageConsentGiven,
+    image_consent_timestamp: media.imageConsentTimestamp,
     street: proposedStreet,
     house_number: null,
     postal_code: proposedPostalCode,

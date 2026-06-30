@@ -17,6 +17,7 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
   const [selectedTrades, setSelectedTrades] = useState<string[]>([]);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [founderVerification, setFounderVerification] = useState(true);
+  const [mediaDetailsEntered, setMediaDetailsEntered] = useState(false);
   const errors = state.fieldErrors || {};
   const values = state.values || {};
   const formKey = JSON.stringify(values);
@@ -118,6 +119,45 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
             <input className={inputClass} defaultValue={textValue(values, "contactPersonPhone")} name="contactPersonPhone" inputMode="tel" />
           </Field>
         </div>
+      </FormSection>
+
+      <FormSection
+        number="2a"
+        title="Profil optisch vervollständigen"
+        help="Logo und Ansprechpartnerbild sind freiwillig. Ihr kostenloses Basisprofil kann auch ohne Bilder eingetragen werden. Eingereichte Bilder werden geprüft, bevor sie öffentlich erscheinen."
+      >
+        <div className="grid gap-4 lg:grid-cols-2">
+          <MediaFileField
+            accept="image/jpeg,image/png,image/webp"
+            error={errors.companyLogo}
+            help="JPG, PNG oder WebP. Maximal 2 MB. SVG, GIF und PDF sind nicht erlaubt."
+            label="Firmenlogo hochladen"
+            maxBytes={2 * 1024 * 1024}
+            name="companyLogo"
+            onMediaChange={setMediaDetailsEntered}
+          />
+          <MediaFileField
+            accept="image/jpeg,image/png,image/webp"
+            error={errors.contactProfileImage}
+            help="JPG, PNG oder WebP. Maximal 5 MB. Nur ein Bild einreichen, wenn die abgebildete Person zugestimmt hat."
+            label="Ansprechpartnerbild hochladen"
+            maxBytes={5 * 1024 * 1024}
+            name="contactProfileImage"
+            onMediaChange={setMediaDetailsEntered}
+          />
+          <Field label="Ansprechpartner Name" error={errors.mediaContactName}>
+            <input className={inputClass} name="mediaContactName" onChange={(event) => event.target.value.trim() ? setMediaDetailsEntered(true) : undefined} />
+          </Field>
+          <Field label="Rolle/Funktion" error={errors.mediaContactRole}>
+            <input className={inputClass} name="mediaContactRole" onChange={(event) => event.target.value.trim() ? setMediaDetailsEntered(true) : undefined} placeholder="z. B. Inhaber, Geschäftsführung, Bauleitung" />
+          </Field>
+        </div>
+        <Consent checked={booleanValue(values, "imageConsentGiven")} name="imageConsentGiven" error={errors.imageConsentGiven} required={mediaDetailsEntered}>
+          Ich bin berechtigt, diese Bilder und Angaben für den Betrieb einzureichen.
+        </Consent>
+        <p className="mt-3 rounded-md border border-line bg-white px-4 py-3 text-xs leading-5 text-muted">
+          Logo und Ansprechpartnerbild sind freiwillig. Sie können Ihr Profil auch ohne Medien kostenlos eintragen. Bilder werden erst nach Prüfung veröffentlicht.
+        </p>
       </FormSection>
 
       <FormSection number="3" title="Standort" help="Der Standort hilft Auftraggebern, Betriebe regional einzuordnen.">
@@ -319,6 +359,51 @@ function FormSection({ number, title, help, children }: { number: string; title:
   );
 }
 
+function MediaFileField({
+  accept,
+  error,
+  help,
+  label,
+  maxBytes,
+  name,
+  onMediaChange,
+}: {
+  accept: string;
+  error?: string;
+  help: string;
+  label: string;
+  maxBytes: number;
+  name: string;
+  onMediaChange: (selected: boolean) => void;
+}) {
+  return (
+    <label className="grid gap-2 rounded-lg border border-line bg-[#fbfcff] p-4 text-sm font-semibold text-ink">
+      {label}
+      <input
+        accept={accept}
+        className="rounded-md border border-line bg-white px-3 py-2 text-sm"
+        name={name}
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+          const maxMb = Math.round(maxBytes / 1024 / 1024);
+          event.target.setCustomValidity("");
+          if (file && !allowedTypes.includes(file.type)) {
+            event.target.setCustomValidity("Bitte nur JPG, PNG oder WebP hochladen.");
+          } else if (file && file.size > maxBytes) {
+            event.target.setCustomValidity(`Die Datei ist zu groß. Maximal ${maxMb} MB sind erlaubt.`);
+          }
+          if (file) onMediaChange(true);
+          event.target.reportValidity();
+        }}
+        type="file"
+      />
+      <span className="text-xs font-normal leading-5 text-muted">{help}</span>
+      {error ? <span className="text-xs font-semibold text-[#a4442b]">{error}</span> : null}
+    </label>
+  );
+}
+
 function Field({ label, error, required, children }: { label: string; error?: string; required?: boolean; children: React.ReactNode }) {
   return (
     <label className="grid gap-1.5 text-sm font-medium text-ink">
@@ -332,11 +417,11 @@ function Field({ label, error, required, children }: { label: string; error?: st
   );
 }
 
-function Consent({ name, checked, error, children }: { name: string; checked?: boolean; error?: string; children: React.ReactNode }) {
+function Consent({ name, checked, error, required, children }: { name: string; checked?: boolean; error?: string; required?: boolean; children: React.ReactNode }) {
   return (
     <label className="grid gap-1 text-sm font-medium leading-6 text-ink">
       <span className="flex items-start gap-3">
-        <input className="mt-1 h-4 w-4 accent-action" defaultChecked={checked} name={name} type="checkbox" />
+        <input className="mt-1 h-4 w-4 accent-action" defaultChecked={checked} name={name} required={required} type="checkbox" />
         <span>{children}</span>
       </span>
       {error ? <span className="pl-7 text-xs font-semibold text-[#a4442b]">{error}</span> : null}
