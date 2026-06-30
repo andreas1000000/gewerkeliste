@@ -27,8 +27,8 @@ export function ClaimAssistant({
   const [missingServices, setMissingServices] = useState("");
   const [mediaDetailsEntered, setMediaDetailsEntered] = useState(false);
   const [contact, setContact] = useState({
-    name: "",
-    email: "",
+    name: isUpdate ? company.contact_name || "" : "",
+    email: isUpdate ? company.email || "" : "",
     phone: company.phone || "",
     role: "",
   });
@@ -99,6 +99,7 @@ export function ClaimAssistant({
   return (
     <form action={formAction} className="grid gap-5" encType="multipart/form-data">
       <input name="company_id" type="hidden" value={company.id} />
+      <input name="intent" type="hidden" value={intent} />
       <input
         name="message"
         type="hidden"
@@ -180,13 +181,13 @@ export function ClaimAssistant({
         </Field>
       </WizardSection>
 
-      <WizardSection eyebrow="Schritt 4" title="Ansprechpartner und öffentliche Kontaktdaten">
+      <WizardSection eyebrow="Schritt 4" title={isUpdate ? "Rückfragen optional" : "Ansprechpartner und öffentliche Kontaktdaten"}>
         <div className="grid gap-4 md:grid-cols-2">
-          <Field label="Name Ansprechpartner" error={errors.name}>
-            <input className={inputClass} name="name" onChange={(event) => updateContact("name", event.target.value)} required value={contact.name} />
+          <Field label={isUpdate ? "Name Ansprechpartner optional" : "Name Ansprechpartner"} error={errors.name}>
+            <input className={inputClass} name="name" onChange={(event) => updateContact("name", event.target.value)} required={!isUpdate} value={contact.name} />
           </Field>
-          <Field label="E-Mail für Rückfragen" error={errors.email}>
-            <input className={inputClass} name="email" onChange={(event) => updateContact("email", event.target.value)} required type="email" value={contact.email} />
+          <Field label={isUpdate ? "E-Mail für Rückfragen optional" : "E-Mail für Rückfragen"} error={errors.email}>
+            <input className={inputClass} name="email" onChange={(event) => updateContact("email", event.target.value)} required={!isUpdate} type="email" value={contact.email} />
           </Field>
           <Field label="Telefon öffentlich / Rückruf" error={errors.phone}>
             <input className={inputClass} name="phone" onChange={(event) => updateContact("phone", event.target.value)} value={contact.phone} />
@@ -204,8 +205,9 @@ export function ClaimAssistant({
           />
         </Field>
         <p className="mt-3 text-sm leading-6 text-muted">
-          Beschreiben Sie kurz und sachlich, welche Leistungen Sie anbieten. Keine Werbetexte, keine irreführenden
-          Angaben.
+          {isUpdate
+            ? "Diese Kontaktdaten sind nur für Rückfragen zur Prüfung hilfreich. Sie müssen sie nicht erneut eintragen, wenn Sie nur Leistungen, Logo oder Profildaten ergänzen möchten."
+            : "Beschreiben Sie kurz und sachlich, welche Leistungen Sie anbieten. Keine Werbetexte, keine irreführenden Angaben."}
         </p>
         <label className="mt-5 flex items-start gap-3 text-sm font-medium leading-6 text-ink">
           <input className="mt-1 h-4 w-4 accent-action" name="is_authorized" required type="checkbox" />

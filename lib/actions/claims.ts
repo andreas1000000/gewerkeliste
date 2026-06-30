@@ -19,15 +19,30 @@ export async function submitClaim(_prevState: CompanyFormState, formData: FormDa
     };
   }
 
+  const intent = String(formData.get("intent") || "claim") === "update" ? "update" : "claim";
+  const companyId = String(formData.get("company_id") || "");
+  if (!isUuid(companyId)) {
+    return { ok: false, message: "Ungueltiger Betriebseintrag.", fieldErrors: { company_id: "Betrieb fehlt." } };
+  }
+
+  const supabase = getSupabaseAdmin();
+  const company = await getCompany(companyId);
+  const rawName = String(formData.get("name") || "").trim();
+  const rawEmail = String(formData.get("email") || "").trim();
+  const rawPhone = String(formData.get("phone") || "").trim();
+  const supportContribution = String(formData.get("support_contribution") || "none");
+  const supportCustomAmount = String(formData.get("support_custom_amount") || "");
+  const supportInvoiceRequested = formData.get("support_invoice_requested") === "on";
+
   const parsed = claimSchema.safeParse({
-    company_id: String(formData.get("company_id") || ""),
-    name: String(formData.get("name") || ""),
-    email: String(formData.get("email") || ""),
-    phone: String(formData.get("phone") || ""),
+    company_id: companyId,
+    name: intent === "update" ? rawName || company.contact_name || "Profilergänzung" : rawName,
+    email: intent === "update" ? rawEmail || company.email || "profil-ergaenzung@gewerkeliste.com" : rawEmail,
+    phone: rawPhone,
     message: String(formData.get("message") || ""),
-    support_contribution: String(formData.get("support_contribution") || "none"),
-    support_custom_amount: String(formData.get("support_custom_amount") || ""),
-    support_invoice_requested: formData.get("support_invoice_requested") === "on",
+    support_contribution: supportContribution,
+    support_custom_amount: supportCustomAmount,
+    support_invoice_requested: supportInvoiceRequested,
   });
 
   if (!parsed.success) {
@@ -38,14 +53,12 @@ export async function submitClaim(_prevState: CompanyFormState, formData: FormDa
     };
   }
 
-  const supabase = getSupabaseAdmin();
   const { support_contribution, support_custom_amount, support_invoice_requested, ...claim } = parsed.data;
   const supportSummary = formatSupportContribution(
     support_contribution,
     support_custom_amount,
     support_invoice_requested,
   );
-  const company = await getCompany(parsed.data.company_id);
   const requesterRole = String(formData.get("requester_role") || "").trim();
   const proposedCompanyName = String(formData.get("proposed_company_name") || company.name).trim() || company.name;
   const proposedLegalForm = emptyStringToNull(String(formData.get("proposed_legal_form") || ""));
@@ -90,12 +103,15 @@ export async function submitClaim(_prevState: CompanyFormState, formData: FormDa
   }
   const media = mediaResult.media;
 
-  const { error } = await supabase.from("company_claims").insert({
-    ...claim,
-    message: `${claim.message}\n\n---\n${supportSummary}`,
-  });
-  if (error) return { ok: false, message: error.message };
+  if (intent === "claim") {
+    const { error } = await supabase.from("company_claims").insert({
+      ...claim,
+      message: `${claim.message}\n\n---\n${supportSummary}`,
+    });
+    if (error) return { ok: false, message: error.message };
+  }
 
+  const submissionEmail = rawEmail || company.email || "profil-ergaenzung@gewerkeliste.com";
   const { error: submissionError } = await supabase.from("company_submissions").insert({
     id: submissionId,
     status: "submitted",
@@ -103,18 +119,18 @@ export async function submitClaim(_prevState: CompanyFormState, formData: FormDa
     legal_form: proposedLegalForm,
     website: proposedWebsite,
     phone: proposedPhone,
-    email: claim.email,
-    contact_email: claim.email,
-    contact_first_name: claim.name,
+    email: submissionEmail,
+    contact_email: rawEmail || null,
+    contact_first_name: rawName || null,
     contact_last_name: null,
-    contact_role: requesterRole || "Eintragsuebernahme",
-    contact_person_email: claim.email,
-    contact_person_phone: claim.phone,
+    contact_role: requesterRole || (intent === "claim" ? "Eintragsuebernahme" : "Profilergänzung"),
+    contact_person_email: rawEmail || null,
+    contact_person_phone: rawPhone || null,
     logo_url: media.logoUrl,
     profile_image_url: media.profileImageUrl,
     profile_image_alt: media.profileImageAlt,
-    contact_person_name: media.contactPersonName || claim.name,
-    contact_person_role: media.contactPersonRole || requesterRole || "Eintragsuebernahme",
+    contact_person_name: media.contactPersonName || rawName || company.contact_name || null,
+    contact_person_role: media.contactPersonRole || requesterRole || null,
     image_consent_given: media.imageConsentGiven,
     image_consent_timestamp: media.imageConsentTimestamp,
     street: proposedStreet,
@@ -133,7 +149,7 @@ export async function submitClaim(_prevState: CompanyFormState, formData: FormDa
     service_countries: ["Deutschland"],
     short_description: proposedDescription.slice(0, 240) || `${company.trades?.name || "Fachbetrieb"} in ${proposedCity}`,
     description: [
-      "Profiluebernahme fuer bestehenden Betriebseintrag.",
+      intent === "claim" ? "Profiluebernahme fuer bestehenden Betriebseintrag." : "Profilergänzung fuer bestehenden Betriebseintrag.",
       "",
       claim.message,
       "",
@@ -147,11 +163,12 @@ export async function submitClaim(_prevState: CompanyFormState, formData: FormDa
       `Bestehende Firmen-ID: ${company.id}`,
       `Bestehender Slug: ${company.slug}`,
       proposedEmail ? `Vorgeschlagene oeffentliche E-Mail: ${proposedEmail}` : "",
+      intent === "update" && !rawEmail ? "Keine Rueckfrage-E-Mail eingetragen." : "",
     ].filter(Boolean).join("\n"),
     memberships: [],
     certificates: [],
     manufacturer_certificates: [],
-    wants_founder_verification: true,
+    wants_founder_verification: intent === "claim",
     wants_support_contribution: support_contribution !== "none",
     support_contribution_amount:
       support_contribution === "none"
@@ -163,18 +180,24 @@ export async function submitClaim(_prevState: CompanyFormState, formData: FormDa
     consent_authorized: true,
     consent_data_correct: false,
     consent_privacy: true,
-    source: `claim:${company.id}`,
+    source: intent === "claim" ? `claim:${company.id}` : `profile-update:${company.id}`,
   });
   if (submissionError) return { ok: false, message: submissionError.message };
 
-  await supabase.from("companies").update({ claim_status: "pending" }).eq("id", parsed.data.company_id).neq("claim_status", "claimed");
+  if (intent === "claim") {
+    await supabase.from("companies").update({ claim_status: "pending" }).eq("id", parsed.data.company_id).neq("claim_status", "claimed");
+  }
 
   revalidatePath("/");
   revalidatePath("/betriebe");
   revalidatePath("/suche");
   revalidatePath("/admin/claims");
   revalidatePath("/admin/submissions");
-  return { ok: true, message: "Anfrage wurde gespeichert. Ein freiwilliger Förderbeitrag wird nur vorbereitet; automatisch wird nichts berechnet." };
+  return { ok: true, message: "Anfrage wurde gespeichert. Automatisch wird nichts veroeffentlicht." };
+}
+
+function isUuid(value: string) {
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
 
 function emptyStringToNull(value: string) {
