@@ -46,6 +46,7 @@ const liveReport = {
   ...report,
   mode: "live",
   inserted_companies: 0,
+  updated_companies: 0,
   skipped_duplicates: 0,
   inserted_internal_contact_sources: 0,
   inserted_review_items: 0,
@@ -67,6 +68,26 @@ for (const candidate of candidates) {
 
   const existing = findExistingCompany(candidate, existingCompanies);
   if (existing) {
+    if (candidate.action === "update_existing") {
+      try {
+        const trade = await getOrCreateTrade(candidate.tradeMapped);
+        await updateExistingCompany(existing.id, candidate, trade.id);
+        await recordCompanyImportDetails(existing.id, trade.id, candidate);
+        Object.assign(existing, {
+          name: candidate.companyName,
+          street: candidate.street,
+          city: candidate.city,
+          postal_code: candidate.postalCode,
+          email: candidate.publicEmail,
+          phone: candidate.publicPhone,
+          website_url: candidate.website,
+        });
+        liveReport.updated_companies += 1;
+      } catch (error) {
+        addLiveError(`${candidate.companyName}: ${error.message}`);
+      }
+      continue;
+    }
     liveReport.skipped_duplicates += 1;
     await insertDuplicateReview(candidate, existing);
     continue;
@@ -90,23 +111,7 @@ for (const candidate of candidates) {
     liveReport.inserted_companies += 1;
     liveReport.created_slugs.push(slug);
 
-    await insertCompanySource(company.id, candidate);
-    if (candidate.internalContacts.length > 0) {
-      liveReport.inserted_internal_contact_sources += 1;
-      await insertInternalContactSource(company.id, candidate);
-      liveReport.inserted_review_items += 1;
-      await insertContactReview(company.id, candidate);
-    }
-
-    await upsertCompanyTrade(company.id, trade.id, candidate);
-    liveReport.inserted_company_trade_links += 1;
-
-    const serviceRows = await mapServiceRows(candidate, company.id);
-    for (const row of serviceRows) {
-      const { error } = await supabase.from("company_services").upsert(row, { onConflict: "company_id,service_id" });
-      if (error) addLiveError(`${candidate.companyName}: company_services ${error.message}`);
-      else liveReport.inserted_company_service_links += 1;
-    }
+    await recordCompanyImportDetails(company.id, trade.id, candidate);
   } catch (error) {
     addLiveError(`${candidate.companyName}: ${error.message}`);
   }
@@ -117,6 +122,9 @@ process.exit(liveReport.errors.length ? 1 : 0);
 
 function parseSeedTable(text, taxonomyIndex) {
   const lines = text.replace(/\r/g, "").split("\n");
+  const header = lines[0]?.split("\t").map((value) => value.trim()) || [];
+  if (header.includes("company_name") && header.includes("trade_mapped")) return parseNormalizedSeedTable(lines, header);
+
   const rows = [];
   let current = null;
   let pendingTradePrefix = "";
@@ -167,6 +175,39 @@ function parseSeedTable(text, taxonomyIndex) {
   return rows.filter((row) => row.companyName && row.tradeOriginal);
 }
 
+function parseNormalizedSeedTable(lines, header) {
+  const rows = [];
+  for (const rawLine of lines.slice(1)) {
+    if (!rawLine.trim()) continue;
+    const cells = rawLine.split("\t");
+    const row = Object.fromEntries(header.map((key, index) => [key, cell(cells[index])]));
+    rows.push({
+      action: row.action || "create_new",
+      companyName: row.company_name,
+      legalName: row.legal_name,
+      tradeOriginal: row.trade_original,
+      tradeMappedLabel: row.trade_mapped,
+      servicesRaw: row.services_mapped,
+      street: row.street,
+      postalCode: row.postal_code,
+      city: row.city,
+      district: row.district,
+      region: row.region || region,
+      website: row.website,
+      sourceType: row.source_type,
+      sourceUrl: row.source_url,
+      sourcePage: row.source_page,
+      phonePublicRaw: row.phone_public,
+      phoneInternalRaw: row.phone_internal_only,
+      emailPublicRaw: row.email_public,
+      emailInternalRaw: row.email_internal_only,
+      phoneRaw: [row.phone_public, row.phone_internal_only].filter(Boolean).join("\n"),
+      emailRaw: [row.email_public, row.email_internal_only].filter(Boolean).join("\n"),
+    });
+  }
+  return rows.filter((row) => row.companyName && row.tradeOriginal);
+}
+
 function appendContinuationCells(current, cells) {
   for (const part of cells.map(cell).filter(Boolean)) {
     if (part.includes("@")) current.emailRaw = appendLine(current.emailRaw, part);
@@ -207,18 +248,24 @@ function parseLocation(value) {
 }
 
 function buildCandidate(row, rowNumber, taxonomyIndex) {
-  const emails = extractEmails(row.emailRaw);
-  const phones = extractPhones(row.phoneRaw);
-  const emailClassifications = emails.map(classifyEmail);
-  const phoneClassifications = phones.map((phone) => classifyPhone(phone, row.phoneRaw));
+  const publicEmailClassifications = extractEmails(row.emailPublicRaw || "").map(classifyEmail);
+  const internalEmailClassifications = extractEmails(row.emailInternalRaw || "").map((email) => ({ email, public: false, reason: classifyEmail(email).reason }));
+  const fallbackEmailClassifications = row.emailPublicRaw || row.emailInternalRaw ? [] : extractEmails(row.emailRaw).map(classifyEmail);
+  const emailClassifications = [...publicEmailClassifications, ...internalEmailClassifications, ...fallbackEmailClassifications];
+  const publicPhoneClassifications = extractPhones(row.phonePublicRaw || "").map((phone) => classifyPhone(phone, row.phonePublicRaw || ""));
+  const internalPhoneClassifications = extractPhones(row.phoneInternalRaw || "").map((phone) => ({ phone, public: false, reason: classifyPhone(phone, row.phoneInternalRaw || "").reason }));
+  const fallbackPhoneClassifications = row.phonePublicRaw || row.phoneInternalRaw ? [] : extractPhones(row.phoneRaw).map((phone) => classifyPhone(phone, row.phoneRaw));
+  const phoneClassifications = [...publicPhoneClassifications, ...internalPhoneClassifications, ...fallbackPhoneClassifications];
+  const emails = [...new Set(emailClassifications.map((item) => item.email))];
+  const phones = [...new Set(phoneClassifications.map((item) => item.phone))];
   const publicEmail = emailClassifications.find((item) => item.public)?.email || null;
   const publicPhone = phoneClassifications.find((item) => item.public)?.phone || null;
   const internalContacts = [
     ...emailClassifications.filter((item) => !item.public).map((item) => ({ type: "email", value: item.email, reason: item.reason })),
     ...phoneClassifications.filter((item) => !item.public).map((item) => ({ type: "phone", value: item.phone, reason: item.reason })),
   ];
-  const tradeMapped = mapTrade(row.tradeOriginal, taxonomyIndex);
-  const servicesMapped = mapServices(row.tradeOriginal, tradeMapped, taxonomyIndex);
+  const tradeMapped = mapTrade(row.tradeMappedLabel || row.tradeOriginal, taxonomyIndex) || mapTrade(row.tradeOriginal, taxonomyIndex);
+  const servicesMapped = row.servicesRaw ? mapServicesFromLabels(row.servicesRaw, tradeMapped, taxonomyIndex) : mapServices(row.tradeOriginal, tradeMapped, taxonomyIndex);
   const duplicateKey = [normalizeKey(row.companyName), row.postalCode, normalizeKey(row.city), normalizeKey(row.street)].join("|");
   const validationErrors = [];
   if (!row.companyName) validationErrors.push("Firmenname fehlt");
@@ -229,15 +276,20 @@ function buildCandidate(row, rowNumber, taxonomyIndex) {
 
   return {
     rowNumber,
+    action: row.action || "create_new",
     companyName: row.companyName,
+    legalName: row.legalName || row.companyName,
     tradeOriginal: row.tradeOriginal,
     tradeMapped,
     servicesMapped,
     street: row.street,
     postalCode: row.postalCode,
     city: row.city,
-    region,
-    website: null,
+    region: row.region || region,
+    website: normalizeWebsiteUrl(row.website),
+    sourceType: row.sourceType || source,
+    sourceUrl: normalizeWebsiteUrl(row.sourceUrl),
+    sourcePage: row.sourcePage || null,
     publicEmail,
     publicPhone,
     emails,
@@ -280,6 +332,8 @@ function buildDryRunReport(candidates, duplicateGroups) {
     unique_companies: new Set(candidates.map((candidate) => candidate.duplicateKey)).size,
     suspected_duplicates: duplicateGroups.reduce((sum, group) => sum + group.rows.length, 0),
     public_importable_basic_profiles: candidates.filter((candidate) => candidate.importable).length,
+    create_new_records: candidates.filter((candidate) => candidate.action === "create_new").length,
+    update_existing_records: candidates.filter((candidate) => candidate.action === "update_existing").length,
     internally_stored_emails: candidates.reduce((sum, candidate) => sum + candidate.internalContacts.filter((item) => item.type === "email").length, 0),
     internally_stored_phone_numbers: candidates.reduce((sum, candidate) => sum + candidate.internalContacts.filter((item) => item.type === "phone").length, 0),
     withheld_mobile_numbers: candidates.reduce((sum, candidate) => sum + candidate.withheldMobilePhones, 0),
@@ -382,23 +436,65 @@ async function insertCompany(candidate, tradeId, slug) {
   return data;
 }
 
+async function updateExistingCompany(companyId, candidate, tradeId) {
+  const updates = {
+    trade_id: tradeId,
+    name: candidate.companyName,
+    email: candidate.publicEmail,
+    phone: candidate.publicPhone,
+    website_url: candidate.website,
+    street: candidate.street || null,
+    city: candidate.city,
+    postal_code: candidate.postalCode,
+    public_visible: true,
+    needs_review: candidate.internalContacts.length > 0,
+    profile_status: candidate.internalContacts.length > 0 ? "needs_review" : "imported",
+  };
+  const { error } = await supabase.from("companies").update(updates).eq("id", companyId);
+  if (error) throw error;
+}
+
+async function recordCompanyImportDetails(companyId, tradeId, candidate) {
+  await insertCompanySource(companyId, candidate);
+  if (candidate.internalContacts.length > 0) {
+    liveReport.inserted_internal_contact_sources += 1;
+    await insertInternalContactSource(companyId, candidate);
+    liveReport.inserted_review_items += 1;
+    await insertContactReview(companyId, candidate);
+  }
+
+  await upsertCompanyTrade(companyId, tradeId, candidate);
+  liveReport.inserted_company_trade_links += 1;
+
+  const serviceRows = await mapServiceRows(candidate, companyId);
+  for (const row of serviceRows) {
+    const { error } = await supabase.from("company_services").upsert(row, { onConflict: "company_id,service_id" });
+    if (error) addLiveError(`${candidate.companyName}: company_services ${error.message}`);
+    else liveReport.inserted_company_service_links += 1;
+  }
+}
+
 async function insertCompanySource(companyId, candidate) {
   const { error } = await supabase.from("company_sources").insert({
     company_id: companyId,
-    source_type: source,
-    source_url: null,
-    title: "Kuratierte Seed-Liste Andreas Moser",
+    source_type: candidate.sourceType || source,
+    source_url: candidate.sourceUrl || candidate.website || null,
+    title: candidate.sourcePage ? `Kuratierte Seed-Liste Andreas Moser: ${candidate.sourcePage}` : "Kuratierte Seed-Liste Andreas Moser",
     snippet: `${candidate.tradeOriginal} | ${candidate.companyName} | ${candidate.postalCode} ${candidate.city}`,
     content: JSON.stringify({
       source,
       source_note: sourceNote,
       profile_type: "free_basic",
       visibility: "public",
-      region,
+      region: candidate.region,
+      legal_name: candidate.legalName,
       created_by_import: true,
       trade_original: candidate.tradeOriginal,
       trade_mapped: candidate.tradeMapped?.slug,
       services_mapped: candidate.servicesMapped.map((service) => service.slug),
+      source_type: candidate.sourceType,
+      source_url: candidate.sourceUrl,
+      source_page: candidate.sourcePage,
     }),
     source_name: source,
     confidence_score: 80,
@@ -577,6 +673,25 @@ function mapServices(original, tradeMapped, taxonomyIndex) {
     .map((service) => ({ name: service.name, slug: service.slug }));
 }
 
+function mapServicesFromLabels(value, tradeMapped, taxonomyIndex) {
+  if (!tradeMapped) return [];
+  const services = taxonomyIndex.servicesByTrade.get(tradeMapped.slug) || [];
+  const labels = String(value || "")
+    .split(";")
+    .map((label) => label.trim())
+    .filter(Boolean);
+  const mapped = [];
+  for (const label of labels) {
+    const normalized = normalizeKey(label);
+    const service = services.find((item) => {
+      const names = [item.name, item.slug, ...(item.aliases || [])].map(normalizeKey);
+      return names.some((name) => name === normalized || name.includes(normalized) || normalized.includes(name));
+    });
+    if (service && !mapped.some((item) => item.slug === service.slug)) mapped.push({ name: service.name, slug: service.slug });
+  }
+  return mapped.slice(0, 12);
+}
+
 function extractEmails(value) {
   return [...new Set(String(value || "").match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/gi) || [])].map((email) => email.trim().toLowerCase());
 }
@@ -633,6 +748,14 @@ function normalizePhone(value) {
 
 function companySlug(name, postalCode, city) {
   return slugify([name, postalCode, city].filter(Boolean).join(" "));
+}
+
+function normalizeWebsiteUrl(value) {
+  const cleaned = String(value || "").trim();
+  if (!cleaned) return null;
+  if (/^https?:\/\//i.test(cleaned)) return cleaned;
+  if (/^[a-z0-9.-]+\.[a-z]{2,}(?:\/.*)?$/i.test(cleaned)) return `https://${cleaned}`;
+  return null;
 }
 
 function slugify(value) {
@@ -741,24 +864,72 @@ function manualTradeEntries() {
     "Abbruch": "abbrucharbeiten",
     "Abbruch Erd- und Tiefbau": "abbrucharbeiten",
     "Abbruch Erd- und Tiefbau GmbH": "abbrucharbeiten",
+    "Bauunternehmen / Hochbau": "bauunternehmen",
+    "Bauunternehmen / Hochbau / Tiefbau": "bauunternehmen",
+    "Bauunternehmen / Naturbau": "bauunternehmen",
     "Baumeisterarbeiten": "bauunternehmen",
     "Baumeisterarbeiten Tiefbau": "tiefbau",
+    "Betonwerk / Betonbau": "betonbau",
     "Beweissicherung/Baugutachter": "sachverstaendige",
     "Brandschutz": "brandschutzplanung",
+    "CNC / Metallbearbeitung": "metallbau",
     "Dachdecker/Spengler": "dachdeckerarbeiten",
+    "Dämmung / Einblasdämmung": "waermedaemmverbundsysteme",
     "Elektrofachplanung": "tga-planung",
+    "Elektroinstallation / Gebäudetechnik": "elektroinstallation",
+    "Elektroinstallation / Photovoltaik / Smarthome": "elektroinstallation",
     "Elektroinstallation": "elektroinstallation",
     "Elektrotechnik/ Elektroinstallation": "elektroinstallation",
     "Elektrotechnik": "elektrotechnik",
     "Erd - Kanal - Pflasterbau Abbruch Recycling": "tiefbau",
     "Erdbau Tiefbau": "erdarbeiten",
+    "Estrich / Bodensysteme": "estricharbeiten",
     "Estrich/Sichtestrich": "estricharbeiten",
+    "Fahrzeugbau / Metallbau": "metallbau",
     "Fassade Glas Alu": "metallbau",
+    "Feinmechanik / Metallbearbeitung": "metallbau",
+    "Feinwerktechnik / Metallbearbeitung": "metallbau",
     "Fenster": "fensterbau",
+    "Fensterbau / Bauelemente / Metallbau": "fensterbau",
+    "Fliesenleger": "fliesenarbeiten",
+    "Fliesenleger / Naturstein": "fliesenarbeiten",
     "Garten- und Landschaftsbau": "garten-landschaftsbau",
     "Gartenpflege Rodungsarbeiten": "garten-landschaftsbau",
     "GEG Nachweis Wärmeschutznachweis": "energieberatung",
     "GEG Nachweis Wärmeschutznachweis SiGeKo": "energieberatung",
+    "Heizung / Sanitär / Haustechnik": "heizungsbau",
+    "Heizung / Sanitär / Lüftung": "heizungsbau",
+    "Heizung / Sanitär / Lüftung / Solar": "heizungsbau",
+    "Heizung / Sanitär / Versorgungstechnik": "heizungsbau",
+    "Holzbau / Holzhausbau": "holzbau",
+    "Holzbau / Zimmerei / Fensterbau": "holzbau",
+    "Isolierung / Dämmung": "technische-isolierung",
+    "Maschinenbau / Metallbau": "metallbau",
+    "Maschinenbau / Metallbearbeitung": "metallbau",
+    "Metallbau / Balkonbau": "metallbau",
+    "Metallbau / Bauschlosserei": "metallbau",
+    "Metallbau / Fassade": "metallbau",
+    "Metallbau / Kunstschmiede": "metallbau",
+    "Metallbau / Landtechnik": "metallbau",
+    "Metallbau / Maschinenbau": "metallbau",
+    "Metallbau / Schlosserei": "metallbau",
+    "Metallbau / Stahlbau": "metallbau",
+    "Metallbau / Stahlbau / Schlosserei": "metallbau",
+    "Metallbearbeitung / Feinmechanik": "metallbau",
+    "Metallbearbeitung / Stanztechnik": "metallbau",
+    "Schlosserei / Metallbau": "metallbau",
+    "Stahlbau / Metallbau": "stahlbau",
+    "Stahlbau / Metallbau / Schlosserei": "stahlbau",
+    "Stuckateur / Putz / Trockenbau": "verputzarbeiten",
+    "Tiefbau / Abbruch / Recycling": "tiefbau",
+    "Tiefbau / Bauunternehmen": "tiefbau",
+    "Tiefbau / Garten- und Landschaftsbau": "tiefbau",
+    "Tiefbau / Pflasterbau": "tiefbau",
+    "Trockenbau / Akustikbau": "trockenbau",
+    "WKSB-Isolierung": "technische-isolierung",
+    "Zimmerei / Dachdeckerei": "holzbau",
+    "Zimmerei / Holzbau": "holzbau",
+    "Zimmerei / Holzbau / Dachdeckerei": "holzbau",
     "Gerüstbau": "geruestbau",
     "HLS": "heizungsbau",
     "HLS Haustechnik": "heizungsbau",
