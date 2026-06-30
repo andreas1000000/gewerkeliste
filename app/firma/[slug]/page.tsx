@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import type { Route } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ServiceAreaPreview } from "@/components/map/service-area-preview";
 import { SiteHeader } from "@/components/site-header";
 import {
   cleanCompanyDescription,
@@ -13,7 +12,6 @@ import {
 } from "@/lib/company-display";
 import { getCompanyBySlug, getCompanyBySlugForMetadata } from "@/lib/data/public-directory";
 import { breadcrumbJsonLd, jsonLd, localBusinessJsonLd } from "@/lib/seo";
-import { serviceTaxonomy } from "@/lib/service-taxonomy";
 import type { PublicClaimStatus, PublicCompanyWithTrade } from "@/lib/types/public-directory";
 
 export const dynamic = "force-dynamic";
@@ -39,7 +37,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   const trade = company.trades?.name || "Handwerk";
   const description =
-    cleanCompanyDescription(company.description) ||
+    businessProfileDescription(cleanCompanyDescription(company.description)) ||
     `Unternehmensprofil von ${company.name} in ${company.city}: Gewerk, Leistungen, Kontakt und Datenstatus auf GewerkeListe.com.`;
 
   return {
@@ -67,13 +65,11 @@ export default async function CompanyPublicPage({ params }: PageProps) {
     const canClaim = company.claim_status === "unclaimed" || company.claim_status === "rejected";
     const websiteHref = normalizeWebsiteUrl(company.website_url);
     const location = `${company.postal_code} ${company.city}`.trim();
-    const visibleDescription = publicResultDescription(company.description);
+    const visibleDescription = businessProfileDescription(publicResultDescription(company.description));
     const profileDescription = getProfileDescription(company, trade, location, visibleDescription);
     const executedTrades = getExecutedTrades(company);
     const services = getRecognizableServices(company, executedTrades);
     const groupedServices = groupServicesForDisplay(services);
-    const detailServiceFamilies = getDetailedServiceFamilies(company, services);
-    const topServices = services.slice(0, 12);
     const sourceItems = getSourceItems(company, websiteHref);
     const hasCoordinates =
       Number.isFinite(company.latitude) &&
@@ -121,14 +117,20 @@ export default async function CompanyPublicPage({ params }: PageProps) {
           </nav>
 
           <section className="mt-5 overflow-hidden rounded-lg border border-line bg-white shadow-soft">
-            <div className="relative h-32 bg-[linear-gradient(135deg,#07173d_0%,#174b8f_44%,#e8f1fb_100%)] sm:h-44">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_30%,rgba(255,255,255,0.18),transparent_24%),radial-gradient(circle_at_84%_26%,rgba(47,143,91,0.24),transparent_28%)]" />
-              <div className="absolute bottom-4 left-5 rounded-md bg-white/90 px-3 py-1 text-xs font-semibold text-brand shadow-soft sm:left-7">
-                Öffentliches Unternehmensprofil
+            <div className="relative min-h-36 bg-[#0d2447] sm:min-h-48">
+              <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(7,23,61,0.96)_0%,rgba(24,78,133,0.9)_48%,rgba(226,239,248,0.9)_100%)]" />
+              <div className="absolute inset-0 opacity-35 [background-image:linear-gradient(90deg,rgba(255,255,255,0.16)_1px,transparent_1px),linear-gradient(0deg,rgba(255,255,255,0.12)_1px,transparent_1px)] [background-size:48px_48px]" />
+              <div className="relative flex min-h-36 items-start justify-between gap-4 p-5 sm:min-h-48 sm:p-7">
+                <div className="rounded-md bg-white/90 px-3 py-1 text-xs font-semibold text-brand shadow-soft">
+                  Öffentliches Unternehmensprofil
+                </div>
+                <div className="hidden max-w-xs rounded-md border border-white/25 bg-white/12 px-4 py-3 text-right text-xs leading-5 text-white sm:block">
+                  Bau- und Handwerksprofil mit Standort, Leistungen, Kontaktwegen und Datenstatus.
+                </div>
               </div>
             </div>
-            <div className="px-5 pb-6 sm:px-7">
-              <div className="-mt-12 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
+            <div className="px-5 pb-0 sm:px-7">
+              <div className="-mt-16 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
                   <ProfileMark company={company} />
                   <div className="pb-1">
@@ -143,7 +145,6 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                     <p className="mt-2 text-sm text-muted">{[company.city, trade, status.shortLabel].filter(Boolean).join(" · ")}</p>
                   </div>
                 </div>
-                <ActionBar company={company} websiteHref={websiteHref} canClaim={canClaim} />
               </div>
               <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
                 <ProfileMetric label="Standort" value={location || company.city} />
@@ -151,11 +152,14 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                 <ProfileMetric label="Profilstatus" value={status.shortLabel} />
                 <ProfileMetric label="Profilvollständigkeit" value={`${completionScore}%`} />
               </div>
+              <div className="mt-6 border-t border-line py-4">
+                <ActionBar company={company} websiteHref={websiteHref} canClaim={canClaim} />
+              </div>
             </div>
           </section>
 
           <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
-            <div className="grid gap-5">
+            <div className="order-2 grid gap-5 lg:order-1">
               <ProfileCard title="Über den Betrieb">
                 <p className="max-w-4xl text-base leading-7 text-ink">{profileDescription}</p>
                 <div className="mt-5 grid gap-3 sm:grid-cols-3">
@@ -166,15 +170,11 @@ export default async function CompanyPublicPage({ params }: PageProps) {
               </ProfileCard>
 
               <ProfileCard
-                title="Leistungsübersicht"
-                subtitle={
-                  company.verified || company.claim_status === "claimed"
-                    ? "Kompakte Übersicht der vom Betrieb angegebenen oder im Profil genannten Leistungen."
-                    : "Kompakte Übersicht der auf Firmenwebsite oder öffentlichen Unternehmensquellen erkennbaren Leistungen."
-                }
+                title="Leistungen"
+                subtitle="Auf der Firmenwebsite oder im Profil genannte Leistungen."
               >
-                {topServices.length ? (
-                  <TopServiceOverview services={topServices} totalCount={services.length} />
+                {groupedServices.length ? (
+                  <ServiceGroups groups={groupedServices} totalCount={services.length} />
                 ) : (
                   <p className="text-sm leading-6 text-muted">
                     Für diesen Betrieb sind noch keine konkreten Leistungen strukturiert hinterlegt. Nach Profilübernahme
@@ -183,35 +183,23 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                 )}
               </ProfileCard>
 
-              {groupedServices.length ? (
-                <ProfileCard
-                  title="Leistungsspektrum im Detail"
-                  subtitle="Detailleistungen werden nach fachlichen Bereichen gruppiert. Grundlage sind vom Betrieb angegebene oder öffentlich erkennbare Leistungsbereiche."
-                >
-                  <DetailServiceFamilies families={detailServiceFamilies} fallbackGroups={groupedServices} />
-                </ProfileCard>
-              ) : null}
-
               <ProfileCard title="Gewerke">
                 <TradeOverview primaryTrade={trade} trades={executedTrades} />
               </ProfileCard>
 
-              <ProfileCard title="Wirkungskreis">
-                <div className="grid gap-4 sm:grid-cols-2">
+              <ProfileCard title="Standort und Wirkungskreis">
+                <div className="grid gap-3 sm:grid-cols-3">
                   <Fact label="Standort" value={location} />
+                  <Fact label="Ort" value={company.city} />
                   <Fact
-                    label="Einsatzgebiet"
-                    value="Demnächst verfügbar. Betriebe können ihren tatsächlichen Wirkungskreis nach Profilübernahme ergänzen."
+                    label="Wirkungskreis"
+                    value="Regionale Tätigkeit kann nach Profilübernahme präzisiert werden."
                   />
                 </div>
-                <div className="mt-5">
-                  <ServiceAreaPreview
-                    label={`${company.name} Wirkungskreis Vorschau`}
-                    type="region"
-                    status="draft"
-                    regionNames={[company.city]}
-                  />
-                </div>
+                <p className="mt-4 text-sm leading-6 text-muted">
+                  Aktuell wird der Betrieb mit dem bekannten Standort geführt. Ein genauer Einsatzradius oder einzelne Orte werden erst nach
+                  Prüfung und Profilübernahme veröffentlicht.
+                </p>
               </ProfileCard>
 
               <ProfileCard title="Datenquellen / Datenstatus">
@@ -243,7 +231,7 @@ export default async function CompanyPublicPage({ params }: PageProps) {
               </ProfileCard>
             </div>
 
-            <aside className="grid content-start gap-5">
+            <aside className="order-1 grid content-start gap-5 lg:order-2">
               <ProfileCard title="Kontakt">
                 <dl className="grid gap-4">
                   <DataRow label="Standort" value={location} />
@@ -258,7 +246,7 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                 ) : null}
               </ProfileCard>
 
-              <ProfileCard title="Profilstatus">
+              <ProfileCard title="Datenstatus">
                 <div className={`rounded-md border px-4 py-4 text-sm leading-6 ${statusBoxClass(status.tone)}`}>
                   <div className="font-semibold text-ink">{status.label}</div>
                   <p className="mt-2">{status.note}</p>
@@ -287,7 +275,7 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                     className="mt-3 inline-flex w-full min-h-10 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-action hover:border-action"
                     href={`/betriebe/${company.slug}/profil-ergaenzen` as Route}
                   >
-                    Korrektur oder Ergänzung anfragen
+                    Daten korrigieren
                   </Link>
                   <p className="mt-3 text-xs leading-5 text-muted">
                     Der kostenlose Basiseintrag bleibt erhalten. Erweiterte Profilfunktionen sind optional.
@@ -373,8 +361,8 @@ function ContactTrustCard({ company, canClaim }: { company: PublicCompanyWithTra
                 {company.profile_image_url ? "Persönlicher Ansprechpartner" : "Ansprechpartner sichtbar machen"}
               </h3>
               <p className="mt-1 text-sm leading-6 text-muted">
-                Menschen arbeiten mit Menschen. Nach Profilübernahme kann der Betrieb hier einen Ansprechpartner, ein Teamfoto
-                oder eine kurze persönliche Vorstellung ergänzen.
+                Menschen arbeiten mit Menschen. Nach Profilübernahme kann der Betrieb hier einen Ansprechpartner, ein Teamfoto oder
+                eine kurze persönliche Vorstellung ergänzen.
               </p>
             </div>
           </div>
@@ -382,11 +370,11 @@ function ContactTrustCard({ company, canClaim }: { company: PublicCompanyWithTra
 
         {canClaim ? (
           <Link className="inline-flex min-h-10 items-center justify-center rounded-md bg-action px-4 text-sm font-semibold text-white hover:bg-brand" href={claimHref}>
-            Ansprechpartner nach Profilübernahme ergänzen
+            Profil übernehmen
           </Link>
         ) : (
           <Link className="inline-flex min-h-10 items-center justify-center rounded-md bg-action px-4 text-sm font-semibold text-white hover:bg-brand" href={updateHref}>
-            Ansprechpartner ergänzen anfragen
+            Daten korrigieren
           </Link>
         )}
         <p className="text-xs leading-5 text-muted">
@@ -435,8 +423,7 @@ function ProfileCompletionCard({
         </Link>
       )}
       <p className="mt-3 text-xs leading-5 text-muted">
-        Kostenlos bleiben Basisprofil, Stammdaten, Gewerke, Leistungen und Kontaktwege. Erweiterte Darstellung wie
-        Referenzen, Projektgalerie, Sichtbarkeitsreport oder visuelle Wirkungskreise kann später optional ergänzt werden.
+        Kostenlos bleiben Basisprofil, Stammdaten, Gewerke, Leistungen und Kontaktwege. Erweiterte Profilfunktionen sind optional.
       </p>
     </ProfileCard>
   );
@@ -478,85 +465,65 @@ function ActionBar({
   );
 }
 
-function TopServiceOverview({ services, totalCount }: { services: string[]; totalCount: number }) {
+function ServiceGroups({ groups, totalCount }: { groups: Array<{ label: string; items: string[] }>; totalCount: number }) {
+  const visibleLimit = 18;
+  let shown = 0;
+
+  const visibleGroups = groups
+    .map((group) => {
+      const remaining = visibleLimit - shown;
+      if (remaining <= 0) return { ...group, items: [] };
+      const items = group.items.slice(0, remaining);
+      shown += items.length;
+      return { ...group, items };
+    })
+    .filter((group) => group.items.length);
+
+  const hiddenGroups = groups
+    .map((group) => ({ ...group, items: group.items.slice(Math.max(0, visibleLimit - countPreviousItems(groups, group.label))) }))
+    .filter((group) => group.items.length);
+
   return (
-    <div>
-      <div className="flex flex-wrap gap-2">
-        {services.map((item) => (
-          <span key={item} className="rounded-md border border-line bg-[#fbfcff] px-3 py-2 text-sm font-semibold text-ink">
-            {item}
-          </span>
-        ))}
-      </div>
-      {totalCount > services.length ? (
-        <p className="mt-4 text-sm leading-6 text-muted">
-          {totalCount - services.length} weitere Detailleistungen sind im Abschnitt „Leistungsspektrum im Detail“ zugeordnet.
-        </p>
+    <div className="grid gap-4">
+      {visibleGroups.map((group) => (
+        <ServiceGroup key={group.label} group={group} />
+      ))}
+      {totalCount > visibleLimit ? (
+        <details className="rounded-md border border-line bg-[#fbfcff] p-4">
+          <summary className="cursor-pointer list-none text-sm font-semibold text-action">Alle Leistungen anzeigen</summary>
+          <div className="mt-4 grid gap-4">
+            {hiddenGroups.map((group) => (
+              <ServiceGroup key={`all-${group.label}`} group={group} />
+            ))}
+          </div>
+        </details>
       ) : null}
     </div>
   );
 }
 
-function DetailServiceFamilies({
-  families,
-  fallbackGroups,
-}: {
-  families: Array<{ label: string; description: string; items: string[] }>;
-  fallbackGroups: Array<{ label: string; items: string[] }>;
-}) {
-  if (families.length) {
-    return (
-      <div className="grid gap-3">
-        {families.map((family, index) => (
-          <details key={family.label} className="rounded-md border border-line bg-[#fbfcff] p-4" open={index === 0}>
-            <summary className="cursor-pointer list-none">
-              <span className="flex items-center justify-between gap-4">
-                <span>
-                  <span className="block text-sm font-semibold text-ink">{family.label}</span>
-                  <span className="mt-1 block text-xs leading-5 text-muted">
-                    {family.items.length} Detailleistungen · {family.description}
-                  </span>
-                </span>
-                <span className="rounded-md border border-line bg-white px-3 py-1 text-xs font-semibold text-action">Details öffnen</span>
-              </span>
-            </summary>
-            <div className="mt-4 flex flex-wrap gap-2">
-              {family.items.map((item) => (
-                <span key={item} className="rounded-md border border-line bg-white px-3 py-2 text-sm font-semibold text-ink">
-                  {item}
-                </span>
-              ))}
-            </div>
-          </details>
+function ServiceGroup({ group }: { group: { label: string; items: string[] } }) {
+  return (
+    <div>
+      <h3 className="text-sm font-semibold text-ink">{group.label}</h3>
+      <div className="mt-2 flex flex-wrap gap-2">
+        {group.items.map((item) => (
+          <span key={item} className="rounded-md border border-line bg-[#fbfcff] px-3 py-2 text-sm font-semibold text-ink">
+            {item}
+          </span>
         ))}
       </div>
-    );
-  }
-
-  return (
-    <div className="grid gap-3">
-      {fallbackGroups.map((group, index) => (
-        <details key={group.label} className="rounded-md border border-line bg-[#fbfcff] p-4" open={index === 0}>
-          <summary className="cursor-pointer list-none">
-            <span className="flex items-center justify-between gap-4">
-              <span>
-                <span className="block text-sm font-semibold text-ink">{group.label}</span>
-                <span className="mt-1 block text-xs text-muted">{group.items.length} Detailleistungen</span>
-              </span>
-              <span className="rounded-md border border-line bg-white px-3 py-1 text-xs font-semibold text-action">Details öffnen</span>
-            </span>
-          </summary>
-          <div className="mt-4 flex flex-wrap gap-2">
-            {group.items.map((item) => (
-              <span key={item} className="rounded-md border border-line bg-white px-3 py-2 text-sm font-semibold text-ink">
-                {item}
-              </span>
-            ))}
-          </div>
-        </details>
-      ))}
     </div>
   );
+}
+
+function countPreviousItems(groups: Array<{ label: string; items: string[] }>, label: string) {
+  let count = 0;
+  for (const group of groups) {
+    if (group.label === label) return count;
+    count += group.items.length;
+  }
+  return count;
 }
 
 function TradeOverview({ primaryTrade, trades }: { primaryTrade: string; trades: string[] }) {
@@ -586,62 +553,10 @@ function TradeOverview({ primaryTrade, trades }: { primaryTrade: string; trades:
   );
 }
 
-function getDetailedServiceFamilies(company: PublicCompanyWithTrade, services: string[]) {
-  const relatedSlugs = serviceSlugsForCompany(company, services);
-  const selectedFamilies: Array<{ label: string; description: string; items: string[] }> = [];
-
-  for (const group of serviceTaxonomy) {
-    for (const trade of group.trades) {
-      if (!relatedSlugs.has(trade.slug)) continue;
-      for (const family of trade.families) {
-        selectedFamilies.push({
-          label: `${trade.name} · ${family.name}`,
-          description: family.description,
-          items: family.services.map((service) => service.name),
-        });
-      }
-    }
-  }
-
-  return dedupeServiceFamilies(selectedFamilies).slice(0, 8);
-}
-
-function serviceSlugsForCompany(company: PublicCompanyWithTrade, services: string[]) {
-  const slugs = new Set<string>();
-  if (company.trades?.slug && company.trades.slug !== "bauunternehmen") slugs.add(company.trades.slug);
-
-  const text = [company.trades?.slug, company.trades?.name, ...services].join(" ").toLowerCase();
-  const mappings: Array<{ slugs: string[]; signals: string[] }> = [
-    { slugs: ["maurerarbeiten", "betonbau"], signals: ["bauunternehmen", "hochbau", "maurer", "mauerwerk", "rohbau"] },
-    { slugs: ["betonbau", "bauwerksabdichtung"], signals: ["beton", "fundament", "bodenplatte", "abdichtung"] },
-    { slugs: ["erdarbeiten"], signals: ["erdarbeiten", "aushub", "bagger", "baugrube"] },
-    { slugs: ["garten-landschaftsbau", "pflasterarbeiten"], signals: ["garten", "landschaft", "galabau", "pflaster", "außenanlagen", "aussenanlagen"] },
-    { slugs: ["architektur-entwurf"], signals: ["bauantrag", "entwurf", "planung"] },
-  ];
-
-  for (const mapping of mappings) {
-    if (mapping.signals.some((signal) => text.includes(signal))) {
-      mapping.slugs.forEach((slug) => slugs.add(slug));
-    }
-  }
-
-  return slugs;
-}
-
-function dedupeServiceFamilies(families: Array<{ label: string; description: string; items: string[] }>) {
-  const seen = new Set<string>();
-  return families.filter((family) => {
-    const key = family.label;
-    if (seen.has(key)) return false;
-    seen.add(key);
-    return true;
-  });
-}
-
 function ProfileCard({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
   return (
     <section className="rounded-lg border border-line bg-white p-5 shadow-soft sm:p-6">
-      <h2 className="text-xl font-semibold text-ink">{title}</h2>
+      <h2 className="text-lg font-semibold text-ink sm:text-xl">{title}</h2>
       {subtitle ? <p className="mt-2 text-sm leading-6 text-muted">{subtitle}</p> : null}
       <div className="mt-4">{children}</div>
     </section>
@@ -729,6 +644,32 @@ function getProfileDescription(company: PublicCompanyWithTrade, trade: string, l
   return `${company.name} ist als Betrieb im Bereich ${trade} in ${location} gelistet. Der Eintrag basiert auf öffentlich zugänglichen Unternehmensinformationen und ist noch nicht vollständig vom Betrieb bestätigt.`;
 }
 
+function businessProfileDescription(description: string) {
+  if (!description) return "";
+
+  const blockedSignals = [
+    "Ausgewählte Leistungen:",
+    "Ausgewaehlte Leistungen:",
+    "Nachweisangaben:",
+    "Gewerbenachweis kann bei Bedarf nachgereicht werden",
+    "Startphase:",
+    "Förderoption:",
+    "Foerderoption:",
+    "Rechnung auf Wunsch:",
+    "Status: automatisch wird nichts berechnet",
+  ];
+
+  const cleaned = cleanCompanyDescription(description)
+    .split(/(?<=[.!?])\s+/)
+    .filter((sentence) => !blockedSignals.some((signal) => sentence.includes(signal)))
+    .slice(0, 4)
+    .join(" ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  return cleaned;
+}
+
 function getRecognizableServices(company: PublicCompanyWithTrade, executedTrades: string[]) {
   const evidenceItems = (company.company_trades || [])
     .filter((match) => match.status !== "rejected" && match.visibility_level !== "internal")
@@ -783,7 +724,7 @@ function getProfileCompletionItems(company: PublicCompanyWithTrade, description:
     serviceCount ? "Leistungen weiter schärfen" : "Leistungen ergänzen",
     description ? "Kurzbeschreibung aktuell halten" : "Kurzbeschreibung ergänzen",
     hasCoordinates ? "Wirkungskreis präzisieren" : "Wirkungskreis markieren",
-    "Referenzen und Projektbeispiele später ergänzen",
+    "Kontaktwege aktuell halten",
   ];
 }
 
