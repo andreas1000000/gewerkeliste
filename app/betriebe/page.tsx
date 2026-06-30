@@ -171,13 +171,17 @@ function BusinessCard({ company }: { company: PublicCompanyWithTrade }) {
   return (
     <article className="rounded-lg border border-line bg-white p-5 shadow-soft">
       <div className="grid gap-5 md:grid-cols-[72px_minmax(0,1fr)_auto] md:items-start">
-        <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-lg border border-line bg-[#f8fafc] text-xl font-semibold text-brand">
+        <Link
+          aria-label={`Profil von ${company.name} ansehen`}
+          className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-lg border border-line bg-[#f8fafc] text-xl font-semibold text-brand transition hover:border-action focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-action"
+          href={`/firma/${company.slug}` as Route}
+        >
           {imageUrl ? (
             <img alt={`Profilbild oder Logo von ${company.name}`} className="h-full w-full object-contain" src={imageUrl} />
           ) : (
             <span aria-hidden="true">{initials(company.name)}</span>
           )}
-        </div>
+        </Link>
 
         <div className="min-w-0">
           <div className="flex flex-wrap gap-2">
@@ -187,7 +191,11 @@ function BusinessCard({ company }: { company: PublicCompanyWithTrade }) {
               </span>
             ))}
           </div>
-          <h3 className="mt-2 text-xl font-semibold text-[#07173d]">{company.name}</h3>
+          <h3 className="mt-2 text-xl font-semibold text-[#07173d]">
+            <Link className="hover:text-action hover:underline" href={`/firma/${company.slug}` as Route}>
+              {company.name}
+            </Link>
+          </h3>
           <p className="mt-1 text-sm font-medium text-muted">{location || company.city}</p>
           {description ? (
             <p className="mt-3 max-w-4xl text-sm leading-6 text-ink">{description}</p>
