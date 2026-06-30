@@ -192,6 +192,10 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                 </ProfileCard>
               ) : null}
 
+              <ProfileCard title="Gewerke">
+                <TradeOverview primaryTrade={trade} trades={executedTrades} />
+              </ProfileCard>
+
               <ProfileCard title="Wirkungskreis">
                 <div className="grid gap-4 sm:grid-cols-2">
                   <Fact label="Standort" value={location} />
@@ -551,6 +555,33 @@ function DetailServiceFamilies({
           </div>
         </details>
       ))}
+    </div>
+  );
+}
+
+function TradeOverview({ primaryTrade, trades }: { primaryTrade: string; trades: string[] }) {
+  const visibleTrades = [...new Set([primaryTrade, ...trades].filter(Boolean))];
+
+  return (
+    <div>
+      <div className="flex flex-wrap gap-2">
+        {visibleTrades.map((item, index) => (
+          <span
+            key={item}
+            className={
+              index === 0
+                ? "rounded-md border border-[#b9dec8] bg-[#f1fbf5] px-3 py-2 text-sm font-semibold text-[#24523a]"
+                : "rounded-md border border-line bg-[#fbfcff] px-3 py-2 text-sm font-semibold text-ink"
+            }
+          >
+            {item}
+          </span>
+        ))}
+      </div>
+      <p className="mt-4 text-sm leading-6 text-muted">
+        Das Hauptgewerk wird prominent geführt. Weitere Gewerke ergeben sich aus bestätigten Zuordnungen oder öffentlich erkennbaren
+        Leistungssignalen und können nach Profilübernahme geschärft werden.
+      </p>
     </div>
   );
 }
