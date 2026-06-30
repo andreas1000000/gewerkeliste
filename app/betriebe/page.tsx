@@ -77,7 +77,7 @@ export default async function BusinessesPage({ searchParams }: PageProps) {
             <label className="text-sm font-semibold text-[#24364d]" htmlFor="business-query">
               Betrieb suchen
             </label>
-            <div className="mt-3 grid gap-3 sm:grid-cols-[minmax(0,1fr)_220px_auto]">
+            <div className="mt-3 grid gap-3">
               <input
                 id="business-query"
                 name="query"
@@ -85,17 +85,19 @@ export default async function BusinessesPage({ searchParams }: PageProps) {
                 placeholder="Betrieb suchen - z. B. Firmenname, Ort oder Gewerk"
                 className="min-h-12 rounded-md border border-line bg-white px-4 text-base outline-none focus:border-action"
               />
-              <input
-                name="ort"
-                defaultValue={location || ""}
-                placeholder="Ort oder PLZ"
-                className="min-h-12 rounded-md border border-line bg-white px-4 text-base outline-none focus:border-action"
-              />
-              <input name="gewerk" type="hidden" value={tradeSlug || ""} />
-              <input name="leistung" type="hidden" value={serviceSlug || ""} />
-              <button className="min-h-12 rounded-md bg-action px-5 text-sm font-semibold text-white hover:bg-brand">
-                Betrieb suchen
-              </button>
+              <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_136px]">
+                <input
+                  name="ort"
+                  defaultValue={location || ""}
+                  placeholder="Ort oder PLZ"
+                  className="min-h-12 rounded-md border border-line bg-white px-4 text-base outline-none focus:border-action"
+                />
+                <input name="gewerk" type="hidden" value={tradeSlug || ""} />
+                <input name="leistung" type="hidden" value={serviceSlug || ""} />
+                <button className="min-h-12 rounded-md bg-action px-5 text-sm font-semibold text-white hover:bg-brand">
+                  Betrieb suchen
+                </button>
+              </div>
             </div>
             <p className="mt-3 text-xs leading-5 text-muted">
               Suche nach Firmenname, Ort, Gewerk, Leistung oder Website-Domain. Vor dem Eintragen hilft die Suche,
