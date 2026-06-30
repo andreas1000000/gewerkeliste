@@ -273,7 +273,7 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                     className="mt-5 inline-flex w-full min-h-11 items-center justify-center rounded-md bg-action px-4 text-sm font-semibold text-white hover:bg-brand"
                     href={`/betriebe/${company.slug}/claim` as Route}
                   >
-                    Profil kostenlos übernehmen
+                    Kostenloses Basisprofil übernehmen
                   </Link>
                   <Link
                     className="mt-3 inline-flex w-full min-h-10 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-action hover:border-action"
@@ -401,9 +401,10 @@ function ProfileCompletionCard({
   const updateHref = `/betriebe/${company.slug}/profil-ergaenzen` as Route;
 
   return (
-    <ProfileCard title="Profil vervollständigen">
+    <ProfileCard title="Ihr Basisprofil bleibt kostenlos.">
       <p className="text-sm leading-6 text-muted">
-        Das Basisprofil bleibt kostenlos. Betriebe können ihr Profil übernehmen, Stammdaten korrigieren und Leistungen vollständig darstellen.
+        Ihr Betrieb kann auf GewerkeListe.com kostenlos sichtbar bleiben – mit Name, Ort, Kontaktwegen, Gewerken und Leistungen.
+        Sie können Ihr Profil übernehmen, Stammdaten korrigieren und Ihr tatsächliches Leistungsspektrum vollständig darstellen.
       </p>
       <ul className="mt-4 grid gap-2 text-sm leading-6 text-muted">
         {items.map((item) => (
@@ -418,22 +419,28 @@ function ProfileCompletionCard({
           className="mt-5 inline-flex w-full min-h-11 items-center justify-center rounded-md bg-action px-4 text-sm font-semibold text-white hover:bg-brand"
           href={`/betriebe/${company.slug}/claim` as Route}
         >
-          Profil kostenlos übernehmen
+          Kostenloses Basisprofil übernehmen
         </Link>
       ) : (
         <Link
           className="mt-5 inline-flex w-full min-h-11 items-center justify-center rounded-md bg-action px-4 text-sm font-semibold text-white hover:bg-brand"
           href={updateHref}
         >
-          Profil vervollständigen
+          Profil kostenlos vervollständigen
         </Link>
       )}
+      <Link
+        className="mt-3 inline-flex w-full min-h-10 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-action hover:border-action"
+        href={updateHref}
+      >
+        Daten korrigieren
+      </Link>
       <div className="mt-4 grid gap-3 text-xs leading-5 text-muted">
         <p>
           In der Startphase kann auch das Logo kostenlos ergänzt werden. Später können erweiterte Profilfunktionen optional Teil eines Pro-Profils werden.
         </p>
         <p>
-          Erweiterte Darstellungsfunktionen wie Ansprechpartnerbild, Referenzen, QR-Code, Sichtbarkeitsreport oder besondere Profilgestaltung können später optional als Gründungsmitgliedschaft oder Pro-Profil angeboten werden.
+          Optionale Zusatzfunktionen wie Logo, Ansprechpartnerbild, Referenzen, QR-Code, Sichtbarkeitsreport oder erweiterte Profilgestaltung können später als Gründungsmitgliedschaft oder Pro-Profil angeboten werden. Das kostenlose Basisprofil bleibt davon unabhängig bestehen.
         </p>
       </div>
     </ProfileCard>
