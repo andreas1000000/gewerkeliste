@@ -4,7 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ClaimAssistant } from "@/components/claim-assistant";
 import { SiteHeader } from "@/components/site-header";
-import { extractServiceListFromDescription } from "@/lib/company-display";
+import { cleanCompanyDescription, extractServiceListFromDescription } from "@/lib/company-display";
 import { getCompanyBySlug, getLatestCompanyProfileUpdateSubmission } from "@/lib/data";
 
 type PageProps = {
@@ -33,6 +33,8 @@ export default async function CompanyProfileUpdatePage({ params }: PageProps) {
   const initialTrades = [company.trades?.slug].filter((item): item is string => Boolean(item));
   const latestSubmission = await getLatestCompanyProfileUpdateSubmission(company.id);
   const initialServices = latestSubmission?.selected_services.length ? latestSubmission.selected_services : extractServiceListFromDescription(company.description);
+  const initialDescription =
+    latestSubmission?.short_description || cleanCompanyDescription(company.description) || company.description || "";
 
   return (
     <main className="min-h-screen bg-[#f7f8fb] text-ink">
@@ -68,7 +70,14 @@ export default async function CompanyProfileUpdatePage({ params }: PageProps) {
         </section>
 
         <div className="mt-6">
-          <ClaimAssistant company={company} initialServices={initialServices} initialSubmission={latestSubmission} initialTrades={initialTrades} intent="update" />
+          <ClaimAssistant
+            company={company}
+            initialDescription={initialDescription}
+            initialServices={initialServices}
+            initialSubmission={latestSubmission}
+            initialTrades={initialTrades}
+            intent="update"
+          />
         </div>
       </div>
     </main>

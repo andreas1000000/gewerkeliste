@@ -10,12 +10,14 @@ const initialState: CompanyFormState = { ok: false, message: "" };
 type ClaimAssistantIntent = "claim" | "update";
 export function ClaimAssistant({
   company,
+  initialDescription,
   initialServices,
   initialSubmission,
   initialTrades,
   intent = "claim",
 }: {
   company: CompanyWithTrade;
+  initialDescription?: string;
   initialServices?: string[];
   initialSubmission?: CompanySubmission | null;
   initialTrades: string[];
@@ -41,7 +43,7 @@ export function ClaimAssistant({
     city: initialSubmission?.city || company.city,
     publicEmail: initialSubmission?.contact_email || company.email || "",
     website: initialSubmission?.website || company.website_url || "",
-    description: initialSubmission?.description || company.description || "",
+    description: initialDescription || initialSubmission?.short_description || company.description || "",
   });
   const errors = state.fieldErrors || {};
   const tradeLabels = new Map(publicTradeTaxonomy().map((trade) => [trade.slug, trade.name]));
@@ -107,6 +109,9 @@ export function ClaimAssistant({
       <input name="support_custom_amount" type="hidden" value="" />
       <input name="primaryTrade" type="hidden" value={selectedTrades[0] || ""} />
       <input name="proposed_phone" type="hidden" value={contact.phone} />
+      {selectedServices.map((service) => (
+        <input key={service} name="selectedServices" type="hidden" value={service} />
+      ))}
       {selectedTrades.slice(1).map((slug) => (
         <input key={slug} name="secondaryTrades" type="hidden" value={slug} />
       ))}
