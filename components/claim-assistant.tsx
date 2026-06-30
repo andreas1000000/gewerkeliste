@@ -1,50 +1,50 @@
 "use client";
-
 import { useState } from "react";
 import { useActionState } from "react";
 import { TradeCheckboxGroups } from "@/components/trade-checkbox-groups";
 import { TradeServiceSelection } from "@/components/trade-service-selection";
 import { submitClaim } from "@/lib/actions/claims";
-import type { CompanyFormState, CompanyWithTrade } from "@/lib/types";
+import type { CompanyFormState, CompanySubmission, CompanyWithTrade } from "@/lib/types";
 import { publicTradeTaxonomy } from "@/lib/trade-taxonomy";
-
 const initialState: CompanyFormState = { ok: false, message: "" };
 type ClaimAssistantIntent = "claim" | "update";
-
 export function ClaimAssistant({
   company,
+  initialServices,
+  initialSubmission,
   initialTrades,
   intent = "claim",
 }: {
   company: CompanyWithTrade;
+  initialServices?: string[];
+  initialSubmission?: CompanySubmission | null;
   initialTrades: string[];
   intent?: ClaimAssistantIntent;
 }) {
   const [state, formAction, pending] = useActionState(submitClaim, initialState);
   const isUpdate = intent === "update";
   const [selectedTrades, setSelectedTrades] = useState(initialTrades);
-  const [selectedServices, setSelectedServices] = useState<string[]>([]);
-  const [missingServices, setMissingServices] = useState("");
+  const [selectedServices, setSelectedServices] = useState<string[]>(initialSubmission?.selected_services?.length ? initialSubmission.selected_services : initialServices || []);
+  const [missingServices, setMissingServices] = useState((initialSubmission?.specializations || []).join("\n"));
   const [mediaDetailsEntered, setMediaDetailsEntered] = useState(false);
   const [contact, setContact] = useState({
-    name: isUpdate ? company.contact_name || "" : "",
-    email: isUpdate ? company.email || "" : "",
-    phone: company.phone || "",
-    role: "",
+    name: isUpdate ? initialSubmission?.contact_person_name || company.contact_name || "" : "",
+    email: isUpdate ? initialSubmission?.contact_person_email || company.email || "" : "",
+    phone: initialSubmission?.contact_person_phone || company.phone || "",
+    role: initialSubmission?.contact_person_role || "",
   });
   const [profile, setProfile] = useState({
     companyName: company.name,
-    legalForm: "",
-    street: company.street || "",
-    postalCode: company.postal_code,
-    city: company.city,
-    publicEmail: company.email || "",
-    website: company.website_url || "",
-    description: company.description || "",
+    legalForm: initialSubmission?.legal_form || "",
+    street: initialSubmission?.street || company.street || "",
+    postalCode: initialSubmission?.postal_code || company.postal_code,
+    city: initialSubmission?.city || company.city,
+    publicEmail: initialSubmission?.contact_email || company.email || "",
+    website: initialSubmission?.website || company.website_url || "",
+    description: initialSubmission?.description || company.description || "",
   });
   const errors = state.fieldErrors || {};
   const tradeLabels = new Map(publicTradeTaxonomy().map((trade) => [trade.slug, trade.name]));
-
   if (state.ok) {
     return (
       <section className="rounded-lg border border-[#b9dec8] bg-white p-6 shadow-soft sm:p-8">
@@ -63,7 +63,6 @@ export function ClaimAssistant({
       </section>
     );
   }
-
   function toggleTrade(slug: string) {
     setSelectedTrades((current) => {
       if (current.includes(slug)) {
@@ -74,28 +73,23 @@ export function ClaimAssistant({
       return [...current, slug];
     });
   }
-
   function toggleService(service: string) {
     setSelectedServices((current) =>
       current.includes(service) ? current.filter((item) => item !== service) : [...current, service],
     );
   }
-
   function pruneServicesForTrades(trades: string[]) {
     if (!trades.length) {
       setSelectedServices([]);
       return;
     }
   }
-
   function updateContact(field: keyof typeof contact, value: string) {
     setContact((current) => ({ ...current, [field]: value }));
   }
-
   function updateProfile(field: keyof typeof profile, value: string) {
     setProfile((current) => ({ ...current, [field]: value }));
   }
-
   return (
     <form action={formAction} className="grid gap-5" encType="multipart/form-data">
       <input name="company_id" type="hidden" value={company.id} />
@@ -116,7 +110,6 @@ export function ClaimAssistant({
       {selectedTrades.slice(1).map((slug) => (
         <input key={slug} name="secondaryTrades" type="hidden" value={slug} />
       ))}
-
       <WizardSection eyebrow="Schritt 1" title={isUpdate ? "Profildaten prüfen" : "Betrieb prüfen"}>
         <p className="mb-5 text-sm leading-6 text-muted">
           Prüfen Sie die vorhandenen Betriebsdaten. Korrigieren Sie nur Angaben, die öffentlich für den Betrieb verwendet werden
@@ -146,7 +139,6 @@ export function ClaimAssistant({
           </Field>
         </div>
       </WizardSection>
-
       <WizardSection eyebrow="Schritt 2" title="Welche Gewerke bietet Ihr Betrieb an?">
         <p className="text-sm leading-6 text-muted">
           Bereits erkannte Gewerke sind vorausgewählt. Entfernen Sie unpassende Gewerke und ergänzen Sie alle Gewerke,
@@ -161,7 +153,6 @@ export function ClaimAssistant({
           </p>
         ) : null}
       </WizardSection>
-
       <WizardSection eyebrow="Schritt 3" title="Welche konkreten Leistungen bietet Ihr Betrieb an?">
         <TradeServiceSelection selectedServices={selectedServices} selectedTrades={selectedTrades} onToggleService={toggleService} />
         {selectedTrades.length && !selectedServices.length ? (
@@ -180,7 +171,6 @@ export function ClaimAssistant({
           />
         </Field>
       </WizardSection>
-
       <WizardSection eyebrow="Schritt 4" title={isUpdate ? "Rückfragen optional" : "Ansprechpartner und öffentliche Kontaktdaten"}>
         <div className="grid gap-4 md:grid-cols-2">
           <Field label={isUpdate ? "Name Ansprechpartner optional" : "Name Ansprechpartner"} error={errors.name}>
@@ -215,10 +205,10 @@ export function ClaimAssistant({
         </label>
         {errors.is_authorized ? <p className="mt-2 text-xs font-semibold text-[#a4442b]">{errors.is_authorized}</p> : null}
       </WizardSection>
-
       <WizardSection eyebrow="Schritt 5" title="Profil vervollständigen">
         <p className="mb-5 text-sm leading-6 text-muted">
           Logo und Ansprechpartnerbild sind freiwillig. Diese Angaben werden geprüft, bevor sie öffentlich im Profil erscheinen.
+          Bereits eingereichte Angaben sind vorausgefüllt, damit Sie sie ergänzen oder ändern können.
         </p>
         <div className="grid gap-4 lg:grid-cols-2">
           <MediaFileField
@@ -252,7 +242,6 @@ export function ClaimAssistant({
         </label>
         {errors.imageConsentGiven ? <p className="mt-2 text-xs font-semibold text-[#a4442b]">{errors.imageConsentGiven}</p> : null}
       </WizardSection>
-
       <WizardSection eyebrow="Schritt 6" title="Zusammenfassung prüfen">
         <div className="grid gap-4">
           <SummaryBlock title="Betrieb">
@@ -323,7 +312,6 @@ export function ClaimAssistant({
     </form>
   );
 }
-
 function WizardSection({ eyebrow, title, children }: { eyebrow: string; title: string; children: React.ReactNode }) {
   return (
     <section className="rounded-lg border border-line bg-white p-5 shadow-soft sm:p-6">
@@ -333,7 +321,6 @@ function WizardSection({ eyebrow, title, children }: { eyebrow: string; title: s
     </section>
   );
 }
-
 function MediaFileField({
   accept,
   error,
@@ -378,7 +365,6 @@ function MediaFileField({
     </label>
   );
 }
-
 function Field({ label, error, children }: { label: string; error?: string; children: React.ReactNode }) {
   return (
     <label className="grid gap-1.5 text-sm font-semibold text-ink">
@@ -388,7 +374,6 @@ function Field({ label, error, children }: { label: string; error?: string; chil
     </label>
   );
 }
-
 function SummaryBlock({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="rounded-lg border border-line bg-[#fbfcff] p-4">
@@ -397,7 +382,6 @@ function SummaryBlock({ title, children }: { title: string; children: React.Reac
     </section>
   );
 }
-
 function SummaryLine({ label, value }: { label: string; value: string }) {
   return (
     <div className="grid gap-1 border-b border-line py-2 text-sm last:border-b-0 sm:grid-cols-[180px_minmax(0,1fr)]">
@@ -406,5 +390,4 @@ function SummaryLine({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
-
 const inputClass = "w-full rounded-md border border-line px-3 py-2 outline-none focus:border-action";

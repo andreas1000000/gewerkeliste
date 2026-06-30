@@ -4,7 +4,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ClaimAssistant } from "@/components/claim-assistant";
 import { SiteHeader } from "@/components/site-header";
-import { getCompanyBySlug } from "@/lib/data";
+import { extractServiceListFromDescription } from "@/lib/company-display";
+import { getCompanyBySlug, getLatestCompanyProfileUpdateSubmission } from "@/lib/data";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -30,6 +31,8 @@ export default async function CompanyProfileUpdatePage({ params }: PageProps) {
   if (!company) notFound();
 
   const initialTrades = [company.trades?.slug].filter((item): item is string => Boolean(item));
+  const latestSubmission = await getLatestCompanyProfileUpdateSubmission(company.id);
+  const initialServices = latestSubmission?.selected_services.length ? latestSubmission.selected_services : extractServiceListFromDescription(company.description);
 
   return (
     <main className="min-h-screen bg-[#f7f8fb] text-ink">
@@ -59,13 +62,13 @@ export default async function CompanyProfileUpdatePage({ params }: PageProps) {
             Der kostenlose Basiseintrag bleibt erhalten. Profilergänzungen werden als Prüfungsvorschlag gespeichert.
           </p>
           <p className="mt-3 rounded-md border border-line bg-[#fbfcff] px-4 py-3 text-xs leading-5 text-muted">
-            Logo, Ansprechpartnerbild, Teamfoto und Referenzbilder werden erst mit einem sicheren Owner-Bereich und
-            geprüfter Medienfreigabe ergänzt. Es erfolgt keine automatische Veröffentlichung.
+            Bereits eingereichte Profilergänzungen werden hier wieder aufgegriffen. Neue Änderungen werden erneut geprüft;
+            es erfolgt keine automatische Veröffentlichung.
           </p>
         </section>
 
         <div className="mt-6">
-          <ClaimAssistant company={company} initialTrades={initialTrades} intent="update" />
+          <ClaimAssistant company={company} initialServices={initialServices} initialSubmission={latestSubmission} initialTrades={initialTrades} intent="update" />
         </div>
       </div>
     </main>

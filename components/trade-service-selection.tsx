@@ -21,7 +21,8 @@ export function TradeServiceSelection({
     () => new Map(publicTradeTaxonomy().map((trade) => [trade.slug, trade.name])),
     [],
   );
-  const selectedTradeSet = new Set(selectedTrades);
+  const serviceTradesBySlug = new Map(serviceTaxonomy.flatMap((group) => group.trades).map((trade) => [trade.slug, trade]));
+  const selectedTradeSet = new Set(selectedTrades.flatMap(serviceTaxonomySlugsForTrade));
   const trades = serviceTaxonomy
     .flatMap((group) => group.trades)
     .filter((trade) => selectedTradeSet.has(trade.slug));
@@ -66,8 +67,11 @@ export function TradeServiceSelection({
       </div>
 
       {selectedTrades.map((tradeSlug) => {
-        const trade = trades.find((item) => item.slug === tradeSlug);
-        const families = (trade?.families || [])
+        const mappedTradeSlugs = serviceTaxonomySlugsForTrade(tradeSlug);
+        const mappedTrades = mappedTradeSlugs.map((slug) => serviceTradesBySlug.get(slug)).filter((item): item is NonNullable<typeof item> => Boolean(item));
+        const trade = mappedTrades[0];
+        const families = mappedTrades
+          .flatMap((mappedTrade) => mappedTrade.families)
           .map((family) => ({
             ...family,
             services: family.services.filter((service) => {
@@ -137,10 +141,22 @@ export function TradeServiceSelection({
 }
 
 function selectedServicesForTrade(tradeSlug: string, selectedServices: string[]) {
-  const trade = serviceTaxonomy.flatMap((group) => group.trades).find((item) => item.slug === tradeSlug);
-  if (!trade) return [];
-  const serviceNames = new Set(trade.families.flatMap((family) => family.services.map((service) => service.name)));
+  const tradeSlugs = new Set(serviceTaxonomySlugsForTrade(tradeSlug));
+  const serviceNames = new Set(
+    serviceTaxonomy
+      .flatMap((group) => group.trades)
+      .filter((trade) => tradeSlugs.has(trade.slug))
+      .flatMap((trade) => trade.families.flatMap((family) => family.services.map((service) => service.name))),
+  );
   return selectedServices.filter((service) => serviceNames.has(service));
+}
+
+function serviceTaxonomySlugsForTrade(tradeSlug: string) {
+  const aliases: Record<string, string[]> = {
+    bauunternehmen: ["maurerarbeiten", "hochbau", "betonbau"],
+    rohbau: ["maurerarbeiten", "hochbau", "betonbau"],
+  };
+  return aliases[tradeSlug] || [tradeSlug];
 }
 
 function normalizeSearch(value: string) {

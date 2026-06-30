@@ -323,6 +323,20 @@ export async function getCompanyClaims() {
   return data as CompanyClaimWithCompany[];
 }
 
+export async function getLatestCompanyProfileUpdateSubmission(companyId: string) {
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("company_submissions")
+    .select("*")
+    .eq("source", `profile-update:${companyId}`)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error || !data) return null;
+  return normalizeSubmission(data);
+}
+
 export async function getCompanySubmissions(params?: {
   status?: string;
   primaryTrade?: string;

@@ -11,6 +11,17 @@ import type { CompanyFormState } from "@/lib/types";
 import { claimSchema, flattenZodErrors } from "@/lib/validation";
 
 export async function submitClaim(_prevState: CompanyFormState, formData: FormData): Promise<CompanyFormState> {
+  try {
+    return await submitClaimUnchecked(formData);
+  } catch (error) {
+    return {
+      ok: false,
+      message: error instanceof Error ? error.message : "Die Profilergänzung konnte nicht gespeichert werden. Bitte pruefe die Angaben und versuche es erneut.",
+    };
+  }
+}
+
+async function submitClaimUnchecked(formData: FormData): Promise<CompanyFormState> {
   if (formData.get("is_authorized") !== "on") {
     return {
       ok: false,
