@@ -679,6 +679,8 @@ function isKnownSeedTrade(value, taxonomyIndex) {
 
 function mapTrade(original, taxonomyIndex) {
   const normalized = normalizeKey(original);
+  const manual = new Map(manualTradeEntries().map(([label, slug]) => [normalizeKey(label), slug])).get(normalized);
+  if (manual && taxonomyIndex.bySlug.has(manual)) return taxonomyIndex.bySlug.get(manual);
   const direct = taxonomyIndex.terms.get(normalized);
   if (direct && taxonomyIndex.bySlug.has(direct)) return taxonomyIndex.bySlug.get(direct);
   for (const [term, slug] of taxonomyIndex.terms.entries()) {
@@ -904,6 +906,7 @@ function manualTradeEntries() {
     "Dämmung / Einblasdämmung": "waermedaemmverbundsysteme",
     "Elektrofachplanung": "tga-planung",
     "Elektroinstallation / Gebäudetechnik": "elektroinstallation",
+    "Elektroinstallation / Photovoltaik": "elektroinstallation",
     "Elektroinstallation / Photovoltaik / Smarthome": "elektroinstallation",
     "Elektroinstallation": "elektroinstallation",
     "Elektrotechnik/ Elektroinstallation": "elektroinstallation",
@@ -925,6 +928,7 @@ function manualTradeEntries() {
     "GEG Nachweis Wärmeschutznachweis": "energieberatung",
     "GEG Nachweis Wärmeschutznachweis SiGeKo": "energieberatung",
     "Heizung / Sanitär / Haustechnik": "heizungsbau",
+    "Heizung / Sanitär / Energietechnik": "heizungsbau",
     "Heizung / Sanitär / Lüftung": "heizungsbau",
     "Heizung / Sanitär / Lüftung / Solar": "heizungsbau",
     "Heizung / Sanitär / Versorgungstechnik": "heizungsbau",
@@ -945,9 +949,16 @@ function manualTradeEntries() {
     "Metallbearbeitung / Feinmechanik": "metallbau",
     "Metallbearbeitung / Stanztechnik": "metallbau",
     "Schlosserei / Metallbau": "metallbau",
+    "Schreinerei / Fenster / Türen": "schreinerarbeiten",
+    "Schreinerei / Holztechnik": "schreinerarbeiten",
+    "Schreinerei / Innenausbau": "schreinerarbeiten",
+    "Schreinerei / Ladenbau": "schreinerarbeiten",
+    "Schreinerei / Möbelbau": "schreinerarbeiten",
+    "Schreinerei / Möbelwerkstätte": "schreinerarbeiten",
     "Stahlbau / Metallbau": "stahlbau",
     "Stahlbau / Metallbau / Schlosserei": "stahlbau",
     "Stuckateur / Putz / Trockenbau": "verputzarbeiten",
+    "Spenglerei": "spenglerarbeiten",
     "Tiefbau / Abbruch / Recycling": "tiefbau",
     "Tiefbau / Bauunternehmen": "tiefbau",
     "Tiefbau / Garten- und Landschaftsbau": "tiefbau",
