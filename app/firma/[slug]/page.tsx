@@ -125,9 +125,6 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                 <div className="rounded-md bg-white/90 px-3 py-1 text-xs font-semibold text-brand shadow-soft">
                   Öffentliches Unternehmensprofil
                 </div>
-                <div className="hidden max-w-xs rounded-md border border-white/25 bg-white/12 px-4 py-3 text-right text-xs leading-5 text-white sm:block">
-                  Bau- und Handwerksprofil mit Standort, Leistungen, Kontaktwegen und Datenstatus.
-                </div>
               </div>
             </div>
             <div className="px-5 pt-5 pb-0 sm:px-7 sm:pt-6">
@@ -179,10 +176,6 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                     können Leistungen und Spezialisierungen ergänzt werden.
                   </p>
                 )}
-              </ProfileCard>
-
-              <ProfileCard title="Gewerke">
-                <TradeOverview primaryTrade={trade} trades={executedTrades} />
               </ProfileCard>
 
               <ProfileCard title="Standort und Wirkungskreis">
@@ -376,7 +369,7 @@ function ContactTrustCard({ company, canClaim }: { company: PublicCompanyWithTra
               <p className="mt-1 text-sm leading-6 text-muted">
                 {company.profile_image_url
                   ? "Der Betrieb zeigt hier ein bereitgestelltes Ansprechpartnerprofil."
-                  : "Dieser Betrieb hat noch keinen Ansprechpartner im Profil ergänzt. Ein persönlicher Ansprechpartner macht das Profil greifbarer und schafft Vertrauen bei Planern, Bauleitern und Auftraggebern. Der Betrieb kann diese Angabe nach Profilübernahme ergänzen."}
+                  : "Dieser Betrieb hat noch keinen Ansprechpartner angegeben. Ein persönlicher Ansprechpartner macht das Profil greifbarer und schafft Vertrauen bei potentiellen Auftraggebern."}
               </p>
             </div>
           </div>
@@ -517,27 +510,6 @@ function ServiceAccordion({ group, open }: { group: { label: string; items: stri
         ))}
       </div>
     </details>
-  );
-}
-
-function TradeOverview({ primaryTrade, trades }: { primaryTrade: string; trades: string[] }) {
-  const visibleTrades = [...new Set([primaryTrade, ...trades].filter(Boolean))];
-
-  return (
-    <div className="flex flex-wrap gap-2">
-      {visibleTrades.map((item, index) => (
-        <span
-          key={item}
-          className={
-            index === 0
-              ? "rounded-md border border-[#b9dec8] bg-[#f1fbf5] px-3 py-2 text-sm font-semibold text-[#24523a]"
-              : "rounded-md border border-line bg-[#fbfcff] px-3 py-2 text-sm font-semibold text-ink"
-          }
-        >
-          {item}
-        </span>
-      ))}
-    </div>
   );
 }
 
