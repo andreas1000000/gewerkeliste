@@ -65,6 +65,7 @@ export default async function CompanyPublicPage({ params }: PageProps) {
     const canClaim = company.claim_status === "unclaimed" || company.claim_status === "rejected";
     const websiteHref = normalizeWebsiteUrl(company.website_url);
     const location = `${company.postal_code} ${company.city}`.trim();
+    const address = getProfileAddress(company);
     const visibleDescription = businessProfileDescription(publicResultDescription(company.description));
     const profileDescription = getProfileDescription(company, trade, location, visibleDescription);
     const executedTrades = getExecutedTrades(company);
@@ -132,13 +133,10 @@ export default async function CompanyPublicPage({ params }: PageProps) {
             <div className="px-5 pb-0 sm:px-7">
               <div className="-mt-16 flex flex-col gap-5 lg:flex-row lg:items-end lg:justify-between">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-end">
-                  <ProfileMark company={company} />
+                  <ProfileMark company={company} canClaim={canClaim} />
                   <div className="pb-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <StatusBadge status={status} />
-                      <span className="rounded-md border border-line bg-[#fbfcff] px-3 py-1 text-xs font-semibold text-muted">
-                        Keine Qualitäts- oder Verfügbarkeitsgarantie
-                      </span>
                     </div>
                     <h1 className="mt-3 text-3xl font-semibold tracking-normal text-ink sm:text-4xl">{company.name}</h1>
                     <p className="mt-2 text-lg font-medium text-[#30415f]">{headline}</p>
@@ -147,7 +145,7 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                 </div>
               </div>
               <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                <ProfileMetric label="Standort" value={location || company.city} />
+                <ProfileMetric label="Standort" value={address.compact} />
                 <ProfileMetric label="Schwerpunkt" value={trade} />
                 <ProfileMetric label="Profilstatus" value={status.shortLabel} />
                 <ProfileMetric label="Profilvollständigkeit" value={`${completionScore}%`} />
@@ -189,13 +187,16 @@ export default async function CompanyPublicPage({ params }: PageProps) {
 
               <ProfileCard title="Standort und Wirkungskreis">
                 <div className="grid gap-3 sm:grid-cols-3">
-                  <Fact label="Standort" value={location} />
+                  <Fact label="Standort" value={address.full} />
                   <Fact label="Ort" value={company.city} />
                   <Fact
                     label="Wirkungskreis"
                     value="Regionale Tätigkeit kann nach Profilübernahme präzisiert werden."
                   />
                 </div>
+                {!address.hasStreet ? (
+                  <p className="mt-3 text-xs leading-5 text-muted">Straße/Hausnummer ist noch nicht hinterlegt.</p>
+                ) : null}
                 <p className="mt-4 text-sm leading-6 text-muted">
                   Aktuell wird der Betrieb mit dem bekannten Standort geführt. Ein genauer Einsatzradius oder einzelne Orte werden erst nach
                   Prüfung und Profilübernahme veröffentlicht.
@@ -234,11 +235,14 @@ export default async function CompanyPublicPage({ params }: PageProps) {
             <aside className="order-1 grid content-start gap-5 lg:order-2">
               <ProfileCard title="Kontakt">
                 <dl className="grid gap-4">
-                  <DataRow label="Standort" value={location} />
+                  <DataRow label="Standort" value={address.full} />
                   {websiteHref ? <DataRow label="Website" value={company.website_url || websiteHref} href={websiteHref} external /> : null}
                   {company.phone ? <DataRow label="Telefon" value={company.phone} href={`tel:${company.phone}`} /> : null}
                   {company.email ? <DataRow label="E-Mail" value={company.email} href={`mailto:${company.email}`} /> : null}
                 </dl>
+                {!address.hasStreet ? (
+                  <p className="mt-3 text-xs leading-5 text-muted">Straße/Hausnummer ist noch nicht hinterlegt.</p>
+                ) : null}
                 {!hasDirectContact ? (
                   <p className="mt-4 rounded-md border border-line bg-[#fbfcff] px-4 py-3 text-sm leading-6 text-muted">
                     Für diesen Betrieb sind noch keine direkten Kontaktdaten hinterlegt.
@@ -250,6 +254,13 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                 <div className={`rounded-md border px-4 py-4 text-sm leading-6 ${statusBoxClass(status.tone)}`}>
                   <div className="font-semibold text-ink">{status.label}</div>
                   <p className="mt-2">{status.note}</p>
+                  <p className="mt-3 text-xs leading-5">
+                    Datenstatus: Diese Seite ist ein Betriebsprofil. GewerkeListe gibt keine Qualitäts-, Auftrags- oder
+                    Verfügbarkeitsgarantie.
+                  </p>
+                  <p className="mt-2 text-xs leading-5">
+                    Personenbezogene Profilangaben werden nur angezeigt, wenn sie vom Betrieb bereitgestellt oder freigegeben wurden.
+                  </p>
                 </div>
                 <dl className="mt-4 grid gap-4">
                   <DataRow label="Eintrag" value={claimStatusLabel(company.claim_status)} />
@@ -319,7 +330,9 @@ export default async function CompanyPublicPage({ params }: PageProps) {
   }
 }
 
-function ProfileMark({ company }: { company: PublicCompanyWithTrade }) {
+function ProfileMark({ company, canClaim }: { company: PublicCompanyWithTrade; canClaim: boolean }) {
+  const logoLabel = canClaim ? "Logo nach Profilübernahme ergänzen" : "Logo ergänzen";
+
   return (
     <div className="flex h-28 w-28 shrink-0 items-center justify-center rounded-lg border border-line bg-white p-3 shadow-soft sm:h-32 sm:w-32">
       {company.logo_url ? (
@@ -328,7 +341,7 @@ function ProfileMark({ company }: { company: PublicCompanyWithTrade }) {
         <div className="grid h-full w-full place-items-center rounded-md bg-[#07173d] px-3 text-center text-white">
           <div>
             <div className="text-4xl font-semibold">{initials(company.name)}</div>
-            <div className="mt-2 text-[10px] font-semibold leading-4 text-white/75">Logo nach Profilübernahme ergänzen</div>
+            <div className="mt-2 text-[10px] font-semibold leading-4 text-white/75">{logoLabel}</div>
           </div>
         </div>
       )}
@@ -341,7 +354,7 @@ function ContactTrustCard({ company, canClaim }: { company: PublicCompanyWithTra
   const updateHref = `/betriebe/${company.slug}/profil-ergaenzen` as Route;
 
   return (
-    <ProfileCard title="Ansprechpartner & Vertrauen">
+    <ProfileCard title="Ansprechpartner & Team">
       <div className="grid gap-3">
         <div className="rounded-md border border-line bg-[#fbfcff] p-4">
           <div className="flex gap-3">
@@ -358,11 +371,12 @@ function ContactTrustCard({ company, canClaim }: { company: PublicCompanyWithTra
             </div>
             <div>
               <h3 className="text-sm font-semibold text-ink">
-                {company.profile_image_url ? "Persönlicher Ansprechpartner" : "Ansprechpartner sichtbar machen"}
+                {company.profile_image_url ? "Persönlicher Ansprechpartner" : "Teamprofil ergänzbar"}
               </h3>
               <p className="mt-1 text-sm leading-6 text-muted">
-                Menschen arbeiten mit Menschen. Nach Profilübernahme kann der Betrieb hier einen Ansprechpartner, ein Teamfoto oder
-                eine kurze persönliche Vorstellung ergänzen.
+                {company.profile_image_url
+                  ? "Der Betrieb zeigt hier ein bereitgestelltes Ansprechpartner- oder Teamprofil."
+                  : "Dieser Betrieb hat noch kein Ansprechpartner- oder Teamprofil ergänzt. In der Startphase können Betriebe ihr Profil kostenlos vervollständigen und persönliche Ansprechpartner sichtbar machen. Später können erweiterte Team- und Vertrauenselemente Teil optionaler Profilfunktionen werden."}
               </p>
             </div>
           </div>
@@ -370,16 +384,13 @@ function ContactTrustCard({ company, canClaim }: { company: PublicCompanyWithTra
 
         {canClaim ? (
           <Link className="inline-flex min-h-10 items-center justify-center rounded-md bg-action px-4 text-sm font-semibold text-white hover:bg-brand" href={claimHref}>
-            Profil übernehmen
+            Profil übernehmen und Ansprechpartner ergänzen
           </Link>
         ) : (
           <Link className="inline-flex min-h-10 items-center justify-center rounded-md bg-action px-4 text-sm font-semibold text-white hover:bg-brand" href={updateHref}>
-            Daten korrigieren
+            Profil vervollständigen
           </Link>
         )}
-        <p className="text-xs leading-5 text-muted">
-          Es werden keine privaten Ansprechpartnerdaten erfunden oder aus fremden Quellen übernommen. Veröffentlichungen erfolgen erst nach Prüfung.
-        </p>
       </div>
     </ProfileCard>
   );
@@ -398,7 +409,10 @@ function ProfileCompletionCard({
 
   return (
     <ProfileCard title="Profil vervollständigen">
-      <p className="text-sm leading-6 text-muted">Dieses Profil kann vom Betrieb übernommen und weiter ausgebaut werden.</p>
+      <p className="text-sm leading-6 text-muted">
+        In der Startphase können Betriebe ihr Profil kostenlos vervollständigen. Erweiterte Profilfunktionen können später
+        optional als Gründungsmitgliedschaft oder Pro-Profil angeboten werden.
+      </p>
       <ul className="mt-4 grid gap-2 text-sm leading-6 text-muted">
         {items.map((item) => (
           <li key={item} className="flex gap-2">
@@ -419,12 +433,18 @@ function ProfileCompletionCard({
           className="mt-5 inline-flex w-full min-h-11 items-center justify-center rounded-md bg-action px-4 text-sm font-semibold text-white hover:bg-brand"
           href={updateHref}
         >
-          Profilergänzung anfragen
+          Profil vervollständigen
         </Link>
       )}
-      <p className="mt-3 text-xs leading-5 text-muted">
-        Kostenlos bleiben Basisprofil, Stammdaten, Gewerke, Leistungen und Kontaktwege. Erweiterte Profilfunktionen sind optional.
-      </p>
+      <div className="mt-4 grid gap-3 text-xs leading-5 text-muted">
+        <p>
+          Kostenlos in der Startphase: Logo ergänzen, Stammdaten korrigieren, Leistungen ergänzen und Profil übernehmen.
+        </p>
+        <p>
+          Optional später: Ansprechpartner-/Teamdarstellung, Referenzen, erweiterte Profilgestaltung, QR-Code/Kurzlink,
+          Sichtbarkeitsreport und visuelle Wirkungskreise.
+        </p>
+      </div>
     </ProfileCard>
   );
 }
@@ -489,8 +509,11 @@ function ServiceGroups({ groups, totalCount }: { groups: Array<{ label: string; 
         <ServiceGroup key={group.label} group={group} />
       ))}
       {totalCount > visibleLimit ? (
-        <details className="rounded-md border border-line bg-[#fbfcff] p-4">
-          <summary className="cursor-pointer list-none text-sm font-semibold text-action">Alle Leistungen anzeigen</summary>
+        <details className="group rounded-md border border-line bg-[#fbfcff] p-4">
+          <summary className="cursor-pointer list-none text-sm font-semibold text-action">
+            <span className="group-open:hidden">Alle Leistungen anzeigen</span>
+            <span className="hidden group-open:inline">Weniger anzeigen</span>
+          </summary>
           <div className="mt-4 grid gap-4">
             {hiddenGroups.map((group) => (
               <ServiceGroup key={`all-${group.label}`} group={group} />
@@ -568,7 +591,7 @@ function getProfileStatus(company: PublicCompanyWithTrade): ProfileStatus {
     return {
       label: "Betriebsdaten bestätigt",
       shortLabel: "Daten bestätigt",
-      note: "Der Betrieb hat grundlegende Profildaten bestätigt. Dies ist keine Qualitäts-, Verfügbarkeits- oder Empfehlungsgarantie.",
+      note: "Der Betrieb hat grundlegende Profildaten bestätigt.",
       tone: "verified",
     };
   }
@@ -638,7 +661,7 @@ function getProfileDescription(company: PublicCompanyWithTrade, trade: string, l
   if (visibleDescription) return visibleDescription;
 
   if (company.claim_status === "claimed" || company.verified) {
-    return `${company.name} ist als Betrieb im Bereich ${trade} in ${location} gelistet. Die grundlegenden Betriebsdaten wurden übernommen bzw. zur Prüfung eingereicht. Dies ist keine Qualitäts- oder Verfügbarkeitsgarantie.`;
+    return `${company.name} ist als Betrieb im Bereich ${trade} in ${location} gelistet. Die grundlegenden Betriebsdaten wurden übernommen bzw. zur Prüfung eingereicht.`;
   }
 
   return `${company.name} ist als Betrieb im Bereich ${trade} in ${location} gelistet. Der Eintrag basiert auf öffentlich zugänglichen Unternehmensinformationen und ist noch nicht vollständig vom Betrieb bestätigt.`;
@@ -726,6 +749,17 @@ function getProfileCompletionItems(company: PublicCompanyWithTrade, description:
     hasCoordinates ? "Wirkungskreis präzisieren" : "Wirkungskreis markieren",
     "Kontaktwege aktuell halten",
   ];
+}
+
+function getProfileAddress(company: PublicCompanyWithTrade) {
+  const cityLine = `${company.postal_code} ${company.city}`.trim();
+  const street = company.street?.trim();
+
+  return {
+    compact: street ? `${street}, ${cityLine}` : cityLine,
+    full: street ? `${street}, ${cityLine}` : `Standort: ${cityLine}`,
+    hasStreet: Boolean(street),
+  };
 }
 
 function getProfileCompletionScore(
