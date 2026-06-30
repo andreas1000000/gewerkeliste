@@ -35,6 +35,7 @@ export default async function CompanyProfileUpdatePage({ params }: PageProps) {
   const initialServices = latestSubmission?.selected_services.length ? latestSubmission.selected_services : extractServiceListFromDescription(company.description);
   const initialDescription =
     latestSubmission?.short_description || cleanCompanyDescription(company.description) || company.description || "";
+  const formCompany = { ...company, description: initialDescription };
 
   return (
     <main className="min-h-screen bg-[#f7f8fb] text-ink">
@@ -71,7 +72,7 @@ export default async function CompanyProfileUpdatePage({ params }: PageProps) {
 
         <div className="mt-6">
           <ClaimAssistant
-            company={company}
+            company={formCompany}
             initialDescription={initialDescription}
             initialServices={initialServices}
             initialSubmission={latestSubmission}
