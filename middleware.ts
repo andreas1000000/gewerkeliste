@@ -18,12 +18,13 @@ export function middleware(request: NextRequest) {
 
   const auth = request.headers.get("authorization");
   if (auth?.startsWith("Basic ")) {
-    const decoded = atob(auth.slice("Basic ".length));
-    const separator = decoded.indexOf(":");
-    const password = separator >= 0 ? decoded.slice(separator + 1) : "";
+    const password = basicAuthPassword(auth);
 
     if (password === adminSecret) {
-      return NextResponse.next();
+      const response = NextResponse.next();
+      response.headers.set("X-Robots-Tag", "noindex, nofollow");
+      response.headers.set("Cache-Control", "private, no-store");
+      return response;
     }
   }
 
@@ -31,8 +32,20 @@ export function middleware(request: NextRequest) {
     status: 401,
     headers: {
       "WWW-Authenticate": 'Basic realm="GewerkeListe Admin"',
+      "X-Robots-Tag": "noindex, nofollow",
+      "Cache-Control": "private, no-store",
     },
   });
+}
+
+function basicAuthPassword(auth: string) {
+  try {
+    const decoded = atob(auth.slice("Basic ".length));
+    const separator = decoded.indexOf(":");
+    return separator >= 0 ? decoded.slice(separator + 1) : "";
+  } catch {
+    return "";
+  }
 }
 
 export const config = {
