@@ -19,6 +19,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
             <NavLink href="/admin/coverage?region=stephanskirchen" label="Coverage" />
             <NavLink href="/admin/research-imports" label="Recherche" />
             <NavLink href="/admin/companies" label="Betriebe" />
+            <NavLink href="/admin/service-enrichment" label="Leistungs-Review" />
             <NavLink href="/trades" label="Gewerke" />
             <Link className="rounded-md bg-brand px-3 py-2 font-semibold text-white hover:bg-[#265a4d]" href="/companies/new">
               Neuer Eintrag
