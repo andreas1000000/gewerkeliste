@@ -13,7 +13,7 @@ export function middleware(request: NextRequest) {
 
   const adminSecret = process.env.ADMIN_SECRET;
   if (!adminSecret) {
-    return new NextResponse("ADMIN_SECRET is required", { status: 500 });
+    return unauthorizedResponse();
   }
 
   const auth = request.headers.get("authorization");
@@ -28,6 +28,10 @@ export function middleware(request: NextRequest) {
     }
   }
 
+  return unauthorizedResponse();
+}
+
+function unauthorizedResponse() {
   return new NextResponse("Authentication required", {
     status: 401,
     headers: {
