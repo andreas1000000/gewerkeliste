@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import type { Route } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { ClaimAssistant } from "@/components/claim-assistant";
 import { SiteHeader } from "@/components/site-header";
-import { getCompanyBySlug } from "@/lib/data";
+import { canonicalPublicCompanySlug, canonicalPublicCompanySlugFromSlug, getCompanyBySlug } from "@/lib/data/public-directory";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -26,10 +26,19 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function CompanyClaimWizardPage({ params }: PageProps) {
   const { slug } = await params;
+  const canonicalRequestedSlug = canonicalPublicCompanySlugFromSlug(slug);
+  if (canonicalRequestedSlug !== slug) {
+    permanentRedirect(`/betriebe/${canonicalRequestedSlug}/claim`);
+  }
+
   const company = await getClaimCompany(slug);
   if (!company) notFound();
+  const canonicalSlug = canonicalPublicCompanySlug(company);
+  if (canonicalSlug !== slug) {
+    permanentRedirect(`/betriebe/${canonicalSlug}/claim`);
+  }
 
-  const initialTrades = [company.trades?.slug].filter((item): item is string => Boolean(item));
+  const initialTrades = getInitialTrades(company);
 
   return (
     <main className="min-h-screen bg-[#f7f8fb] text-ink">
@@ -83,6 +92,21 @@ async function getClaimCompany(slug: string) {
   } catch {
     return null;
   }
+}
+
+function getInitialTrades(company: Awaited<ReturnType<typeof getClaimCompany>>) {
+  if (!company) return [];
+
+  const confirmedCompanyTrades = (company.company_trades || [])
+    .filter((match) => match.status !== "rejected" && match.visibility_level !== "internal" && Boolean(match.trades?.slug))
+    .sort((a, b) => (b.confidence_score || 0) - (a.confidence_score || 0))
+    .map((match) => match.trades?.slug);
+
+  return [company.trades?.slug, ...confirmedCompanyTrades].filter(uniqueString);
+}
+
+function uniqueString(value: string | null | undefined, index: number, values: Array<string | null | undefined>): value is string {
+  return Boolean(value) && values.indexOf(value) === index;
 }
 
 function Benefit({ children }: { children: React.ReactNode }) {

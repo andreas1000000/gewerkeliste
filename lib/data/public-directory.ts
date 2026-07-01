@@ -9,6 +9,9 @@ import type {
 
 const COMPANY_MEDIA_BUCKET = "company-media";
 const MEDIA_SIGNED_URL_TTL_SECONDS = 60 * 60;
+const PUBLIC_COMPANY_SLUG_ALIASES: Record<string, string> = {
+  "wagner-und-spielvogel-gdbr-83083-riedering": "wagner-und-spielvogel-gbr-83083-riedering",
+};
 
 export async function getPublicCompanies(params?: {
   query?: string;
@@ -393,11 +396,7 @@ export function canonicalPublicCompanySlug(company: PublicCompanyWithTrade) {
 }
 
 export function canonicalPublicCompanySlugFromSlug(slug: string) {
-  if (slug === "wagner-und-spielvogel-gdbr-83083-riedering") {
-    return "wagner-und-spielvogel-gbr-83083-riedering";
-  }
-
-  return slug;
+  return PUBLIC_COMPANY_SLUG_ALIASES[slug] || slug;
 }
 
 function dedupePublicCompanies<T extends PublicCompanyWithTrade>(companies: T[]) {

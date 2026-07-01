@@ -5,9 +5,17 @@ import { TradeCheckboxGroups } from "@/components/trade-checkbox-groups";
 import { TradeServiceSelection } from "@/components/trade-service-selection";
 import { submitClaim } from "@/lib/actions/claims";
 import type { CompanyFormState, CompanySubmission, CompanyWithTrade } from "@/lib/types";
+import type { PublicCompanyWithTrade } from "@/lib/types/public-directory";
 import { publicTradeTaxonomy } from "@/lib/trade-taxonomy";
 const initialState: CompanyFormState = { ok: false, message: "" };
 type ClaimAssistantIntent = "claim" | "update";
+type ClaimAssistantCompany = (CompanyWithTrade | PublicCompanyWithTrade) & {
+  logo_url?: string | null;
+  profile_image_url?: string | null;
+  contact_person_name?: string | null;
+  contact_person_role?: string | null;
+};
+
 export function ClaimAssistant({
   company,
   initialDescription,
@@ -16,7 +24,7 @@ export function ClaimAssistant({
   initialTrades,
   intent = "claim",
 }: {
-  company: CompanyWithTrade;
+  company: ClaimAssistantCompany;
   initialDescription?: string;
   initialServices?: string[];
   initialSubmission?: CompanySubmission | null;
@@ -30,11 +38,13 @@ export function ClaimAssistant({
   const [missingServices, setMissingServices] = useState((initialSubmission?.specializations || []).join("\n"));
   const [mediaDetailsEntered, setMediaDetailsEntered] = useState(false);
   const [contact, setContact] = useState({
-    name: isUpdate ? initialSubmission?.contact_person_name || company.contact_name || "" : "",
+    name: isUpdate ? initialSubmission?.contact_person_name || company.contact_person_name || company.contact_name || "" : "",
     email: isUpdate ? initialSubmission?.contact_person_email || company.email || "" : "",
     phone: initialSubmission?.contact_person_phone || company.phone || "",
-    role: initialSubmission?.contact_person_role || "",
+    role: initialSubmission?.contact_person_role || company.contact_person_role || "",
   });
+  const mediaContactName = initialSubmission?.contact_person_name || company.contact_person_name || company.contact_name || "";
+  const mediaContactRole = initialSubmission?.contact_person_role || company.contact_person_role || "";
   const [profile, setProfile] = useState({
     companyName: company.name,
     legalForm: initialSubmission?.legal_form || "",
@@ -215,6 +225,18 @@ export function ClaimAssistant({
           Logo und Ansprechpartnerbild sind freiwillig. Diese Angaben werden geprüft, bevor sie öffentlich im Profil erscheinen.
           Bereits eingereichte Angaben sind vorausgefüllt, damit Sie sie ergänzen oder ändern können.
         </p>
+        {company.logo_url || company.profile_image_url ? (
+          <div className="mb-5 grid gap-3 rounded-md border border-line bg-[#fbfcff] p-4 text-sm text-ink sm:grid-cols-2">
+            <p>
+              <span className="font-semibold">Logo:</span>{" "}
+              {company.logo_url ? "bereits im Profil hinterlegt" : "noch nicht hinterlegt"}
+            </p>
+            <p>
+              <span className="font-semibold">Ansprechpartnerbild:</span>{" "}
+              {company.profile_image_url ? "bereits im Profil hinterlegt" : "noch nicht hinterlegt"}
+            </p>
+          </div>
+        ) : null}
         <div className="grid gap-4 lg:grid-cols-2">
           <MediaFileField
             accept="image/jpeg,image/png,image/webp"
@@ -235,10 +257,21 @@ export function ClaimAssistant({
             onMediaChange={setMediaDetailsEntered}
           />
           <Field label="Ansprechpartner Name" error={errors.mediaContactName}>
-            <input className={inputClass} name="mediaContactName" onChange={(event) => event.target.value.trim() ? setMediaDetailsEntered(true) : undefined} />
+            <input
+              className={inputClass}
+              defaultValue={mediaContactName}
+              name="mediaContactName"
+              onChange={(event) => event.target.value.trim() ? setMediaDetailsEntered(true) : undefined}
+            />
           </Field>
           <Field label="Rolle/Funktion" error={errors.mediaContactRole}>
-            <input className={inputClass} name="mediaContactRole" onChange={(event) => event.target.value.trim() ? setMediaDetailsEntered(true) : undefined} placeholder="z. B. Inhaber, Geschäftsführung, Büro" />
+            <input
+              className={inputClass}
+              defaultValue={mediaContactRole}
+              name="mediaContactRole"
+              onChange={(event) => event.target.value.trim() ? setMediaDetailsEntered(true) : undefined}
+              placeholder="z. B. Inhaber, Geschäftsführung, Büro"
+            />
           </Field>
         </div>
         <label className="mt-5 flex items-start gap-3 text-sm font-medium leading-6 text-ink">
