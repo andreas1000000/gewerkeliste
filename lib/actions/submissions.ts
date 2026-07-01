@@ -104,7 +104,25 @@ async function updateClaimedCompany(
   payload: ReturnType<typeof companyPayload>,
 ): Promise<ApprovedCompany> {
   const supabase = getSupabaseAdmin();
-  const { data, error } = await supabase.from("companies").update(payload).eq("id", companyId).select("id, slug").single();
+  const { data: existing, error: existingError } = await supabase
+    .from("companies")
+    .select("logo_url, profile_image_url, profile_image_alt, contact_person_name, contact_person_role")
+    .eq("id", companyId)
+    .single();
+  if (existingError || !existing) {
+    throw existingError || new Error("Bestehender Betriebseintrag konnte nicht gelesen werden.");
+  }
+
+  const updatePayload = {
+    ...payload,
+    logo_url: payload.logo_url || existing.logo_url || null,
+    profile_image_url: payload.profile_image_url || existing.profile_image_url || null,
+    profile_image_alt: payload.profile_image_alt || existing.profile_image_alt || null,
+    contact_person_name: payload.contact_person_name || existing.contact_person_name || null,
+    contact_person_role: payload.contact_person_role || existing.contact_person_role || null,
+  };
+
+  const { data, error } = await supabase.from("companies").update(updatePayload).eq("id", companyId).select("id, slug").single();
   if (error || !data) throw error || new Error("Bestehender Betriebseintrag konnte nicht aktualisiert werden.");
   return data;
 }
