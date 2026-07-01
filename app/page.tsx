@@ -79,7 +79,6 @@ export default async function HomePage() {
     .sort((a, b) => a.localeCompare(b, "de"))
     .slice(0, 12);
   const verifiedCount = companies.filter((company) => company.verified).length;
-  const regionCount = new Set(companies.map((company) => company.city).filter(Boolean)).size;
   const showRealMetrics = companies.length > 0;
 
   return (
@@ -359,7 +358,6 @@ export default async function HomePage() {
             <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
               {companies.length > 0 ? <Metric label="Betriebe" value={companies.length} /> : null}
               {verifiedCount > 0 ? <Metric label="Bestätigt" value={verifiedCount} /> : null}
-              {regionCount > 0 ? <Metric label="Regionen" value={regionCount} /> : null}
             </div>
           ) : null}
         </Card>
