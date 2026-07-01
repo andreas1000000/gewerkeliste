@@ -2,7 +2,7 @@ import { siteConfig } from "@/lib/site-config";
 import type { PublicCompanyWithTrade } from "@/lib/types/public-directory";
 
 export function siteUrl(path = "/") {
-  const base = (process.env.NEXT_PUBLIC_SITE_URL || siteConfig.url).replace(/\/+$/, "");
+  const base = siteConfig.url.replace(/\/+$/, "");
   const cleanPath = path.startsWith("/") ? path : `/${path}`;
   return `${base}${cleanPath}`;
 }
@@ -63,6 +63,8 @@ export function collectionPageJsonLd({
 }
 
 export function localBusinessJsonLd(company: PublicCompanyWithTrade, path: string, description?: string) {
+  const logo = publicJsonLdMediaUrl(company.logo_url);
+  const profileImage = publicJsonLdMediaUrl(company.profile_image_url);
   const tradeNames = [
     ...(company.company_trades || [])
       .filter((match) => match.status !== "rejected" && match.visibility_level !== "internal" && Boolean(match.trades?.name))
@@ -86,8 +88,8 @@ export function localBusinessJsonLd(company: PublicCompanyWithTrade, path: strin
     description: description || undefined,
     telephone: company.phone || undefined,
     email: company.email || undefined,
-    image: company.profile_image_url || company.logo_url || undefined,
-    logo: company.logo_url || undefined,
+    image: profileImage || logo,
+    logo,
     address,
     areaServed: company.city
       ? {
@@ -99,6 +101,23 @@ export function localBusinessJsonLd(company: PublicCompanyWithTrade, path: strin
     serviceType: tradeNames.length ? Array.from(new Set(tradeNames)) : undefined,
     sameAs: company.website_url || undefined,
   });
+}
+
+function publicJsonLdMediaUrl(value?: string | null) {
+  if (!value) return undefined;
+
+  try {
+    const url = new URL(value);
+
+    if (url.protocol !== "https:") return undefined;
+    if (url.hostname === "localhost" || url.hostname === "127.0.0.1") return undefined;
+    if (url.pathname.includes("/storage/v1/object/sign/")) return undefined;
+    if (url.searchParams.has("token")) return undefined;
+
+    return url.toString();
+  } catch {
+    return undefined;
+  }
 }
 
 function removeUndefined<T>(value: T): T {

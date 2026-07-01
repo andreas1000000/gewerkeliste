@@ -3,35 +3,27 @@ import {
   getPublicCompanyTradeCounts,
   getPublicCompanySitemapEntries,
   getPublicLocationSitemapEntries,
+  getPublicServiceLocationSitemapEntries,
   getPublicTradeLocationSitemapEntries,
 } from "@/lib/data/public-directory";
-import { popularServicesForTrade, serviceSeoEntries } from "@/lib/service-taxonomy";
+import { serviceSeoEntries } from "@/lib/service-taxonomy";
+import { siteConfig } from "@/lib/site-config";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { publicTradeTaxonomy } from "@/lib/trade-taxonomy";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://gewerkeliste.com";
-  const [companies, locations, tradeLocations, tradeCounts] = await Promise.all([
+  const baseUrl = siteConfig.url;
+  const [companies, locations, tradeLocations, serviceLocations, tradeCounts] = await Promise.all([
     loadCompanyEntries(),
     loadLocationEntries(),
     loadTradeLocationEntries(),
+    loadServiceLocationEntries(),
     loadTradeCounts(),
   ]);
   const now = new Date();
   const activeTradeSlugs = new Set(Object.entries(tradeCounts).filter(([, count]) => count > 0).map(([slug]) => slug));
-  const activeServices = serviceSeoEntries()
-    .filter((entry) => activeTradeSlugs.has(entry.trade.slug) && (entry.service.isPopular || (tradeCounts[entry.trade.slug] || 0) >= 3))
-    .slice(0, 600);
-  const activeServiceSlugs = new Set(activeServices.map((entry) => entry.service.slug));
-  const serviceLocationEntries = tradeLocations
-    .flatMap((entry) =>
-      popularServicesForTrade(entry.tradeSlug, 4).map((service) => ({
-        serviceSlug: service.slug,
-        city: entry.city,
-      })),
-    )
-    .filter((entry) => activeServiceSlugs.has(entry.serviceSlug))
-    .slice(0, 1000);
+  const activeServiceSlugs = new Set(serviceLocations.map((entry) => entry.serviceSlug));
+  const activeServices = serviceSeoEntries().filter((entry) => activeServiceSlugs.has(entry.service.slug)).slice(0, 600);
 
   return [
     {
@@ -70,7 +62,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly" as const,
       priority: 0.52,
     })),
-    ...serviceLocationEntries.map((entry) => ({
+    ...serviceLocations.map((entry) => ({
       url: `${baseUrl}/leistungen/${entry.serviceSlug}/${entry.city}`,
       lastModified: now,
       changeFrequency: "weekly" as const,
@@ -93,12 +85,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.75,
-    },
-    {
-      url: `${baseUrl}/eintrag-beanspruchen`,
-      lastModified: now,
-      changeFrequency: "monthly",
-      priority: 0.5,
     },
     {
       url: `${baseUrl}/betrieb-eintragen`,
@@ -142,6 +128,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 type LocationSitemapEntry = { city: string; slug: string };
 type CompanySitemapEntry = { slug: string; updatedAt: string | null };
 type TradeLocationSitemapEntry = { tradeSlug: string; city: string };
+type ServiceLocationSitemapEntry = { serviceSlug: string; city: string };
 
 async function loadLocationEntries(): Promise<LocationSitemapEntry[]> {
   if (!isSupabaseConfigured()) return [];
@@ -168,6 +155,16 @@ async function loadTradeLocationEntries(): Promise<TradeLocationSitemapEntry[]> 
 
   try {
     return await getPublicTradeLocationSitemapEntries();
+  } catch {
+    return [];
+  }
+}
+
+async function loadServiceLocationEntries(): Promise<ServiceLocationSitemapEntry[]> {
+  if (!isSupabaseConfigured()) return [];
+
+  try {
+    return await getPublicServiceLocationSitemapEntries();
   } catch {
     return [];
   }

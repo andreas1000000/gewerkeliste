@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import { ClaimBadge } from "@/components/status-badge";
 import { publicResultDescription } from "@/lib/company-display";
-import { getBusinessDirectoryCompanies } from "@/lib/data/public-directory";
+import { getServiceDirectoryCompanies } from "@/lib/data/public-directory";
 import { breadcrumbJsonLd, collectionPageJsonLd, itemListJsonLd, jsonLd } from "@/lib/seo";
 import { findServiceSeoEntry } from "@/lib/service-taxonomy";
 import { isSupabaseConfigured } from "@/lib/supabase";
@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const entry = findServiceSeoEntry(slug);
   if (!entry) return { title: "Leistung nicht gefunden | GewerkeListe.com" };
 
-  const companies = isSupabaseConfigured() ? await getBusinessDirectoryCompanies({ serviceSlug: entry.service.slug, limit: 12 }) : [];
+  const companies = isSupabaseConfigured() ? await getServiceDirectoryCompanies({ serviceSlug: entry.service.slug, limit: 12 }) : [];
   const hasCompanies = companies.length > 0;
 
   return {
@@ -48,7 +48,7 @@ export default async function ServicePage({ params }: PageProps) {
   const entry = findServiceSeoEntry(slug);
   if (!entry) notFound();
 
-  const companies = isSupabaseConfigured() ? await getBusinessDirectoryCompanies({ serviceSlug: entry.service.slug, limit: 24 }) : [];
+  const companies = isSupabaseConfigured() ? await getServiceDirectoryCompanies({ serviceSlug: entry.service.slug, limit: 24 }) : [];
   const breadcrumb = breadcrumbJsonLd([
     { name: "Startseite", path: "/" },
     { name: "Leistungen", path: "/leistungen" },

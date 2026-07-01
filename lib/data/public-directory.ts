@@ -93,6 +93,44 @@ export async function getBusinessDirectoryCompanies(params?: {
     .slice(0, params?.limit || 50);
 }
 
+export async function getServiceDirectoryCompanies(params: {
+  serviceSlug: string;
+  location?: string;
+  limit?: number;
+}) {
+  const service = findServiceSearchContext(params.serviceSlug);
+  if (!service) return [];
+
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("companies")
+    .select(
+      "*, trades(id, name, slug), company_trades(confidence_score, source, evidence, status, visibility_level, trades(id, name, slug))",
+    )
+    .eq("public_visible", true)
+    .order("created_at", { ascending: false })
+    .limit(700);
+
+  if (error) return [];
+
+  const companies = dedupePublicCompanies(await resolveCompanyMedia(data as PublicCompanyWithTrade[]));
+  return companies
+    .filter((company) => serviceDirectlyMatchesCompany(company, service))
+    .filter((company) => companyMatchesDirectoryLocation(company, params.location))
+    .map((company) => ({
+      company,
+      score: scoreBusinessDirectoryMatch(company, {
+        query: service.name,
+        tradeSlugs: [],
+        service,
+        location: params.location,
+      }),
+    }))
+    .sort((a, b) => b.score - a.score || newestFirst(a.company, b.company))
+    .map((entry) => entry.company)
+    .slice(0, params.limit || 50);
+}
+
 export async function getPublicCompaniesByTrade(
   tradeSlug: string,
   params?: {
@@ -221,6 +259,53 @@ export async function getPublicTradeLocationSitemapEntries(limit = 500) {
     if (!citySlug) continue;
     entries.set(`${trade.slug}/${citySlug}`, { tradeSlug: trade.slug, city: citySlug });
     if (entries.size >= limit) break;
+  }
+
+  return Array.from(entries.values());
+}
+
+export async function getPublicServiceLocationSitemapEntries(limit = 700) {
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("companies")
+    .select("city, description, website_url, email, phone, postal_code, trades(slug), company_trades(status, visibility_level, evidence, trades(slug))")
+    .eq("public_visible", true)
+    .not("city", "is", null)
+    .limit(limit * 3);
+
+  if (error) return [];
+
+  const serviceEntries = serviceTaxonomy.flatMap((group) =>
+    group.trades.flatMap((trade) =>
+      trade.families.flatMap((familyItem) =>
+        familyItem.services.map((service) => ({
+          service,
+          tradeSlug: trade.slug,
+          directTerms: [service.name, service.slug.replace(/-/g, " "), ...service.aliases],
+        })),
+      ),
+    ),
+  );
+  const entries = new Map<string, { serviceSlug: string; city: string }>();
+
+  for (const row of data || []) {
+    const company = row as unknown as PublicCompanyWithTrade;
+    if (!company.city) continue;
+    const city = slugifyLocation(company.city);
+    if (!city) continue;
+    const tradeSlugs = publicCompanyTradeSlugSet(company);
+    const blob = companyDirectorySearchBlob(company);
+
+    for (const entry of serviceEntries) {
+      if (!tradeSlugs.has(normalizeForDirectorySearch(entry.tradeSlug))) continue;
+      const directHit = entry.directTerms
+        .map(normalizeForDirectorySearch)
+        .filter((term) => term.length > 2)
+        .some((term) => blob.includes(term));
+      if (!directHit) continue;
+      entries.set(`${entry.service.slug}/${city}`, { serviceSlug: entry.service.slug, city });
+      if (entries.size >= limit) return Array.from(entries.values());
+    }
   }
 
   return Array.from(entries.values());
@@ -583,7 +668,63 @@ type DirectoryServiceSearchContext = {
   name: string;
   tradeSlugs: string[];
   terms: string[];
+  directTerms: string[];
 };
+
+function publicCompanyTradeSlugSet(company: PublicCompanyWithTrade) {
+  return new Set(
+    [
+      company.trades?.slug,
+      ...(company.company_trades || [])
+        .filter((match) => match.status !== "rejected" && match.visibility_level !== "internal")
+        .map((match) => match.trades?.slug),
+    ]
+      .filter((value): value is string => Boolean(value))
+      .map(normalizeForDirectorySearch),
+  );
+}
+
+function companyDirectorySearchBlob(company: PublicCompanyWithTrade) {
+  const tradeNames = [
+    company.trades?.name,
+    company.trades?.slug,
+    ...(company.company_trades || [])
+      .filter((match) => match.status !== "rejected" && match.visibility_level !== "internal")
+      .flatMap((match) => [match.trades?.name, match.trades?.slug]),
+  ].filter((value): value is string => Boolean(value));
+
+  return normalizeForDirectorySearch(
+    [
+      company.name,
+      company.website_url,
+      company.city,
+      company.postal_code,
+      company.description,
+      company.email,
+      company.phone,
+      tradeNames.join(" "),
+      ...(company.company_trades || [])
+        .filter((match) => match.status !== "rejected" && match.visibility_level !== "internal")
+        .map((match) => match.evidence || ""),
+    ].join(" "),
+  );
+}
+
+function serviceDirectlyMatchesCompany(company: PublicCompanyWithTrade, service: DirectoryServiceSearchContext) {
+  const blob = companyDirectorySearchBlob(company);
+  return service.directTerms
+    .map(normalizeForDirectorySearch)
+    .filter((term) => term.length > 2)
+    .some((term) => blob.includes(term));
+}
+
+function companyMatchesDirectoryLocation(company: PublicCompanyWithTrade, location?: string) {
+  const locationQuery = normalizeForDirectorySearch(location || "");
+  if (!locationQuery) return true;
+  const locationValue = normalizeForDirectorySearch([company.city, company.postal_code].filter(Boolean).join(" "));
+  const locationTokens = expandDirectoryQuery(locationQuery);
+  return locationValue.includes(locationQuery) || locationTokens.some((token) => locationValue.includes(token));
+}
 
 function scoreBusinessDirectoryMatch(
   company: PublicCompanyWithTrade,
@@ -607,21 +748,7 @@ function scoreBusinessDirectoryMatch(
       .flatMap((match) => [match.trades?.name, match.trades?.slug]),
   ].filter((value): value is string => Boolean(value));
   const companyTradeSlugs = new Set(tradeNames.map(normalizeForDirectorySearch));
-  const companySearchBlob = normalizeForDirectorySearch(
-    [
-      company.name,
-      company.website_url,
-      company.city,
-      company.postal_code,
-      company.description,
-      company.email,
-      company.phone,
-      tradeNames.join(" "),
-      ...(company.company_trades || [])
-        .filter((match) => match.status !== "rejected" && match.visibility_level !== "internal")
-        .map((match) => match.evidence || ""),
-    ].join(" "),
-  );
+  const companySearchBlob = companyDirectorySearchBlob(company);
 
   const fields: Array<[string | null | undefined, number]> = [
     [company.name, 100],
@@ -728,6 +855,7 @@ function findServiceSearchContext(serviceSlug?: string): DirectoryServiceSearchC
             slug: service.slug,
             name: service.name,
             tradeSlugs: [trade.slug, ...service.crosslinks],
+            directTerms: [service.name, service.slug.replace(/-/g, " "), ...service.aliases],
             terms: [
               service.name,
               service.description,
@@ -746,6 +874,7 @@ function findServiceSearchContext(serviceSlug?: string): DirectoryServiceSearchC
     slug: serviceSlug,
     name: serviceSlug.replace(/-/g, " "),
     tradeSlugs: [],
+    directTerms: [serviceSlug, serviceSlug.replace(/-/g, " ")],
     terms: [serviceSlug, serviceSlug.replace(/-/g, " ")],
   };
 }

@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import { ClaimBadge } from "@/components/status-badge";
 import { publicResultDescription } from "@/lib/company-display";
-import { getBusinessDirectoryCompanies } from "@/lib/data/public-directory";
+import { getServiceDirectoryCompanies } from "@/lib/data/public-directory";
 import { breadcrumbJsonLd, collectionPageJsonLd, itemListJsonLd, jsonLd } from "@/lib/seo";
 import { findServiceSeoEntry } from "@/lib/service-taxonomy";
 import { isSupabaseConfigured } from "@/lib/supabase";
@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   if (!entry) return { title: "Leistung nicht gefunden | GewerkeListe.com" };
 
   const companies = isSupabaseConfigured()
-    ? await getBusinessDirectoryCompanies({ serviceSlug: entry.service.slug, location, limit: 12 })
+    ? await getServiceDirectoryCompanies({ serviceSlug: entry.service.slug, location, limit: 12 })
     : [];
   const hasCompanies = companies.length > 0;
 
@@ -53,7 +53,7 @@ export default async function ServiceLocationPage({ params }: PageProps) {
   if (!entry) notFound();
 
   const companies = isSupabaseConfigured()
-    ? await getBusinessDirectoryCompanies({ serviceSlug: entry.service.slug, location, limit: 36 })
+    ? await getServiceDirectoryCompanies({ serviceSlug: entry.service.slug, location, limit: 36 })
     : [];
   const breadcrumb = breadcrumbJsonLd([
     { name: "Startseite", path: "/" },

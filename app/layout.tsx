@@ -4,7 +4,7 @@ import { siteConfig } from "@/lib/site-config";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || siteConfig.url),
+  metadataBase: new URL(siteConfig.url),
   title: "GewerkeListe.com – Fachbetriebe nach Gewerk und Ort finden",
   description:
     "Finden Sie Baugewerke und Fachbetriebe nach Leistung, Ort und Tätigkeitsgebiet. Betriebe können ihren Eintrag übernehmen, verifizieren und Leistungen strukturiert darstellen.",
