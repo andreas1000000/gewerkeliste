@@ -13,6 +13,12 @@ type ApprovedCompany = {
   slug: string;
 };
 
+type SubmissionTradeAssignment = {
+  id: string;
+  slug: string;
+  primary: boolean;
+};
+
 export async function approveSubmission(formData: FormData) {
   const id = String(formData.get("id") || "");
   if (!id) redirect("/admin/submissions?error=missing-submission-id");
@@ -59,6 +65,7 @@ async function promoteSubmissionToCompany(
   const company = claimCompanyId
     ? await updateClaimedCompany(claimCompanyId, updateOrInsert)
     : await createSubmittedCompany(submission, updateOrInsert);
+  const tradeAssignments = await getSubmissionTradeAssignments(submission, { id: trade.id, slug: tradeSlug });
 
   const { error: submissionError } = await supabase
     .from("company_submissions")
@@ -68,7 +75,7 @@ async function promoteSubmissionToCompany(
   if (submissionError) throw submissionError;
 
   await Promise.allSettled([
-    upsertPrimaryCompanyTrade(company.id, trade.id, submission),
+    upsertCompanyTradeRelations(company.id, tradeAssignments, submission),
     insertSubmissionSource(company.id, submission),
   ]);
 
@@ -147,14 +154,47 @@ async function createSubmittedCompany(
   return data;
 }
 
-async function upsertPrimaryCompanyTrade(companyId: string, tradeId: string, submission: CompanySubmission) {
+async function getSubmissionTradeAssignments(
+  submission: CompanySubmission,
+  primaryTrade: { id: string; slug: string },
+): Promise<SubmissionTradeAssignment[]> {
+  const supabase = getSupabaseAdmin();
+  const secondarySlugs = submission.secondary_trades
+    .map((slug) => canonicalTradeSlug(slug))
+    .filter((slug, index, values) => slug && slug !== primaryTrade.slug && values.indexOf(slug) === index);
+
+  if (!secondarySlugs.length) return [{ ...primaryTrade, primary: true }];
+
+  const { data, error } = await supabase.from("trades").select("id, slug").in("slug", secondarySlugs);
+  const secondaryTrades: SubmissionTradeAssignment[] =
+    error || !data ? [] : data.map((trade) => ({ id: trade.id, slug: trade.slug, primary: false }));
+
+  return [{ ...primaryTrade, primary: true }, ...secondaryTrades];
+}
+
+async function upsertCompanyTradeRelations(
+  companyId: string,
+  trades: SubmissionTradeAssignment[],
+  submission: CompanySubmission,
+) {
+  await Promise.all(trades.map((trade) => upsertCompanyTradeRelation(companyId, trade, submission)));
+}
+
+async function upsertCompanyTradeRelation(
+  companyId: string,
+  trade: SubmissionTradeAssignment,
+  submission: CompanySubmission,
+) {
   const supabase = getSupabaseAdmin();
   const row = {
     company_id: companyId,
-    trade_id: tradeId,
+    trade_id: trade.id,
     confidence_score: 100,
     source: "admin-submission-approval",
-    evidence: [submission.primary_trade, ...submission.selected_services].filter(Boolean).join(", ") || null,
+    evidence: [
+      trade.primary ? submission.primary_trade : trade.slug,
+      ...submission.selected_services,
+    ].filter(Boolean).join(", ") || null,
     status: "admin_confirmed",
     visibility_level: "basis_public",
   };
@@ -167,7 +207,7 @@ async function upsertPrimaryCompanyTrade(companyId: string, tradeId: string, sub
     .upsert(
       {
         company_id: companyId,
-        trade_id: tradeId,
+        trade_id: trade.id,
         confidence_score: 100,
         source: "admin-submission-approval",
         evidence: row.evidence,

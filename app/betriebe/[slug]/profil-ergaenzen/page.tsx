@@ -30,8 +30,8 @@ export default async function CompanyProfileUpdatePage({ params }: PageProps) {
   const company = await getProfileCompany(slug);
   if (!company) notFound();
 
-  const initialTrades = [company.trades?.slug].filter((item): item is string => Boolean(item));
   const latestSubmission = await getLatestCompanyProfileUpdateSubmission(company.id);
+  const initialTrades = getInitialTrades(company, latestSubmission);
   const initialServices = latestSubmission?.selected_services.length ? latestSubmission.selected_services : extractServiceListFromDescription(company.description);
   const initialDescription =
     latestSubmission?.short_description || cleanCompanyDescription(company.description) || company.description || "";
@@ -95,4 +95,27 @@ async function getProfileCompany(slug: string) {
 
 function Benefit({ children }: { children: React.ReactNode }) {
   return <div className="rounded-md border border-line bg-[#fbfcff] px-4 py-3 text-sm font-semibold text-ink">{children}</div>;
+}
+
+function getInitialTrades(
+  company: Awaited<ReturnType<typeof getProfileCompany>>,
+  latestSubmission: Awaited<ReturnType<typeof getLatestCompanyProfileUpdateSubmission>>,
+) {
+  if (!company) return [];
+
+  const confirmedCompanyTrades = (company.company_trades || [])
+    .filter((match) => match.status !== "rejected" && match.visibility_level !== "internal" && Boolean(match.trades?.slug))
+    .sort((a, b) => (b.confidence_score || 0) - (a.confidence_score || 0))
+    .map((match) => match.trades?.slug);
+
+  return [
+    latestSubmission?.primary_trade,
+    ...(latestSubmission?.secondary_trades || []),
+    company.trades?.slug,
+    ...confirmedCompanyTrades,
+  ].filter(uniqueString);
+}
+
+function uniqueString(value: string | null | undefined, index: number, values: Array<string | null | undefined>): value is string {
+  return Boolean(value) && values.indexOf(value) === index;
 }

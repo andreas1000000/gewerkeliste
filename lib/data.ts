@@ -263,7 +263,7 @@ export async function getCompany(id: string) {
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("companies")
-    .select("*, trades(id, name, slug)")
+    .select("*, trades(id, name, slug), company_trades(id, confidence_score, status, visibility_level, trades(id, name, slug))")
     .eq("id", id)
     .single();
 
@@ -275,7 +275,7 @@ export async function getCompanyBySlug(slug: string) {
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("companies")
-    .select("*, trades(id, name, slug)")
+    .select("*, trades(id, name, slug), company_trades(id, confidence_score, status, visibility_level, trades(id, name, slug))")
     .eq("slug", slug)
     .eq("public_visible", true)
     .single();
