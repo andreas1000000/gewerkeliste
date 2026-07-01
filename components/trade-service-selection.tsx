@@ -141,14 +141,18 @@ export function TradeServiceSelection({
 }
 
 function selectedServicesForTrade(tradeSlug: string, selectedServices: string[]) {
-  const tradeSlugs = new Set(serviceTaxonomySlugsForTrade(tradeSlug));
-  const serviceNames = new Set(
+  const serviceNames = serviceNamesForTrades([tradeSlug]);
+  return selectedServices.filter((service) => serviceNames.has(service));
+}
+
+export function serviceNamesForTrades(tradeSlugs: string[]) {
+  const mappedTradeSlugs = new Set(tradeSlugs.flatMap(serviceTaxonomySlugsForTrade));
+  return new Set(
     serviceTaxonomy
       .flatMap((group) => group.trades)
-      .filter((trade) => tradeSlugs.has(trade.slug))
+      .filter((trade) => mappedTradeSlugs.has(trade.slug))
       .flatMap((trade) => trade.families.flatMap((family) => family.services.map((service) => service.name))),
   );
-  return selectedServices.filter((service) => serviceNames.has(service));
 }
 
 function serviceTaxonomySlugsForTrade(tradeSlug: string) {

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useActionState } from "react";
 import { TradeCheckboxGroups } from "@/components/trade-checkbox-groups";
-import { TradeServiceSelection } from "@/components/trade-service-selection";
+import { serviceNamesForTrades, TradeServiceSelection } from "@/components/trade-service-selection";
 import { submitBusinessEntry } from "@/lib/actions/business-entry";
 import type { CompanyFormState } from "@/lib/types";
 import type { TaxonomyTrade } from "@/lib/trade-taxonomy";
@@ -17,7 +17,7 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
   const [selectedTrades, setSelectedTrades] = useState<string[]>([]);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [founderVerification, setFounderVerification] = useState(true);
-  const [mediaDetailsEntered, setMediaDetailsEntered] = useState(false);
+  const [mediaFilesSelected, setMediaFilesSelected] = useState(false);
   const errors = state.fieldErrors || {};
   const values = state.values || {};
   const formKey = JSON.stringify(values);
@@ -44,7 +44,8 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
       const next = current.includes(slug) ? current.filter((item) => item !== slug) : [...current, slug];
       const nextPrimary = next[0] || "";
       setPrimaryTrade(nextPrimary);
-      setSelectedServices([]);
+      const allowedServices = serviceNamesForTrades(next);
+      setSelectedServices((services) => services.filter((service) => allowedServices.has(service)));
       return next;
     });
   }
@@ -134,7 +135,7 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
             label="Firmenlogo hochladen"
             maxBytes={2 * 1024 * 1024}
             name="companyLogo"
-            onMediaChange={setMediaDetailsEntered}
+            onMediaChange={setMediaFilesSelected}
           />
           <MediaFileField
             accept="image/jpeg,image/png,image/webp"
@@ -143,17 +144,17 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
             label="Ansprechpartnerbild hochladen"
             maxBytes={5 * 1024 * 1024}
             name="contactProfileImage"
-            onMediaChange={setMediaDetailsEntered}
+            onMediaChange={setMediaFilesSelected}
           />
           <Field label="Ansprechpartner Name" error={errors.mediaContactName}>
-            <input className={inputClass} name="mediaContactName" onChange={(event) => event.target.value.trim() ? setMediaDetailsEntered(true) : undefined} />
+            <input className={inputClass} defaultValue={textValue(values, "mediaContactName")} name="mediaContactName" />
           </Field>
           <Field label="Rolle/Funktion" error={errors.mediaContactRole}>
-            <input className={inputClass} name="mediaContactRole" onChange={(event) => event.target.value.trim() ? setMediaDetailsEntered(true) : undefined} placeholder="z. B. Inhaber, Geschäftsführung, Bauleitung" />
+            <input className={inputClass} defaultValue={textValue(values, "mediaContactRole")} name="mediaContactRole" placeholder="z. B. Inhaber, Geschäftsführung, Bauleitung" />
           </Field>
         </div>
-        <Consent checked={booleanValue(values, "imageConsentGiven")} name="imageConsentGiven" error={errors.imageConsentGiven} required={mediaDetailsEntered}>
-          Ich bin berechtigt, diese Bilder und Angaben für den Betrieb einzureichen.
+        <Consent checked={booleanValue(values, "imageConsentGiven")} name="imageConsentGiven" error={errors.imageConsentGiven} required={mediaFilesSelected}>
+          Ich bin berechtigt, diese Bilder für den Betrieb einzureichen.
         </Consent>
         <p className="mt-3 rounded-md border border-line bg-white px-4 py-3 text-xs leading-5 text-muted">
           Logo und Ansprechpartnerbild sind freiwillig. Sie können Ihr Profil auch ohne Medien kostenlos eintragen. Bilder werden erst nach Prüfung veröffentlicht.

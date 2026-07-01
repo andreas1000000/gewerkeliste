@@ -33,6 +33,7 @@ export async function prepareSubmissionMedia(formData: FormData, submissionId: s
   const contactPersonName = nullableFormString(formData, "mediaContactName");
   const contactPersonRole = nullableFormString(formData, "mediaContactRole");
   const hasMediaDetails = Boolean(logo || contactImage || contactPersonName || contactPersonRole);
+  const hasUploadedMedia = Boolean(logo || contactImage);
   const consentGiven = formData.get("imageConsentGiven") === "on";
 
   if (!hasMediaDetails) {
@@ -42,10 +43,10 @@ export async function prepareSubmissionMedia(formData: FormData, submissionId: s
     };
   }
 
-  if (!consentGiven) {
+  if (hasUploadedMedia && !consentGiven) {
     return {
       ok: false,
-      message: "Bitte bestaetigen Sie, dass Sie berechtigt sind, diese Bilder und Angaben fuer den Betrieb einzureichen.",
+      message: "Bitte bestaetigen Sie, dass Sie berechtigt sind, diese Bilder fuer den Betrieb einzureichen.",
       fieldErrors: { imageConsentGiven: "Berechtigung ist erforderlich." },
     };
   }
@@ -70,8 +71,8 @@ export async function prepareSubmissionMedia(formData: FormData, submissionId: s
       profileImageAlt: contactImage ? `${companyName} Ansprechpartnerbild` : null,
       contactPersonName,
       contactPersonRole,
-      imageConsentGiven: true,
-      imageConsentTimestamp: new Date().toISOString(),
+      imageConsentGiven: hasUploadedMedia,
+      imageConsentTimestamp: hasUploadedMedia ? new Date().toISOString() : null,
     },
   };
 }
