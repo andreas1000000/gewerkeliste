@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import type { Route } from "next";
 import Link from "next/link";
-import { LegalFooter } from "@/components/legal-footer";
 import { SiteHeader } from "@/components/site-header";
 import { ClaimBadge } from "@/components/status-badge";
 import { publicResultDescription, publicResultImage } from "@/lib/company-display";
@@ -155,7 +154,6 @@ export default async function BusinessesPage({ searchParams }: PageProps) {
         </section>
       </section>
 
-      <LegalFooter />
     </main>
   );
 }
