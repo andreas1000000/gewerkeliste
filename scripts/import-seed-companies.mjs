@@ -14,6 +14,7 @@ const dryRun = Boolean(args["dry-run"]) || !live;
 const seedFile = args.file || "work/curated-seed-companies.tsv";
 const defaultLatitude = numberArg("default-latitude", 47.8564);
 const defaultLongitude = numberArg("default-longitude", 12.1225);
+const requireSourceUrl = Boolean(args["require-source-url"]);
 const source = "curated_seed_list";
 const sourceNote = "kuratierter regionaler Startdatenbestand";
 const region = "Rosenheim / Oberbayern";
@@ -270,7 +271,7 @@ function buildCandidate(row, rowNumber, taxonomyIndex) {
     ...emailClassifications.filter((item) => !item.public).map((item) => ({ type: "email", value: item.email, reason: item.reason })),
     ...phoneClassifications.filter((item) => !item.public).map((item) => ({ type: "phone", value: item.phone, reason: item.reason })),
   ];
-  const tradeMapped = mapTrade(row.tradeMappedLabel || row.tradeOriginal, taxonomyIndex) || mapTrade(row.tradeOriginal, taxonomyIndex);
+  const tradeMapped = mapTrade(row.tradeOriginal, taxonomyIndex) || mapTrade(row.tradeMappedLabel, taxonomyIndex);
   const servicesMapped = row.servicesRaw ? mapServicesFromLabels(row.servicesRaw, tradeMapped, taxonomyIndex) : mapServices(row.tradeOriginal, tradeMapped, taxonomyIndex);
   const duplicateKey = [normalizeKey(row.companyName), row.postalCode, normalizeKey(row.city), normalizeKey(row.street)].join("|");
   const validationErrors = [];
@@ -278,6 +279,8 @@ function buildCandidate(row, rowNumber, taxonomyIndex) {
   if (!row.postalCode || !/^[0-9]{5}$/.test(row.postalCode)) validationErrors.push("PLZ fehlt oder ungueltig");
   if (!row.city) validationErrors.push("Ort fehlt");
   if (!tradeMapped) validationErrors.push("Gewerk nicht gemappt");
+  if (requireSourceUrl && !normalizeWebsiteUrl(row.sourceUrl)) validationErrors.push("Unternehmensquelle source_url fehlt");
+  if (row.sourceUrl && isBlockedImportSource(row.sourceUrl)) validationErrors.push("source_url ist keine Unternehmensquelle");
   if (row.companyName.includes("\n")) validationErrors.push("Mehrzeiliger Firmenname unklar");
 
   return {
@@ -787,6 +790,11 @@ function normalizeWebsiteUrl(value) {
   return null;
 }
 
+function isBlockedImportSource(value) {
+  const normalized = String(value || "").toLowerCase();
+  return /(swro|hwk|handwerkskammer|innung|gelbeseiten|dasoertliche|dastelefonbuch|11880|cylex|meinestadt|branchenbuch|unternehmensregister|northdata|firmenwissen|google\.com\/maps|facebook|instagram|linkedin)/i.test(normalized);
+}
+
 function slugify(value) {
   return normalizeKey(value).replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 }
@@ -893,18 +901,32 @@ function manualTradeEntries() {
     "Abbruch": "abbrucharbeiten",
     "Abbruch Erd- und Tiefbau": "abbrucharbeiten",
     "Abbruch Erd- und Tiefbau GmbH": "abbrucharbeiten",
+    "Akustik / Trockenbau": "trockenbau",
+    "Architektur": "architekt",
+    "Architektur / Planung": "architekt",
+    "Außenanlagen / GaLaBau": "garten-landschaftsbau",
     "Bauunternehmen / Hochbau": "bauunternehmen",
     "Bauunternehmen / Hochbau / Tiefbau": "bauunternehmen",
     "Bauunternehmen / Naturbau": "bauunternehmen",
+    "Baumanagement": "bauleitung",
+    "Baumanagement / Ingenieurbüro": "bauleitung",
     "Baumeisterarbeiten": "bauunternehmen",
     "Baumeisterarbeiten Tiefbau": "tiefbau",
+    "Bausanierung": "sanierung",
+    "Bautrocknung / Sanierung": "bautrocknung",
+    "Beton / Rohbau-Zulieferer": "betonbau",
     "Betonwerk / Betonbau": "betonbau",
     "Beweissicherung/Baugutachter": "sachverstaendige",
     "Brandschutz": "brandschutzplanung",
+    "Brandschutz / Feuerlöscherservice": "brandschutz",
+    "Brandschutzservice": "brandschutz",
     "CNC / Metallbearbeitung": "metallbau",
     "Dachdecker/Spengler": "dachdeckerarbeiten",
+    "Dach / Spenglerei": "spenglerarbeiten",
+    "Dachdeckerei": "dachdeckerarbeiten",
     "Dämmung / Einblasdämmung": "waermedaemmverbundsysteme",
     "Elektrofachplanung": "tga-planung",
+    "Elektro / Solartechnik": "elektroinstallation",
     "Elektroinstallation / Gebäudetechnik": "elektroinstallation",
     "Elektroinstallation / Photovoltaik": "elektroinstallation",
     "Elektroinstallation / Photovoltaik / Smarthome": "elektroinstallation",
@@ -912,7 +934,10 @@ function manualTradeEntries() {
     "Elektrotechnik/ Elektroinstallation": "elektroinstallation",
     "Elektrotechnik": "elektrotechnik",
     "Erd - Kanal - Pflasterbau Abbruch Recycling": "tiefbau",
+    "Erdbau / Abbruch": "erdarbeiten",
     "Erdbau Tiefbau": "erdarbeiten",
+    "Energieausweis / Energieberatung": "energieberatung",
+    "Energieberatung": "energieberatung",
     "Estrich / Bodensysteme": "estricharbeiten",
     "Estrich/Sichtestrich": "estricharbeiten",
     "Fahrzeugbau / Metallbau": "metallbau",
@@ -920,10 +945,18 @@ function manualTradeEntries() {
     "Feinmechanik / Metallbearbeitung": "metallbau",
     "Feinwerktechnik / Metallbearbeitung": "metallbau",
     "Fenster": "fensterbau",
+    "Fenster / Türen / Schreinerei": "schreinerarbeiten",
     "Fensterbau / Bauelemente / Metallbau": "fensterbau",
+    "Fliesen / Boden": "fliesenarbeiten",
     "Fliesenleger": "fliesenarbeiten",
     "Fliesenleger / Naturstein": "fliesenarbeiten",
     "Garten- und Landschaftsbau": "garten-landschaftsbau",
+    "Gartenbau": "garten-landschaftsbau",
+    "Gartengestaltung / Gartenpflege": "garten-landschaftsbau",
+    "Gebäudeenergieberatung": "energieberatung",
+    "Gebäudereinigung": "gebaeudereinigung",
+    "Gebäudereinigung / Autoaufbereitung": "gebaeudereinigung",
+    "Gebäudereinigung / Reinigungsservice": "gebaeudereinigung",
     "Gartenpflege Rodungsarbeiten": "garten-landschaftsbau",
     "GEG Nachweis Wärmeschutznachweis": "energieberatung",
     "GEG Nachweis Wärmeschutznachweis SiGeKo": "energieberatung",
@@ -932,9 +965,22 @@ function manualTradeEntries() {
     "Heizung / Sanitär / Lüftung": "heizungsbau",
     "Heizung / Sanitär / Lüftung / Solar": "heizungsbau",
     "Heizung / Sanitär / Versorgungstechnik": "heizungsbau",
+    "HLS / Haustechnik": "heizungsbau",
+    "Hochbau / Baugeschäft": "bauunternehmen",
     "Holzbau / Holzhausbau": "holzbau",
+    "Holzbau / Zimmerei": "holzbau",
     "Holzbau / Zimmerei / Fensterbau": "holzbau",
+    "Ingenieurbüro": "tragwerksplanung",
+    "Innenarchitektur / Planung": "architekt",
     "Isolierung / Dämmung": "technische-isolierung",
+    "Kälte / Klima": "kaelte-klima",
+    "Kälte- und Klimatechnik": "kaelte-klima",
+    "Klima / Kälte": "kaelte-klima",
+    "Leckortung / Sanierung": "bautrocknung",
+    "Leckortung / Trocknung / Sanierung": "bautrocknung",
+    "Maler / Lackierer": "malerarbeiten",
+    "Maler- und Lackierermeister": "malerarbeiten",
+    "Malerbetrieb": "malerarbeiten",
     "Maschinenbau / Metallbau": "metallbau",
     "Maschinenbau / Metallbearbeitung": "metallbau",
     "Metallbau / Balkonbau": "metallbau",
@@ -948,6 +994,10 @@ function manualTradeEntries() {
     "Metallbau / Stahlbau / Schlosserei": "metallbau",
     "Metallbearbeitung / Feinmechanik": "metallbau",
     "Metallbearbeitung / Stanztechnik": "metallbau",
+    "Planung / Architektur": "architekt",
+    "Planung / Baumanagement": "bauleitung",
+    "Planung / Landschaftsarchitektur": "architekt",
+    "Reinigung / Gebäudeservice": "gebaeudereinigung",
     "Schlosserei / Metallbau": "metallbau",
     "Schreinerei / Fenster / Türen": "schreinerarbeiten",
     "Schreinerei / Holztechnik": "schreinerarbeiten",
@@ -959,11 +1009,14 @@ function manualTradeEntries() {
     "Stahlbau / Metallbau / Schlosserei": "stahlbau",
     "Stuckateur / Putz / Trockenbau": "verputzarbeiten",
     "Spenglerei": "spenglerarbeiten",
+    "Spenglerei / Dachdeckerei": "spenglerarbeiten",
     "Tiefbau / Abbruch / Recycling": "tiefbau",
     "Tiefbau / Bauunternehmen": "tiefbau",
     "Tiefbau / Garten- und Landschaftsbau": "tiefbau",
     "Tiefbau / Pflasterbau": "tiefbau",
     "Trockenbau / Akustikbau": "trockenbau",
+    "Umweltconsulting / Schadstoff / Gutachten": "schadstoffsanierung",
+    "Umweltconsulting / Schadstoffe": "schadstoffsanierung",
     "WKSB-Isolierung": "technische-isolierung",
     "Zimmerei / Dachdeckerei": "holzbau",
     "Zimmerei / Holzbau": "holzbau",
