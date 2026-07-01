@@ -458,16 +458,33 @@ async function applyApprovedProfileUpdateMedia<T extends PublicCompanyWithTrade>
   if (company.profile_image_url) return company;
 
   const supabase = getSupabaseAdmin();
-  const { data, error } = await supabase
+  const sources = [`profile-update:${company.id}`, `claim:${company.id}`];
+  const { data: sourceMatch, error: sourceError } = await supabase
     .from("company_submissions")
     .select("logo_url, profile_image_url, profile_image_alt, contact_person_name, contact_person_role")
-    .eq("source", `profile-update:${company.id}`)
+    .in("source", sources)
     .eq("status", "approved")
     .not("profile_image_url", "is", null)
     .order("updated_at", { ascending: false })
     .limit(1)
     .maybeSingle();
 
+  const fallbackMatch = sourceMatch
+    ? null
+    : await supabase
+        .from("company_submissions")
+        .select("logo_url, profile_image_url, profile_image_alt, contact_person_name, contact_person_role")
+        .eq("company_name", company.name)
+        .eq("postal_code", company.postal_code)
+        .eq("city", company.city)
+        .eq("status", "approved")
+        .not("profile_image_url", "is", null)
+        .order("updated_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+  const data = sourceMatch || fallbackMatch?.data;
+  const error = sourceError || fallbackMatch?.error;
   if (error || !data) return company;
 
   return {
