@@ -6,7 +6,7 @@ import { ClaimAssistant } from "@/components/claim-assistant";
 import { SiteHeader } from "@/components/site-header";
 import { cleanCompanyDescription, extractServiceListFromDescription } from "@/lib/company-display";
 import { getLatestCompanyProfileUpdateSubmission } from "@/lib/data";
-import { canonicalPublicCompanySlug, getCompanyBySlug } from "@/lib/data/public-directory";
+import { canonicalPublicCompanySlug, canonicalPublicCompanySlugFromSlug, getCompanyBySlug } from "@/lib/data/public-directory";
 import type { CompanyWithTrade } from "@/lib/types";
 
 type PageProps = {
@@ -29,6 +29,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function CompanyProfileUpdatePage({ params }: PageProps) {
   const { slug } = await params;
+  const canonicalRequestedSlug = canonicalPublicCompanySlugFromSlug(slug);
+  if (canonicalRequestedSlug !== slug) {
+    permanentRedirect(`/betriebe/${canonicalRequestedSlug}/profil-ergaenzen`);
+  }
+
   const company = await getProfileCompany(slug);
   if (!company) notFound();
   const canonicalSlug = canonicalPublicCompanySlug(company);

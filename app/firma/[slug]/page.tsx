@@ -10,7 +10,12 @@ import {
   groupServicesForDisplay,
   publicResultDescription,
 } from "@/lib/company-display";
-import { canonicalPublicCompanySlug, getCompanyBySlug, getCompanyBySlugForMetadata } from "@/lib/data/public-directory";
+import {
+  canonicalPublicCompanySlug,
+  canonicalPublicCompanySlugFromSlug,
+  getCompanyBySlug,
+  getCompanyBySlugForMetadata,
+} from "@/lib/data/public-directory";
 import { breadcrumbJsonLd, jsonLd, localBusinessJsonLd } from "@/lib/seo";
 import type { PublicClaimStatus, PublicCompanyWithTrade } from "@/lib/types/public-directory";
 
@@ -57,6 +62,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function CompanyPublicPage({ params }: PageProps) {
   const { slug } = await params;
+  const canonicalRequestedSlug = canonicalPublicCompanySlugFromSlug(slug);
+  if (canonicalRequestedSlug !== slug) {
+    permanentRedirect(`/firma/${canonicalRequestedSlug}`);
+  }
 
   try {
     const company = await getCompanyBySlug(slug);

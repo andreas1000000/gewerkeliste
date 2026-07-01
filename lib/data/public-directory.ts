@@ -389,11 +389,15 @@ async function getBusinessDirectoryCompaniesFallback(params?: {
 }
 
 export function canonicalPublicCompanySlug(company: PublicCompanyWithTrade) {
-  if (company.slug === "wagner-und-spielvogel-gdbr-83083-riedering") {
+  return canonicalPublicCompanySlugFromSlug(company.slug);
+}
+
+export function canonicalPublicCompanySlugFromSlug(slug: string) {
+  if (slug === "wagner-und-spielvogel-gdbr-83083-riedering") {
     return "wagner-und-spielvogel-gbr-83083-riedering";
   }
 
-  return company.slug;
+  return slug;
 }
 
 function dedupePublicCompanies<T extends PublicCompanyWithTrade>(companies: T[]) {
