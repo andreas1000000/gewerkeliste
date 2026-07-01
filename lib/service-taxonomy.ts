@@ -78,6 +78,13 @@ export type ServiceTaxonomyGroup = {
   trades: ServiceTaxonomyTrade[];
 };
 
+export type ServiceSeoEntry = {
+  service: ServiceTaxonomyService;
+  family: ServiceFamily;
+  trade: ServiceTaxonomyTrade;
+  group: ServiceTaxonomyGroup;
+};
+
 export const serviceActivities: ServiceActivity[] = [
   "Beratung",
   "Planung",
@@ -998,6 +1005,25 @@ export function popularServicesForTrade(slug: string, limit = 8) {
     .flatMap((trade) => trade.families.flatMap((familyItem) => familyItem.services));
   const popular = services.filter((service) => service.isPopular);
   return (popular.length ? popular : services).slice(0, limit);
+}
+
+export function serviceSeoEntries() {
+  return serviceTaxonomy.flatMap((groupItem) =>
+    groupItem.trades.flatMap((tradeItem) =>
+      tradeItem.families.flatMap((familyItem) =>
+        familyItem.services.map((service) => ({
+          service,
+          family: familyItem,
+          trade: tradeItem,
+          group: groupItem,
+        })),
+      ),
+    ),
+  );
+}
+
+export function findServiceSeoEntry(slug: string) {
+  return serviceSeoEntries().find((entry) => entry.service.slug === slug);
 }
 
 function group(sortOrder: number, name: string, description: string, trades: ServiceTaxonomyTrade[]): ServiceTaxonomyGroup {

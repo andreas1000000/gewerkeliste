@@ -24,6 +24,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: `${company.name} Profil ergänzen | GewerkeListe.com`,
     description: `Profilergänzung für ${company.name}: Leistungen, Kontaktangaben und Profildaten zur Prüfung einreichen.`,
+    robots: {
+      index: false,
+      follow: true,
+    },
   };
 }
 

@@ -26,12 +26,18 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       title: "Gewerk nicht gefunden | GewerkeListe.com",
     };
   }
+  const companies = isSupabaseConfigured() ? await getPublicCompaniesByTrade(trade.slug) : [];
+  const hasCompanies = companies.length > 0;
 
   return {
     title: `${trade.name}: Betriebe, Leistungen & Regionen | GewerkeListe.com`,
     description: `Finden Sie Betriebe aus dem Bereich ${trade.name}. GewerkeListe.com macht Bau- und Handwerksbetriebe strukturiert auffindbar.`,
     alternates: {
       canonical: `/gewerke/${trade.slug}`,
+    },
+    robots: {
+      index: hasCompanies,
+      follow: true,
     },
     openGraph: {
       title: `${trade.name} finden | GewerkeListe.com`,

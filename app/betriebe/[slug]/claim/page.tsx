@@ -21,6 +21,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: `${company.name} kostenlos übernehmen | GewerkeListe.com`,
     description: `Kostenloses Basisprofil von ${company.name} übernehmen, Daten korrigieren und Leistungen zur Prüfung einreichen.`,
+    robots: {
+      index: false,
+      follow: true,
+    },
   };
 }
 

@@ -12,6 +12,8 @@ export default function robots(): MetadataRoute.Robots {
         "/fuer-betriebe",
         "/gewerke",
         "/gewerke/",
+        "/leistungen",
+        "/leistungen/",
         "/orte",
         "/orte/",
         "/firma/",

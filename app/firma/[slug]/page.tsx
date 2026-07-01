@@ -17,6 +17,7 @@ import {
   getCompanyBySlugForMetadata,
 } from "@/lib/data/public-directory";
 import { breadcrumbJsonLd, jsonLd, localBusinessJsonLd } from "@/lib/seo";
+import { slugify as slugifyService } from "@/lib/service-taxonomy";
 import type { PublicClaimStatus, PublicCompanyWithTrade } from "@/lib/types/public-directory";
 
 export const dynamic = "force-dynamic";
@@ -554,9 +555,13 @@ function ServiceAccordion({ group, open }: { group: { label: string; items: stri
       </summary>
       <div className="mt-4 flex flex-wrap gap-2">
         {group.items.map((item) => (
-          <span key={item} className="rounded-md border border-line bg-[#fbfcff] px-3 py-2 text-sm font-semibold text-ink">
+          <Link
+            key={item}
+            className="rounded-md border border-line bg-[#fbfcff] px-3 py-2 text-sm font-semibold text-ink hover:border-action hover:text-action"
+            href={`/leistungen/${slugifyService(item)}` as Route}
+          >
             {item}
-          </span>
+          </Link>
         ))}
       </div>
     </details>
