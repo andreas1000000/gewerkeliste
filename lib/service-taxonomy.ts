@@ -302,6 +302,18 @@ export const serviceTaxonomy: ServiceTaxonomyGroup[] = [
     ]),
   ]),
   group(5, "Rohbau, Beton, Mauerwerk & Tragwerk", "Massive Bauteile, Beton, Mauerwerk, Abdichtung und Durchbrüche.", [
+    trade("bauunternehmen", "Bauunternehmen", "Bauausführung für Neubau, Umbau, Sanierung und Rohbau.", [
+      family("Bauausführung", ["Neubau", "Rohbau", "Hochbau", "Anbau", "Umbau", "Sanierung", "Modernisierung", "Baukoordination", "Baustellenabwicklung", "Bauleistungen aus einer Hand"], {
+        aliases: ["Baufirma", "Baugeschäft", "Bauunternehmung", "Rohbauunternehmen", "Hochbauunternehmen"],
+        activities: ["Beratung", "Planung", "Ausführung", "Sanierung", "Modernisierung"],
+        contexts: ["Neubau", "Bestand", "Altbau", "Einfamilienhaus", "Mehrfamilienhaus", "Gewerbe"],
+      }),
+      family("Bestand und Umbau", ["Wanddurchbruch", "Grundrissänderung", "Bestandsumbau", "Anbau an Bestand", "Gebäudesanierung", "Abbruch kleiner Bauteile", "Fundamentarbeiten im Bestand"], {
+        aliases: ["Umbauarbeiten", "Altbausanierung", "Renovierung", "Bestandssanierung"],
+        activities: ["Sanierung", "Modernisierung", "Rückbau", "Ausführung"],
+        contexts: ["Bestand", "Altbau", "Umbau", "privat", "gewerblich"],
+      }),
+    ]),
     trade("maurerarbeiten", "Maurerarbeiten & Mauerwerk", "Mauerwerk im Neubau und Bestand.", [
       family("Mauerwerk", ["Mauerarbeiten", "Ziegelmauerwerk", "Porenbeton", "Kalksandstein", "Natursteinmauerwerk", "Sichtmauerwerk", "tragende Wände", "nichttragende Wände", "Sturz einbauen", "Wanddurchbruch", "Ringanker", "Mauerwerkssanierung"], {
         aliases: ["Maurer", "Rohbauer", "Mauerwerksbau"],

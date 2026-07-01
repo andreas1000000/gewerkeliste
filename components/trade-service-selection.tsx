@@ -153,8 +153,8 @@ function selectedServicesForTrade(tradeSlug: string, selectedServices: string[])
 
 function serviceTaxonomySlugsForTrade(tradeSlug: string) {
   const aliases: Record<string, string[]> = {
-    bauunternehmen: ["maurerarbeiten", "hochbau", "betonbau"],
-    rohbau: ["maurerarbeiten", "hochbau", "betonbau"],
+    bauunternehmen: ["bauunternehmen", "maurerarbeiten", "betonbau"],
+    rohbau: ["bauunternehmen", "maurerarbeiten", "betonbau"],
   };
   return aliases[tradeSlug] || [tradeSlug];
 }
