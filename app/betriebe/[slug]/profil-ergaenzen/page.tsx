@@ -5,7 +5,9 @@ import { notFound } from "next/navigation";
 import { ClaimAssistant } from "@/components/claim-assistant";
 import { SiteHeader } from "@/components/site-header";
 import { cleanCompanyDescription, extractServiceListFromDescription } from "@/lib/company-display";
-import { getCompanyBySlug, getLatestCompanyProfileUpdateSubmission } from "@/lib/data";
+import { getLatestCompanyProfileUpdateSubmission } from "@/lib/data";
+import { getCompanyBySlug } from "@/lib/data/public-directory";
+import type { CompanyWithTrade } from "@/lib/types";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -35,7 +37,7 @@ export default async function CompanyProfileUpdatePage({ params }: PageProps) {
   const initialServices = latestSubmission?.selected_services.length ? latestSubmission.selected_services : extractServiceListFromDescription(company.description);
   const initialDescription =
     latestSubmission?.short_description || cleanCompanyDescription(company.description) || company.description || "";
-  const formCompany = { ...company, description: initialDescription };
+  const formCompany: CompanyWithTrade = { ...company, description: initialDescription, company_trades: undefined };
 
   return (
     <main className="min-h-screen bg-[#f7f8fb] text-ink">
