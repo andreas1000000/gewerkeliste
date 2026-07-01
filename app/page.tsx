@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { Route } from "next";
 import Link from "next/link";
 import { ServiceAreaPreview } from "@/components/map/service-area-preview";
+import { SearchSubmitButton } from "@/components/search-submit-button";
 import { SiteHeader } from "@/components/site-header";
 import { getPublicCompanies } from "@/lib/data/public-directory";
 import type { ServiceAreaGeoJson } from "@/lib/geo/types";
@@ -127,11 +128,14 @@ export default async function HomePage() {
               <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
                 <label className="grid gap-1.5 text-xs font-semibold text-brand">
                   Was suchen Sie?
-                  <input
-                    name="query"
-                    className="h-12 rounded-md border border-line px-3 text-sm font-normal outline-none focus:border-action"
-                    placeholder="z. B. Pflasterbau, Abdichtung, Metallbau"
-                  />
+                  <span className="relative">
+                    <input
+                      name="query"
+                      className="h-12 w-full rounded-md border border-line px-3 pr-14 text-sm font-normal outline-none focus:border-action"
+                      placeholder="z. B. Pflasterbau, Abdichtung, Metallbau"
+                    />
+                    <SearchSubmitButton className="absolute right-1.5 top-1.5 h-9 w-9" label="Betriebe suchen" />
+                  </span>
                 </label>
                 <label className="grid gap-1.5 text-xs font-semibold text-brand">
                   Wo suchen Sie?
@@ -141,7 +145,7 @@ export default async function HomePage() {
                     placeholder="Ort oder PLZ"
                   />
                 </label>
-                <button className="mt-auto h-12 rounded-md bg-action px-6 text-sm font-semibold text-white hover:bg-brand">
+                <button className="mt-auto inline-flex h-12 items-center justify-center rounded-md bg-action px-6 text-sm font-semibold text-white hover:bg-brand">
                   Fachbetrieb suchen
                 </button>
               </div>

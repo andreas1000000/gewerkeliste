@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { SearchSubmitButton } from "@/components/search-submit-button";
 
 type SiteHeaderProps = {
   locale?: "de" | "en";
@@ -64,12 +65,15 @@ export function SiteHeader({ locale = "de" }: SiteHeaderProps) {
           <label className="sr-only" htmlFor="site-search">
             {copy.searchLabel}
           </label>
-          <input
-            id="site-search"
-            name="query"
-            className="h-11 w-full rounded-md border border-line bg-white px-4 text-sm outline-none focus:border-action"
-            placeholder={copy.searchPlaceholder}
-          />
+          <div className="relative">
+            <input
+              id="site-search"
+              name="query"
+              className="h-11 w-full rounded-md border border-line bg-white px-4 pr-12 text-sm outline-none focus:border-action"
+              placeholder={copy.searchPlaceholder}
+            />
+            <SearchSubmitButton className="absolute right-1.5 top-1.5 h-8 w-8" label={copy.searchLabel} />
+          </div>
         </form>
 
         <nav className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-semibold text-[#24364d]">

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { Route } from "next";
 import Link from "next/link";
 import { ServiceAreaPreview } from "@/components/map/service-area-preview";
+import { SearchSubmitButton } from "@/components/search-submit-button";
 import { SiteHeader } from "@/components/site-header";
 import { getPublicCompanies } from "@/lib/data/public-directory";
 import type { ServiceAreaGeoJson } from "@/lib/geo/types";
@@ -101,11 +102,14 @@ export default async function EnglishHomePage() {
               <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
                 <label className="grid gap-1.5 text-xs font-semibold text-brand">
                   What are you looking for?
-                  <input
-                    name="query"
-                    className="h-12 rounded-md border border-line px-3 text-sm font-normal outline-none focus:border-action"
-                    placeholder="e.g. paving, waterproofing, metalwork"
-                  />
+                  <span className="relative">
+                    <input
+                      name="query"
+                      className="h-12 w-full rounded-md border border-line px-3 pr-14 text-sm font-normal outline-none focus:border-action"
+                      placeholder="e.g. paving, waterproofing, metalwork"
+                    />
+                    <SearchSubmitButton className="absolute right-1.5 top-1.5 h-9 w-9" label="Search companies" />
+                  </span>
                 </label>
                 <label className="grid gap-1.5 text-xs font-semibold text-brand">
                   Where?

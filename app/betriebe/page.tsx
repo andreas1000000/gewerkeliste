@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { Route } from "next";
 import Link from "next/link";
+import { SearchSubmitButton } from "@/components/search-submit-button";
 import { SiteHeader } from "@/components/site-header";
 import { ClaimBadge } from "@/components/status-badge";
 import { publicResultDescription, publicResultImage } from "@/lib/company-display";
@@ -77,13 +78,16 @@ export default async function BusinessesPage({ searchParams }: PageProps) {
               Betrieb suchen
             </label>
             <div className="mt-3 grid gap-3">
-              <input
-                id="business-query"
-                name="query"
-                defaultValue={query || ""}
-                placeholder="Betrieb suchen - z. B. Firmenname, Ort oder Gewerk"
-                className="min-h-12 rounded-md border border-line bg-white px-4 text-base outline-none focus:border-action"
-              />
+              <div className="relative">
+                <input
+                  id="business-query"
+                  name="query"
+                  defaultValue={query || ""}
+                  placeholder="Betrieb suchen - z. B. Firmenname, Ort oder Gewerk"
+                  className="min-h-12 w-full rounded-md border border-line bg-white px-4 pr-14 text-base outline-none focus:border-action"
+                />
+                <SearchSubmitButton className="absolute right-1.5 top-1.5 h-9 w-9" label="Betrieb suchen" />
+              </div>
               <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_136px]">
                 <input
                   name="ort"
