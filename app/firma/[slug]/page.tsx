@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import type { Route } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import {
   cleanCompanyDescription,
@@ -10,7 +10,7 @@ import {
   groupServicesForDisplay,
   publicResultDescription,
 } from "@/lib/company-display";
-import { getCompanyBySlug, getCompanyBySlugForMetadata } from "@/lib/data/public-directory";
+import { canonicalPublicCompanySlug, getCompanyBySlug, getCompanyBySlugForMetadata } from "@/lib/data/public-directory";
 import { breadcrumbJsonLd, jsonLd, localBusinessJsonLd } from "@/lib/seo";
 import type { PublicClaimStatus, PublicCompanyWithTrade } from "@/lib/types/public-directory";
 
@@ -60,6 +60,11 @@ export default async function CompanyPublicPage({ params }: PageProps) {
 
   try {
     const company = await getCompanyBySlug(slug);
+    const canonicalSlug = canonicalPublicCompanySlug(company);
+    if (canonicalSlug !== slug) {
+      permanentRedirect(`/firma/${canonicalSlug}`);
+    }
+
     const trade = company.trades?.name || "Gewerk";
     const status = getProfileStatus(company);
     const canClaim = company.claim_status === "unclaimed" || company.claim_status === "rejected";

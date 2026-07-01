@@ -1,5 +1,6 @@
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { serviceTermsByTradeSlug, serviceTaxonomy } from "@/lib/service-taxonomy";
+import { companySlug } from "@/lib/slug";
 import type {
   PublicCompanyMetadata,
   PublicCompanyTradeMatch,
@@ -41,7 +42,7 @@ export async function getPublicCompanies(params?: {
 
   const { data, error } = await query;
   if (error) return getPublicCompaniesFallback(params);
-  return resolveCompanyMedia(data as PublicCompanyWithTrade[]);
+  return dedupePublicCompanies(await resolveCompanyMedia(data as PublicCompanyWithTrade[]));
 }
 
 export async function getBusinessDirectoryCompanies(params?: {
@@ -70,7 +71,7 @@ export async function getBusinessDirectoryCompanies(params?: {
     return getBusinessDirectoryCompaniesFallback(params);
   }
 
-  const companies = await resolveCompanyMedia(data as PublicCompanyWithTrade[]);
+  const companies = dedupePublicCompanies(await resolveCompanyMedia(data as PublicCompanyWithTrade[]));
   if (!hasFilter) return companies.slice(0, params?.limit || 40);
 
   return companies
@@ -316,7 +317,7 @@ async function getPublicCompaniesByPrimaryTradeFallback(
 
   const { data, error } = await query;
   if (error) throw error;
-  return resolveCompanyMedia(data as PublicCompanyWithTrade[]);
+  return dedupePublicCompanies(await resolveCompanyMedia(data as PublicCompanyWithTrade[]));
 }
 
 async function getPublicCompaniesFallback(params?: {
@@ -368,7 +369,7 @@ async function getBusinessDirectoryCompaniesFallback(params?: {
 
   if (error) throw error;
 
-  const companies = await resolveCompanyMedia(data as PublicCompanyWithTrade[]);
+  const companies = dedupePublicCompanies(await resolveCompanyMedia(data as PublicCompanyWithTrade[]));
   if (!hasFilter) return companies.slice(0, params?.limit || 40);
 
   return companies
@@ -385,6 +386,56 @@ async function getBusinessDirectoryCompaniesFallback(params?: {
     .sort((a, b) => b.score - a.score || newestFirst(a.company, b.company))
     .map((entry) => entry.company)
     .slice(0, params?.limit || 50);
+}
+
+export function canonicalPublicCompanySlug(company: PublicCompanyWithTrade) {
+  if (company.slug === "wagner-und-spielvogel-gdbr-83083-riedering") {
+    return "wagner-und-spielvogel-gbr-83083-riedering";
+  }
+
+  return company.slug;
+}
+
+function dedupePublicCompanies<T extends PublicCompanyWithTrade>(companies: T[]) {
+  const bestByKey = new Map<string, T>();
+
+  for (const company of companies) {
+    const key = publicCompanyDedupeKey(company);
+    const current = bestByKey.get(key);
+    if (!current || comparePublicCompanyCanonical(company, current) < 0) {
+      bestByKey.set(key, company);
+    }
+  }
+
+  return [...bestByKey.values()];
+}
+
+function publicCompanyDedupeKey(company: PublicCompanyWithTrade) {
+  return [
+    normalizeForDirectorySearch(company.name),
+    normalizeForDirectorySearch(company.postal_code),
+    normalizeForDirectorySearch(company.city),
+  ].join("|");
+}
+
+function comparePublicCompanyCanonical(a: PublicCompanyWithTrade, b: PublicCompanyWithTrade) {
+  const aCanonical = canonicalPublicCompanySlug(a) === a.slug;
+  const bCanonical = canonicalPublicCompanySlug(b) === b.slug;
+  if (aCanonical !== bCanonical) return aCanonical ? -1 : 1;
+
+  const aExpected = a.slug === companySlug(a.name, a.postal_code, a.city);
+  const bExpected = b.slug === companySlug(b.name, b.postal_code, b.city);
+  if (aExpected !== bExpected) return aExpected ? -1 : 1;
+
+  const aMedia = Number(Boolean(a.logo_url)) + Number(Boolean(a.profile_image_url));
+  const bMedia = Number(Boolean(b.logo_url)) + Number(Boolean(b.profile_image_url));
+  if (aMedia !== bMedia) return bMedia - aMedia;
+
+  const aTradeCount = (a.company_trades || []).filter((match) => match.status !== "rejected" && match.visibility_level !== "internal").length;
+  const bTradeCount = (b.company_trades || []).filter((match) => match.status !== "rejected" && match.visibility_level !== "internal").length;
+  if (aTradeCount !== bTradeCount) return bTradeCount - aTradeCount;
+
+  return newestFirst(a, b);
 }
 
 async function getCompanyBySlugFallback(slug: string) {

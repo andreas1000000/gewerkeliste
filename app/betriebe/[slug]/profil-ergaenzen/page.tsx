@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import type { Route } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { ClaimAssistant } from "@/components/claim-assistant";
 import { SiteHeader } from "@/components/site-header";
 import { cleanCompanyDescription, extractServiceListFromDescription } from "@/lib/company-display";
 import { getLatestCompanyProfileUpdateSubmission } from "@/lib/data";
-import { getCompanyBySlug } from "@/lib/data/public-directory";
+import { canonicalPublicCompanySlug, getCompanyBySlug } from "@/lib/data/public-directory";
 import type { CompanyWithTrade } from "@/lib/types";
 
 type PageProps = {
@@ -31,6 +31,10 @@ export default async function CompanyProfileUpdatePage({ params }: PageProps) {
   const { slug } = await params;
   const company = await getProfileCompany(slug);
   if (!company) notFound();
+  const canonicalSlug = canonicalPublicCompanySlug(company);
+  if (canonicalSlug !== slug) {
+    permanentRedirect(`/betriebe/${canonicalSlug}/profil-ergaenzen`);
+  }
 
   const latestSubmission = await getLatestCompanyProfileUpdateSubmission(company.id);
   const initialTrades = getInitialTrades(company, latestSubmission);
