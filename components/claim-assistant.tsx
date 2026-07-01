@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useActionState } from "react";
 import { TradeCheckboxGroups } from "@/components/trade-checkbox-groups";
-import { TradeServiceSelection } from "@/components/trade-service-selection";
+import { serviceNamesForTrades, TradeServiceSelection } from "@/components/trade-service-selection";
 import { submitClaim } from "@/lib/actions/claims";
 import type { CompanyFormState, CompanySubmission, CompanyWithTrade } from "@/lib/types";
 import type { PublicCompanyWithTrade } from "@/lib/types/public-directory";
@@ -36,7 +36,8 @@ export function ClaimAssistant({
   const [selectedTrades, setSelectedTrades] = useState(initialTrades);
   const [selectedServices, setSelectedServices] = useState<string[]>(initialSubmission?.selected_services?.length ? initialSubmission.selected_services : initialServices || []);
   const [missingServices, setMissingServices] = useState((initialSubmission?.specializations || []).join("\n"));
-  const [mediaDetailsEntered, setMediaDetailsEntered] = useState(false);
+  const [logoFileSelected, setLogoFileSelected] = useState(false);
+  const [contactImageFileSelected, setContactImageFileSelected] = useState(false);
   const [contact, setContact] = useState({
     name: isUpdate ? initialSubmission?.contact_person_name || company.contact_person_name || company.contact_name || "" : "",
     email: isUpdate ? initialSubmission?.contact_person_email || company.email || "" : "",
@@ -57,6 +58,7 @@ export function ClaimAssistant({
   });
   const errors = state.fieldErrors || {};
   const tradeLabels = new Map(publicTradeTaxonomy().map((trade) => [trade.slug, trade.name]));
+  const mediaFilesSelected = logoFileSelected || contactImageFileSelected;
   if (state.ok) {
     return (
       <section className="rounded-lg border border-[#b9dec8] bg-white p-6 shadow-soft sm:p-8">
@@ -77,24 +79,16 @@ export function ClaimAssistant({
   }
   function toggleTrade(slug: string) {
     setSelectedTrades((current) => {
-      if (current.includes(slug)) {
-        const next = current.filter((item) => item !== slug);
-        pruneServicesForTrades(next);
-        return next;
-      }
-      return [...current, slug];
+      const next = current.includes(slug) ? current.filter((item) => item !== slug) : [...current, slug];
+      const allowedServices = serviceNamesForTrades(next);
+      setSelectedServices((services) => services.filter((service) => allowedServices.has(service)));
+      return next;
     });
   }
   function toggleService(service: string) {
     setSelectedServices((current) =>
       current.includes(service) ? current.filter((item) => item !== service) : [...current, service],
     );
-  }
-  function pruneServicesForTrades(trades: string[]) {
-    if (!trades.length) {
-      setSelectedServices([]);
-      return;
-    }
   }
   function updateContact(field: keyof typeof contact, value: string) {
     setContact((current) => ({ ...current, [field]: value }));
@@ -245,7 +239,7 @@ export function ClaimAssistant({
             label="Logo hochladen"
             maxBytes={2 * 1024 * 1024}
             name="companyLogo"
-            onMediaChange={setMediaDetailsEntered}
+            onMediaChange={setLogoFileSelected}
           />
           <MediaFileField
             accept="image/jpeg,image/png,image/webp"
@@ -254,14 +248,13 @@ export function ClaimAssistant({
             label="Ansprechpartnerbild hochladen"
             maxBytes={5 * 1024 * 1024}
             name="contactProfileImage"
-            onMediaChange={setMediaDetailsEntered}
+            onMediaChange={setContactImageFileSelected}
           />
           <Field label="Ansprechpartner Name" error={errors.mediaContactName}>
             <input
               className={inputClass}
               defaultValue={mediaContactName}
               name="mediaContactName"
-              onChange={(event) => event.target.value.trim() ? setMediaDetailsEntered(true) : undefined}
             />
           </Field>
           <Field label="Rolle/Funktion" error={errors.mediaContactRole}>
@@ -269,14 +262,13 @@ export function ClaimAssistant({
               className={inputClass}
               defaultValue={mediaContactRole}
               name="mediaContactRole"
-              onChange={(event) => event.target.value.trim() ? setMediaDetailsEntered(true) : undefined}
               placeholder="z. B. Inhaber, Geschäftsführung, Büro"
             />
           </Field>
         </div>
         <label className="mt-5 flex items-start gap-3 text-sm font-medium leading-6 text-ink">
-          <input className="mt-1 h-4 w-4 accent-action" name="imageConsentGiven" required={mediaDetailsEntered} type="checkbox" />
-          Ich bin berechtigt, diese Bilder und Angaben für den Betrieb einzureichen.
+          <input className="mt-1 h-4 w-4 accent-action" name="imageConsentGiven" required={mediaFilesSelected} type="checkbox" />
+          Ich bin berechtigt, diese Bilder für den Betrieb einzureichen.
         </label>
         {errors.imageConsentGiven ? <p className="mt-2 text-xs font-semibold text-[#a4442b]">{errors.imageConsentGiven}</p> : null}
       </WizardSection>
@@ -393,7 +385,7 @@ function MediaFileField({
           } else if (file && file.size > maxBytes) {
             event.target.setCustomValidity(`Die Datei ist zu groß. Maximal ${maxMb} MB sind erlaubt.`);
           }
-          if (file) onMediaChange(true);
+          onMediaChange(Boolean(file));
           event.target.reportValidity();
         }}
         type="file"
