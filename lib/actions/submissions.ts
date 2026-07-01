@@ -19,6 +19,14 @@ type SubmissionTradeAssignment = {
   primary: boolean;
 };
 
+type ExistingCompanyMatch = ApprovedCompany & {
+  name: string;
+  postal_code: string;
+  city: string;
+  email: string | null;
+  website_url: string | null;
+};
+
 export async function approveSubmission(formData: FormData) {
   const id = String(formData.get("id") || "");
   if (!id) redirect("/admin/submissions?error=missing-submission-id");
@@ -62,10 +70,16 @@ async function promoteSubmissionToCompany(
   }
 
   const updateOrInsert = companyPayload(submission, trade.id, options.publicVisible);
+  const existingCompany = claimCompanyId ? null : await findExistingCompanyForSubmission(submission);
   const company = claimCompanyId
     ? await updateClaimedCompany(claimCompanyId, updateOrInsert)
+    : existingCompany
+      ? await updateClaimedCompany(existingCompany.id, updateOrInsert)
     : await createSubmittedCompany(submission, updateOrInsert);
   const tradeAssignments = await getSubmissionTradeAssignments(submission, { id: trade.id, slug: tradeSlug });
+
+  await upsertCompanyTradeRelations(company.id, tradeAssignments, submission);
+  await insertSubmissionSource(company.id, submission);
 
   const { error: submissionError } = await supabase
     .from("company_submissions")
@@ -73,11 +87,6 @@ async function promoteSubmissionToCompany(
     .eq("id", submission.id)
     .neq("status", "approved");
   if (submissionError) throw submissionError;
-
-  await Promise.allSettled([
-    upsertCompanyTradeRelations(company.id, tradeAssignments, submission),
-    insertSubmissionSource(company.id, submission),
-  ]);
 
   return company;
 }
@@ -154,6 +163,46 @@ async function createSubmittedCompany(
   return data;
 }
 
+async function findExistingCompanyForSubmission(submission: CompanySubmission): Promise<ExistingCompanyMatch | null> {
+  const supabase = getSupabaseAdmin();
+  const expectedSlug = companySlug(submission.company_name, submission.postal_code, submission.city);
+  const { data: slugMatch, error: slugError } = await supabase
+    .from("companies")
+    .select("id, slug, name, postal_code, city, email, website_url")
+    .eq("slug", expectedSlug)
+    .maybeSingle();
+
+  if (!slugError && slugMatch) return slugMatch as ExistingCompanyMatch;
+
+  const { data, error } = await supabase
+    .from("companies")
+    .select("id, slug, name, postal_code, city, email, website_url")
+    .eq("postal_code", submission.postal_code)
+    .limit(50);
+
+  if (error || !data?.length) return null;
+
+  const normalizedSubmissionName = normalizeCompanyMatchValue(submission.company_name);
+  const normalizedWebsite = normalizeUrlForMatch(submission.website);
+  const normalizedEmail = normalizeEmailForMatch(submission.email);
+
+  const matches = (data as ExistingCompanyMatch[]).filter((company) => {
+    if (company.slug === expectedSlug) return true;
+    if (
+      company.postal_code === submission.postal_code &&
+      normalizeCompanyMatchValue(company.city) === normalizeCompanyMatchValue(submission.city) &&
+      normalizeCompanyMatchValue(company.name) === normalizedSubmissionName
+    ) {
+      return true;
+    }
+    if (normalizedWebsite && normalizedWebsite === normalizeUrlForMatch(company.website_url)) return true;
+    if (normalizedEmail && normalizedEmail === normalizeEmailForMatch(company.email)) return true;
+    return false;
+  });
+
+  return matches[0] || null;
+}
+
 async function getSubmissionTradeAssignments(
   submission: CompanySubmission,
   primaryTrade: { id: string; slug: string },
@@ -202,7 +251,7 @@ async function upsertCompanyTradeRelation(
   const { error } = await supabase.from("company_trades").upsert(row, { onConflict: "company_id,trade_id" });
   if (!error) return;
 
-  await supabase
+  const { error: fallbackError } = await supabase
     .from("company_trades")
     .upsert(
       {
@@ -214,6 +263,7 @@ async function upsertCompanyTradeRelation(
       },
       { onConflict: "company_id,trade_id" },
     );
+  if (fallbackError) throw fallbackError;
 }
 
 async function insertSubmissionSource(companyId: string, submission: CompanySubmission) {
@@ -255,6 +305,34 @@ function normalizeSubmissionWebsite(value: string | null) {
   if (!trimmed) return null;
   if (/^https?:\/\//i.test(trimmed)) return trimmed;
   return `https://${trimmed}`;
+}
+
+function normalizeUrlForMatch(value: string | null) {
+  if (!value) return "";
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/^https?:\/\//, "")
+    .replace(/^www\./, "")
+    .replace(/\/+$/, "");
+}
+
+function normalizeEmailForMatch(value: string | null) {
+  return value?.trim().toLowerCase() || "";
+}
+
+function normalizeCompanyMatchValue(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/ä/g, "ae")
+    .replace(/ö/g, "oe")
+    .replace(/ü/g, "ue")
+    .replace(/ß/g, "ss")
+    .replace(/\b(gmbh|gbr|gdbr|ug|ag|kg|ohg|ek|e k|mbh|co|firma)\b/g, " ")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
 }
 
 function readableApprovalError(error: unknown) {
