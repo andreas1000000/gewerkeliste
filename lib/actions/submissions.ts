@@ -32,6 +32,7 @@ export async function approveSubmission(formData: FormData) {
   if (!id) redirect("/admin/submissions?error=missing-submission-id");
 
   const publicVisible = formData.get("public_visible") === "on";
+  const verified = formData.get("verified") === "on";
 
   try {
     const submission = await getCompanySubmission(id);
@@ -39,7 +40,7 @@ export async function approveSubmission(formData: FormData) {
       throw new Error("Diese Einreichung wurde bereits freigegeben.");
     }
 
-    const company = await promoteSubmissionToCompany(submission, { publicVisible });
+    const company = await promoteSubmissionToCompany(submission, { publicVisible, verified });
 
     revalidatePath("/admin/submissions");
     revalidatePath(`/admin/submissions/${id}`);
@@ -58,7 +59,7 @@ export async function approveSubmission(formData: FormData) {
 
 async function promoteSubmissionToCompany(
   submission: CompanySubmission,
-  options: { publicVisible: boolean },
+  options: { publicVisible: boolean; verified: boolean },
 ): Promise<ApprovedCompany> {
   const supabase = getSupabaseAdmin();
   const claimCompanyId = claimCompanyIdFromSource(submission.source);
@@ -69,7 +70,7 @@ async function promoteSubmissionToCompany(
     throw tradeError || new Error(`Gewerk fehlt in Supabase: ${tradeSlug}`);
   }
 
-  const updateOrInsert = companyPayload(submission, trade.id, options.publicVisible);
+  const updateOrInsert = companyPayload(submission, trade.id, options);
   const existingCompany = claimCompanyId ? null : await findExistingCompanyForSubmission(submission);
   const company = claimCompanyId
     ? await updateClaimedCompany(claimCompanyId, updateOrInsert)
@@ -91,7 +92,13 @@ async function promoteSubmissionToCompany(
   return company;
 }
 
-function companyPayload(submission: CompanySubmission, tradeId: string, publicVisible: boolean) {
+function companyPayload(
+  submission: CompanySubmission,
+  tradeId: string,
+  options: { publicVisible: boolean; verified: boolean },
+) {
+  const verificationDate = options.verified ? new Date().toISOString() : null;
+
   return {
     trade_id: tradeId,
     description: companyDescription(submission),
@@ -105,13 +112,22 @@ function companyPayload(submission: CompanySubmission, tradeId: string, publicVi
     latitude: 0,
     longitude: 0,
     claim_status: "claimed",
-    verified: false,
-    public_visible: publicVisible,
+    verified: options.verified,
+    profile_status: options.verified ? "verified" : "claimed",
+    verification_date: verificationDate,
+    public_visible: options.publicVisible,
     logo_url: submission.logo_url || null,
     profile_image_url: submission.profile_image_url || null,
     profile_image_alt: submission.profile_image_alt || null,
     contact_person_name: submission.contact_person_name,
     contact_person_role: submission.contact_person_role,
+    service_radius_km: submission.service_radius_km || null,
+    service_regions: submission.service_regions,
+    service_postal_codes: submission.postal_codes,
+    references_text: submission.references_text || null,
+    memberships: submission.memberships,
+    certificates: submission.certificates,
+    manufacturer_certificates: submission.manufacturer_certificates,
   };
 }
 
@@ -122,7 +138,9 @@ async function updateClaimedCompany(
   const supabase = getSupabaseAdmin();
   const { data: existing, error: existingError } = await supabase
     .from("companies")
-    .select("logo_url, profile_image_url, profile_image_alt, contact_person_name, contact_person_role")
+    .select(
+      "claim_status, verified, profile_status, verification_date, logo_url, profile_image_url, profile_image_alt, contact_person_name, contact_person_role, service_radius_km, service_regions, service_postal_codes, references_text, memberships, certificates, manufacturer_certificates",
+    )
     .eq("id", companyId)
     .single();
   if (existingError || !existing) {
@@ -131,11 +149,24 @@ async function updateClaimedCompany(
 
   const updatePayload = {
     ...payload,
+    claim_status: existing.claim_status === "claimed" && !payload.verified ? "claimed" : payload.claim_status,
+    verified: payload.verified || Boolean(existing.verified),
+    profile_status: payload.verified ? "verified" : existing.profile_status || payload.profile_status,
+    verification_date: payload.verified ? payload.verification_date : existing.verification_date || null,
     logo_url: payload.logo_url || existing.logo_url || null,
     profile_image_url: payload.profile_image_url || existing.profile_image_url || null,
     profile_image_alt: payload.profile_image_alt || existing.profile_image_alt || null,
     contact_person_name: payload.contact_person_name || existing.contact_person_name || null,
     contact_person_role: payload.contact_person_role || existing.contact_person_role || null,
+    service_radius_km: payload.service_radius_km || existing.service_radius_km || null,
+    service_regions: payload.service_regions.length ? payload.service_regions : existing.service_regions || [],
+    service_postal_codes: payload.service_postal_codes.length ? payload.service_postal_codes : existing.service_postal_codes || [],
+    references_text: payload.references_text || existing.references_text || null,
+    memberships: payload.memberships.length ? payload.memberships : existing.memberships || [],
+    certificates: payload.certificates.length ? payload.certificates : existing.certificates || [],
+    manufacturer_certificates: payload.manufacturer_certificates.length
+      ? payload.manufacturer_certificates
+      : existing.manufacturer_certificates || [],
   };
 
   const { data, error } = await supabase.from("companies").update(updatePayload).eq("id", companyId).select("id, slug").single();

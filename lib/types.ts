@@ -26,6 +26,18 @@ export type Company = {
   public_visible: boolean;
   claim_status: ClaimStatus;
   verified: boolean;
+  profile_status?: "imported" | "verified" | "claimed" | "needs_review" | "removed" | null;
+  verification_date?: string | null;
+  is_free_founding_member?: boolean | null;
+  trust_badge?: string | null;
+  voluntary_support_status?: string | null;
+  service_radius_km?: number | null;
+  service_regions?: string[] | null;
+  service_postal_codes?: string[] | null;
+  references_text?: string | null;
+  memberships?: string[] | null;
+  certificates?: string[] | null;
+  manufacturer_certificates?: string[] | null;
   created_at: string;
   updated_at: string;
 };

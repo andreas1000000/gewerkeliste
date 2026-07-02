@@ -87,6 +87,10 @@ export default async function CompanyPublicPage({ params }: PageProps) {
     const services = getRecognizableServices(company, executedTrades);
     const groupedServices = groupServicesForDisplay(services);
     const sourceItems = getSourceItems(company, websiteHref);
+    const serviceAreaItems = getServiceAreaItems(company);
+    const referenceItems = getTextBlockItems(company.references_text);
+    const proofItems = getProfileProofItems(company);
+    const startProfileBadges = getStartProfileBadges(company);
     const hasCoordinates =
       Number.isFinite(company.latitude) &&
       Number.isFinite(company.longitude) &&
@@ -149,6 +153,11 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                   <div className="min-w-0 pb-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <StatusBadge status={status} />
+                      {startProfileBadges.map((badge) => (
+                        <span key={badge} className="rounded-md border border-[#d6c089] bg-[#fff8df] px-3 py-1 text-xs font-semibold text-[#715316]">
+                          {badge}
+                        </span>
+                      ))}
                     </div>
                     <h1 className="mt-3 text-3xl font-semibold tracking-normal text-ink sm:text-4xl">{company.name}</h1>
                     <p className="mt-2 text-lg font-medium text-[#30415f]">{headline}</p>
@@ -199,17 +208,72 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                   <Fact label="Ort" value={company.city} />
                   <Fact
                     label="Wirkungskreis"
-                    value="Regionale Tätigkeit kann nach Profilübernahme präzisiert werden."
+                    value={
+                      serviceAreaItems.length
+                        ? serviceAreaItems.join(", ")
+                        : "Regionale Tätigkeit kann nach Profilübernahme präzisiert werden."
+                    }
                   />
                 </div>
                 {!address.hasStreet ? (
                   <p className="mt-3 text-xs leading-5 text-muted">Straße/Hausnummer ist noch nicht hinterlegt.</p>
                 ) : null}
-                <p className="mt-4 text-sm leading-6 text-muted">
-                  Aktuell wird der Betrieb mit dem bekannten Standort geführt. Ein genauer Einsatzradius oder einzelne Orte werden erst nach
-                  Prüfung und Profilübernahme veröffentlicht.
-                </p>
+                {company.service_radius_km ? (
+                  <p className="mt-4 text-sm leading-6 text-muted">
+                    Angegebener Einsatzradius: {company.service_radius_km} km. Angaben zum Wirkungskreis werden vor Veröffentlichung geprüft.
+                  </p>
+                ) : (
+                  <p className="mt-4 text-sm leading-6 text-muted">
+                    Aktuell wird der Betrieb mit dem bekannten Standort geführt. Ein genauer Einsatzradius oder einzelne Orte werden erst nach
+                    Prüfung und Profilübernahme veröffentlicht.
+                  </p>
+                )}
               </ProfileCard>
+
+              {(referenceItems.length || proofItems.length) ? (
+                <ProfileCard title="Referenzen und Nachweise">
+                  {referenceItems.length ? (
+                    <div>
+                      <h3 className="text-sm font-semibold text-ink">Referenzen</h3>
+                      <ul className="mt-3 grid gap-2 text-sm leading-6 text-muted">
+                        {referenceItems.map((item) => (
+                          <li key={item} className="rounded-md border border-line bg-[#fbfcff] px-4 py-3">{item}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+                  {proofItems.length ? (
+                    <div className={referenceItems.length ? "mt-5" : ""}>
+                      <h3 className="text-sm font-semibold text-ink">Nachweise und Zugehörigkeiten</h3>
+                      <ul className="mt-3 flex flex-wrap gap-2">
+                        {proofItems.map((item) => (
+                          <li key={item} className="rounded-md border border-line bg-[#fbfcff] px-3 py-2 text-sm font-semibold text-ink">
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+                  <p className="mt-4 text-xs leading-5 text-muted">
+                    Referenzen und Nachweise werden als Textangaben dargestellt. Bilder oder Dokumentdateien werden derzeit nicht öffentlich angezeigt.
+                  </p>
+                </ProfileCard>
+              ) : null}
+
+              {company.verified ? (
+                <ProfileCard title="Verifizierungskennzeichnung">
+                  <div className="rounded-md border border-[#8ab9aa] bg-[#e8f3ef] px-4 py-4 text-sm leading-6 text-[#25584c]">
+                    <div className="font-semibold text-ink">Verifiziertes Profil</div>
+                    <p className="mt-2">
+                      Die veröffentlichten Betriebsdaten wurden geprüft oder vom Betrieb bestätigt. Das ist ein Hinweis
+                      auf nachvollziehbare Profildaten, keine Qualitäts-, Verfügbarkeits- oder Auftragsgarantie.
+                    </p>
+                    {company.verification_date ? (
+                      <p className="mt-2 text-xs">Bestätigt am {formatDate(company.verification_date)}</p>
+                    ) : null}
+                  </div>
+                </ProfileCard>
+              ) : null}
 
               <ProfileCard title="Datenquellen / Datenstatus">
                 {sourceItems.length ? (
@@ -581,9 +645,9 @@ function ProfileCard({ title, subtitle, children }: { title: string; subtitle?: 
 function getProfileStatus(company: PublicCompanyWithTrade): ProfileStatus {
   if (company.verified) {
     return {
-      label: "Betriebsdaten bestätigt",
-      shortLabel: "Daten bestätigt",
-      note: "Der Betrieb hat grundlegende Profildaten bestätigt.",
+      label: "Verifiziertes Profil",
+      shortLabel: "Verifiziertes Profil",
+      note: "Die veröffentlichten Betriebsdaten wurden geprüft oder vom Betrieb bestätigt.",
       tone: "verified",
     };
   }
@@ -740,6 +804,58 @@ function getProfileCompletionItems(company: PublicCompanyWithTrade, description:
     hasCoordinates ? "Wirkungskreis präzisieren" : "Wirkungskreis markieren",
     "Kontaktwege aktuell halten",
   ];
+}
+
+function getServiceAreaItems(company: PublicCompanyWithTrade) {
+  const regions = Array.isArray(company.service_regions) ? company.service_regions : [];
+  const postalCodes = Array.isArray(company.service_postal_codes) ? company.service_postal_codes : [];
+
+  return [...regions, ...postalCodes]
+    .map((item) => String(item).trim())
+    .filter(Boolean)
+    .slice(0, 8);
+}
+
+function getTextBlockItems(value?: string | null) {
+  if (!value) return [];
+
+  return value
+    .split(/\n|;/)
+    .map((item) => item.trim().replace(/^[\-–•\s]+/, ""))
+    .filter((item) => item.length >= 3)
+    .slice(0, 8);
+}
+
+function getProfileProofItems(company: PublicCompanyWithTrade) {
+  return [
+    ...(Array.isArray(company.memberships) ? company.memberships : []),
+    ...(Array.isArray(company.certificates) ? company.certificates : []),
+    ...(Array.isArray(company.manufacturer_certificates) ? company.manufacturer_certificates : []),
+  ]
+    .map((item) => String(item).trim())
+    .filter(Boolean)
+    .slice(0, 12);
+}
+
+function getStartProfileBadges(company: PublicCompanyWithTrade) {
+  const badges: string[] = [];
+
+  if (company.is_free_founding_member) badges.push("Startmitglied");
+  if (company.trust_badge) badges.push(company.trust_badge);
+  if (company.voluntary_support_status) badges.push(company.voluntary_support_status);
+  if (company.profile_status === "verified" && !badges.includes("Verifiziertes Profil")) {
+    badges.push("Verifiziertes Profil");
+  }
+
+  return badges.slice(0, 3);
+}
+
+function formatDate(value: string) {
+  try {
+    return new Intl.DateTimeFormat("de-DE", { dateStyle: "medium" }).format(new Date(value));
+  } catch {
+    return value;
+  }
 }
 
 function getProfileAddress(company: PublicCompanyWithTrade) {
