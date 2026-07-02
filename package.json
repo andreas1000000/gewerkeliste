@@ -30,6 +30,7 @@
     "services:enrich:dry-run": "node scripts/service-enrichment-dry-run.mjs",
     "services:enrich:review-export": "node scripts/service-enrichment-review-export.mjs",
     "services:approve:high-priority": "node scripts/service-approval-high-priority.mjs",
+    "services:apply-approved": "node scripts/apply-approved-service-plan.mjs",
     "seo:coverage": "node scripts/seo-coverage.mjs",
     "supabase:apply-sql": "node scripts/apply-supabase-sql.mjs"
   },
