@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { createClient } from "@supabase/supabase-js";
+import { existsSync, readFileSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
@@ -10,6 +11,8 @@ import { requireLiveConfirmation, requireSupabaseSafety } from "./safety-gates.m
 
 const args = parseArgs(process.argv.slice(2));
 const live = Boolean(args.live);
+loadEnvFile(".env.local");
+loadEnvFile(".env");
 const taxonomyModule = await importServiceTaxonomyModule();
 const { serviceTaxonomy, serviceActivities, serviceContexts } = taxonomyModule;
 
@@ -132,6 +135,7 @@ async function syncServices(familyIds) {
           slug: service.slug,
           description: service.description,
           search_weight: service.searchWeight || 70,
+          sort_order: index + 1,
           seo_enabled: false,
           is_popular: Boolean(service.isPopular),
           is_active: true,
@@ -306,6 +310,24 @@ function parseArgs(argv) {
     }
   }
   return result;
+}
+
+function loadEnvFile(filePath) {
+  if (!existsSync(filePath)) return;
+  const content = readFileSync(filePath, "utf8");
+  for (const line of content.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) continue;
+    const separator = trimmed.indexOf("=");
+    if (separator <= 0) continue;
+    const key = trimmed.slice(0, separator).trim();
+    if (process.env[key]) continue;
+    let value = trimmed.slice(separator + 1).trim();
+    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+      value = value.slice(1, -1);
+    }
+    process.env[key] = value;
+  }
 }
 
 function fail(message) {

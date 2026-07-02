@@ -36,6 +36,7 @@ create table if not exists services (
   slug text not null,
   description text,
   search_weight integer not null default 70 check (search_weight between 0 and 100),
+  sort_order integer not null default 0,
   seo_enabled boolean not null default false,
   is_popular boolean not null default false,
   is_active boolean not null default true,

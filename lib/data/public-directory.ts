@@ -103,19 +103,29 @@ export async function getServiceDirectoryCompanies(params: {
 
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
-    .from("companies")
+    .from("company_services")
     .select(
-      "*, trades(id, name, slug), company_trades(confidence_score, source, evidence, status, visibility_level, trades(id, name, slug))",
+      "confidence_score, services!inner(slug), companies!inner(*, trades(id, name, slug), company_trades(confidence_score, source, evidence, status, visibility_level, trades(id, name, slug)))",
     )
-    .eq("public_visible", true)
-    .order("created_at", { ascending: false })
+    .eq("status", "confirmed")
+    .eq("services.slug", service.slug)
+    .eq("companies.public_visible", true)
+    .order("confidence_score", { ascending: false })
     .limit(700);
 
   if (error) return [];
 
-  const companies = dedupePublicCompanies(await resolveCompanyMedia(data as PublicCompanyWithTrade[]));
+  const companies = dedupePublicCompanies(
+    await resolveCompanyMedia(
+      (data || [])
+        .map((row) => {
+          const raw = row as unknown as { companies: PublicCompanyWithTrade | PublicCompanyWithTrade[] | null };
+          return Array.isArray(raw.companies) ? raw.companies[0] : raw.companies;
+        })
+        .filter((company): company is PublicCompanyWithTrade => Boolean(company)),
+    ),
+  );
   return companies
-    .filter((company) => serviceDirectlyMatchesCompany(company, service))
     .filter((company) => companyMatchesDirectoryLocation(company, params.location))
     .map((company) => ({
       company,
@@ -267,45 +277,30 @@ export async function getPublicTradeLocationSitemapEntries(limit = 500) {
 export async function getPublicServiceLocationSitemapEntries(limit = 700) {
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
-    .from("companies")
-    .select("city, description, website_url, email, phone, postal_code, trades(slug), company_trades(status, visibility_level, evidence, trades(slug))")
-    .eq("public_visible", true)
-    .not("city", "is", null)
+    .from("company_services")
+    .select("services!inner(slug), companies!inner(city, public_visible)")
+    .eq("status", "confirmed")
+    .eq("companies.public_visible", true)
+    .not("companies.city", "is", null)
     .limit(limit * 3);
 
   if (error) return [];
 
-  const serviceEntries = serviceTaxonomy.flatMap((group) =>
-    group.trades.flatMap((trade) =>
-      trade.families.flatMap((familyItem) =>
-        familyItem.services.map((service) => ({
-          service,
-          tradeSlug: trade.slug,
-          directTerms: [service.name, service.slug.replace(/-/g, " "), ...service.aliases],
-        })),
-      ),
-    ),
-  );
   const entries = new Map<string, { serviceSlug: string; city: string }>();
 
   for (const row of data || []) {
-    const company = row as unknown as PublicCompanyWithTrade;
-    if (!company.city) continue;
+    const raw = row as unknown as {
+      services: { slug: string } | { slug: string }[] | null;
+      companies: { city: string } | { city: string }[] | null;
+    };
+    const service = Array.isArray(raw.services) ? raw.services[0] : raw.services;
+    const company = Array.isArray(raw.companies) ? raw.companies[0] : raw.companies;
+    if (!service?.slug) continue;
+    if (!company?.city) continue;
     const city = slugifyLocation(company.city);
     if (!city) continue;
-    const tradeSlugs = publicCompanyTradeSlugSet(company);
-    const blob = companyDirectorySearchBlob(company);
-
-    for (const entry of serviceEntries) {
-      if (!tradeSlugs.has(normalizeForDirectorySearch(entry.tradeSlug))) continue;
-      const directHit = entry.directTerms
-        .map(normalizeForDirectorySearch)
-        .filter((term) => term.length > 2)
-        .some((term) => blob.includes(term));
-      if (!directHit) continue;
-      entries.set(`${entry.service.slug}/${city}`, { serviceSlug: entry.service.slug, city });
-      if (entries.size >= limit) return Array.from(entries.values());
-    }
+    entries.set(`${service.slug}/${city}`, { serviceSlug: service.slug, city });
+    if (entries.size >= limit) return Array.from(entries.values());
   }
 
   return Array.from(entries.values());
