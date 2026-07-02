@@ -7,6 +7,7 @@ import { ClaimBadge } from "@/components/status-badge";
 import { publicResultDescription } from "@/lib/company-display";
 import { getPublicCompanies } from "@/lib/data/public-directory";
 import { breadcrumbJsonLd, collectionPageJsonLd, itemListJsonLd, jsonLd } from "@/lib/seo";
+import { popularServicesForTrade } from "@/lib/service-taxonomy";
 import { isSupabaseConfigured } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
@@ -47,6 +48,7 @@ export default async function LocationPage({ params }: PageProps) {
   if (!companies.length) notFound();
 
   const tradeLinks = tradeNames(companies).slice(0, 16);
+  const serviceLinks = servicesForTrades(tradeLinks).slice(0, 16);
   const breadcrumb = breadcrumbJsonLd([
     { name: "Startseite", path: "/" },
     { name: "Orte", path: "/orte" },
@@ -105,6 +107,27 @@ export default async function LocationPage({ params }: PageProps) {
             </div>
           </aside>
         </div>
+
+        {serviceLinks.length ? (
+          <section className="mt-8 rounded-lg border border-line bg-white p-6 shadow-soft">
+            <h2 className="text-xl font-semibold text-[#07173d]">Häufige Leistungen in {location}</h2>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-muted">
+              Diese Leistungsbegriffe stammen aus den Gewerken, für die in {location} öffentliche Betriebe sichtbar sind.
+              Die konkrete Zuordnung wird erst über geprüfte Leistungsdaten indexierbar.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {serviceLinks.map((service) => (
+                <Link
+                  key={service.slug}
+                  className="rounded-md border border-line bg-[#fbfcff] px-3 py-2 text-sm font-semibold text-action hover:border-action"
+                  href={`/betriebe?ort=${ort}&leistung=${service.slug}&query=${encodeURIComponent(service.name)}` as Route}
+                >
+                  {service.name}
+                </Link>
+              ))}
+            </div>
+          </section>
+        ) : null}
 
         <section className="mt-8 rounded-lg border border-line bg-white p-6 shadow-soft">
           <div className="flex flex-col justify-between gap-3 border-b border-line pb-4 sm:flex-row sm:items-end">
@@ -167,4 +190,14 @@ function tradeNames(companies: Awaited<ReturnType<typeof getPublicCompanies>>) {
     }
   }
   return Array.from(trades.values()).sort((a, b) => a.name.localeCompare(b.name, "de"));
+}
+
+function servicesForTrades(trades: Array<{ slug: string }>) {
+  const services = new Map<string, { name: string; slug: string }>();
+  for (const trade of trades) {
+    for (const service of popularServicesForTrade(trade.slug, 4)) {
+      services.set(service.slug, { name: service.name, slug: service.slug });
+    }
+  }
+  return Array.from(services.values()).sort((a, b) => a.name.localeCompare(b.name, "de"));
 }

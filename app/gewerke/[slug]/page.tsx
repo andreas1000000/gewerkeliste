@@ -155,12 +155,18 @@ export default async function TradeDetailPage({ params }: PageProps) {
                 <Link
                   key={service.slug}
                   className="rounded-md border border-line bg-[#fbfcff] px-3 py-2 text-sm font-medium text-ink hover:border-action hover:text-action"
-                  href={`/betriebe?gewerk=${trade.slug}&leistung=${service.slug}&query=${encodeURIComponent(service.name)}` as Route}
+                  href={`/leistungen/${service.slug}` as Route}
                 >
                   {service.name}
                 </Link>
               ))}
             </div>
+            <Link
+              className="mt-4 inline-flex min-h-10 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-action hover:border-action"
+              href={`/betriebe?gewerk=${trade.slug}` as Route}
+            >
+              Betriebe für {trade.name} anzeigen
+            </Link>
           </section>
         ) : null}
 

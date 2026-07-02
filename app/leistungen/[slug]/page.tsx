@@ -7,7 +7,7 @@ import { ClaimBadge } from "@/components/status-badge";
 import { publicResultDescription } from "@/lib/company-display";
 import { getServiceDirectoryCompanies } from "@/lib/data/public-directory";
 import { breadcrumbJsonLd, collectionPageJsonLd, itemListJsonLd, jsonLd } from "@/lib/seo";
-import { findServiceSeoEntry } from "@/lib/service-taxonomy";
+import { findServiceSeoEntry, popularServicesForTrade } from "@/lib/service-taxonomy";
 import { isSupabaseConfigured } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
@@ -66,6 +66,7 @@ export default async function ServicePage({ params }: PageProps) {
     })),
   );
   const locations = Array.from(new Set(companies.map((company) => company.city).filter(Boolean))).slice(0, 12);
+  const relatedServices = popularServicesForTrade(entry.trade.slug, 10).filter((service) => service.slug !== entry.service.slug).slice(0, 8);
 
   return (
     <main className="min-h-screen bg-[#f7f8fb] text-ink">
@@ -137,6 +138,27 @@ export default async function ServicePage({ params }: PageProps) {
                   href={`/leistungen/${entry.service.slug}/${slugifyLocation(location)}` as Route}
                 >
                   {entry.service.name} in {location}
+                </Link>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
+        {relatedServices.length ? (
+          <section className="mt-8 rounded-lg border border-line bg-white p-6 shadow-soft">
+            <h2 className="text-xl font-semibold text-[#07173d]">Verwandte Leistungen im Gewerk {entry.trade.name}</h2>
+            <p className="mt-2 max-w-3xl text-sm leading-6 text-muted">
+              Diese Leistungen liegen fachlich nahe beieinander. Die jeweilige Leistungsseite wird nur indexierbar, wenn
+              echte passende Betriebe vorhanden sind.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {relatedServices.map((service) => (
+                <Link
+                  key={service.slug}
+                  className="rounded-md border border-line bg-[#fbfcff] px-3 py-2 text-sm font-semibold text-action hover:border-action"
+                  href={`/leistungen/${service.slug}` as Route}
+                >
+                  {service.name}
                 </Link>
               ))}
             </div>

@@ -7,7 +7,7 @@ import { ClaimBadge } from "@/components/status-badge";
 import { publicResultDescription } from "@/lib/company-display";
 import { getServiceDirectoryCompanies } from "@/lib/data/public-directory";
 import { breadcrumbJsonLd, collectionPageJsonLd, itemListJsonLd, jsonLd } from "@/lib/seo";
-import { findServiceSeoEntry } from "@/lib/service-taxonomy";
+import { findServiceSeoEntry, popularServicesForTrade } from "@/lib/service-taxonomy";
 import { isSupabaseConfigured } from "@/lib/supabase";
 
 export const dynamic = "force-dynamic";
@@ -72,6 +72,7 @@ export default async function ServiceLocationPage({ params }: PageProps) {
       path: `/firma/${company.slug}`,
     })),
   );
+  const relatedServices = popularServicesForTrade(entry.trade.slug, 10).filter((service) => service.slug !== entry.service.slug).slice(0, 8);
 
   return (
     <main className="min-h-screen bg-[#f7f8fb] text-ink">
@@ -190,6 +191,23 @@ export default async function ServiceLocationPage({ params }: PageProps) {
             </div>
           )}
         </section>
+
+        {relatedServices.length ? (
+          <section className="mt-8 rounded-lg border border-line bg-white p-6 shadow-soft">
+            <h2 className="text-xl font-semibold text-[#07173d]">Verwandte Leistungen in diesem Gewerk</h2>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {relatedServices.map((service) => (
+                <Link
+                  key={service.slug}
+                  className="rounded-md border border-line bg-[#fbfcff] px-3 py-2 text-sm font-semibold text-action hover:border-action"
+                  href={`/betriebe?ort=${ort}&leistung=${service.slug}&query=${encodeURIComponent(service.name)}` as Route}
+                >
+                  {service.name} in {location}
+                </Link>
+              ))}
+            </div>
+          </section>
+        ) : null}
       </section>
     </main>
   );

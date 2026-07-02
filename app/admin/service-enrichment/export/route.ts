@@ -12,6 +12,8 @@ export async function GET() {
     headers: {
       "Content-Type": "text/csv; charset=utf-8",
       "Content-Disposition": 'attachment; filename="service-enrichment-review-2026-07-01.csv"',
+      "Cache-Control": "private, no-store",
+      "X-Robots-Tag": "noindex, nofollow",
     },
   });
 }

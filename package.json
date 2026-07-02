@@ -29,6 +29,7 @@
     "taxonomy:services:test": "node scripts/test-service-taxonomy.mjs",
     "services:enrich:dry-run": "node scripts/service-enrichment-dry-run.mjs",
     "services:enrich:review-export": "node scripts/service-enrichment-review-export.mjs",
+    "seo:coverage": "node scripts/seo-coverage.mjs",
     "supabase:apply-sql": "node scripts/apply-supabase-sql.mjs"
   },
   "dependencies": {

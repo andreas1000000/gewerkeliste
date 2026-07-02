@@ -91,6 +91,21 @@ export default async function AdminServiceEnrichmentPage({ searchParams }: PageP
         <Metric label="Ort-Seiten" value={report.summary.service_location_pages_after_review} />
       </section>
 
+      <section className="mb-6 rounded-lg border border-line bg-white p-4 shadow-soft">
+        <h2 className="text-sm font-semibold text-ink">Review-Entscheidungen</h2>
+        <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold">
+          {["AUTO_CANDIDATE_HIGH", "REVIEW_REQUIRED_MEDIUM", "DO_NOT_AUTO_APPLY_LOW", "AMBIGUOUS", "APPROVED", "REJECTED"].map((label) => (
+            <span key={label} className="rounded-md border border-line bg-panel px-2.5 py-1 text-muted">
+              {label}
+            </span>
+          ))}
+        </div>
+        <p className="mt-3 text-sm leading-6 text-muted">
+          Diese Seite bleibt read-only. APPROVED und REJECTED sind vorbereitete Review-Zustände; eine spätere Übernahme
+          in company_services erfolgt nur einzeln und nach expliziter Admin-Freigabe.
+        </p>
+      </section>
+
       <form className="mb-6 grid gap-3 rounded-lg border border-line bg-white p-4 shadow-soft lg:grid-cols-[1fr_140px_170px_170px_170px_190px_auto]">
         <input className="rounded-md border border-line px-3 py-2 text-sm outline-none focus:border-brand" defaultValue={filters.query || ""} name="q" placeholder="Betrieb suchen" />
         <select className="rounded-md border border-line px-3 py-2 text-sm outline-none focus:border-brand" defaultValue={filters.confidence || ""} name="confidence">
