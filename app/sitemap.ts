@@ -23,7 +23,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
   const activeTradeSlugs = new Set(Object.entries(tradeCounts).filter(([, count]) => count > 0).map(([slug]) => slug));
   const activeServiceSlugs = new Set(serviceLocations.map((entry) => entry.serviceSlug));
-  const activeServices = serviceSeoEntries().filter((entry) => activeServiceSlugs.has(entry.service.slug)).slice(0, 600);
+  const activeServices = uniqueServicesBySlug(serviceSeoEntries().filter((entry) => activeServiceSlugs.has(entry.service.slug))).slice(0, 600);
 
   return [
     {
@@ -129,6 +129,15 @@ type LocationSitemapEntry = { city: string; slug: string };
 type CompanySitemapEntry = { slug: string; updatedAt: string | null };
 type TradeLocationSitemapEntry = { tradeSlug: string; city: string };
 type ServiceLocationSitemapEntry = { serviceSlug: string; city: string };
+
+function uniqueServicesBySlug(entries: ReturnType<typeof serviceSeoEntries>) {
+  const seen = new Set<string>();
+  return entries.filter((entry) => {
+    if (seen.has(entry.service.slug)) return false;
+    seen.add(entry.service.slug);
+    return true;
+  });
+}
 
 async function loadLocationEntries(): Promise<LocationSitemapEntry[]> {
   if (!isSupabaseConfigured()) return [];
