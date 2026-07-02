@@ -1,0 +1,365 @@
+{
+  "generated_at": "2026-07-02T08:27:05.819Z",
+  "mode": "dry_run_apply_plan",
+  "no_live_write": true,
+  "source_report": "reports/service-enrichment-dry-run-2026-07-01.json",
+  "target_services": [
+    "hochbau",
+    "umbau",
+    "architektur",
+    "fenster",
+    "dachsanierung"
+  ],
+  "rows": [
+    {
+      "company_id": "53190cdc-7f70-416a-8175-725b7b09f17c",
+      "service_slug": "hochbau",
+      "source": "service_approval_high_priority_review",
+      "evidence": "Hochbau / Naturbau",
+      "confidence": "high",
+      "approved_status": "pending",
+      "write_action": "would_insert_or_update",
+      "no_live_write": true
+    },
+    {
+      "company_id": "c43e6604-2c1f-400e-8b01-94715aa3beec",
+      "service_slug": "hochbau",
+      "source": "service_approval_high_priority_review",
+      "evidence": "Hochbau / Tiefbau",
+      "confidence": "high",
+      "approved_status": "pending",
+      "write_action": "would_insert_or_update",
+      "no_live_write": true
+    },
+    {
+      "company_id": "87971dd0-5714-4e49-9eb1-b8a2c1686700",
+      "service_slug": "hochbau",
+      "source": "service_approval_high_priority_review",
+      "evidence": "Baugeschäft / Hochbau",
+      "confidence": "high",
+      "approved_status": "pending",
+      "write_action": "would_insert_or_update",
+      "no_live_write": true
+    },
+    {
+      "company_id": "df7b09bf-b7f5-4800-9a3f-807facd70cda",
+      "service_slug": "umbau",
+      "source": "service_approval_high_priority_review",
+      "evidence": "ten in Bad Aibling. Auf der Firmenwebsite werden u. a. Leistungen in den Bereichen Umbau, Sanierung, Dachsanierung beschrieben. Der Eintrag wurde aus öffentlich zugänglichen Unternehmensquellen vorbereitet. Der Eintrag ist no",
+      "confidence": "high",
+      "approved_status": "pending",
+      "write_action": "would_insert_or_update",
+      "no_live_write": true
+    },
+    {
+      "company_id": "512d8e26-cb98-4fe2-aa20-d6ace55c560a",
+      "service_slug": "umbau",
+      "source": "service_approval_high_priority_review",
+      "evidence": "ten in Bad Aibling. Auf der Firmenwebsite werden u. a. Leistungen in den Bereichen Umbau, Schreinerarbeiten beschrieben. Der Eintrag wurde aus öffentlich zugänglichen Unternehmensquellen vorbereitet. Der Eintrag ist noch nich",
+      "confidence": "high",
+      "approved_status": "pending",
+      "write_action": "would_insert_or_update",
+      "no_live_write": true
+    },
+    {
+      "company_id": "d9adda02-2dce-4ef1-8e4e-75ee64f513d2",
+      "service_slug": "umbau",
+      "source": "service_approval_high_priority_review",
+      "evidence": "ten in Bad Aibling. Auf der Firmenwebsite werden u. a. Leistungen in den Bereichen Umbau, Sanierung, Zimmererarbeiten beschrieben. Der Eintrag wurde aus öffentlich zugänglichen Unternehmensquellen vorbereitet. Der Eintrag ist",
+      "confidence": "high",
+      "approved_status": "pending",
+      "write_action": "would_insert_or_update",
+      "no_live_write": true
+    },
+    {
+      "company_id": "0034536f-2b0f-4c69-beae-52857a03422c",
+      "service_slug": "umbau",
+      "source": "service_approval_high_priority_review",
+      "evidence": "Aibling. Auf der Firmenwebsite werden u. a. Leistungen in den Bereichen Metallbau, Umbau, Netzwerktechnik beschrieben. Der Eintrag wurde aus öffentlich zugänglichen Unternehmensquellen vorbereitet. Der Eintrag ist noch nicht",
+      "confidence": "high",
+      "approved_status": "pending",
+      "write_action": "would_insert_or_update",
+      "no_live_write": true
+    },
+    {
+      "company_id": "1ae2fe75-3947-4b8d-b4c4-4a35f7c7b640",
+      "service_slug": "umbau",
+      "source": "service_approval_high_priority_review",
+      "evidence": "tion in Bad Aibling. Auf der Firmenwebsite werden u. a. Leistungen in den Bereichen Umbau, Sanierung, Schreinerarbeiten beschrieben. Der Eintrag wurde aus öffentlich zugänglichen Unternehmensquellen vorbereitet. Der Eintrag i",
+      "confidence": "high",
+      "approved_status": "pending",
+      "write_action": "would_insert_or_update",
+      "no_live_write": true
+    },
+    {
+      "company_id": "5e1a07be-6348-43c0-8882-da5fe79ffd7e",
+      "service_slug": "umbau",
+      "source": "service_approval_high_priority_review",
+      "evidence": "ad Aibling. Auf der Firmenwebsite werden u. a. Leistungen in den Bereichen Metallbau, Umbau, Netzwerktechnik beschrieben. Der Eintrag wurde aus öffentlich zugänglichen Unternehmensquellen vorbereitet. Der Eintrag ist noch nic",
+      "confidence": "high",
+      "approved_status": "pending",
+      "write_action": "would_insert_or_update",
+      "no_live_write": true
+    },
+    {
+      "company_id": "77d8dd1c-ed7a-4f35-b41c-cb10eb959b1f",
+      "service_slug": "umbau",
+      "source": "service_approval_high_priority_review",
+      "evidence": "en in Bad Aibling. Auf der Firmenwebsite werden u. a. Leistungen in den Bereichen Umbau, Schreinerarbeiten, Netzwerktechnik beschrieben. Der Eintrag wurde aus öffentlich zugänglichen Unternehmensquellen vorbereitet. Der Eintr",
+      "confidence": "high",
+      "approved_status": "pending",
+      "write_action": "would_insert_or_update",
+      "no_live_write": true
+    },
+    {
+      "company_id": "1ef9b97c-eb42-4b13-844b-d46e913417d7",
+      "service_slug": "umbau",
+      "source": "service_approval_high_priority_review",
+      "evidence": "irmenwebsite werden u. a. Leistungen in den Bereichen Maurerarbeiten, Betonarbeiten, Umbau beschrieben. Der Eintrag wurde aus öffentlich zugänglichen Unternehmensquellen vorbereitet. Der Eintrag ist noch nicht vom Betrieb bes",
+      "confidence": "high",
+      "approved_status": "pending",
+      "write_action": "would_insert_or_update",
+      "no_live_write": true
+    },
+    {
+      "company_id": "a6b4ecd8-5512-4592-b0c5-91d1b57de767",
+      "service_slug": "umbau",
+      "source": "service_approval_high_priority_review",
+      "evidence": "Umbauhilfe Meyer ist ein Betrieb im Bereich Erdarbeiten in Bad Aibling. Auf der Firmenwebsite werden u. a. Leistungen in den Bereichen Umbau, San",
+      "confidence": "high",
+      "approved_status": "pending",
+      "write_action": "would_insert_or_update",
+      "no_live_write": true
+    },
+    {
+      "company_id": "41c39afa-157e-44d7-a08a-106eb9532b8a",
+      "service_slug": "umbau",
+      "source": "service_approval_high_priority_review",
+      "evidence": "eiten in Bad Aibling. Auf der Firmenwebsite werden u. a. Leistungen in den Bereichen Umbau, Pflasterarbeiten, Schreinerarbeiten beschrieben. Der Eintrag wurde aus öffentlich zugänglichen Unternehmensquellen vorbereitet. Der E",
+      "confidence": "high",
+      "approved_status": "pending",
+      "write_action": "would_insert_or_update",
+      "no_live_write": true
+    },
+    {
+      "company_id": "8e1b647c-1960-4189-b767-7f745b024335",
+      "service_slug": "umbau",
+      "source": "service_approval_high_priority_review",
+      "evidence": "Prien am Chiemsee. Auf der Firmenwebsite werden u. a. Leistungen in den Bereichen Umbau, Heizung beschrieben. Der Eintrag wurde aus öffentlich zugänglichen Unternehmensquellen vorbereitet. Der Eintrag ist noch nicht vom Betr",
+      "confidence": "high",
+      "approved_status": "pending",
+      "write_action": "would_insert_or_update",
+      "no_live_write": true
+    },
+    {
+      "company_id": "24345cdf-129b-4b05-95be-c162ecd1f2ff",
+      "service_slug": "umbau",
+      "source": "service_approval_high_priority_review",
+      "evidence": "rbeiten in Rosenheim. Auf der Firmenwebsite werden u. a. Leistungen in den Bereichen Umbau, Sanierung, Pflasterarbeiten beschrieben. Der Eintrag wurde aus öffentlich zugänglichen Unternehmensquellen vorbereitet. Der Eintrag i",
+      "confidence": "high",
+      "approved_status": "pending",
+      "write_action": "would_insert_or_update",
+      "no_live_write": true
+    },
+    {
+      "company_id": "38ae9783-c4b2-4292-8a05-c0d70103da10",
+      "service_slug": "umbau",
+      "source": "service_approval_high_priority_review",
+      "evidence": "arbeiten in Rosenheim. Auf der Firmenwebsite werden u. a. Leistungen in den Bereichen Umbau, Sanierung, Pflasterarbeiten beschrieben. Der Eintrag wurde aus öffentlich zugänglichen Unternehmensquellen vorbereitet. Der Eintrag",
+      "confidence": "high",
+      "approved_status": "pending",
+      "write_action": "would_insert_or_update",
+      "no_live_write": true
+    },
+    {
+      "company_id": "facd2c47-226b-41e5-81c0-39ae99bdab6d",
+      "service_slug": "architektur",
+      "source": "service_approval_high_priority_review",
+      "evidence": "Architekt in Kolbermoor. Kostenloses Basisprofil aus kuratiertem regionalem Startdatenbestand. Dieses Profil ist noch nicht vom Betrieb verifiziert.",
+      "confidence": "high",
+      "approved_status": "pending",
+      "write_action": "would_insert_or_update",
+      "no_live_write": true
+    },
+    {
+      "company_id": "f81fa3b5-a4e4-4bf9-b2a7-2341e4a782b4",
+      "service_slug": "architektur",
+      "source": "service_approval_high_priority_review",
+      "evidence": "Architekt in Kolbermoor. Kostenloses Basisprofil aus kuratiertem regionalem Startdatenbestand. Dieses Profil ist noch nicht vom Betrieb verifiziert.",
+      "confidence": "high",
+      "approved_status": "pending",
+      "write_action": "would_insert_or_update",
+      "no_live_write": true
+    },
+    {
+      "company_id": "229ff305-968b-458a-a151-099cbc5e64ad",
+      "service_slug": "architektur",
+      "source": "service_approval_high_priority_review",
+      "evidence": "Architekt in Kolbermoor. Kostenloses Basisprofil aus kuratiertem regionalem Startdatenbestand. Dieses Profil ist noch nicht vom Betrieb verifiziert.",
+      "confidence": "high",
+      "approved_status": "pending",
+      "write_action": "would_insert_or_update",
+      "no_live_write": true
+    },
+    {
+      "company_id": "ff479029-0e27-4411-b543-45e14613ec91",
+      "service_slug": "architektur",
+      "source": "service_approval_high_priority_review",
+      "evidence": "Architekt in Kolbermoor. Kostenloses Basisprofil aus kuratiertem regionalem Startdatenbestand. Dieses Profil ist noch nicht vom Betrieb verifiziert.",
+      "confidence": "high",
+      "approved_status": "pending",
+      "write_action": "would_insert_or_update",
+      "no_live_write": true
+    },
+    {
+      "company_id": "1c9b813a-033c-428c-b1c7-e3e9275f54f4",
+      "service_slug": "architektur",
+      "source": "service_approval_high_priority_review",
+      "evidence": "Architekt in Prien am Chiemsee. Kostenloses Basisprofil aus kuratiertem regionalem Startdatenbestand. Dieses Profil ist noch nicht vom Betrieb verifi",
+      "confidence": "high",
+      "approved_status": "pending",
+      "write_action": "would_insert_or_update",
+      "no_live_write": true
+    },
+    {
+      "company_id": "de52876d-1ac3-445e-9bed-48f65eacc947",
+      "service_slug": "architektur",
+      "source": "service_approval_high_priority_review",
+      "evidence": "Architekt in Prien am Chiemsee. Kostenloses Basisprofil aus kuratiertem regionalem Startdatenbestand. Dieses Profil ist noch nicht vom Betrieb verifi",
+      "confidence": "high",
+      "approved_status": "pending",
+      "write_action": "would_insert_or_update",
+      "no_live_write": true
+    },
+    {
+      "company_id": "7249d8b9-d8f9-4efa-80c2-df51c92d36df",
+      "service_slug": "architektur",
+      "source": "service_approval_high_priority_review",
+      "evidence": "Architekt in Prien am Chiemsee. Kostenloses Basisprofil aus kuratiertem regionalem Startdatenbestand. Dieses Profil ist noch nicht vom Betrieb verifi",
+      "confidence": "high",
+      "approved_status": "pending",
+      "write_action": "would_insert_or_update",
+      "no_live_write": true
+    },
+    {
+      "company_id": "d78edfe2-20b0-4847-8898-85e0ff7934d1",
+      "service_slug": "architektur",
+      "source": "service_approval_high_priority_review",
+      "evidence": "Architekt in Reischenhart. Kostenloses Basisprofil aus kuratiertem regionalem Startdatenbestand. Dieses Profil ist noch nicht vom Betrieb verifiziert",
+      "confidence": "high",
+      "approved_status": "pending",
+      "write_action": "would_insert_or_update",
+      "no_live_write": true
+    },
+    {
+      "company_id": "f2c4a9e8-8a88-4d62-b329-ff3d406dfc41",
+      "service_slug": "architektur",
+      "source": "service_approval_high_priority_review",
+      "evidence": "Architekt in Riedering. Kostenloses Basisprofil aus kuratiertem regionalem Startdatenbestand. Dieses Profil ist noch nicht vom Betrieb verifiziert. K",
+      "confidence": "high",
+      "approved_status": "pending",
+      "write_action": "would_insert_or_update",
+      "no_live_write": true
+    },
+    {
+      "company_id": "adfd545b-147c-42a1-bfa3-ba1603a50c67",
+      "service_slug": "architektur",
+      "source": "service_approval_high_priority_review",
+      "evidence": "Architekt in Rosenheim. Kostenloses Basisprofil aus kuratiertem regionalem Startdatenbestand. Dieses Profil ist noch nicht vom Betrieb verifiziert. K",
+      "confidence": "high",
+      "approved_status": "pending",
+      "write_action": "would_insert_or_update",
+      "no_live_write": true
+    },
+    {
+      "company_id": "b9fbcc89-5e6e-4fcf-b5c5-023bc3c830f5",
+      "service_slug": "architektur",
+      "source": "service_approval_high_priority_review",
+      "evidence": "Architekt in Rosenheim. Kostenloses Basisprofil aus kuratiertem regionalem Startdatenbestand. Dieses Profil ist noch nicht vom Betrieb verifiziert. K",
+      "confidence": "high",
+      "approved_status": "pending",
+      "write_action": "would_insert_or_update",
+      "no_live_write": true
+    },
+    {
+      "company_id": "767dff83-7074-4b84-a63c-43ef47e9bd70",
+      "service_slug": "architektur",
+      "source": "service_approval_high_priority_review",
+      "evidence": "Architekt in Rosenheim. Kostenloses Basisprofil aus kuratiertem regionalem Startdatenbestand. Dieses Profil ist noch nicht vom Betrieb verifiziert. K",
+      "confidence": "high",
+      "approved_status": "pending",
+      "write_action": "would_insert_or_update",
+      "no_live_write": true
+    },
+    {
+      "company_id": "df7b09bf-b7f5-4800-9a3f-807facd70cda",
+      "service_slug": "dachsanierung",
+      "source": "service_approval_high_priority_review",
+      "evidence": "ng. Auf der Firmenwebsite werden u. a. Leistungen in den Bereichen Umbau, Sanierung, Dachsanierung beschrieben. Der Eintrag wurde aus öffentlich zugänglichen Unternehmensquellen vorbereitet. Der Eintrag ist noch nicht vom Betrieb bes",
+      "confidence": "high",
+      "approved_status": "pending",
+      "write_action": "would_insert_or_update",
+      "no_live_write": true
+    },
+    {
+      "company_id": "ee3150b7-fbb1-49b1-bcfe-c4579cf58296",
+      "service_slug": "dachsanierung",
+      "source": "service_approval_high_priority_review",
+      "evidence": "Firmenwebsite werden u. a. Leistungen in den Bereichen Sanierung, Pflasterarbeiten, Dachsanierung beschrieben. Der Eintrag wurde aus öffentlich zugänglichen Unternehmensquellen vorbereitet. Der Eintrag ist noch nicht vom Betrieb bes",
+      "confidence": "high",
+      "approved_status": "pending",
+      "write_action": "would_insert_or_update",
+      "no_live_write": true
+    },
+    {
+      "company_id": "4e8cb327-5d76-4901-bcbf-80dde715997a",
+      "service_slug": "dachsanierung",
+      "source": "service_approval_high_priority_review",
+      "evidence": "g. Auf der Firmenwebsite werden u. a. Leistungen in den Bereichen Pflasterarbeiten, Dachsanierung, Spenglerarbeiten beschrieben. Der Eintrag wurde aus öffentlich zugänglichen Unternehmensquellen vorbereitet. Der Eintrag ist noch nich",
+      "confidence": "high",
+      "approved_status": "pending",
+      "write_action": "would_insert_or_update",
+      "no_live_write": true
+    },
+    {
+      "company_id": "e55c8298-d4ac-453e-bb58-a91cca3ea090",
+      "service_slug": "dachsanierung",
+      "source": "service_approval_high_priority_review",
+      "evidence": "Umbau, Sanierung, Pflasterarbeiten, Dachsanierung, Zimmererarbeiten, Schreinerarbeiten, Netzwerktechnik",
+      "confidence": "high",
+      "approved_status": "pending",
+      "write_action": "would_insert_or_update",
+      "no_live_write": true
+    },
+    {
+      "company_id": "24345cdf-129b-4b05-95be-c162ecd1f2ff",
+      "service_slug": "dachsanierung",
+      "source": "service_approval_high_priority_review",
+      "evidence": "Umbau, Sanierung, Pflasterarbeiten, Dachsanierung, Zimmererarbeiten, Netzwerktechnik",
+      "confidence": "high",
+      "approved_status": "pending",
+      "write_action": "would_insert_or_update",
+      "no_live_write": true
+    },
+    {
+      "company_id": "38ae9783-c4b2-4292-8a05-c0d70103da10",
+      "service_slug": "dachsanierung",
+      "source": "service_approval_high_priority_review",
+      "evidence": "Umbau, Sanierung, Pflasterarbeiten, Dachsanierung, Zimmererarbeiten, Netzwerktechnik",
+      "confidence": "high",
+      "approved_status": "pending",
+      "write_action": "would_insert_or_update",
+      "no_live_write": true
+    },
+    {
+      "company_id": "a5f18393-e748-4f4a-ae73-3816d35b6c2a",
+      "service_slug": "dachsanierung",
+      "source": "service_approval_high_priority_review",
+      "evidence": "eiten in Rosenheim. Auf der Firmenwebsite werden u. a. Leistungen in den Bereichen Dachsanierung, Spenglerarbeiten, Netzwerktechnik beschrieben. Der Eintrag wurde aus öffentlich zugänglichen Unternehmensquellen vorbereitet. Der Eintr",
+      "confidence": "high",
+      "approved_status": "pending",
+      "write_action": "would_insert_or_update",
+      "no_live_write": true
+    }
+  ]
+}
