@@ -1,0 +1,31 @@
+# GewerkeListe.com
+
+GewerkeListe.com ist ein strukturiertes B2B-Verzeichnis fuer Bau- und Handwerksbetriebe. Die Plattform ordnet Betriebe nach Gewerk, konkreter Leistung und Ort, damit Auftraggeber, Planer, Bauleiter und Betriebe schneller passende Informationen finden.
+
+## Zielgruppen
+
+- Bau- und Handwerksbetriebe
+- Planer, Architekten und Ingenieure
+- Bauleiter, Projektsteuerer und Generalunternehmer
+- Kommunen, Hausverwaltungen und professionelle Auftraggeber
+- Bauherren mit konkretem regionalem Suchbedarf
+
+## Wichtigste oeffentliche URLs
+
+- https://gewerkeliste.com/
+- https://gewerkeliste.com/betriebe
+- https://gewerkeliste.com/gewerke
+- https://gewerkeliste.com/leistungen
+- https://gewerkeliste.com/orte
+- https://gewerkeliste.com/betrieb-eintragen
+- https://gewerkeliste.com/eintrag-beanspruchen
+- https://gewerkeliste.com/fuer-betriebe
+- https://gewerkeliste.com/ueber-gewerkeliste
+
+## Struktur
+
+Oeffentliche Firmenprofile zeigen, soweit vorhanden, Name, Ort, Gewerk, Leistungen, Kontaktwege, Standortinformationen, Datenstatus und Hinweise zur Profiluebernahme. Das kostenlose Basisprofil bleibt kostenlos. Optionale Zusatzfunktionen koennen spaeter separat angeboten werden.
+
+## Kontakt
+
+kontakt@gewerkeliste.com

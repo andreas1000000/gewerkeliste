@@ -6,6 +6,7 @@ import { SiteHeader } from "@/components/site-header";
 import { ClaimBadge } from "@/components/status-badge";
 import { publicResultDescription, publicResultImage } from "@/lib/company-display";
 import { getBusinessDirectoryCompanies } from "@/lib/data/public-directory";
+import { breadcrumbJsonLd, collectionPageJsonLd, itemListJsonLd, jsonLd } from "@/lib/seo";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import type { PublicCompanyWithTrade } from "@/lib/types/public-directory";
 
@@ -41,10 +42,28 @@ export default async function BusinessesPage({ searchParams }: PageProps) {
       })
     : [];
   const hasSearch = Boolean(query || tradeSlug || serviceSlug || location);
+  const breadcrumb = breadcrumbJsonLd([
+    { name: "Startseite", path: "/" },
+    { name: "Betriebe", path: "/betriebe" },
+  ]);
+  const collectionPage = collectionPageJsonLd({
+    name: "Bau- und Handwerksbetriebe",
+    description: "Oeffentliche Betriebsprofile nach Gewerk, Leistung und Ort durchsuchen.",
+    path: "/betriebe",
+  });
+  const itemList = itemListJsonLd(
+    companies.slice(0, 24).map((company) => ({
+      name: company.name,
+      path: `/firma/${company.slug}`,
+    })),
+  );
 
   return (
     <main className="min-h-screen bg-[#fbfaf7] text-ink">
       <SiteHeader />
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(breadcrumb)} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(collectionPage)} />
+      {companies.length ? <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(itemList)} /> : null}
 
       <section className="border-b border-line bg-white">
         <div className="mx-auto grid max-w-7xl gap-8 px-5 py-10 lg:grid-cols-[minmax(0,1fr)_420px] lg:px-8">

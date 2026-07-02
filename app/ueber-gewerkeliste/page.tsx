@@ -139,6 +139,37 @@ export default function AboutGewerkeListePage() {
         </div>
       </section>
 
+      <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div className="rounded-lg border border-line bg-white p-6 shadow-soft sm:p-8">
+          <p className="text-sm font-semibold uppercase tracking-normal text-brand">Kurz erklärt</p>
+          <h2 className="mt-2 text-3xl font-semibold text-brand">Was ist GewerkeListe.com?</h2>
+          <div className="mt-5 grid gap-5 text-base leading-7 text-ink lg:grid-cols-2">
+            <div className="space-y-4">
+              <p>
+                GewerkeListe.com ist ein strukturiertes B2B-Verzeichnis für Bau- und Handwerksbetriebe. Betriebe werden
+                nicht nur nach Namen gelistet, sondern nach Gewerk, konkreter Leistung und Ort eingeordnet.
+              </p>
+              <p>
+                Die Plattform hilft Planern, Bauleitern, professionellen Auftraggebern, Hausverwaltungen, Kommunen und
+                Bauherren, passende Betriebe schneller zu finden und die fachliche Suche nicht jedes Mal bei null zu
+                beginnen.
+              </p>
+            </div>
+            <div className="space-y-4">
+              <p>
+                Betriebe können einen bestehenden Eintrag übernehmen, fehlende Daten ergänzen, Stammdaten korrigieren
+                und ihr tatsächliches Leistungsspektrum sichtbar machen. So wird aus einer unvollständigen Liste ein
+                belastbareres regionales Branchenverzeichnis.
+              </p>
+              <p className="font-semibold text-brand">
+                Das Basisprofil bleibt kostenlos. Kostenpflichtig können später nur optionale Zusatzfunktionen werden;
+                die grundlegende Sichtbarkeit mit Name, Ort, Gewerk, Leistungen und Kontaktwegen bleibt davon unabhängig.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <TwoColumnSection
         eyebrow="Das Problem"
         title="Der Markt ist nicht leer. Er ist nur schlecht sichtbar."

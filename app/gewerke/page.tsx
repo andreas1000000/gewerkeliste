@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { SiteHeader } from "@/components/site-header";
 import { TradeBrowser, type TradeViewMode } from "@/components/trade-browser";
 import { getPublicCompanyTradeCounts } from "@/lib/data/public-directory";
-import { breadcrumbJsonLd, collectionPageJsonLd, jsonLd } from "@/lib/seo";
+import { breadcrumbJsonLd, collectionPageJsonLd, itemListJsonLd, jsonLd } from "@/lib/seo";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { frequentTradeSlugs } from "@/lib/trade-hierarchy";
 import { serviceTradeHierarchy } from "@/lib/service-taxonomy";
@@ -43,12 +43,19 @@ export default async function TradesPage({ searchParams }: PageProps) {
     description: "Gewerke, Leistungen und passende Betriebe strukturiert finden.",
     path: "/gewerke",
   });
+  const itemList = itemListJsonLd(
+    publicTradeTaxonomy().map((trade) => ({
+      name: trade.name,
+      path: `/gewerke/${trade.slug}`,
+    })),
+  );
 
   return (
     <main className="min-h-screen bg-[#f7f8fb] text-ink">
       <SiteHeader />
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(breadcrumb)} />
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(collectionPage)} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(itemList)} />
       <TradeBrowser
         claimIntent={claimIntent}
         companyCounts={companyCounts}

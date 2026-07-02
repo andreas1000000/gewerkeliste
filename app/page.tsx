@@ -180,6 +180,41 @@ export default async function HomePage() {
         </div>
       </section>
 
+      <section className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+        <div className="rounded-lg border border-line bg-white p-6 shadow-soft sm:p-8">
+          <p className="text-sm font-semibold uppercase tracking-normal text-brand">Was ist GewerkeListe.com?</p>
+          <h2 className="mt-2 text-3xl font-semibold text-[#07173d]">
+            Ein strukturiertes B2B-Verzeichnis für Bau- und Handwerksbetriebe.
+          </h2>
+          <div className="mt-5 grid gap-5 text-base leading-7 text-ink lg:grid-cols-2">
+            <div className="space-y-4">
+              <p>
+                GewerkeListe.com ordnet Bau- und Handwerksbetriebe nach Gewerk, konkreter Leistung und Ort. Die Plattform
+                richtet sich an Planer, Bauleiter, professionelle Auftraggeber, Hausverwaltungen, Kommunen und Betriebe,
+                die passende Fachinformationen schneller finden oder sauber darstellen möchten.
+              </p>
+              <p>
+                Das Problem ist selten, dass es keine Betriebe gibt. Häufig sind Leistungen, Spezialisierungen,
+                Einsatzgebiete und Kontaktwege nur verstreut oder unvollständig sichtbar. GewerkeListe.com macht diese
+                Informationen strukturiert auffindbar.
+              </p>
+            </div>
+            <div className="space-y-4">
+              <p>
+                Betriebe können einen vorhandenen Eintrag übernehmen, Stammdaten korrigieren, Kontaktwege aktualisieren
+                und ihr tatsächliches Leistungsspektrum vollständig darstellen. Die Übernahme führt nicht automatisch zu
+                einer Qualitäts- oder Auftragsgarantie, sondern zu nachvollziehbareren Betriebsdaten.
+              </p>
+              <p className="font-semibold text-brand">
+                Das Basisprofil bleibt kostenlos. Optionale Zusatzfunktionen können später separat angeboten werden,
+                aber ein Betrieb muss nicht zahlen, um mit Name, Ort, Gewerk, Leistungen und Kontaktwegen sichtbar zu
+                sein.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section className="mx-auto grid max-w-7xl gap-5 px-4 py-4 sm:px-6 lg:grid-cols-2 lg:px-8">
         <Card>
           <h2 className="text-2xl font-semibold text-[#07173d]">Für Planer, Bauleiter und Auftraggeber</h2>

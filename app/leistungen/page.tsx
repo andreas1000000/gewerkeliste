@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import type { Route } from "next";
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
-import { breadcrumbJsonLd, collectionPageJsonLd, jsonLd } from "@/lib/seo";
+import { breadcrumbJsonLd, collectionPageJsonLd, itemListJsonLd, jsonLd } from "@/lib/seo";
 import { serviceSeoEntries } from "@/lib/service-taxonomy";
 
 export const metadata: Metadata = {
@@ -27,12 +27,21 @@ export default function ServicesPage() {
     description: "Leistungen nach Gewerk einordnen und passende Betriebe finden.",
     path: "/leistungen",
   });
+  const itemList = itemListJsonLd(
+    grouped.flatMap((group) =>
+      group.services.map((entry) => ({
+        name: entry.service.name,
+        path: `/leistungen/${entry.service.slug}`,
+      })),
+    ),
+  );
 
   return (
     <main className="min-h-screen bg-[#f7f8fb] text-ink">
       <SiteHeader />
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(breadcrumb)} />
       <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(collectionPage)} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(itemList)} />
 
       <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <nav className="text-sm text-muted" aria-label="Breadcrumb">
