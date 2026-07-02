@@ -14,7 +14,6 @@ const privacyPolicy = `# Datenschutzerklärung
 Verantwortlich für die Verarbeitung personenbezogener Daten auf dieser Website ist:
 
 **Andreas Moser**
-Andreas Moser Baugewerbe
 Untermoosen 3
 83083 Riedering
 Deutschland

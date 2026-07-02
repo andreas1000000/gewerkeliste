@@ -22,7 +22,7 @@ export default function ImpressumPage() {
             <h2 className="text-xl font-semibold text-ink">Angaben gemäß § 5 DDG</h2>
             <address className="mt-4 not-italic leading-7 text-ink">
               <div>{siteOwner.operatorName}</div>
-              <div>{siteOwner.businessName}</div>
+              {siteOwner.businessName ? <div>{siteOwner.businessName}</div> : null}
               <div>{siteOwner.street}</div>
               <div>
                 {siteOwner.postalCode} {siteOwner.city}

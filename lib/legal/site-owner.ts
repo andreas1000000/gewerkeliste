@@ -1,8 +1,8 @@
 export const siteOwner = {
   operatorName: "Andreas Moser",
   projectName: "GewerkeListe.com",
-  legalForm: "Einzelunternehmer / Andreas Moser Baugewerbe",
-  businessName: "Andreas Moser Baugewerbe",
+  legalForm: "Einzelunternehmer",
+  businessName: null,
   street: "Untermoosen 3",
   postalCode: "83083",
   city: "Riedering",
