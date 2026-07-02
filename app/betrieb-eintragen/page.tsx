@@ -9,6 +9,9 @@ export const metadata: Metadata = {
   title: "Betrieb kostenlos eintragen oder Profil übernehmen | GewerkeListe.com",
   description:
     "Tragen Sie Ihren Fachbetrieb kostenlos ein, übernehmen Sie ein vorhandenes Profil oder reichen Sie Korrekturen zur Prüfung ein.",
+  alternates: {
+    canonical: "/betrieb-eintragen",
+  },
 };
 
 export default function RegisterCompanyPage() {

@@ -8,6 +8,9 @@ import { getCompany, getCompanyBySlug } from "@/lib/data";
 export const metadata: Metadata = {
   title: "Eintrag übernehmen | GewerkeListe.com",
   description: "Bestehenden Betriebseintrag finden, Betriebsdaten prüfen und vollständiges Leistungsspektrum zur Prüfung einreichen.",
+  alternates: {
+    canonical: "/eintrag-beanspruchen",
+  },
 };
 
 type PageProps = {
