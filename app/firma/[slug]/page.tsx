@@ -327,6 +327,8 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                 ) : null}
               </ProfileCard>
 
+              <ContactTrustCard company={company} canClaim={canClaim} premiumContacts={isVerifiedStartProfile ? premiumProfile.contacts : []} />
+
               <ProfileCard title="Datenstatus">
                 <div className={`rounded-md border px-4 py-4 text-sm leading-6 ${statusBoxClass(status.tone)}`}>
                   <div className="font-semibold text-ink">{status.label}</div>
@@ -347,8 +349,6 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                   <DataRow label="Verifizierung" value={company.verified ? "Daten vom Betrieb bestätigt" : "Daten noch nicht verifiziert"} />
                 </dl>
               </ProfileCard>
-
-              <ContactTrustCard company={company} canClaim={canClaim} premiumContacts={isVerifiedStartProfile ? premiumProfile.contacts : []} />
 
               {isVerifiedStartProfile && premiumProfile.teamMembers.length ? (
                 <ProfileCard title="Team">
