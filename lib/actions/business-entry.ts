@@ -83,6 +83,7 @@ export async function submitBusinessEntry(
             ? input.supportCustomAmount
             : Number(input.supportContribution),
       support_invoice_requested: input.supportInvoiceRequested,
+      premium_submission_payload: input.premiumSubmissionPayload,
       consent_authorized: input.consentAuthorized,
       consent_data_correct: input.consentDataCorrect,
       consent_privacy: input.consentPrivacy,

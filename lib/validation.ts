@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { ClaimStatus, CompanyFormState } from "@/lib/types";
+import type { ClaimStatus, CompanyFormState, CompanyPremiumSubmissionPayload } from "@/lib/types";
 import { canonicalTradeSlug, publicTradeTaxonomy } from "@/lib/trade-taxonomy";
 
 export type CompanyInput = {
@@ -255,7 +255,69 @@ export function parseBusinessSubmissionForm(formData: FormData) {
     };
   }
 
-  return { data: result.data };
+  return { data: { ...result.data, premiumSubmissionPayload: parsePremiumSubmissionPayload(formData) } };
+}
+
+export function parsePremiumSubmissionPayload(formData: FormData): CompanyPremiumSubmissionPayload {
+  const requested = formData.get("premiumStartProfileRequested") === "on";
+
+  const payload: CompanyPremiumSubmissionPayload = {
+    requested,
+    request_label: requested ? "Verifiziertes Startprofil fuer 490 EUR netto / 12 Monate angefragt" : null,
+    contacts: requested
+      ? rowsFromFormData(formData, "premiumContactName").map((_, index) => ({
+          name: getStringAt(formData, "premiumContactName", index),
+          role: emptyToNullableString(getStringAt(formData, "premiumContactRole", index)),
+          phone: emptyToNullableString(getStringAt(formData, "premiumContactPhone", index)),
+          email: emptyToNullableString(getStringAt(formData, "premiumContactEmail", index)),
+          image_note: emptyToNullableString(getStringAt(formData, "premiumContactImageNote", index)),
+          sort_order: index + 1,
+        })).filter((item) => item.name || item.role || item.phone || item.email || item.image_note)
+      : [],
+    team_members: requested
+      ? rowsFromFormData(formData, "premiumTeamName").map((_, index) => ({
+          name: getStringAt(formData, "premiumTeamName", index),
+          role: emptyToNullableString(getStringAt(formData, "premiumTeamRole", index)),
+          description: emptyToNullableString(getStringAt(formData, "premiumTeamDescription", index)),
+          image_note: emptyToNullableString(getStringAt(formData, "premiumTeamImageNote", index)),
+          sort_order: index + 1,
+        })).filter((item) => item.name || item.role || item.description || item.image_note)
+      : [],
+    references: requested
+      ? rowsFromFormData(formData, "premiumReferenceTitle").map((_, index) => ({
+          title: getStringAt(formData, "premiumReferenceTitle", index),
+          location: emptyToNullableString(getStringAt(formData, "premiumReferenceLocation", index)),
+          year: parseOptionalYear(getStringAt(formData, "premiumReferenceYear", index)),
+          project_type: emptyToNullableString(getStringAt(formData, "premiumReferenceProjectType", index)),
+          services: splitList(getStringAt(formData, "premiumReferenceServices", index)),
+          description: emptyToNullableString(getStringAt(formData, "premiumReferenceDescription", index)),
+          client_type: emptyToNullableString(getStringAt(formData, "premiumReferenceClientType", index)),
+          sort_order: index + 1,
+        })).filter((item) => item.title || item.location || item.project_type || item.services.length || item.description || item.client_type)
+      : [],
+    reference_media: requested
+      ? rowsFromFormData(formData, "premiumReferenceMediaFileNote").map((_, index) => ({
+          reference_title: emptyToNullableString(getStringAt(formData, "premiumReferenceMediaReferenceTitle", index)),
+          file_note: emptyToNullableString(getStringAt(formData, "premiumReferenceMediaFileNote", index)),
+          caption: emptyToNullableString(getStringAt(formData, "premiumReferenceMediaCaption", index)),
+          alt_text: emptyToNullableString(getStringAt(formData, "premiumReferenceMediaAltText", index)),
+          sort_order: index + 1,
+        })).filter((item) => item.reference_title || item.file_note || item.caption || item.alt_text)
+      : [],
+    certificates: requested
+      ? rowsFromFormData(formData, "premiumCertificateTitle").map((_, index) => ({
+          title: getStringAt(formData, "premiumCertificateTitle", index),
+          issuer: emptyToNullableString(getStringAt(formData, "premiumCertificateIssuer", index)),
+          valid_until: emptyToNullableString(getStringAt(formData, "premiumCertificateValidUntil", index)),
+          description: emptyToNullableString(getStringAt(formData, "premiumCertificateDescription", index)),
+          file_note: emptyToNullableString(getStringAt(formData, "premiumCertificateFileNote", index)),
+          sort_order: index + 1,
+        })).filter((item) => item.title || item.issuer || item.valid_until || item.description || item.file_note)
+      : [],
+    notes: requested ? emptyToNullableString(getString(formData, "premiumSubmissionNotes")) : null,
+  };
+
+  return payload;
 }
 
 function getString(formData: FormData, key: string) {
@@ -265,6 +327,25 @@ function getString(formData: FormData, key: string) {
 
 function getStringArray(formData: FormData, key: string) {
   return formData.getAll(key).filter((value): value is string => typeof value === "string" && value.trim().length > 0);
+}
+
+function rowsFromFormData(formData: FormData, key: string) {
+  return formData.getAll(key);
+}
+
+function getStringAt(formData: FormData, key: string, index: number) {
+  const value = formData.getAll(key)[index];
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function emptyToNullableString(value: string) {
+  const trimmed = value.trim();
+  return trimmed ? trimmed : null;
+}
+
+function parseOptionalYear(value: string) {
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed >= 1900 && parsed <= 2100 ? parsed : null;
 }
 
 function splitList(value: string) {

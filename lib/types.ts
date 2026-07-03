@@ -127,6 +127,62 @@ export type CompanyPremiumProfile = {
   certificates: CompanyCertificate[];
 };
 
+export type PremiumSubmissionContact = {
+  name: string;
+  role: string | null;
+  phone: string | null;
+  email: string | null;
+  image_note: string | null;
+  sort_order: number;
+};
+
+export type PremiumSubmissionTeamMember = {
+  name: string;
+  role: string | null;
+  description: string | null;
+  image_note: string | null;
+  sort_order: number;
+};
+
+export type PremiumSubmissionReference = {
+  title: string;
+  location: string | null;
+  year: number | null;
+  project_type: string | null;
+  services: string[];
+  description: string | null;
+  client_type: string | null;
+  sort_order: number;
+};
+
+export type PremiumSubmissionMedia = {
+  reference_title: string | null;
+  file_note: string | null;
+  caption: string | null;
+  alt_text: string | null;
+  sort_order: number;
+};
+
+export type PremiumSubmissionCertificate = {
+  title: string;
+  issuer: string | null;
+  valid_until: string | null;
+  description: string | null;
+  file_note: string | null;
+  sort_order: number;
+};
+
+export type CompanyPremiumSubmissionPayload = {
+  requested: boolean;
+  request_label: string | null;
+  contacts: PremiumSubmissionContact[];
+  team_members: PremiumSubmissionTeamMember[];
+  references: PremiumSubmissionReference[];
+  reference_media: PremiumSubmissionMedia[];
+  certificates: PremiumSubmissionCertificate[];
+  notes: string | null;
+};
+
 export type CompanyWithTrade = Company & {
   trades: Pick<Trade, "id" | "name" | "slug"> | null;
   company_trades?: Array<{
@@ -217,6 +273,7 @@ export type CompanySubmission = {
   wants_support_contribution: boolean;
   support_contribution_amount: number | null;
   support_invoice_requested: boolean;
+  premium_submission_payload: CompanyPremiumSubmissionPayload | null;
   consent_authorized: boolean;
   consent_data_correct: boolean;
   consent_privacy: boolean;

@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import { useActionState } from "react";
+import { PremiumSubmissionFields } from "@/components/premium-submission-fields";
 import { TradeCheckboxGroups } from "@/components/trade-checkbox-groups";
 import { serviceNamesForTrades, TradeServiceSelection } from "@/components/trade-service-selection";
 import { submitClaim } from "@/lib/actions/claims";
@@ -271,6 +272,9 @@ export function ClaimAssistant({
           Ich bin berechtigt, diese Bilder für den Betrieb einzureichen.
         </label>
         {errors.imageConsentGiven ? <p className="mt-2 text-xs font-semibold text-[#a4442b]">{errors.imageConsentGiven}</p> : null}
+      </WizardSection>
+      <WizardSection eyebrow="Optional" title="Verifiziertes Startprofil anfragen">
+        <PremiumSubmissionFields />
       </WizardSection>
       <WizardSection eyebrow="Schritt 6" title="Zusammenfassung prüfen">
         <div className="grid gap-4">

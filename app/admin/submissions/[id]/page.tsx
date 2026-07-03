@@ -6,7 +6,7 @@ import { approveSubmission, setSubmissionStatus, updateSubmission } from "@/lib/
 import { getCompanySubmission, getSubmissionDuplicates } from "@/lib/data";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { tradeTaxonomy } from "@/lib/trade-taxonomy";
-import type { CompanySubmission } from "@/lib/types";
+import type { CompanyPremiumSubmissionPayload, CompanySubmission } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -170,6 +170,8 @@ export default async function SubmissionDetailPage({ params, searchParams }: Pag
               <TagList label="Zertifikate" items={submission.certificates} />
               <TagList label="Herstellerzertifikate" items={submission.manufacturer_certificates} />
             </ReadSection>
+
+            <PremiumSubmissionReview payload={submission.premium_submission_payload} />
           </div>
 
           <aside className="grid gap-6 content-start">
@@ -307,6 +309,87 @@ function TagList({ label, items }: { label: string; items: string[] }) {
       <div className="mt-2 flex flex-wrap gap-2">
         {items.length > 0 ? items.map((item) => <span key={item} className="rounded-md border border-line bg-panel px-2.5 py-1 text-xs font-semibold text-ink">{item}</span>) : <span className="text-sm text-muted">Nicht angegeben</span>}
       </div>
+    </div>
+  );
+}
+
+function PremiumSubmissionReview({ payload }: { payload: CompanyPremiumSubmissionPayload | null }) {
+  if (!payload?.requested) return null;
+
+  return (
+    <ReadSection title="Verifiziertes Startprofil angefragt">
+      <div className="rounded-md border border-[#9bbbd2] bg-[#f1f7fb] p-4 text-sm leading-6 text-[#17395c]">
+        <div className="font-semibold text-ink">Vom Betrieb eingereicht, noch nicht öffentlich</div>
+        <p className="mt-1">
+          Diese Angaben dienen als Arbeitsgrundlage für das verifizierte Startprofil. Sie werden nicht automatisch in
+          öffentliche Premium-Module übernommen.
+        </p>
+      </div>
+      <PremiumList title="Ansprechpartner" items={payload.contacts} render={(item) => (
+        <>
+          <Data label="Name" value={item.name} />
+          <Data label="Rolle" value={item.role} />
+          <Data label="Telefon" value={item.phone} />
+          <Data label="E-Mail" value={item.email} />
+          <Data label="Bildlink / Hinweis" value={item.image_note} multiline />
+        </>
+      )} />
+      <PremiumList title="Teamvorstellung" items={payload.team_members} render={(item) => (
+        <>
+          <Data label="Name" value={item.name} />
+          <Data label="Rolle" value={item.role} />
+          <Data label="Beschreibung" value={item.description} multiline />
+          <Data label="Bildlink / Hinweis" value={item.image_note} multiline />
+        </>
+      )} />
+      <PremiumList title="Referenzen" items={payload.references} render={(item) => (
+        <>
+          <Data label="Titel" value={item.title} />
+          <Data label="Ort" value={item.location} />
+          <Data label="Jahr" value={item.year ? String(item.year) : null} />
+          <Data label="Projektart" value={item.project_type} />
+          <TagList label="Leistungen" items={item.services} />
+          <Data label="Beschreibung" value={item.description} multiline />
+          <Data label="Kundentyp" value={item.client_type} />
+        </>
+      )} />
+      <PremiumList title="Referenzbilder / Medienhinweise" items={payload.reference_media} render={(item) => (
+        <>
+          <Data label="Referenz" value={item.reference_title} />
+          <Data label="Link / Hinweis" value={item.file_note} multiline />
+          <Data label="Bildtitel / Beschreibung" value={item.caption} multiline />
+          <Data label="Alt-Text" value={item.alt_text} />
+        </>
+      )} />
+      <PremiumList title="Nachweise / Zertifikate" items={payload.certificates} render={(item) => (
+        <>
+          <Data label="Titel" value={item.title} />
+          <Data label="Aussteller" value={item.issuer} />
+          <Data label="Gültig bis" value={item.valid_until} />
+          <Data label="Beschreibung" value={item.description} multiline />
+          <Data label="PDF-/Bildlink / Hinweis" value={item.file_note} multiline />
+        </>
+      )} />
+      <Data label="Weitere Hinweise" value={payload.notes} multiline />
+    </ReadSection>
+  );
+}
+
+function PremiumList<T>({ items, render, title }: { items: T[]; render: (item: T) => React.ReactNode; title: string }) {
+  return (
+    <div className="rounded-md border border-line bg-[#fbfcff] p-4">
+      <h3 className="text-sm font-semibold text-brand">{title}</h3>
+      {items.length ? (
+        <div className="mt-3 grid gap-3">
+          {items.map((item, index) => (
+            <div key={index} className="grid gap-3 rounded-md border border-line bg-white p-4">
+              {render(item)}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="mt-2 text-sm text-muted">Nicht angegeben</p>
+      )}
     </div>
   );
 }

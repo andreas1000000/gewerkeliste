@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useActionState } from "react";
+import { PremiumSubmissionFields } from "@/components/premium-submission-fields";
 import { TradeCheckboxGroups } from "@/components/trade-checkbox-groups";
 import { serviceNamesForTrades, TradeServiceSelection } from "@/components/trade-service-selection";
 import { submitBusinessEntry } from "@/lib/actions/business-entry";
@@ -268,6 +269,8 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
           </Field>
         </div>
       </FormSection>
+
+      <PremiumSubmissionFields />
 
       <FormSection number="9" title="Prüfung und Absenden" help="Die Angaben werden vor der Veröffentlichung geprüft. Eine spätere Datenbestätigung bedeutet nur, dass Profildaten bestätigt wurden. Sie ist keine Qualitätsbewertung.">
         <label className="flex items-start gap-3 text-sm font-medium leading-6 text-ink">

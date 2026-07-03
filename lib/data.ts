@@ -572,11 +572,27 @@ function normalizeSubmission(item: unknown) {
     contact_person_role: typeof raw.contact_person_role === "string" ? raw.contact_person_role : null,
     image_consent_given: raw.image_consent_given === true,
     image_consent_timestamp: typeof raw.image_consent_timestamp === "string" ? raw.image_consent_timestamp : null,
+    premium_submission_payload: normalizePremiumSubmissionPayload(raw.premium_submission_payload),
   } as CompanySubmission;
 }
 
 function arrayField(value: unknown) {
   return Array.isArray(value) ? value.map(String) : [];
+}
+
+function normalizePremiumSubmissionPayload(value: unknown) {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const raw = value as Record<string, unknown>;
+  return {
+    requested: raw.requested === true,
+    request_label: typeof raw.request_label === "string" ? raw.request_label : null,
+    contacts: Array.isArray(raw.contacts) ? raw.contacts : [],
+    team_members: Array.isArray(raw.team_members) ? raw.team_members : [],
+    references: Array.isArray(raw.references) ? raw.references : [],
+    reference_media: Array.isArray(raw.reference_media) ? raw.reference_media : [],
+    certificates: Array.isArray(raw.certificates) ? raw.certificates : [],
+    notes: typeof raw.notes === "string" ? raw.notes : null,
+  };
 }
 
 function duplicateReason(submission: CompanySubmission, company: { name: string; postal_code: string; city: string; email: string | null; website_url: string | null }) {

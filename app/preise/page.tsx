@@ -25,6 +25,8 @@ const basisItems = [
   "Einsatzregionen",
   "Kontaktmöglichkeit",
   "Website-Link, falls vorhanden",
+  "Firmenlogo, falls gewünscht",
+  "ein Ansprechpartnerbild, falls gewünscht",
 ];
 
 const verifiedItems = [
@@ -51,12 +53,12 @@ const comparisonRows = [
   ["Einsatzregionen", "enthalten", "enthalten"],
   ["Kontaktmöglichkeit", "enthalten", "enthalten"],
   ["Website-Link", "enthalten", "enthalten"],
+  ["Firmenlogo", "ein Logo möglich", "enthalten"],
+  ["Ansprechpartner mit Bild", "ein Ansprechpartner möglich", "mehrere Ansprechpartner möglich"],
   ["Verifizierungskennzeichnung", "—", "enthalten"],
-  ["Firmenlogo", "—", "enthalten"],
   ["professionell aufbereitetes Leistungsprofil", "—", "enthalten"],
   ["Zielgruppen klar dargestellt", "—", "enthalten"],
   ["mehrere Ansprechpartner", "—", "enthalten"],
-  ["Ansprechpartner mit Bild", "—", "enthalten"],
   ["Teamvorstellung mit Bild", "—", "enthalten"],
   ["Referenzen", "—", "enthalten"],
   ["Referenzbilder", "—", "enthalten"],

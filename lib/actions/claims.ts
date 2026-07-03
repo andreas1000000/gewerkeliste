@@ -8,7 +8,7 @@ import { slugify } from "@/lib/slug";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { canonicalTradeSlug, findTaxonomyTrade } from "@/lib/trade-taxonomy";
 import type { CompanyFormState } from "@/lib/types";
-import { claimSchema, flattenZodErrors } from "@/lib/validation";
+import { claimSchema, flattenZodErrors, parsePremiumSubmissionPayload } from "@/lib/validation";
 
 export async function submitClaim(_prevState: CompanyFormState, formData: FormData): Promise<CompanyFormState> {
   try {
@@ -103,6 +103,7 @@ async function submitClaimUnchecked(formData: FormData): Promise<CompanyFormStat
     .filter((slug) => slug && slug !== requestedPrimaryTrade && findTaxonomyTrade(slug))
     .slice(0, 4);
   const companyTradeSlug = findTaxonomyTrade(requestedPrimaryTrade)?.slug || slugify(company.trades?.name || "fachbetrieb");
+  const premiumSubmissionPayload = parsePremiumSubmissionPayload(formData);
   const submissionId = randomUUID();
   const mediaResult = await prepareSubmissionMedia(formData, submissionId, proposedCompanyName);
   if (!mediaResult.ok) {
@@ -188,6 +189,7 @@ async function submitClaimUnchecked(formData: FormData): Promise<CompanyFormStat
           ? support_custom_amount
           : Number(support_contribution),
     support_invoice_requested,
+    premium_submission_payload: premiumSubmissionPayload,
     consent_authorized: true,
     consent_data_correct: false,
     consent_privacy: true,
