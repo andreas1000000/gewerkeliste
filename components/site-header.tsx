@@ -12,11 +12,13 @@ const navItems = {
   de: [
     { label: "Gewerke", href: "/gewerke" },
     { label: "Betriebe", href: "/betriebe" },
+    { label: "Preise", href: "/preise" },
     { label: "Über uns", href: "/ueber-gewerkeliste" },
   ],
   en: [
     { label: "Trades", href: "/gewerke" },
     { label: "Companies", href: "/betriebe" },
+    { label: "Pricing", href: "/preise" },
     { label: "About", href: "/ueber-gewerkeliste" },
   ],
 };
