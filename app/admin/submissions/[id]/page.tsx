@@ -322,7 +322,7 @@ function PremiumSubmissionReview({ payload }: { payload: CompanyPremiumSubmissio
         <div className="font-semibold text-ink">Vom Betrieb eingereicht, noch nicht öffentlich</div>
         <p className="mt-1">
           Diese Angaben dienen als Arbeitsgrundlage für das verifizierte Startprofil. Sie werden nicht automatisch in
-          öffentliche Premium-Module übernommen.
+          öffentliche Profilmodule übernommen.
         </p>
       </div>
       <PremiumList title="Ansprechpartner" items={payload.contacts} render={(item) => (

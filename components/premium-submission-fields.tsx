@@ -43,7 +43,7 @@ export function PremiumSubmissionFields() {
       {enabled ? (
         <div className="mt-6 grid gap-6">
           <p className="rounded-md border border-line bg-[#fbfcff] px-4 py-3 text-xs leading-5 text-muted">
-            Mehrere Premium-Medien werden hier zunächst als Link, Cloudordner oder Hinweis eingereicht. Dadurch bleiben
+            Mehrere Bilder und Dokumente werden hier zunächst als Link, Cloudordner oder Hinweis eingereicht. Dadurch bleiben
             die Daten vollständig reviewfähig; veröffentlicht wird nichts ohne Admin-Prüfung.
           </p>
 

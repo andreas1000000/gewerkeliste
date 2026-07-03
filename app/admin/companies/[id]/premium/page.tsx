@@ -31,7 +31,7 @@ export default async function CompanyPremiumAdminPage({ params, searchParams }: 
             <Link className="text-sm font-semibold text-brand hover:underline" href="/admin/companies">
               Zurück zu Betrieben
             </Link>
-            <h1 className="mt-2 text-3xl font-semibold text-ink">Premium-Profil: {company.name}</h1>
+            <h1 className="mt-2 text-3xl font-semibold text-ink">Verifiziertes Startprofil: {company.name}</h1>
             <p className="mt-2 text-sm text-muted">
               {company.postal_code} {company.city} · {company.trades?.name || "Ohne Gewerk"}
             </p>
@@ -43,7 +43,7 @@ export default async function CompanyPremiumAdminPage({ params, searchParams }: 
 
         {saved ? (
           <div className="mb-6 rounded-lg border border-[#b9e2c2] bg-[#f2fbf4] p-4 text-sm font-semibold text-[#245b37]">
-            Premium-Profil gespeichert. Öffentlich sichtbar werden nur freigegebene Inhalte bei verifiziertem Startprofil.
+            Startprofil-Daten gespeichert. Öffentlich sichtbar werden nur freigegebene Inhalte bei verifiziertem Startprofil.
           </div>
         ) : null}
         {error ? (
@@ -75,7 +75,7 @@ export default async function CompanyPremiumAdminPage({ params, searchParams }: 
               <Field label="Startprofil bis" name="premium_expires_at" value={dateTimeInputValue(company.premium_expires_at)} type="datetime-local" />
             </div>
             <p className="mt-4 text-xs leading-5 text-muted">
-              Diese Einstellung erzeugt keine bessere Platzierung und keine Anfragegarantie. Sie steuert nur die öffentliche Premium-Darstellung.
+              Diese Einstellung erzeugt keine bessere Platzierung und keine Anfragegarantie. Sie steuert nur die öffentliche Darstellung des verifizierten Startprofils.
             </p>
           </section>
 
@@ -112,7 +112,7 @@ export default async function CompanyPremiumAdminPage({ params, searchParams }: 
 
           <section className="rounded-lg border border-line bg-white p-5 shadow-soft">
             <button className="rounded-md bg-brand px-5 py-3 text-sm font-semibold text-white hover:bg-[#265a4d]">
-              Premium-Profil speichern
+              Startprofil-Daten speichern
             </button>
             <p className="mt-3 text-xs leading-5 text-muted">
               Nur Einträge mit review_status=approved werden auf öffentlichen Profilen angezeigt. pending, rejected und internal bleiben unsichtbar.
