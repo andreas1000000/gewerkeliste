@@ -90,7 +90,6 @@ export default async function CompanyPublicPage({ params }: PageProps) {
     const serviceAreaItems = getServiceAreaItems(company);
     const referenceItems = getTextBlockItems(company.references_text);
     const proofItems = getProfileProofItems(company);
-    const startProfileBadges = getStartProfileBadges(company);
     const premiumProfile = company.premium_profile || emptyPremiumProfile();
     const isVerifiedStartProfile = hasVerifiedStartProfile(company);
     const hasCoordinates =
@@ -155,11 +154,6 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                   <div className="min-w-0 pb-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <StatusBadge status={status} />
-                      {startProfileBadges.map((badge) => (
-                        <span key={badge} className="rounded-md border border-[#d6c089] bg-[#fff8df] px-3 py-1 text-xs font-semibold text-[#715316]">
-                          {badge}
-                        </span>
-                      ))}
                     </div>
                     <h1 className="mt-3 text-3xl font-semibold tracking-normal text-ink sm:text-4xl">{company.name}</h1>
                     <p className="mt-2 text-lg font-medium text-[#30415f]">{headline}</p>
@@ -1019,20 +1013,6 @@ function getProfileProofItems(company: PublicCompanyWithTrade) {
     .map((item) => String(item).trim())
     .filter(Boolean)
     .slice(0, 12);
-}
-
-function getStartProfileBadges(company: PublicCompanyWithTrade) {
-  const badges: string[] = [];
-
-  if (company.is_free_founding_member) badges.push("Startmitglied");
-  if (hasVerifiedStartProfile(company)) badges.push("Verifiziertes Startprofil");
-  if (company.trust_badge) badges.push(company.trust_badge);
-  if (company.voluntary_support_status) badges.push(company.voluntary_support_status);
-  if (company.profile_status === "verified" && !badges.includes("Verifiziertes Profil")) {
-    badges.push("Verifiziertes Profil");
-  }
-
-  return badges.slice(0, 3);
 }
 
 function hasVerifiedStartProfile(company: PublicCompanyWithTrade) {
