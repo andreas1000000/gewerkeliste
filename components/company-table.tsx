@@ -63,6 +63,12 @@ export function CompanyTable({ companies }: { companies: CompanyWithTrade[] }) {
                     >
                       Bearbeiten
                     </Link>
+                    <Link
+                      className="rounded-md border border-line px-3 py-2 text-xs font-semibold text-ink hover:bg-panel"
+                      href={`/admin/companies/${company.id}/premium`}
+                    >
+                      Premium
+                    </Link>
                     {company.public_visible ? (
                       <form action={hideCompanyFromPublicDirectory}>
                         <input name="id" type="hidden" value={company.id} />

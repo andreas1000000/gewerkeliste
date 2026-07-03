@@ -6,6 +6,14 @@ import type {
   PublicCompanyTradeMatch,
   PublicCompanyWithTrade,
 } from "@/lib/types/public-directory";
+import type {
+  CompanyCertificate,
+  CompanyContact,
+  CompanyPremiumProfile,
+  CompanyReference,
+  CompanyReferenceMedia,
+  CompanyTeamMember,
+} from "@/lib/types";
 
 const COMPANY_MEDIA_BUCKET = "company-media";
 const MEDIA_SIGNED_URL_TTL_SECONDS = 60 * 60;
@@ -341,7 +349,8 @@ export async function getCompanyBySlug(slug: string) {
 
   if (error) return getCompanyBySlugFallback(slug);
   const company = await applyApprovedProfileUpdateMedia(data as PublicCompanyWithTrade);
-  return resolveSingleCompanyMedia(company);
+  const resolvedCompany = await resolveSingleCompanyMedia(company);
+  return attachPublicPremiumProfile(resolvedCompany);
 }
 
 export async function getCompanyBySlugForMetadata(slug: string): Promise<PublicCompanyMetadata | null> {
@@ -531,7 +540,8 @@ async function getCompanyBySlugFallback(slug: string) {
     .single();
 
   if (error) throw error;
-  return resolveSingleCompanyMedia(data as PublicCompanyWithTrade);
+  const company = await resolveSingleCompanyMedia(data as PublicCompanyWithTrade);
+  return attachPublicPremiumProfile(company);
 }
 
 async function getPublicTradeLocationSitemapEntriesFallback(limit: number) {
@@ -573,6 +583,90 @@ function slugifyLocation(value: string) {
 
 async function resolveCompanyMedia<T extends PublicCompanyWithTrade>(companies: T[]) {
   return Promise.all(companies.map((company) => resolveSingleCompanyMedia(company)));
+}
+
+async function attachPublicPremiumProfile<T extends PublicCompanyWithTrade>(company: T) {
+  if (!hasVerifiedStartPackage(company)) {
+    return { ...company, premium_profile: emptyPremiumProfile() };
+  }
+
+  const premiumProfile = await getApprovedCompanyPremiumProfile(company.id);
+  return { ...company, premium_profile: premiumProfile };
+}
+
+function hasVerifiedStartPackage(company: PublicCompanyWithTrade) {
+  return company.profile_package === "verified_start" && (company.verified || company.profile_status === "verified");
+}
+
+async function getApprovedCompanyPremiumProfile(companyId: string): Promise<CompanyPremiumProfile> {
+  const supabase = getSupabaseAdmin();
+  const [contacts, teamMembers, references, referenceMedia, certificates] = await Promise.all([
+    supabase
+      .from("company_contacts")
+      .select("*")
+      .eq("company_id", companyId)
+      .eq("review_status", "approved")
+      .order("is_primary", { ascending: false })
+      .order("sort_order", { ascending: true }),
+    supabase
+      .from("company_team_members")
+      .select("*")
+      .eq("company_id", companyId)
+      .eq("review_status", "approved")
+      .order("sort_order", { ascending: true }),
+    supabase
+      .from("company_references")
+      .select("*")
+      .eq("company_id", companyId)
+      .eq("review_status", "approved")
+      .order("sort_order", { ascending: true }),
+    supabase
+      .from("company_reference_media")
+      .select("*")
+      .eq("company_id", companyId)
+      .eq("review_status", "approved")
+      .order("sort_order", { ascending: true }),
+    supabase
+      .from("company_certificates")
+      .select("*")
+      .eq("company_id", companyId)
+      .eq("review_status", "approved")
+      .order("sort_order", { ascending: true }),
+  ]);
+
+  return {
+    contacts: contacts.error ? [] : await resolvePremiumMediaRows((contacts.data || []) as CompanyContact[], "image_url"),
+    teamMembers: teamMembers.error ? [] : await resolvePremiumMediaRows((teamMembers.data || []) as CompanyTeamMember[], "image_url"),
+    references: references.error ? [] : normalizeReferenceRows((references.data || []) as CompanyReference[]),
+    referenceMedia: referenceMedia.error ? [] : await resolvePremiumMediaRows((referenceMedia.data || []) as CompanyReferenceMedia[], "file_url"),
+    certificates: certificates.error ? [] : await resolvePremiumMediaRows((certificates.data || []) as CompanyCertificate[], "file_url"),
+  };
+}
+
+function emptyPremiumProfile(): CompanyPremiumProfile {
+  return {
+    contacts: [],
+    teamMembers: [],
+    references: [],
+    referenceMedia: [],
+    certificates: [],
+  };
+}
+
+function normalizeReferenceRows(rows: CompanyReference[]) {
+  return rows.map((row) => ({
+    ...row,
+    services: Array.isArray(row.services) ? row.services : [],
+  }));
+}
+
+async function resolvePremiumMediaRows<T extends Record<string, unknown>>(rows: T[], field: keyof T) {
+  return Promise.all(
+    rows.map(async (row) => ({
+      ...row,
+      [field]: await resolveCompanyMediaUrl(typeof row[field] === "string" ? row[field] : null),
+    })),
+  ) as Promise<T[]>;
 }
 
 async function resolveSingleCompanyMedia<T extends PublicCompanyWithTrade>(company: T) {

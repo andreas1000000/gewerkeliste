@@ -221,6 +221,10 @@ export default async function SubmissionDetailPage({ params, searchParams }: Pag
                   Betriebsdaten bestätigt
                 </label>
                 <label className="flex items-start gap-3 text-sm font-medium text-ink">
+                  <input className="mt-1 h-4 w-4 accent-brand" name="verified_start_profile" type="checkbox" defaultChecked={submission.wants_founder_verification} />
+                  Als verifiziertes Startprofil freigeben
+                </label>
+                <label className="flex items-start gap-3 text-sm font-medium text-ink">
                   <input className="mt-1 h-4 w-4 accent-brand" name="public_visible" type="checkbox" defaultChecked />
                   Öffentlichen Firmeneintrag erzeugen
                 </label>

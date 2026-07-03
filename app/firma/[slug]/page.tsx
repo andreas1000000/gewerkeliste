@@ -91,6 +91,8 @@ export default async function CompanyPublicPage({ params }: PageProps) {
     const referenceItems = getTextBlockItems(company.references_text);
     const proofItems = getProfileProofItems(company);
     const startProfileBadges = getStartProfileBadges(company);
+    const premiumProfile = company.premium_profile || emptyPremiumProfile();
+    const isVerifiedStartProfile = hasVerifiedStartProfile(company);
     const hasCoordinates =
       Number.isFinite(company.latitude) &&
       Number.isFinite(company.longitude) &&
@@ -275,6 +277,15 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                 </ProfileCard>
               ) : null}
 
+              {isVerifiedStartProfile && hasPremiumTrustContent(premiumProfile) ? (
+                <ProfileCard
+                  title="Vertrauensprofil"
+                  subtitle="Referenzen und Nachweise werden vom Betrieb bereitgestellt und strukturiert dargestellt."
+                >
+                  <PremiumTrustSections premiumProfile={premiumProfile} />
+                </ProfileCard>
+              ) : null}
+
               <ProfileCard title="Datenquellen / Datenstatus">
                 {sourceItems.length ? (
                   <ul className="grid gap-3">
@@ -343,7 +354,13 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                 </dl>
               </ProfileCard>
 
-              <ContactTrustCard company={company} canClaim={canClaim} />
+              <ContactTrustCard company={company} canClaim={canClaim} premiumContacts={isVerifiedStartProfile ? premiumProfile.contacts : []} />
+
+              {isVerifiedStartProfile && premiumProfile.teamMembers.length ? (
+                <ProfileCard title="Team">
+                  <TeamList companyName={company.name} items={premiumProfile.teamMembers} />
+                </ProfileCard>
+              ) : null}
 
               {canClaim ? (
                 <section className="rounded-lg border border-[#b9dec8] bg-[#f1fbf5] p-5 shadow-soft">
@@ -430,7 +447,15 @@ function ProfileMark({ company, canClaim }: { company: PublicCompanyWithTrade; c
   );
 }
 
-function ContactTrustCard({ company, canClaim }: { company: PublicCompanyWithTrade; canClaim: boolean }) {
+function ContactTrustCard({
+  company,
+  canClaim,
+  premiumContacts,
+}: {
+  company: PublicCompanyWithTrade;
+  canClaim: boolean;
+  premiumContacts: NonNullable<PublicCompanyWithTrade["premium_profile"]>["contacts"];
+}) {
   const claimHref = `/betriebe/${company.slug}/claim` as Route;
   const updateHref = `/betriebe/${company.slug}/profil-ergaenzen` as Route;
   const contactName = company.contact_person_name || company.contact_name || "Ansprechpartner";
@@ -439,7 +464,25 @@ function ContactTrustCard({ company, canClaim }: { company: PublicCompanyWithTra
   return (
     <ProfileCard title="Ansprechpartner">
       <div className="grid gap-3">
-        <div className="rounded-md border border-line bg-[#fbfcff] p-4">
+        {premiumContacts.length ? (
+          <div className="grid gap-3">
+            {premiumContacts.map((contact) => (
+              <div key={contact.id} className="rounded-md border border-line bg-[#fbfcff] p-4">
+                <PersonRow
+                  imageUrl={contact.image_url}
+                  imageAlt={`${contact.name} Ansprechpartner bei ${company.name}`}
+                  initialsSource={contact.name}
+                  name={contact.name}
+                  role={contact.role}
+                  phone={contact.phone}
+                  email={contact.email}
+                  primary={contact.is_primary}
+                />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-md border border-line bg-[#fbfcff] p-4">
           <div className="flex items-center gap-4">
             <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full border border-line bg-white text-center text-xl font-semibold leading-4 text-brand shadow-soft">
               {company.profile_image_url ? (
@@ -470,6 +513,7 @@ function ContactTrustCard({ company, canClaim }: { company: PublicCompanyWithTra
             </div>
           </div>
         </div>
+        )}
 
         {canClaim ? (
           <Link className="inline-flex min-h-10 items-center justify-center rounded-md bg-action px-4 text-sm font-semibold text-white hover:bg-brand" href={claimHref}>
@@ -546,6 +590,146 @@ function ProfileCompletionCard({
         </p>
       </div>
     </ProfileCard>
+  );
+}
+
+function PersonRow({
+  imageUrl,
+  imageAlt,
+  initialsSource,
+  name,
+  role,
+  phone,
+  email,
+  primary,
+}: {
+  imageUrl?: string | null;
+  imageAlt: string;
+  initialsSource: string;
+  name: string;
+  role?: string | null;
+  phone?: string | null;
+  email?: string | null;
+  primary?: boolean;
+}) {
+  return (
+    <div className="flex items-center gap-4">
+      <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border border-line bg-white text-center text-lg font-semibold leading-4 text-brand shadow-soft">
+        {imageUrl ? <img alt={imageAlt} className="h-full w-full object-cover" src={imageUrl} /> : initials(initialsSource)}
+      </div>
+      <div className="min-w-0">
+        <div className="flex flex-wrap items-center gap-2">
+          <h3 className="text-base font-semibold text-ink">{name}</h3>
+          {primary ? <span className="rounded-md border border-line bg-white px-2 py-1 text-xs font-semibold text-muted">Hauptkontakt</span> : null}
+        </div>
+        {role ? <p className="mt-1 text-sm font-semibold text-muted">{role}</p> : null}
+        <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-sm font-semibold">
+          {phone ? <a className="text-action hover:underline" href={`tel:${phone}`}>{phone}</a> : null}
+          {email ? <a className="text-action hover:underline" href={`mailto:${email}`}>{email}</a> : null}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TeamList({
+  companyName,
+  items,
+}: {
+  companyName: string;
+  items: NonNullable<PublicCompanyWithTrade["premium_profile"]>["teamMembers"];
+}) {
+  return (
+    <div className="grid gap-3">
+      {items.map((item) => (
+        <div key={item.id} className="rounded-md border border-line bg-[#fbfcff] p-4">
+          <PersonRow
+            imageUrl={item.image_url}
+            imageAlt={`${item.name} Teammitglied bei ${companyName}`}
+            initialsSource={item.name}
+            name={item.name}
+            role={item.role}
+          />
+          {item.description ? <p className="mt-3 text-sm leading-6 text-muted">{item.description}</p> : null}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function PremiumTrustSections({ premiumProfile }: { premiumProfile: NonNullable<PublicCompanyWithTrade["premium_profile"]> }) {
+  return (
+    <div className="grid gap-5">
+      {premiumProfile.references.length ? (
+        <div>
+          <h3 className="text-sm font-semibold text-ink">Strukturierte Referenzen</h3>
+          <div className="mt-3 grid gap-3">
+            {premiumProfile.references.map((reference) => (
+              <article key={reference.id} className="rounded-md border border-line bg-[#fbfcff] p-4">
+                <div className="flex flex-wrap items-start justify-between gap-3">
+                  <div>
+                    <h4 className="text-base font-semibold text-ink">{reference.title}</h4>
+                    <p className="mt-1 text-sm text-muted">
+                      {[reference.project_type, reference.location, reference.year, reference.client_type].filter(Boolean).join(" · ")}
+                    </p>
+                  </div>
+                </div>
+                {reference.description ? <p className="mt-3 text-sm leading-6 text-muted">{reference.description}</p> : null}
+                {reference.services.length ? (
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {reference.services.map((service) => (
+                      <span key={service} className="rounded-md border border-line bg-white px-2.5 py-1 text-xs font-semibold text-ink">{service}</span>
+                    ))}
+                  </div>
+                ) : null}
+              </article>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {premiumProfile.referenceMedia.length ? (
+        <div>
+          <h3 className="text-sm font-semibold text-ink">Referenzbilder</h3>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            {premiumProfile.referenceMedia.map((media) => (
+              <figure key={media.id} className="overflow-hidden rounded-md border border-line bg-[#fbfcff]">
+                <img alt={media.alt_text || media.caption || "Referenzbild"} className="h-48 w-full object-cover" src={media.file_url} />
+                {media.caption ? <figcaption className="px-3 py-2 text-sm leading-5 text-muted">{media.caption}</figcaption> : null}
+              </figure>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      {premiumProfile.certificates.length ? (
+        <div>
+          <h3 className="text-sm font-semibold text-ink">Nachweise und Zertifikate</h3>
+          <div className="mt-3 grid gap-3">
+            {premiumProfile.certificates.map((certificate) => (
+              <div key={certificate.id} className="rounded-md border border-line bg-[#fbfcff] p-4">
+                <div className="font-semibold text-ink">{certificate.title}</div>
+                <p className="mt-1 text-sm text-muted">
+                  {[certificate.issuer, certificate.issued_at ? `seit ${formatDate(certificate.issued_at)}` : null, certificate.valid_until ? `gültig bis ${formatDate(certificate.valid_until)}` : null]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </p>
+                {certificate.description ? <p className="mt-3 text-sm leading-6 text-muted">{certificate.description}</p> : null}
+                {certificate.file_url ? (
+                  <a className="mt-3 inline-flex text-sm font-semibold text-action hover:underline" href={certificate.file_url} rel="noreferrer" target="_blank">
+                    Nachweis ansehen
+                  </a>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
+      <p className="text-xs leading-5 text-muted">
+        Referenzen und Nachweise werden vom Betrieb bereitgestellt. GewerkeListe strukturiert die Darstellung, gibt aber keine Qualitäts-, Verfügbarkeits- oder Auftragsgarantie.
+      </p>
+    </div>
   );
 }
 
@@ -841,6 +1025,7 @@ function getStartProfileBadges(company: PublicCompanyWithTrade) {
   const badges: string[] = [];
 
   if (company.is_free_founding_member) badges.push("Startmitglied");
+  if (hasVerifiedStartProfile(company)) badges.push("Verifiziertes Startprofil");
   if (company.trust_badge) badges.push(company.trust_badge);
   if (company.voluntary_support_status) badges.push(company.voluntary_support_status);
   if (company.profile_status === "verified" && !badges.includes("Verifiziertes Profil")) {
@@ -848,6 +1033,24 @@ function getStartProfileBadges(company: PublicCompanyWithTrade) {
   }
 
   return badges.slice(0, 3);
+}
+
+function hasVerifiedStartProfile(company: PublicCompanyWithTrade) {
+  return company.profile_package === "verified_start" && (company.verified || company.profile_status === "verified");
+}
+
+function hasPremiumTrustContent(profile: NonNullable<PublicCompanyWithTrade["premium_profile"]>) {
+  return Boolean(profile.references.length || profile.referenceMedia.length || profile.certificates.length);
+}
+
+function emptyPremiumProfile(): NonNullable<PublicCompanyWithTrade["premium_profile"]> {
+  return {
+    contacts: [],
+    teamMembers: [],
+    references: [],
+    referenceMedia: [],
+    certificates: [],
+  };
 }
 
 function formatDate(value: string) {

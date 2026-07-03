@@ -1,6 +1,7 @@
 import { getSupabaseAdmin } from "@/lib/supabase";
 import type {
   CompanyClaimWithCompany,
+  CompanyPremiumProfile,
   CompanyTradeMatch,
   CompanySubmission,
   CompanyWithTrade,
@@ -56,6 +57,47 @@ export async function getCompanies(params?: {
   const { data, error } = await query;
   if (error) return getCompaniesFallback(params);
   return data as CompanyWithTrade[];
+}
+
+export async function getCompanyForPremiumAdmin(id: string) {
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("companies")
+    .select("*, trades(id, name, slug)")
+    .eq("id", id)
+    .single();
+
+  if (error) throw error;
+  return data as CompanyWithTrade;
+}
+
+export async function getCompanyPremiumProfileForAdmin(companyId: string): Promise<CompanyPremiumProfile> {
+  const supabase = getSupabaseAdmin();
+  const [contacts, teamMembers, references, referenceMedia, certificates] = await Promise.all([
+    supabase.from("company_contacts").select("*").eq("company_id", companyId).order("sort_order", { ascending: true }),
+    supabase.from("company_team_members").select("*").eq("company_id", companyId).order("sort_order", { ascending: true }),
+    supabase.from("company_references").select("*").eq("company_id", companyId).order("sort_order", { ascending: true }),
+    supabase.from("company_reference_media").select("*").eq("company_id", companyId).order("sort_order", { ascending: true }),
+    supabase.from("company_certificates").select("*").eq("company_id", companyId).order("sort_order", { ascending: true }),
+  ]);
+
+  if (contacts.error || teamMembers.error || references.error || referenceMedia.error || certificates.error) {
+    return {
+      contacts: [],
+      teamMembers: [],
+      references: [],
+      referenceMedia: [],
+      certificates: [],
+    };
+  }
+
+  return {
+    contacts: contacts.data || [],
+    teamMembers: teamMembers.data || [],
+    references: references.data || [],
+    referenceMedia: referenceMedia.data || [],
+    certificates: certificates.data || [],
+  } as CompanyPremiumProfile;
 }
 
 async function getCompaniesFallback(params?: {

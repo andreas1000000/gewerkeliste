@@ -1,4 +1,4 @@
-import type { ClaimStatus, Company, Trade } from "@/lib/types";
+import type { ClaimStatus, Company, CompanyPremiumProfile, Trade } from "@/lib/types";
 
 export type PublicCompany = Company & {
   logo_url?: string | null;
@@ -6,8 +6,11 @@ export type PublicCompany = Company & {
   profile_image_alt?: string | null;
   contact_person_name?: string | null;
   contact_person_role?: string | null;
+  profile_package?: "basis" | "verified_start" | null;
   profile_status?: "imported" | "verified" | "claimed" | "needs_review" | "removed" | null;
   verification_date?: string | null;
+  premium_started_at?: string | null;
+  premium_expires_at?: string | null;
   is_free_founding_member?: boolean | null;
   trust_badge?: string | null;
   voluntary_support_status?: string | null;
@@ -23,6 +26,7 @@ export type PublicCompany = Company & {
 export type PublicCompanyWithTrade = PublicCompany & {
   trades: Pick<Trade, "id" | "name" | "slug"> | null;
   company_trades?: PublicCompanyTradeRelation[] | null;
+  premium_profile?: CompanyPremiumProfile | null;
 };
 
 export type PublicCompanyTradeRelation = {

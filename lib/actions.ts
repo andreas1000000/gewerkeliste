@@ -28,6 +28,7 @@ import {
 } from "@/lib/actions/approval-required";
 import { submitBusinessEntry as submitBusinessEntryAction } from "@/lib/actions/business-entry";
 import { submitClaim as submitClaimAction } from "@/lib/actions/claims";
+import { updateCompanyPremiumProfile as updateCompanyPremiumProfileAction } from "@/lib/actions/company-premium";
 import { approveSubmission as approveSubmissionAction } from "@/lib/actions/submissions";
 import { parseTradeName } from "@/lib/validation";
 
@@ -81,6 +82,10 @@ export async function updateCompany(
 ): Promise<CompanyFormState> {
   formData.set("id", id);
   return updateCompanyAction(formData);
+}
+
+export async function updateCompanyPremiumProfile(formData: FormData) {
+  return updateCompanyPremiumProfileAction(formData);
 }
 
 export async function submitClaim(_prevState: CompanyFormState, formData: FormData): Promise<CompanyFormState> {

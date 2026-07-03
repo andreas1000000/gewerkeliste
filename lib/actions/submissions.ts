@@ -33,6 +33,7 @@ export async function approveSubmission(formData: FormData) {
 
   const publicVisible = formData.get("public_visible") === "on";
   const verified = formData.get("verified") === "on";
+  const verifiedStartProfile = formData.get("verified_start_profile") === "on";
 
   try {
     const submission = await getCompanySubmission(id);
@@ -40,7 +41,7 @@ export async function approveSubmission(formData: FormData) {
       throw new Error("Diese Einreichung wurde bereits freigegeben.");
     }
 
-    const company = await promoteSubmissionToCompany(submission, { publicVisible, verified });
+    const company = await promoteSubmissionToCompany(submission, { publicVisible, verified, verifiedStartProfile });
 
     revalidatePath("/admin/submissions");
     revalidatePath(`/admin/submissions/${id}`);
@@ -59,7 +60,7 @@ export async function approveSubmission(formData: FormData) {
 
 async function promoteSubmissionToCompany(
   submission: CompanySubmission,
-  options: { publicVisible: boolean; verified: boolean },
+  options: { publicVisible: boolean; verified: boolean; verifiedStartProfile: boolean },
 ): Promise<ApprovedCompany> {
   const supabase = getSupabaseAdmin();
   const claimCompanyId = claimCompanyIdFromSource(submission.source);
@@ -95,9 +96,10 @@ async function promoteSubmissionToCompany(
 function companyPayload(
   submission: CompanySubmission,
   tradeId: string,
-  options: { publicVisible: boolean; verified: boolean },
+  options: { publicVisible: boolean; verified: boolean; verifiedStartProfile: boolean },
 ) {
   const verificationDate = options.verified ? new Date().toISOString() : null;
+  const profilePackage = options.verified && options.verifiedStartProfile ? "verified_start" : "basis";
 
   return {
     trade_id: tradeId,
@@ -113,8 +115,11 @@ function companyPayload(
     longitude: 0,
     claim_status: "claimed",
     verified: options.verified,
+    profile_package: profilePackage,
     profile_status: options.verified ? "verified" : "claimed",
     verification_date: verificationDate,
+    premium_started_at: profilePackage === "verified_start" ? verificationDate : null,
+    premium_expires_at: profilePackage === "verified_start" ? addMonthsIso(12) : null,
     public_visible: options.publicVisible,
     logo_url: submission.logo_url || null,
     profile_image_url: submission.profile_image_url || null,
@@ -139,7 +144,7 @@ async function updateClaimedCompany(
   const { data: existing, error: existingError } = await supabase
     .from("companies")
     .select(
-      "claim_status, verified, profile_status, verification_date, logo_url, profile_image_url, profile_image_alt, contact_person_name, contact_person_role, service_radius_km, service_regions, service_postal_codes, references_text, memberships, certificates, manufacturer_certificates",
+      "claim_status, verified, profile_package, profile_status, verification_date, premium_started_at, premium_expires_at, logo_url, profile_image_url, profile_image_alt, contact_person_name, contact_person_role, service_radius_km, service_regions, service_postal_codes, references_text, memberships, certificates, manufacturer_certificates",
     )
     .eq("id", companyId)
     .single();
@@ -151,8 +156,11 @@ async function updateClaimedCompany(
     ...payload,
     claim_status: existing.claim_status === "claimed" && !payload.verified ? "claimed" : payload.claim_status,
     verified: payload.verified || Boolean(existing.verified),
+    profile_package: payload.profile_package === "verified_start" ? "verified_start" : existing.profile_package || payload.profile_package,
     profile_status: payload.verified ? "verified" : existing.profile_status || payload.profile_status,
     verification_date: payload.verified ? payload.verification_date : existing.verification_date || null,
+    premium_started_at: payload.profile_package === "verified_start" ? payload.premium_started_at : existing.premium_started_at || null,
+    premium_expires_at: payload.profile_package === "verified_start" ? payload.premium_expires_at : existing.premium_expires_at || null,
     logo_url: payload.logo_url || existing.logo_url || null,
     profile_image_url: payload.profile_image_url || existing.profile_image_url || null,
     profile_image_alt: payload.profile_image_alt || existing.profile_image_alt || null,
@@ -364,6 +372,12 @@ function normalizeCompanyMatchValue(value: string) {
     .replace(/\b(gmbh|gbr|gdbr|ug|ag|kg|ohg|ek|e k|mbh|co|firma)\b/g, " ")
     .replace(/[^a-z0-9]+/g, " ")
     .trim();
+}
+
+function addMonthsIso(months: number) {
+  const date = new Date();
+  date.setMonth(date.getMonth() + months);
+  return date.toISOString();
 }
 
 function readableApprovalError(error: unknown) {
