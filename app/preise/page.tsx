@@ -44,6 +44,8 @@ const verifiedItems = [
   "persönliche Unterstützung beim Profilaufbau in der Startphase",
 ];
 
+const verifiedExampleHref = "/firma/wagner-und-spielvogel-gbr-83083-riedering" as Route;
+
 const comparisonRows = [
   ["Preis", "0 €", "490 € netto / 12 Monate"],
   ["Betriebsname", "enthalten", "enthalten"],
@@ -154,6 +156,7 @@ export default function PricingPage() {
             after="Das Basisprofil zeigt, was Ihr Betrieb anbietet. Das verifizierte Profil zeigt, wer dahintersteht, was Sie bereits geleistet haben und warum Auftraggeber Ihnen vertrauen können."
             cta="Startprofil für 490 € sichern"
             href="/eintrag-beanspruchen"
+            exampleHref={verifiedExampleHref}
           />
         </div>
 
@@ -261,6 +264,11 @@ export default function PricingPage() {
           <p className="mt-5 max-w-3xl text-base leading-7 text-blue-100">
             Für Betriebe, die nicht nur online sein wollen — sondern im richtigen Moment gefunden werden wollen.
           </p>
+          <p className="mt-4 text-sm leading-6 text-blue-100">
+            <Link className="font-semibold underline decoration-white/40 underline-offset-4 hover:text-white" href={verifiedExampleHref}>
+              Beispiel eines verifizierten Profils ansehen
+            </Link>
+          </p>
           <div className="mt-6 flex flex-col gap-3 sm:flex-row">
             <Link
               className="inline-flex min-h-11 items-center justify-center rounded-md bg-white px-5 text-sm font-semibold text-brand hover:bg-blue-50"
@@ -300,6 +308,7 @@ function OfferCard({
   after,
   cta,
   href,
+  exampleHref,
   highlighted,
 }: {
   title: string;
@@ -313,6 +322,7 @@ function OfferCard({
   after: string;
   cta: string;
   href: string;
+  exampleHref?: Route;
   highlighted?: boolean;
 }) {
   return (
@@ -347,6 +357,13 @@ function OfferCard({
         </ul>
       ) : null}
       <p className="mt-5 text-base leading-7 text-[#30415f]">{after}</p>
+      {exampleHref ? (
+        <p className="mt-4 text-sm leading-6 text-muted">
+          <Link className="font-semibold text-action hover:underline" href={exampleHref}>
+            So kann ein verifiziertes Startprofil aussehen
+          </Link>
+        </p>
+      ) : null}
       <div className="mt-6">
         {highlighted ? <PrimaryLink href={href}>{cta}</PrimaryLink> : <SecondaryLink href={href}>{cta}</SecondaryLink>}
       </div>

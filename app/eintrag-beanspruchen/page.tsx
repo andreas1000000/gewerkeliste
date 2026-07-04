@@ -39,6 +39,14 @@ export default async function LegacyClaimEntryPage({ searchParams }: PageProps) 
             Basisprofil übernehmen, Korrekturen einreichen und Ihr tatsächliches Leistungsspektrum strukturiert
             darstellen. Änderungen werden geprüft, bevor sie veröffentlicht werden.
           </p>
+          <p className="mt-4 text-sm leading-6 text-muted">
+            <Link
+              className="font-semibold text-action hover:underline"
+              href={"/firma/wagner-und-spielvogel-gbr-83083-riedering" as Route}
+            >
+              Beispiel eines verifizierten Profils ansehen
+            </Link>
+          </p>
           <div className="mt-6 grid gap-3 sm:grid-cols-2">
             <Link
               className="inline-flex min-h-11 items-center justify-center rounded-md bg-action px-5 text-sm font-semibold text-white hover:bg-brand"
