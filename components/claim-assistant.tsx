@@ -98,7 +98,7 @@ export function ClaimAssistant({
     setProfile((current) => ({ ...current, [field]: value }));
   }
   return (
-    <form action={formAction} className="grid gap-5" encType="multipart/form-data">
+    <form action={formAction} className="grid min-w-0 gap-5 overflow-hidden" encType="multipart/form-data">
       <input name="company_id" type="hidden" value={company.id} />
       <input name="intent" type="hidden" value={intent} />
       <input
@@ -348,7 +348,7 @@ export function ClaimAssistant({
 }
 function WizardSection({ eyebrow, title, children }: { eyebrow: string; title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-lg border border-line bg-white p-5 shadow-soft sm:p-6">
+    <section className="min-w-0 overflow-hidden rounded-lg border border-line bg-white p-4 shadow-soft sm:p-6">
       <p className="text-sm font-semibold uppercase tracking-normal text-brand">{eyebrow}</p>
       <h2 className="mt-2 text-2xl font-semibold text-[#07173d]">{title}</h2>
       <div className="mt-5">{children}</div>
@@ -424,4 +424,4 @@ function SummaryLine({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
-const inputClass = "w-full rounded-md border border-line px-3 py-2 outline-none focus:border-action";
+const inputClass = "w-full min-w-0 rounded-md border border-line px-3 py-2 outline-none focus:border-action";
