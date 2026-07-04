@@ -43,8 +43,8 @@ export function PremiumSubmissionFields() {
       {enabled ? (
         <div className="mt-6 grid gap-6">
           <p className="rounded-md border border-line bg-[#fbfcff] px-4 py-3 text-xs leading-5 text-muted">
-            Mehrere Bilder und Dokumente werden hier zunächst als Link, Cloudordner oder Hinweis eingereicht. Dadurch bleiben
-            die Daten vollständig reviewfähig; veröffentlicht wird nichts ohne Admin-Prüfung.
+            Sie müssen nicht alles perfekt vorbereiten. Reichen Sie ein, was vorhanden ist. Wir prüfen und strukturieren
+            Ihr Profil. Bilder und Dokumente werden nicht automatisch veröffentlicht.
           </p>
 
           <DynamicGroup
@@ -67,8 +67,16 @@ export function PremiumSubmissionFields() {
                 <Field label="E-Mail optional">
                   <input className={inputClass} name="premiumContactEmail" type="email" />
                 </Field>
-                <Field label="Bildlink oder Hinweis optional">
-                  <input className={inputClass} name="premiumContactImageNote" placeholder="Link, Cloudordner oder Hinweis für Admin-Upload" />
+                <Field label="Bild optional">
+                  <UploadField
+                    accept="image/jpeg,image/png,image/webp"
+                    help="JPG, PNG oder WebP. Maximal 10 MB."
+                    name="premiumContactImageFile"
+                    preview="image"
+                  />
+                </Field>
+                <Field label="Bildhinweis optional">
+                  <input className={inputClass} name="premiumContactImageNote" placeholder="z. B. Bild folgt später oder besondere Freigabehinweise" />
                 </Field>
                 <input name="premiumContactSortOrder" type="hidden" value={index + 1} />
               </div>
@@ -84,8 +92,16 @@ export function PremiumSubmissionFields() {
                 <Field label="Rolle/Funktion">
                   <input className={inputClass} name="premiumTeamRole" />
                 </Field>
-                <Field label="Bildlink oder Hinweis optional">
-                  <input className={inputClass} name="premiumTeamImageNote" placeholder="Link, Cloudordner oder Hinweis für Admin-Upload" />
+                <Field label="Bild optional">
+                  <UploadField
+                    accept="image/jpeg,image/png,image/webp"
+                    help="JPG, PNG oder WebP. Maximal 10 MB."
+                    name="premiumTeamImageFile"
+                    preview="image"
+                  />
+                </Field>
+                <Field label="Bildhinweis optional">
+                  <input className={inputClass} name="premiumTeamImageNote" placeholder="z. B. Teamfoto folgt später" />
                 </Field>
                 <Field label="Kurzbeschreibung">
                   <textarea className={textareaClass} name="premiumTeamDescription" />
@@ -124,14 +140,22 @@ export function PremiumSubmissionFields() {
             )}
           </DynamicGroup>
 
-          <DynamicGroup addLabel="Referenzbild-Hinweis hinzufügen" count={counts.media} onAdd={() => addItem("media")} title="Referenzbilder">
+          <DynamicGroup addLabel="Referenzbild hinzufügen" count={counts.media} onAdd={() => addItem("media")} title="Referenzbilder">
             {() => (
               <div className="grid gap-4 md:grid-cols-2">
                 <Field label="Zugehörige Referenz optional">
                   <input className={inputClass} name="premiumReferenceMediaReferenceTitle" />
                 </Field>
-                <Field label="Bildlink, Cloudordner oder Hinweis">
-                  <input className={inputClass} name="premiumReferenceMediaFileNote" placeholder="URL oder Ablagehinweis" />
+                <Field label="Bilddatei optional">
+                  <UploadField
+                    accept="image/jpeg,image/png,image/webp"
+                    help="JPG, PNG oder WebP. Maximal 10 MB."
+                    name="premiumReferenceMediaFile"
+                    preview="image"
+                  />
+                </Field>
+                <Field label="Dateihinweis optional">
+                  <input className={inputClass} name="premiumReferenceMediaFileNote" placeholder="z. B. Bild folgt später" />
                 </Field>
                 <Field label="Bildtitel/Beschreibung optional">
                   <input className={inputClass} name="premiumReferenceMediaCaption" />
@@ -155,8 +179,16 @@ export function PremiumSubmissionFields() {
                 <Field label="Gültig bis optional">
                   <input className={inputClass} name="premiumCertificateValidUntil" type="date" />
                 </Field>
-                <Field label="PDF-/Bildlink oder Hinweis optional">
-                  <input className={inputClass} name="premiumCertificateFileNote" placeholder="URL oder Ablagehinweis" />
+                <Field label="PDF oder Bild optional">
+                  <UploadField
+                    accept="application/pdf,image/jpeg,image/png,image/webp"
+                    help="PDF, JPG, PNG oder WebP. Maximal 10 MB."
+                    name="premiumCertificateFile"
+                    preview="file"
+                  />
+                </Field>
+                <Field label="Dateihinweis optional">
+                  <input className={inputClass} name="premiumCertificateFileNote" placeholder="z. B. Nachweis wird nachgereicht" />
                 </Field>
                 <Field label="Beschreibung">
                   <textarea className={textareaClass} name="premiumCertificateDescription" />
@@ -172,6 +204,13 @@ export function PremiumSubmissionFields() {
               placeholder="Was soll bei der Aufbereitung besonders beachtet werden?"
             />
           </Field>
+          <label className="flex items-start gap-3 rounded-md border border-line bg-white p-4 text-sm font-medium leading-6 text-ink">
+            <input className="mt-1 h-4 w-4 accent-action" name="premiumMediaConsentGiven" type="checkbox" />
+            <span>
+              Ich bin berechtigt, diese Zusatzbilder und Dateien für den Betrieb einzureichen. Personenbilder wurden von
+              den abgebildeten Personen freigegeben.
+            </span>
+          </label>
         </div>
       ) : null}
     </section>
@@ -223,5 +262,58 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
       <span>{label}</span>
       {children}
     </label>
+  );
+}
+
+function UploadField({
+  accept,
+  help,
+  name,
+  preview,
+}: {
+  accept: string;
+  help: string;
+  name: string;
+  preview: "image" | "file";
+}) {
+  const [fileName, setFileName] = useState("");
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  return (
+    <div className="grid gap-2">
+      <input
+        accept={accept}
+        className="w-full min-w-0 rounded-md border border-line bg-white px-3 py-2 text-xs sm:text-sm"
+        name={name}
+        onChange={(event) => {
+          const file = event.target.files?.[0] || null;
+          const allowedTypes =
+            preview === "image"
+              ? ["image/jpeg", "image/png", "image/webp"]
+              : ["application/pdf", "image/jpeg", "image/png", "image/webp"];
+          event.target.setCustomValidity("");
+          if (previewUrl) URL.revokeObjectURL(previewUrl);
+          setPreviewUrl(null);
+          setFileName(file?.name || "");
+          if (file && !allowedTypes.includes(file.type)) {
+            event.target.setCustomValidity(
+              preview === "image" ? "Bitte nur JPG, PNG oder WebP hochladen." : "Bitte nur PDF, JPG, PNG oder WebP hochladen.",
+            );
+          } else if (file && file.size > 10 * 1024 * 1024) {
+            event.target.setCustomValidity("Die Datei ist zu groß. Maximal 10 MB sind erlaubt.");
+          } else if (file && file.type.startsWith("image/")) {
+            setPreviewUrl(URL.createObjectURL(file));
+          }
+          event.target.reportValidity();
+        }}
+        type="file"
+      />
+      <span className="text-xs font-normal leading-5 text-muted">{help}</span>
+      {previewUrl ? (
+        <img alt="" className="h-28 w-full rounded-md border border-line bg-white object-contain p-2" src={previewUrl} />
+      ) : fileName ? (
+        <span className="rounded-md border border-line bg-white px-3 py-2 text-xs font-semibold text-muted">{fileName}</span>
+      ) : null}
+    </div>
   );
 }

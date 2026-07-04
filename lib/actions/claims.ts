@@ -4,6 +4,7 @@ import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
 import { prepareSubmissionMedia } from "@/lib/company-media-upload";
 import { getCompany } from "@/lib/data";
+import { preparePremiumSubmissionMedia } from "@/lib/premium-submission-media";
 import { slugify } from "@/lib/slug";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { canonicalTradeSlug, findTaxonomyTrade } from "@/lib/trade-taxonomy";
@@ -114,6 +115,14 @@ async function submitClaimUnchecked(formData: FormData): Promise<CompanyFormStat
     };
   }
   const media = mediaResult.media;
+  const premiumMediaResult = await preparePremiumSubmissionMedia(formData, submissionId, premiumSubmissionPayload);
+  if (!premiumMediaResult.ok) {
+    return {
+      ok: false,
+      message: premiumMediaResult.message,
+      fieldErrors: premiumMediaResult.fieldErrors,
+    };
+  }
 
   if (intent === "claim") {
     const { error } = await supabase.from("company_claims").insert({
@@ -189,7 +198,7 @@ async function submitClaimUnchecked(formData: FormData): Promise<CompanyFormStat
           ? support_custom_amount
           : Number(support_contribution),
     support_invoice_requested,
-    premium_submission_payload: premiumSubmissionPayload,
+    premium_submission_payload: premiumMediaResult.payload,
     consent_authorized: true,
     consent_data_correct: false,
     consent_privacy: true,

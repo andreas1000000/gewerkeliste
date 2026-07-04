@@ -6,7 +6,7 @@ import { approveSubmission, setSubmissionStatus, updateSubmission } from "@/lib/
 import { getCompanySubmission, getSubmissionDuplicates } from "@/lib/data";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { tradeTaxonomy } from "@/lib/trade-taxonomy";
-import type { CompanyPremiumSubmissionPayload, CompanySubmission } from "@/lib/types";
+import type { CompanyPremiumSubmissionPayload, CompanySubmission, SubmissionUploadedFile } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -313,8 +313,13 @@ function TagList({ label, items }: { label: string; items: string[] }) {
   );
 }
 
-function PremiumSubmissionReview({ payload }: { payload: CompanyPremiumSubmissionPayload | null }) {
+async function PremiumSubmissionReview({ payload }: { payload: CompanyPremiumSubmissionPayload | null }) {
   if (!payload?.requested) return null;
+
+  const contacts = await Promise.all(payload.contacts.map(async (item) => ({ item, image: await resolvePayloadFile(item.image_file || null) })));
+  const teamMembers = await Promise.all(payload.team_members.map(async (item) => ({ item, image: await resolvePayloadFile(item.image_file || null) })));
+  const referenceMedia = await Promise.all(payload.reference_media.map(async (item) => ({ item, file: await resolvePayloadFile(item.file || null) })));
+  const certificates = await Promise.all(payload.certificates.map(async (item) => ({ item, file: await resolvePayloadFile(item.file || null) })));
 
   return (
     <ReadSection title="Verifiziertes Startprofil angefragt">
@@ -325,21 +330,23 @@ function PremiumSubmissionReview({ payload }: { payload: CompanyPremiumSubmissio
           öffentliche Profilmodule übernommen.
         </p>
       </div>
-      <PremiumList title="Ansprechpartner" items={payload.contacts} render={(item) => (
+      <PremiumList title="Ansprechpartner" items={contacts} render={({ item, image }) => (
         <>
           <Data label="Name" value={item.name} />
           <Data label="Rolle" value={item.role} />
           <Data label="Telefon" value={item.phone} />
           <Data label="E-Mail" value={item.email} />
-          <Data label="Bildlink / Hinweis" value={item.image_note} multiline />
+          <PayloadFilePreview file={item.image_file || null} label="Bilddatei" resolved={image} />
+          <Data label="Bildhinweis" value={item.image_note} multiline />
         </>
       )} />
-      <PremiumList title="Teamvorstellung" items={payload.team_members} render={(item) => (
+      <PremiumList title="Teamvorstellung" items={teamMembers} render={({ item, image }) => (
         <>
           <Data label="Name" value={item.name} />
           <Data label="Rolle" value={item.role} />
           <Data label="Beschreibung" value={item.description} multiline />
-          <Data label="Bildlink / Hinweis" value={item.image_note} multiline />
+          <PayloadFilePreview file={item.image_file || null} label="Bilddatei" resolved={image} />
+          <Data label="Bildhinweis" value={item.image_note} multiline />
         </>
       )} />
       <PremiumList title="Referenzen" items={payload.references} render={(item) => (
@@ -353,21 +360,23 @@ function PremiumSubmissionReview({ payload }: { payload: CompanyPremiumSubmissio
           <Data label="Kundentyp" value={item.client_type} />
         </>
       )} />
-      <PremiumList title="Referenzbilder / Medienhinweise" items={payload.reference_media} render={(item) => (
+      <PremiumList title="Referenzbilder" items={referenceMedia} render={({ item, file }) => (
         <>
           <Data label="Referenz" value={item.reference_title} />
-          <Data label="Link / Hinweis" value={item.file_note} multiline />
+          <PayloadFilePreview file={item.file || null} label="Bilddatei" resolved={file} />
+          <Data label="Dateihinweis" value={item.file_note} multiline />
           <Data label="Bildtitel / Beschreibung" value={item.caption} multiline />
           <Data label="Alt-Text" value={item.alt_text} />
         </>
       )} />
-      <PremiumList title="Nachweise / Zertifikate" items={payload.certificates} render={(item) => (
+      <PremiumList title="Nachweise / Zertifikate" items={certificates} render={({ item, file }) => (
         <>
           <Data label="Titel" value={item.title} />
           <Data label="Aussteller" value={item.issuer} />
           <Data label="Gültig bis" value={item.valid_until} />
           <Data label="Beschreibung" value={item.description} multiline />
-          <Data label="PDF-/Bildlink / Hinweis" value={item.file_note} multiline />
+          <PayloadFilePreview file={item.file || null} label="Datei" resolved={file} />
+          <Data label="Dateihinweis" value={item.file_note} multiline />
         </>
       )} />
       <Data label="Weitere Hinweise" value={payload.notes} multiline />
@@ -439,6 +448,52 @@ function MediaPreview({
   );
 }
 
+function PayloadFilePreview({
+  file,
+  label,
+  resolved,
+}: {
+  file: SubmissionUploadedFile | null;
+  label: string;
+  resolved: Awaited<ReturnType<typeof resolvePayloadFile>>;
+}) {
+  if (!file) {
+    return <Data label={label} value={null} />;
+  }
+
+  const isImage = file.mime_type.startsWith("image/");
+
+  return (
+    <div className="grid gap-2 border-b border-line pb-3 last:border-b-0 last:pb-0">
+      <dt className="text-xs font-semibold uppercase tracking-normal text-muted">{label}</dt>
+      <dd className="grid gap-2 text-sm text-ink">
+        <div className="flex flex-wrap gap-2 text-xs text-muted">
+          <span className="rounded-full border border-line bg-white px-2 py-1 font-semibold">{file.review_status}</span>
+          <span>{file.original_filename}</span>
+          <span>{file.mime_type}</span>
+          <span>{formatBytes(file.file_size)}</span>
+        </div>
+        {resolved.previewUrl ? (
+          isImage ? (
+            <a className="block overflow-hidden rounded-md border border-line bg-white" href={resolved.previewUrl} rel="noreferrer" target="_blank">
+              <img alt={file.original_filename} className="h-44 w-full object-contain p-3" src={resolved.previewUrl} />
+            </a>
+          ) : (
+            <a className="inline-flex w-fit rounded-md border border-line bg-white px-3 py-2 text-sm font-semibold text-action hover:border-action" href={resolved.previewUrl} rel="noreferrer" target="_blank">
+              Datei zur Prüfung öffnen
+            </a>
+          )
+        ) : (
+          <div className="rounded-md border border-[#f1d08a] bg-[#fff8e8] px-4 py-3 text-sm leading-6 text-[#6d4a00]">
+            Upload-Pfad gespeichert, aber Datei aktuell nicht abrufbar.
+          </div>
+        )}
+        <div className="break-all text-xs text-muted">{file.storage_path}</div>
+      </dd>
+    </div>
+  );
+}
+
 async function getSubmissionMedia(submission: CompanySubmission) {
   const [logo, profileImage] = await Promise.all([
     resolveSubmissionMedia(submission.logo_url),
@@ -458,6 +513,10 @@ async function resolveSubmissionMedia(value: string | null) {
   if (error || !data?.signedUrl) return { previewUrl: null as string | null, status: "unavailable" as const };
 
   return { previewUrl: data.signedUrl, status: "available" as const };
+}
+
+async function resolvePayloadFile(file: SubmissionUploadedFile | null) {
+  return resolveSubmissionMedia(file?.storage_path || null);
 }
 
 function mediaStatusLabel(status: "missing" | "available" | "unavailable", availableLabel: string) {
@@ -508,6 +567,13 @@ function tradeLabel(slug: string) {
 function supportLabel(submission: CompanySubmission) {
   if (!submission.wants_support_contribution) return "nein";
   return submission.support_contribution_amount ? `${submission.support_contribution_amount} EUR` : "ja";
+}
+
+function formatBytes(value: number) {
+  if (!Number.isFinite(value)) return "unbekannte Größe";
+  if (value < 1024) return `${value} B`;
+  if (value < 1024 * 1024) return `${Math.round(value / 1024)} KB`;
+  return `${(value / 1024 / 1024).toFixed(1)} MB`;
 }
 
 function statusLabel(status: string) {

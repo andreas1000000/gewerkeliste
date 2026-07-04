@@ -47,6 +47,15 @@ export type Company = {
 
 export type PremiumReviewStatus = "pending" | "approved" | "rejected" | "internal";
 
+export type SubmissionUploadedFile = {
+  storage_path: string;
+  original_filename: string;
+  mime_type: string;
+  file_size: number;
+  review_status: "pending" | "approved" | "rejected";
+  submitted_at: string;
+};
+
 export type CompanyContact = {
   id: string;
   company_id: string;
@@ -133,6 +142,7 @@ export type PremiumSubmissionContact = {
   phone: string | null;
   email: string | null;
   image_note: string | null;
+  image_file?: SubmissionUploadedFile | null;
   sort_order: number;
 };
 
@@ -141,6 +151,7 @@ export type PremiumSubmissionTeamMember = {
   role: string | null;
   description: string | null;
   image_note: string | null;
+  image_file?: SubmissionUploadedFile | null;
   sort_order: number;
 };
 
@@ -158,6 +169,7 @@ export type PremiumSubmissionReference = {
 export type PremiumSubmissionMedia = {
   reference_title: string | null;
   file_note: string | null;
+  file?: SubmissionUploadedFile | null;
   caption: string | null;
   alt_text: string | null;
   sort_order: number;
@@ -169,6 +181,7 @@ export type PremiumSubmissionCertificate = {
   valid_until: string | null;
   description: string | null;
   file_note: string | null;
+  file?: SubmissionUploadedFile | null;
   sort_order: number;
 };
 

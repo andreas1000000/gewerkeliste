@@ -3,6 +3,7 @@
 import { randomUUID } from "crypto";
 import { revalidatePath } from "next/cache";
 import { prepareSubmissionMedia } from "@/lib/company-media-upload";
+import { preparePremiumSubmissionMedia } from "@/lib/premium-submission-media";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import type { CompanyFormState } from "@/lib/types";
 import { parseBusinessSubmissionForm } from "@/lib/validation";
@@ -28,6 +29,14 @@ export async function submitBusinessEntry(
     };
   }
   const media = mediaResult.media;
+  const premiumMediaResult = await preparePremiumSubmissionMedia(formData, submissionId, input.premiumSubmissionPayload);
+  if (!premiumMediaResult.ok) {
+    return {
+      ok: false,
+      message: premiumMediaResult.message,
+      fieldErrors: premiumMediaResult.fieldErrors,
+    };
+  }
 
   const { data, error } = await supabase
     .from("company_submissions")
@@ -83,7 +92,7 @@ export async function submitBusinessEntry(
             ? input.supportCustomAmount
             : Number(input.supportContribution),
       support_invoice_requested: input.supportInvoiceRequested,
-      premium_submission_payload: input.premiumSubmissionPayload,
+      premium_submission_payload: premiumMediaResult.payload,
       consent_authorized: input.consentAuthorized,
       consent_data_correct: input.consentDataCorrect,
       consent_privacy: input.consentPrivacy,

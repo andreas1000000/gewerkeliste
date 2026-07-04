@@ -265,26 +265,26 @@ export function parsePremiumSubmissionPayload(formData: FormData): CompanyPremiu
     requested,
     request_label: requested ? "Verifiziertes Startprofil fuer 490 EUR netto / 12 Monate angefragt" : null,
     contacts: requested
-      ? rowsFromFormData(formData, "premiumContactName").map((_, index) => ({
+      ? rowsFromFormData(formData, ["premiumContactName", "premiumContactImageFile"]).map((_, index) => ({
           name: getStringAt(formData, "premiumContactName", index),
           role: emptyToNullableString(getStringAt(formData, "premiumContactRole", index)),
           phone: emptyToNullableString(getStringAt(formData, "premiumContactPhone", index)),
           email: emptyToNullableString(getStringAt(formData, "premiumContactEmail", index)),
           image_note: emptyToNullableString(getStringAt(formData, "premiumContactImageNote", index)),
           sort_order: index + 1,
-        })).filter((item) => item.name || item.role || item.phone || item.email || item.image_note)
+        })).filter((item, index) => item.name || item.role || item.phone || item.email || item.image_note || hasUploadedFileAt(formData, "premiumContactImageFile", index))
       : [],
     team_members: requested
-      ? rowsFromFormData(formData, "premiumTeamName").map((_, index) => ({
+      ? rowsFromFormData(formData, ["premiumTeamName", "premiumTeamImageFile"]).map((_, index) => ({
           name: getStringAt(formData, "premiumTeamName", index),
           role: emptyToNullableString(getStringAt(formData, "premiumTeamRole", index)),
           description: emptyToNullableString(getStringAt(formData, "premiumTeamDescription", index)),
           image_note: emptyToNullableString(getStringAt(formData, "premiumTeamImageNote", index)),
           sort_order: index + 1,
-        })).filter((item) => item.name || item.role || item.description || item.image_note)
+        })).filter((item, index) => item.name || item.role || item.description || item.image_note || hasUploadedFileAt(formData, "premiumTeamImageFile", index))
       : [],
     references: requested
-      ? rowsFromFormData(formData, "premiumReferenceTitle").map((_, index) => ({
+      ? rowsFromFormData(formData, ["premiumReferenceTitle"]).map((_, index) => ({
           title: getStringAt(formData, "premiumReferenceTitle", index),
           location: emptyToNullableString(getStringAt(formData, "premiumReferenceLocation", index)),
           year: parseOptionalYear(getStringAt(formData, "premiumReferenceYear", index)),
@@ -296,23 +296,23 @@ export function parsePremiumSubmissionPayload(formData: FormData): CompanyPremiu
         })).filter((item) => item.title || item.location || item.project_type || item.services.length || item.description || item.client_type)
       : [],
     reference_media: requested
-      ? rowsFromFormData(formData, "premiumReferenceMediaFileNote").map((_, index) => ({
+      ? rowsFromFormData(formData, ["premiumReferenceMediaFileNote", "premiumReferenceMediaFile"]).map((_, index) => ({
           reference_title: emptyToNullableString(getStringAt(formData, "premiumReferenceMediaReferenceTitle", index)),
           file_note: emptyToNullableString(getStringAt(formData, "premiumReferenceMediaFileNote", index)),
           caption: emptyToNullableString(getStringAt(formData, "premiumReferenceMediaCaption", index)),
           alt_text: emptyToNullableString(getStringAt(formData, "premiumReferenceMediaAltText", index)),
           sort_order: index + 1,
-        })).filter((item) => item.reference_title || item.file_note || item.caption || item.alt_text)
+        })).filter((item, index) => item.reference_title || item.file_note || item.caption || item.alt_text || hasUploadedFileAt(formData, "premiumReferenceMediaFile", index))
       : [],
     certificates: requested
-      ? rowsFromFormData(formData, "premiumCertificateTitle").map((_, index) => ({
+      ? rowsFromFormData(formData, ["premiumCertificateTitle", "premiumCertificateFile"]).map((_, index) => ({
           title: getStringAt(formData, "premiumCertificateTitle", index),
           issuer: emptyToNullableString(getStringAt(formData, "premiumCertificateIssuer", index)),
           valid_until: emptyToNullableString(getStringAt(formData, "premiumCertificateValidUntil", index)),
           description: emptyToNullableString(getStringAt(formData, "premiumCertificateDescription", index)),
           file_note: emptyToNullableString(getStringAt(formData, "premiumCertificateFileNote", index)),
           sort_order: index + 1,
-        })).filter((item) => item.title || item.issuer || item.valid_until || item.description || item.file_note)
+        })).filter((item, index) => item.title || item.issuer || item.valid_until || item.description || item.file_note || hasUploadedFileAt(formData, "premiumCertificateFile", index))
       : [],
     notes: requested ? emptyToNullableString(getString(formData, "premiumSubmissionNotes")) : null,
   };
@@ -329,8 +329,9 @@ function getStringArray(formData: FormData, key: string) {
   return formData.getAll(key).filter((value): value is string => typeof value === "string" && value.trim().length > 0);
 }
 
-function rowsFromFormData(formData: FormData, key: string) {
-  return formData.getAll(key);
+function rowsFromFormData(formData: FormData, keys: string[]) {
+  const length = Math.max(0, ...keys.map((key) => formData.getAll(key).length));
+  return Array.from({ length });
 }
 
 function getStringAt(formData: FormData, key: string, index: number) {
@@ -341,6 +342,16 @@ function getStringAt(formData: FormData, key: string, index: number) {
 function emptyToNullableString(value: string) {
   const trimmed = value.trim();
   return trimmed ? trimmed : null;
+}
+
+function hasUploadedFileAt(formData: FormData, key: string, index: number) {
+  const value = formData.getAll(key)[index];
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    typeof (value as File).size === "number" &&
+    (value as File).size > 0
+  );
 }
 
 function parseOptionalYear(value: string) {
