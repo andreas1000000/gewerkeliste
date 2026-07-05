@@ -97,6 +97,19 @@ export default function PricingPage() {
                 <br />
                 GewerkeListe zeigt, wofür man Sie beauftragen kann.
               </p>
+              <div className="rounded-lg border border-[#d8e4ef] bg-[#fbfcff] p-5 text-base leading-7 text-[#30415f]">
+                <p>
+                  <strong className="text-ink">GewerkeListe ist im Aufbau.</strong>
+                </p>
+                <p className="mt-3">
+                  Deshalb ist das verifizierte Startprofil mehr als ein Eintrag: Wir unterstützen Sie persönlich dabei,
+                  aus Website, Bildern, Referenzen, Nachweisen und Ansprechpartnern ein klares Profil zu machen.
+                </p>
+                <p className="mt-3">
+                  Sie unterstützen den Aufbau einer fairen Plattform. Wir helfen Ihnen, dort professionell gefunden und
+                  verstanden zu werden.
+                </p>
+              </div>
             </div>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <PrimaryLink href="/eintrag-beanspruchen">Jetzt als Betrieb verifizieren lassen</PrimaryLink>
