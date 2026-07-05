@@ -118,7 +118,6 @@ export default function PricingPage() {
           </div>
 
           <aside className="rounded-lg border border-line bg-[#fbfcff] p-6 shadow-soft">
-            <div className="text-sm font-semibold uppercase tracking-normal text-muted">Preisanker</div>
             <div className="mt-4 text-4xl font-semibold text-ink">490 €</div>
             <p className="mt-2 text-sm font-semibold text-muted">netto / 12 Monate</p>
             <p className="mt-5 text-sm leading-6 text-muted">
