@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import type { Route } from "next";
+import { FaqTeaser } from "@/components/faq-teaser";
 import { SiteHeader } from "@/components/site-header";
+import { faqEntriesFor } from "@/lib/faq";
 
 export const metadata: Metadata = {
   title: "Preise | GewerkeListe.com",
@@ -269,6 +271,18 @@ export default function PricingPage() {
             einem passenden Betrieb sucht.
           </p>
         </TextSection>
+
+        <FaqTeaser
+          entries={faqEntriesFor("preise", [
+            "basisprofil-kostenlos",
+            "startprofil-kosten",
+            "startprofil-nicht-kaufen",
+            "platzierung-kaufen",
+            "bilder-referenzen-hochladen",
+            "automatische-verlaengerung",
+          ])}
+          title="Häufige Fragen zu Preisen und Profilen"
+        />
 
         <section className="mt-10 rounded-lg border border-[#9bbbd2] bg-[#09284e] p-6 text-white shadow-soft sm:p-8">
           <h2 className="text-2xl font-semibold tracking-normal">Verifiziertes Startprofil</h2>

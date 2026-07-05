@@ -2,7 +2,9 @@ import type { Metadata } from "next";
 import type { Route } from "next";
 import Link from "next/link";
 import { BusinessEntryForm } from "@/components/business-entry-form";
+import { FaqTeaser } from "@/components/faq-teaser";
 import { SiteHeader } from "@/components/site-header";
+import { faqEntriesFor } from "@/lib/faq";
 import { publicTradeTaxonomy } from "@/lib/trade-taxonomy";
 
 export const metadata: Metadata = {
@@ -76,6 +78,16 @@ export default function RegisterCompanyPage() {
             </Link>
           </div>
         </div>
+
+        <FaqTeaser
+          entries={faqEntriesFor("betrieb-eintragen", [
+            "basisprofil-inhalt",
+            "logo-ansprechpartner",
+            "veroeffentlichung-eintrag",
+            "startprofil-spaeter",
+          ])}
+          title="Fragen zum kostenlosen Eintrag"
+        />
 
         <div id="eintrag-starten" className="mt-8 scroll-mt-6">
           <BusinessEntryForm trades={publicTradeTaxonomy()} />

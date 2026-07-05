@@ -19,6 +19,7 @@ export default function robots(): MetadataRoute.Robots {
     "/eintrag-beanspruchen",
     "/ueber-gewerkeliste",
     "/preise",
+    "/faq",
   ];
   const privateDisallow = [
     "/admin/",

@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import type { Route } from "next";
 import Link from "next/link";
+import { FaqTeaser } from "@/components/faq-teaser";
 import { ServiceAreaPreview } from "@/components/map/service-area-preview";
 import { SearchSubmitButton } from "@/components/search-submit-button";
 import { SiteHeader } from "@/components/site-header";
 import { getPublicCompanies } from "@/lib/data/public-directory";
+import { faqEntriesFor } from "@/lib/faq";
 import type { ServiceAreaGeoJson } from "@/lib/geo/types";
 import { isSupabaseConfigured } from "@/lib/supabase";
 
@@ -397,6 +399,11 @@ export default async function HomePage() {
           ) : null}
         </Card>
       </section>
+
+      <FaqTeaser
+        entries={faqEntriesFor("home", ["was-ist-gewerkeliste", "fuer-wen", "eintrag-kostenlos", "verifiziertes-profil"])}
+        title="Kurz beantwortet"
+      />
 
       <section className="mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
         <div className="rounded-lg border border-line bg-white p-6 text-center shadow-soft sm:p-8">

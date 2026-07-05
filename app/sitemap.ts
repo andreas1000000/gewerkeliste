@@ -111,6 +111,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.55,
     },
     {
+      url: `${baseUrl}/faq`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.55,
+    },
+    {
       url: `${baseUrl}/ueber-gewerkeliste`,
       lastModified: now,
       changeFrequency: "monthly",

@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import type { Route } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { FaqTeaser } from "@/components/faq-teaser";
 import { SiteHeader } from "@/components/site-header";
 import { getCompany, getCompanyBySlug } from "@/lib/data";
+import { faqEntriesFor } from "@/lib/faq";
 
 export const metadata: Metadata = {
   title: "Eintrag übernehmen | GewerkeListe.com",
@@ -62,6 +64,15 @@ export default async function LegacyClaimEntryPage({ searchParams }: PageProps) 
             </Link>
           </div>
         </div>
+        <FaqTeaser
+          entries={faqEntriesFor("eintrag-beanspruchen", [
+            "beanspruchen-bedeutung",
+            "daten-korrigieren",
+            "zusatzinformationen-einreichen",
+            "bilder-oeffentlich",
+          ])}
+          title="Fragen zur Profilübernahme"
+        />
       </section>
     </main>
   );

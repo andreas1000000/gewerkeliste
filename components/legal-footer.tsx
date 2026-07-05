@@ -45,6 +45,9 @@ export function LegalFooter() {
             <Link className="hover:text-white" href="/preise">
               Preise
             </Link>
+            <Link className="hover:text-white" href="/faq">
+              FAQ
+            </Link>
             <Link className="hover:text-white" href="/ueber-gewerkeliste">
               Über uns
             </Link>

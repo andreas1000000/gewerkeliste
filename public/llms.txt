@@ -20,11 +20,16 @@ GewerkeListe.com ist ein strukturiertes B2B-Verzeichnis fuer Bau- und Handwerksb
 - https://gewerkeliste.com/betrieb-eintragen
 - https://gewerkeliste.com/eintrag-beanspruchen
 - https://gewerkeliste.com/fuer-betriebe
+- https://gewerkeliste.com/faq
 - https://gewerkeliste.com/ueber-gewerkeliste
 
 ## Struktur
 
 Oeffentliche Firmenprofile zeigen, soweit vorhanden, Name, Ort, Gewerk, Leistungen, Kontaktwege, Standortinformationen, Datenstatus und Hinweise zur Profiluebernahme. Das kostenlose Basisprofil bleibt kostenlos. Optionale Zusatzfunktionen koennen spaeter separat angeboten werden.
+
+## Wissensseite
+
+Die FAQ unter https://gewerkeliste.com/faq beantwortet zentrale Fragen zu Suche, kostenlosen Basisprofilen, verifizierten Profilen, Datenpruefung, Referenzen, Nachweisen und der Aufbauphase von GewerkeListe.com.
 
 ## Kontakt
 
