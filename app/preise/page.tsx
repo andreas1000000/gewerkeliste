@@ -84,7 +84,7 @@ export default function PricingPage() {
               <p>
                 <strong className="text-ink">Das Basisprofil bleibt kostenlos.</strong>
                 <br />
-                Weil reine Sichtbarkeit und fachliche Auffindbarkeit nichts kosten sollen.
+                Weil reine Sichtbarkeit und fachliche Auffindbarkeit nichts kosten darf.
               </p>
               <p>
                 <strong className="text-ink">Das verifizierte Startprofil kostet 490 € netto für 12 Monate.</strong>
