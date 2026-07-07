@@ -10,9 +10,12 @@ import type {
   CompanyCertificate,
   CompanyContact,
   CompanyPremiumProfile,
+  CompanyPremiumSubmissionPayload,
   CompanyReference,
   CompanyReferenceMedia,
+  CompanySubmission,
   CompanyTeamMember,
+  SubmissionUploadedFile,
 } from "@/lib/types";
 
 const COMPANY_MEDIA_BUCKET = "company-media";
@@ -590,7 +593,7 @@ async function attachPublicPremiumProfile<T extends PublicCompanyWithTrade>(comp
     return { ...company, premium_profile: emptyPremiumProfile() };
   }
 
-  const premiumProfile = await getApprovedCompanyPremiumProfile(company.id);
+  const premiumProfile = await getApprovedCompanyPremiumProfile(company);
   return { ...company, premium_profile: premiumProfile };
 }
 
@@ -598,8 +601,9 @@ function hasVerifiedStartPackage(company: PublicCompanyWithTrade) {
   return company.profile_package === "verified_start" && (company.verified || company.profile_status === "verified");
 }
 
-async function getApprovedCompanyPremiumProfile(companyId: string): Promise<CompanyPremiumProfile> {
+async function getApprovedCompanyPremiumProfile(company: PublicCompanyWithTrade): Promise<CompanyPremiumProfile> {
   const supabase = getSupabaseAdmin();
+  const companyId = company.id;
   const [contacts, teamMembers, references, referenceMedia, certificates] = await Promise.all([
     supabase
       .from("company_contacts")
@@ -634,13 +638,20 @@ async function getApprovedCompanyPremiumProfile(companyId: string): Promise<Comp
       .order("sort_order", { ascending: true }),
   ]);
 
-  return {
+  const profile = {
     contacts: contacts.error ? [] : await resolvePremiumMediaRows((contacts.data || []) as CompanyContact[], "image_url"),
     teamMembers: teamMembers.error ? [] : await resolvePremiumMediaRows((teamMembers.data || []) as CompanyTeamMember[], "image_url"),
     references: references.error ? [] : normalizeReferenceRows((references.data || []) as CompanyReference[]),
     referenceMedia: referenceMedia.error ? [] : await resolvePremiumMediaRows((referenceMedia.data || []) as CompanyReferenceMedia[], "file_url"),
     certificates: certificates.error ? [] : await resolvePremiumMediaRows((certificates.data || []) as CompanyCertificate[], "file_url"),
+    notes: null,
   };
+
+  if (hasPremiumProfileContent(profile)) {
+    return { ...profile, notes: await getApprovedSubmissionPremiumNotes(company) };
+  }
+
+  return getApprovedSubmissionPremiumProfile(company);
 }
 
 function emptyPremiumProfile(): CompanyPremiumProfile {
@@ -650,6 +661,7 @@ function emptyPremiumProfile(): CompanyPremiumProfile {
     references: [],
     referenceMedia: [],
     certificates: [],
+    notes: null,
   };
 }
 
@@ -658,6 +670,181 @@ function normalizeReferenceRows(rows: CompanyReference[]) {
     ...row,
     services: Array.isArray(row.services) ? row.services : [],
   }));
+}
+
+async function getApprovedSubmissionPremiumProfile(company: PublicCompanyWithTrade): Promise<CompanyPremiumProfile> {
+  const payload = await getApprovedSubmissionPremiumPayload(company);
+  if (!payload?.requested) return emptyPremiumProfile();
+
+  return premiumPayloadToPublicProfile(company.id, payload);
+}
+
+async function getApprovedSubmissionPremiumNotes(company: PublicCompanyWithTrade) {
+  const payload = await getApprovedSubmissionPremiumPayload(company);
+  return payload?.requested ? payload.notes : null;
+}
+
+async function getApprovedSubmissionPremiumPayload(company: PublicCompanyWithTrade): Promise<CompanyPremiumSubmissionPayload | null> {
+  const supabase = getSupabaseAdmin();
+  const companyId = company.id;
+  const sources = [`profile-update:${companyId}`, `claim:${companyId}`];
+  const { data: sourceMatch, error: sourceError } = await supabase
+    .from("company_submissions")
+    .select("id, premium_submission_payload")
+    .in("source", sources)
+    .eq("status", "approved")
+    .order("updated_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  const fallbackMatch = sourceMatch
+    ? null
+    : await supabase
+        .from("company_submissions")
+        .select("id, premium_submission_payload")
+        .eq("company_name", company.name)
+        .eq("postal_code", company.postal_code)
+        .eq("city", company.city)
+        .eq("status", "approved")
+        .order("updated_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+  const data = sourceMatch || fallbackMatch?.data;
+  const error = sourceError || fallbackMatch?.error;
+  if (error || !data) return null;
+
+  const payload = normalizeSubmissionPremiumPayload((data as Pick<CompanySubmission, "premium_submission_payload">).premium_submission_payload);
+  return payload?.requested ? payload : null;
+}
+
+function normalizeSubmissionPremiumPayload(payload: unknown): CompanyPremiumSubmissionPayload | null {
+  if (!payload || typeof payload !== "object") return null;
+  const candidate = payload as Partial<CompanyPremiumSubmissionPayload>;
+  return {
+    requested: Boolean(candidate.requested),
+    request_label: typeof candidate.request_label === "string" ? candidate.request_label : null,
+    contacts: Array.isArray(candidate.contacts) ? candidate.contacts : [],
+    team_members: Array.isArray(candidate.team_members) ? candidate.team_members : [],
+    references: Array.isArray(candidate.references) ? candidate.references : [],
+    reference_media: Array.isArray(candidate.reference_media) ? candidate.reference_media : [],
+    certificates: Array.isArray(candidate.certificates) ? candidate.certificates : [],
+    notes: typeof candidate.notes === "string" ? candidate.notes : null,
+  };
+}
+
+async function premiumPayloadToPublicProfile(companyId: string, payload: CompanyPremiumSubmissionPayload): Promise<CompanyPremiumProfile> {
+  const references: CompanyReference[] = payload.references
+    .filter((item) => item.title || item.description || item.services.length)
+    .map((item, index) => ({
+      id: `submission-reference-${index + 1}`,
+      company_id: companyId,
+      title: item.title || `Referenz ${index + 1}`,
+      project_type: item.project_type,
+      location: item.location,
+      year: item.year,
+      description: item.description,
+      services: item.services,
+      client_type: item.client_type,
+      sort_order: item.sort_order || index + 1,
+      review_status: "approved",
+      created_at: "",
+      updated_at: "",
+    }));
+
+  return {
+    contacts: await Promise.all(
+      payload.contacts
+        .filter((item) => item.name || item.role || item.phone || item.email || item.image_file)
+        .map(async (item, index) => ({
+          id: `submission-contact-${index + 1}`,
+          company_id: companyId,
+          name: item.name || `Ansprechpartner ${index + 1}`,
+          role: item.role,
+          phone: item.phone,
+          email: item.email,
+          image_url: await resolvePayloadMediaUrl(item.image_file || null),
+          sort_order: item.sort_order || index + 1,
+          is_primary: index === 0,
+          review_status: "approved",
+          created_at: "",
+          updated_at: "",
+        })),
+    ),
+    teamMembers: await Promise.all(
+      payload.team_members
+        .filter((item) => item.name || item.role || item.description || item.image_file)
+        .map(async (item, index) => ({
+          id: `submission-team-${index + 1}`,
+          company_id: companyId,
+          name: item.name || `Teammitglied ${index + 1}`,
+          role: item.role,
+          description: item.description,
+          image_url: await resolvePayloadMediaUrl(item.image_file || null),
+          sort_order: item.sort_order || index + 1,
+          review_status: "approved",
+          created_at: "",
+          updated_at: "",
+        })),
+    ),
+    references,
+    referenceMedia: (await Promise.all(
+      payload.reference_media
+        .filter((item) => item.file || item.caption || item.alt_text || item.file_note)
+        .map(async (item, index) => ({
+          id: `submission-reference-media-${index + 1}`,
+          company_id: companyId,
+          reference_id: referenceIdForTitle(references, item.reference_title),
+          file_url: await resolvePayloadMediaUrl(item.file || null),
+          alt_text: item.alt_text,
+          caption: item.caption || item.file_note,
+          sort_order: item.sort_order || index + 1,
+          review_status: "approved",
+          created_at: "",
+          updated_at: "",
+        })),
+    )).filter((item): item is CompanyReferenceMedia => Boolean(item.file_url)),
+    certificates: await Promise.all(
+      payload.certificates
+        .filter((item) => item.title || item.issuer || item.description || item.file)
+        .map(async (item, index) => ({
+          id: `submission-certificate-${index + 1}`,
+          company_id: companyId,
+          title: item.title || `Nachweis ${index + 1}`,
+          issuer: item.issuer,
+          issued_at: null,
+          valid_until: item.valid_until,
+          description: item.description || item.file_note,
+          file_url: await resolvePayloadMediaUrl(item.file || null),
+          sort_order: item.sort_order || index + 1,
+          review_status: "approved",
+          created_at: "",
+          updated_at: "",
+        })),
+    ),
+    notes: payload.notes,
+  };
+}
+
+function hasPremiumProfileContent(profile: CompanyPremiumProfile) {
+  return Boolean(
+    profile.contacts.length ||
+      profile.teamMembers.length ||
+      profile.references.length ||
+      profile.referenceMedia.length ||
+      profile.certificates.length ||
+      Boolean(profile.notes),
+  );
+}
+
+function referenceIdForTitle(references: CompanyReference[], title: string | null) {
+  if (!title) return null;
+  const normalized = title.trim().toLowerCase();
+  return references.find((reference) => reference.title.trim().toLowerCase() === normalized)?.id || null;
+}
+
+async function resolvePayloadMediaUrl(file: SubmissionUploadedFile | null) {
+  return resolveCompanyMediaUrl(file?.storage_path || null);
 }
 
 async function resolvePremiumMediaRows<T extends Record<string, unknown>>(rows: T[], field: keyof T) {

@@ -6,7 +6,7 @@ import { getCompanySubmission, getUniqueCompanySlug } from "@/lib/data";
 import { companySlug } from "@/lib/slug";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { canonicalTradeSlug } from "@/lib/trade-taxonomy";
-import type { CompanySubmission } from "@/lib/types";
+import type { CompanyPremiumSubmissionPayload, CompanySubmission } from "@/lib/types";
 
 type ApprovedCompany = {
   id: string;
@@ -82,6 +82,7 @@ async function promoteSubmissionToCompany(
 
   await upsertCompanyTradeRelations(company.id, tradeAssignments, submission);
   await insertSubmissionSource(company.id, submission);
+  await publishApprovedPremiumSubmission(company.id, submission, options);
 
   const { error: submissionError } = await supabase
     .from("company_submissions")
@@ -320,6 +321,122 @@ async function insertSubmissionSource(companyId: string, submission: CompanySubm
       profile_image_publication: submission.profile_image_url ? "copied_to_company_profile_after_admin_approval" : "not_uploaded",
     }),
   });
+}
+
+async function publishApprovedPremiumSubmission(
+  companyId: string,
+  submission: CompanySubmission,
+  options: { verifiedStartProfile: boolean },
+) {
+  const payload = normalizePremiumPayload(submission.premium_submission_payload);
+  if (!options.verifiedStartProfile || !payload?.requested) return;
+
+  const references = payload.references
+    .filter((item) => item.title || item.description || item.services.length)
+    .map((item, index) => ({
+      title: item.title || `Referenz ${index + 1}`,
+      project_type: item.project_type || null,
+      location: item.location || null,
+      year: item.year || null,
+      description: item.description || null,
+      services: item.services || [],
+      client_type: item.client_type || null,
+      review_status: "approved",
+      sort_order: item.sort_order || index + 1,
+    }));
+
+  await replacePremiumRows("company_contacts", companyId, payload.contacts
+    .filter((item) => item.name || item.role || item.phone || item.email || item.image_file)
+    .map((item, index) => ({
+      name: item.name || `Ansprechpartner ${index + 1}`,
+      role: item.role || null,
+      phone: item.phone || null,
+      email: item.email || null,
+      image_url: item.image_file?.storage_path || null,
+      is_primary: index === 0,
+      review_status: "approved",
+      sort_order: item.sort_order || index + 1,
+    })));
+
+  await replacePremiumRows("company_team_members", companyId, payload.team_members
+    .filter((item) => item.name || item.role || item.description || item.image_file)
+    .map((item, index) => ({
+      name: item.name || `Teammitglied ${index + 1}`,
+      role: item.role || null,
+      description: item.description || null,
+      image_url: item.image_file?.storage_path || null,
+      review_status: "approved",
+      sort_order: item.sort_order || index + 1,
+    })));
+
+  const insertedReferences = await replacePremiumRows("company_references", companyId, references, "id,title,sort_order") as Array<{ id: string; title: string }>;
+  const referenceIdByTitle = new Map(
+    insertedReferences
+      .filter((item) => item.id && item.title)
+      .map((item) => [item.title.trim().toLowerCase(), item.id]),
+  );
+
+  await replacePremiumRows("company_reference_media", companyId, payload.reference_media
+    .filter((item) => item.file?.storage_path)
+    .map((item, index) => ({
+      reference_id: item.reference_title ? referenceIdByTitle.get(item.reference_title.trim().toLowerCase()) || null : null,
+      file_url: item.file?.storage_path,
+      alt_text: item.alt_text || null,
+      caption: item.caption || item.file_note || null,
+      review_status: "approved",
+      sort_order: item.sort_order || index + 1,
+    })));
+
+  await replacePremiumRows("company_certificates", companyId, payload.certificates
+    .filter((item) => item.title || item.issuer || item.description || item.file)
+    .map((item, index) => ({
+      title: item.title || `Nachweis ${index + 1}`,
+      issuer: item.issuer || null,
+      issued_at: null,
+      valid_until: normalizedDate(item.valid_until),
+      description: item.description || item.file_note || null,
+      file_url: item.file?.storage_path || null,
+      review_status: "approved",
+      sort_order: item.sort_order || index + 1,
+    })));
+}
+
+async function replacePremiumRows(
+  table: string,
+  companyId: string,
+  rows: Array<Record<string, unknown>>,
+  selectColumns = "",
+): Promise<Array<Record<string, unknown>>> {
+  const supabase = getSupabaseAdmin();
+  const { error: deleteError } = await supabase.from(table).delete().eq("company_id", companyId);
+  if (deleteError) throw deleteError;
+  if (!rows.length) return [];
+
+  const insertQuery = supabase.from(table).insert(rows.map((row) => ({ ...row, company_id: companyId })));
+  const { data, error } = selectColumns
+    ? await insertQuery.select(selectColumns)
+    : await insertQuery.select("id");
+  if (error) throw error;
+  return (data || []) as Array<Record<string, unknown>>;
+}
+
+function normalizePremiumPayload(payload: CompanyPremiumSubmissionPayload | null): CompanyPremiumSubmissionPayload | null {
+  if (!payload?.requested) return null;
+  return {
+    requested: true,
+    request_label: payload.request_label || null,
+    contacts: Array.isArray(payload.contacts) ? payload.contacts : [],
+    team_members: Array.isArray(payload.team_members) ? payload.team_members : [],
+    references: Array.isArray(payload.references) ? payload.references : [],
+    reference_media: Array.isArray(payload.reference_media) ? payload.reference_media : [],
+    certificates: Array.isArray(payload.certificates) ? payload.certificates : [],
+    notes: payload.notes || null,
+  };
+}
+
+function normalizedDate(value: string | null) {
+  if (!value) return null;
+  return /^\d{4}-\d{2}-\d{2}$/.test(value) ? value : null;
 }
 
 function companyDescription(submission: CompanySubmission) {

@@ -14,7 +14,23 @@ export function publicResultDescription(description: string | null | undefined) 
   return text;
 }
 
-export function cleanCompanyDescription(description: string | null | undefined) {
+export function publicProfileDescription(description: string | null | undefined) {
+  const text = cleanCompanyDescription(description, 0);
+  if (!text) return "";
+
+  const genericSignals = [
+    "Öffentlicher Basis-Eintrag",
+    "öffentlich zugänglichen Gewerbedaten",
+    "Der Eintrag ist noch nicht vom Betrieb bestätigt",
+    "Korrektur oder Löschung kann jederzeit angefragt werden",
+    "Quelle:",
+  ];
+
+  if (genericSignals.some((signal) => text.includes(signal))) return "";
+  return text;
+}
+
+export function cleanCompanyDescription(description: string | null | undefined, maxLength = 420) {
   const text = dedupeRepeatedDescription(removeInternalSubmissionFragments(description));
   if (!text) return "";
 
@@ -24,7 +40,7 @@ export function cleanCompanyDescription(description: string | null | undefined) 
     .replace(/\s+/g, " ")
     .trim();
 
-  return truncateDescription(withoutServiceIntro, 420);
+  return maxLength > 0 ? truncateDescription(withoutServiceIntro, maxLength) : ensureFinalPunctuation(tidyDescriptionEnding(withoutServiceIntro));
 }
 
 export function extractServiceListFromDescription(description: string | null | undefined) {

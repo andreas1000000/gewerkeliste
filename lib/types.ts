@@ -134,6 +134,7 @@ export type CompanyPremiumProfile = {
   references: CompanyReference[];
   referenceMedia: CompanyReferenceMedia[];
   certificates: CompanyCertificate[];
+  notes?: string | null;
 };
 
 export type PremiumSubmissionContact = {

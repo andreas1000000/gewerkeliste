@@ -8,6 +8,7 @@ import {
   extractServiceListFromDescription,
   extractServiceKeywordsFromText,
   groupServicesForDisplay,
+  publicProfileDescription,
   publicResultDescription,
 } from "@/lib/company-display";
 import {
@@ -81,7 +82,7 @@ export default async function CompanyPublicPage({ params }: PageProps) {
     const websiteHref = normalizeWebsiteUrl(company.website_url);
     const location = `${company.postal_code} ${company.city}`.trim();
     const address = getProfileAddress(company);
-    const visibleDescription = businessProfileDescription(publicResultDescription(company.description));
+    const visibleDescription = businessProfileDescription(publicProfileDescription(company.description));
     const profileDescription = getProfileDescription(company, trade, location, visibleDescription);
     const executedTrades = getExecutedTrades(company);
     const services = getRecognizableServices(company, executedTrades);
@@ -654,6 +655,15 @@ function TeamList({
 function PremiumTrustSections({ premiumProfile }: { premiumProfile: NonNullable<PublicCompanyWithTrade["premium_profile"]> }) {
   return (
     <div className="grid gap-5">
+      {premiumProfile.notes ? (
+        <div>
+          <h3 className="text-sm font-semibold text-ink">Weitere Profilinformationen</h3>
+          <p className="mt-3 whitespace-pre-line rounded-md border border-line bg-[#fbfcff] p-4 text-sm leading-6 text-muted">
+            {premiumProfile.notes}
+          </p>
+        </div>
+      ) : null}
+
       {premiumProfile.references.length ? (
         <div>
           <h3 className="text-sm font-semibold text-ink">Strukturierte Referenzen</h3>
@@ -1020,7 +1030,7 @@ function hasVerifiedStartProfile(company: PublicCompanyWithTrade) {
 }
 
 function hasPremiumTrustContent(profile: NonNullable<PublicCompanyWithTrade["premium_profile"]>) {
-  return Boolean(profile.references.length || profile.referenceMedia.length || profile.certificates.length);
+  return Boolean(profile.references.length || profile.referenceMedia.length || profile.certificates.length || profile.notes);
 }
 
 function emptyPremiumProfile(): NonNullable<PublicCompanyWithTrade["premium_profile"]> {
@@ -1030,6 +1040,7 @@ function emptyPremiumProfile(): NonNullable<PublicCompanyWithTrade["premium_prof
     references: [],
     referenceMedia: [],
     certificates: [],
+    notes: null,
   };
 }
 
