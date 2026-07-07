@@ -20,6 +20,41 @@ import type {
 
 const COMPANY_MEDIA_BUCKET = "company-media";
 const MEDIA_SIGNED_URL_TTL_SECONDS = 60 * 60;
+const APPROVED_SUBMISSION_PUBLIC_SELECT = [
+  "id",
+  "updated_at",
+  "company_name",
+  "legal_form",
+  "website",
+  "phone",
+  "email",
+  "contact_email",
+  "contact_first_name",
+  "contact_last_name",
+  "contact_role",
+  "contact_person_email",
+  "contact_person_phone",
+  "logo_url",
+  "profile_image_url",
+  "profile_image_alt",
+  "contact_person_name",
+  "contact_person_role",
+  "image_consent_given",
+  "service_radius_km",
+  "service_regions",
+  "postal_codes",
+  "service_countries",
+  "short_description",
+  "description",
+  "selected_services",
+  "specializations",
+  "references_text",
+  "memberships",
+  "certificates",
+  "manufacturer_certificates",
+  "premium_submission_payload",
+  "source",
+].join(", ");
 const PUBLIC_COMPANY_SLUG_ALIASES: Record<string, string> = {
   "wagner-und-spielvogel-gdbr-83083-riedering": "wagner-und-spielvogel-gbr-83083-riedering",
 };
@@ -351,7 +386,7 @@ export async function getCompanyBySlug(slug: string) {
     .single();
 
   if (error) return getCompanyBySlugFallback(slug);
-  const company = await applyApprovedProfileUpdateMedia(data as PublicCompanyWithTrade);
+  const company = await applyApprovedSubmissionPublicDetails(data as PublicCompanyWithTrade);
   const resolvedCompany = await resolveSingleCompanyMedia(company);
   return attachPublicPremiumProfile(resolvedCompany);
 }
@@ -543,8 +578,9 @@ async function getCompanyBySlugFallback(slug: string) {
     .single();
 
   if (error) throw error;
-  const company = await resolveSingleCompanyMedia(data as PublicCompanyWithTrade);
-  return attachPublicPremiumProfile(company);
+  const company = await applyApprovedSubmissionPublicDetails(data as PublicCompanyWithTrade);
+  const resolvedCompany = await resolveSingleCompanyMedia(company);
+  return attachPublicPremiumProfile(resolvedCompany);
 }
 
 async function getPublicTradeLocationSitemapEntriesFallback(limit: number) {
@@ -590,7 +626,7 @@ async function resolveCompanyMedia<T extends PublicCompanyWithTrade>(companies: 
 
 async function attachPublicPremiumProfile<T extends PublicCompanyWithTrade>(company: T) {
   if (!hasVerifiedStartPackage(company)) {
-    return { ...company, premium_profile: emptyPremiumProfile() };
+    return { ...company, premium_profile: await getApprovedSubmissionPremiumProfile(company) };
   }
 
   const premiumProfile = await getApprovedCompanyPremiumProfile(company);
@@ -685,12 +721,21 @@ async function getApprovedSubmissionPremiumNotes(company: PublicCompanyWithTrade
 }
 
 async function getApprovedSubmissionPremiumPayload(company: PublicCompanyWithTrade): Promise<CompanyPremiumSubmissionPayload | null> {
+  const submission = await getLatestApprovedSubmissionForCompany(company, "premium_submission_payload");
+  const payload = normalizeSubmissionPremiumPayload(submission?.premium_submission_payload);
+  return payload?.requested ? payload : null;
+}
+
+async function getLatestApprovedSubmissionForCompany(
+  company: PublicCompanyWithTrade,
+  selectColumns = APPROVED_SUBMISSION_PUBLIC_SELECT,
+): Promise<Partial<CompanySubmission> | null> {
   const supabase = getSupabaseAdmin();
   const companyId = company.id;
   const sources = [`profile-update:${companyId}`, `claim:${companyId}`];
   const { data: sourceMatch, error: sourceError } = await supabase
     .from("company_submissions")
-    .select("id, premium_submission_payload")
+    .select(selectColumns)
     .in("source", sources)
     .eq("status", "approved")
     .order("updated_at", { ascending: false })
@@ -701,8 +746,8 @@ async function getApprovedSubmissionPremiumPayload(company: PublicCompanyWithTra
     ? null
     : await supabase
         .from("company_submissions")
-        .select("id, premium_submission_payload")
-        .eq("company_name", company.name)
+        .select(selectColumns)
+        .eq("company_name", companyNameWithoutLegalForm(company.name, company.legal_form))
         .eq("postal_code", company.postal_code)
         .eq("city", company.city)
         .eq("status", "approved")
@@ -713,9 +758,7 @@ async function getApprovedSubmissionPremiumPayload(company: PublicCompanyWithTra
   const data = sourceMatch || fallbackMatch?.data;
   const error = sourceError || fallbackMatch?.error;
   if (error || !data) return null;
-
-  const payload = normalizeSubmissionPremiumPayload((data as Pick<CompanySubmission, "premium_submission_payload">).premium_submission_payload);
-  return payload?.requested ? payload : null;
+  return data as Partial<CompanySubmission>;
 }
 
 function normalizeSubmissionPremiumPayload(payload: unknown): CompanyPremiumSubmissionPayload | null {
@@ -869,47 +912,100 @@ async function resolveSingleCompanyMedia<T extends PublicCompanyWithTrade>(compa
   };
 }
 
-async function applyApprovedProfileUpdateMedia<T extends PublicCompanyWithTrade>(company: T) {
-  if (company.profile_image_url) return company;
+async function applyApprovedSubmissionPublicDetails<T extends PublicCompanyWithTrade>(company: T) {
+  const submission = await getLatestApprovedSubmissionForCompany(company);
+  if (!submission) return company;
 
-  const supabase = getSupabaseAdmin();
-  const sources = [`profile-update:${company.id}`, `claim:${company.id}`];
-  const { data: sourceMatch, error: sourceError } = await supabase
-    .from("company_submissions")
-    .select("logo_url, profile_image_url, profile_image_alt, contact_person_name, contact_person_role")
-    .in("source", sources)
-    .eq("status", "approved")
-    .not("profile_image_url", "is", null)
-    .order("updated_at", { ascending: false })
-    .limit(1)
-    .maybeSingle();
-
-  const fallbackMatch = sourceMatch
-    ? null
-    : await supabase
-        .from("company_submissions")
-        .select("logo_url, profile_image_url, profile_image_alt, contact_person_name, contact_person_role")
-        .eq("company_name", company.name)
-        .eq("postal_code", company.postal_code)
-        .eq("city", company.city)
-        .eq("status", "approved")
-        .not("profile_image_url", "is", null)
-        .order("updated_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-
-  const data = sourceMatch || fallbackMatch?.data;
-  const error = sourceError || fallbackMatch?.error;
-  if (error || !data) return company;
+  const legalName = companyNameWithLegalForm(submission.company_name, submission.legal_form);
+  const description = submissionDescriptionForPublicProfile(submission);
+  const contactName =
+    cleanString(submission.contact_person_name) ||
+    [cleanString(submission.contact_first_name), cleanString(submission.contact_last_name)].filter(Boolean).join(" ") ||
+    company.contact_person_name ||
+    company.contact_name ||
+    null;
 
   return {
     ...company,
-    logo_url: company.logo_url || (typeof data.logo_url === "string" ? data.logo_url : null),
-    profile_image_url: typeof data.profile_image_url === "string" ? data.profile_image_url : company.profile_image_url,
-    profile_image_alt: typeof data.profile_image_alt === "string" ? data.profile_image_alt : company.profile_image_alt,
-    contact_person_name: typeof data.contact_person_name === "string" ? data.contact_person_name : company.contact_person_name,
-    contact_person_role: typeof data.contact_person_role === "string" ? data.contact_person_role : company.contact_person_role,
+    name: legalName || company.name,
+    legal_form: cleanString(submission.legal_form) || company.legal_form || null,
+    description: description || company.description,
+    website_url: normalizeSubmissionWebsite(submission.website) || company.website_url,
+    phone: cleanString(submission.phone) || company.phone,
+    email: cleanString(submission.email) || company.email,
+    logo_url: cleanString(submission.logo_url) || company.logo_url || null,
+    profile_image_url: submission.image_consent_given ? cleanString(submission.profile_image_url) || company.profile_image_url || null : company.profile_image_url,
+    profile_image_alt: submission.image_consent_given
+      ? cleanString(submission.profile_image_alt) || company.profile_image_alt || null
+      : company.profile_image_alt,
+    contact_person_name: contactName,
+    contact_person_role: cleanString(submission.contact_person_role) || cleanString(submission.contact_role) || company.contact_person_role || null,
+    contact_person_email: cleanString(submission.contact_person_email) || cleanString(submission.contact_email) || company.contact_person_email || null,
+    contact_person_phone: cleanString(submission.contact_person_phone) || company.contact_person_phone || null,
+    service_radius_km: submission.service_radius_km || company.service_radius_km || null,
+    service_regions: nonEmptyList(submission.service_regions).length ? nonEmptyList(submission.service_regions) : company.service_regions || [],
+    service_postal_codes: nonEmptyList(submission.postal_codes).length ? nonEmptyList(submission.postal_codes) : company.service_postal_codes || [],
+    service_countries: nonEmptyList(submission.service_countries).length ? nonEmptyList(submission.service_countries) : company.service_countries || [],
+    specializations: nonEmptyList(submission.specializations).length ? nonEmptyList(submission.specializations) : company.specializations || [],
+    references_text: cleanString(submission.references_text) || company.references_text || null,
+    memberships: nonEmptyList(submission.memberships).length ? nonEmptyList(submission.memberships) : company.memberships || [],
+    certificates: nonEmptyList(submission.certificates).length ? nonEmptyList(submission.certificates) : company.certificates || [],
+    manufacturer_certificates: nonEmptyList(submission.manufacturer_certificates).length
+      ? nonEmptyList(submission.manufacturer_certificates)
+      : company.manufacturer_certificates || [],
   };
+}
+
+function submissionDescriptionForPublicProfile(submission: Partial<CompanySubmission>) {
+  return [submission.short_description, submission.description]
+    .map((item) => cleanString(item))
+    .filter(Boolean)
+    .join("\n\n");
+}
+
+function companyNameWithLegalForm(companyName?: string | null, legalForm?: string | null) {
+  const name = cleanString(companyName);
+  const form = cleanString(legalForm);
+  if (!name) return null;
+  if (!form) return name;
+  const normalizedName = normalizeLegalFormMatchValue(name);
+  const normalizedForm = normalizeLegalFormMatchValue(form);
+  if (!normalizedForm || normalizedName.split(" ").includes(normalizedForm)) return name;
+  return `${name} ${form}`;
+}
+
+function companyNameWithoutLegalForm(name: string, legalForm?: string | null) {
+  const form = cleanString(legalForm);
+  if (!form) return name;
+  return name.replace(new RegExp(`\\s+${escapeRegExp(form)}$`, "i"), "").trim() || name;
+}
+
+function normalizeLegalFormMatchValue(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+function normalizeSubmissionWebsite(value?: string | null) {
+  const trimmed = cleanString(value);
+  if (!trimmed) return null;
+  if (/^https?:\/\//i.test(trimmed)) return trimmed;
+  return `https://${trimmed}`;
+}
+
+function cleanString(value?: string | null) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function nonEmptyList(value?: unknown[] | null) {
+  return Array.isArray(value) ? value.map((item) => String(item).trim()).filter(Boolean) : [];
+}
+
+function escapeRegExp(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
 
 async function resolveCompanyMediaUrl(value?: string | null) {

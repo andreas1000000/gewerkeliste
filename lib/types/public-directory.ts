@@ -6,6 +6,9 @@ export type PublicCompany = Company & {
   profile_image_alt?: string | null;
   contact_person_name?: string | null;
   contact_person_role?: string | null;
+  contact_person_email?: string | null;
+  contact_person_phone?: string | null;
+  legal_form?: string | null;
   profile_package?: "basis" | "verified_start" | null;
   profile_status?: "imported" | "verified" | "claimed" | "needs_review" | "removed" | null;
   verification_date?: string | null;
@@ -17,6 +20,8 @@ export type PublicCompany = Company & {
   service_radius_km?: number | null;
   service_regions?: string[] | null;
   service_postal_codes?: string[] | null;
+  service_countries?: string[] | null;
+  specializations?: string[] | null;
   references_text?: string | null;
   memberships?: string[] | null;
   certificates?: string[] | null;

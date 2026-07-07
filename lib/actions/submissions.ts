@@ -103,6 +103,7 @@ function companyPayload(
   const profilePackage = options.verified && options.verifiedStartProfile ? "verified_start" : "basis";
 
   return {
+    name: companyNameWithLegalForm(submission.company_name, submission.legal_form),
     trade_id: tradeId,
     description: companyDescription(submission),
     contact_name: [submission.contact_first_name, submission.contact_last_name].filter(Boolean).join(" ") || null,
@@ -123,8 +124,8 @@ function companyPayload(
     premium_expires_at: profilePackage === "verified_start" ? addMonthsIso(12) : null,
     public_visible: options.publicVisible,
     logo_url: submission.logo_url || null,
-    profile_image_url: submission.profile_image_url || null,
-    profile_image_alt: submission.profile_image_alt || null,
+    profile_image_url: submission.image_consent_given ? submission.profile_image_url || null : null,
+    profile_image_alt: submission.image_consent_given ? submission.profile_image_alt || null : null,
     contact_person_name: submission.contact_person_name,
     contact_person_role: submission.contact_person_role,
     service_radius_km: submission.service_radius_km || null,
@@ -145,7 +146,7 @@ async function updateClaimedCompany(
   const { data: existing, error: existingError } = await supabase
     .from("companies")
     .select(
-      "claim_status, verified, profile_package, profile_status, verification_date, premium_started_at, premium_expires_at, logo_url, profile_image_url, profile_image_alt, contact_person_name, contact_person_role, service_radius_km, service_regions, service_postal_codes, references_text, memberships, certificates, manufacturer_certificates",
+      "name, claim_status, verified, profile_package, profile_status, verification_date, premium_started_at, premium_expires_at, logo_url, profile_image_url, profile_image_alt, contact_person_name, contact_person_role, service_radius_km, service_regions, service_postal_codes, references_text, memberships, certificates, manufacturer_certificates",
     )
     .eq("id", companyId)
     .single();
@@ -155,6 +156,7 @@ async function updateClaimedCompany(
 
   const updatePayload = {
     ...payload,
+    name: payload.name || existing.name,
     claim_status: existing.claim_status === "claimed" && !payload.verified ? "claimed" : payload.claim_status,
     verified: payload.verified || Boolean(existing.verified),
     profile_package: payload.profile_package === "verified_start" ? "verified_start" : existing.profile_package || payload.profile_package,
@@ -193,7 +195,6 @@ async function createSubmittedCompany(
     .from("companies")
     .insert({
       ...payload,
-      name: submission.company_name,
       slug,
     })
     .select("id, slug")
@@ -201,6 +202,25 @@ async function createSubmittedCompany(
 
   if (error || !data) throw error || new Error("Betriebseintrag konnte nicht angelegt werden.");
   return data;
+}
+
+function companyNameWithLegalForm(companyName: string, legalForm: string | null) {
+  const name = companyName.trim();
+  const form = legalForm?.trim();
+  if (!form) return name;
+  const normalizedName = normalizeLegalFormMatchValue(name);
+  const normalizedForm = normalizeLegalFormMatchValue(form);
+  if (!normalizedForm || normalizedName.split(" ").includes(normalizedForm)) return name;
+  return `${name} ${form}`;
+}
+
+function normalizeLegalFormMatchValue(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
 }
 
 async function findExistingCompanyForSubmission(submission: CompanySubmission): Promise<ExistingCompanyMatch | null> {

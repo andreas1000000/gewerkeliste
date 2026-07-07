@@ -87,6 +87,7 @@ export default async function CompanyPublicPage({ params }: PageProps) {
     const executedTrades = getExecutedTrades(company);
     const services = getRecognizableServices(company, executedTrades);
     const groupedServices = groupServicesForDisplay(services);
+    const specializationItems = getSpecializationItems(company);
     const sourceItems = getSourceItems(company, websiteHref);
     const serviceAreaItems = getServiceAreaItems(company);
     const referenceItems = getTextBlockItems(company.references_text);
@@ -97,7 +98,7 @@ export default async function CompanyPublicPage({ params }: PageProps) {
       Number.isFinite(company.latitude) &&
       Number.isFinite(company.longitude) &&
       !(company.latitude === 0 && company.longitude === 0);
-    const hasDirectContact = Boolean(company.email || company.phone || websiteHref);
+    const hasDirectContact = Boolean(company.email || company.phone || company.contact_person_email || company.contact_person_phone || websiteHref);
     const profileCompletionItems = getProfileCompletionItems(company, visibleDescription, services.length, hasCoordinates);
     const completionScore = getProfileCompletionScore(company, visibleDescription, services.length, hasCoordinates);
     const headline = trade === "Gewerk" ? `Bau- und Handwerksbetrieb in ${company.city}` : `${trade} in ${company.city}`;
@@ -177,7 +178,11 @@ export default async function CompanyPublicPage({ params }: PageProps) {
           <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1fr)_360px]">
             <div className="order-2 grid gap-5 lg:order-1">
               <ProfileCard title="Über den Betrieb">
-                <p className="max-w-4xl text-base leading-7 text-ink">{profileDescription}</p>
+                <div className="max-w-4xl space-y-4 text-base leading-7 text-ink">
+                  {profileDescription.split(/\n{2,}/).map((paragraph) => (
+                    <p key={paragraph}>{paragraph}</p>
+                  ))}
+                </div>
                 <div className="mt-5 grid gap-3 sm:grid-cols-3">
                   <Fact label="Gewerk" value={trade} />
                   <Fact label="Region" value={company.city} />
@@ -197,6 +202,18 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                     können Leistungen und Spezialisierungen ergänzt werden.
                   </p>
                 )}
+                {specializationItems.length ? (
+                  <div className="mt-5 border-t border-line pt-4">
+                    <h3 className="text-sm font-semibold text-ink">Spezialisierungen</h3>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {specializationItems.map((item) => (
+                        <span key={item} className="rounded-md border border-line bg-white px-3 py-2 text-sm font-semibold text-ink">
+                          {item}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
               </ProfileCard>
 
               <ProfileCard title="Standort und Wirkungskreis">
@@ -328,7 +345,7 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                 ) : null}
               </ProfileCard>
 
-              <ContactTrustCard company={company} canClaim={canClaim} premiumContacts={isVerifiedStartProfile ? premiumProfile.contacts : []} />
+              <ContactTrustCard company={company} canClaim={canClaim} premiumContacts={premiumProfile.contacts} />
 
               <ProfileCard title="Datenstatus">
                 <div className={`rounded-md border px-4 py-4 text-sm leading-6 ${statusBoxClass(status.tone)}`}>
@@ -454,7 +471,9 @@ function ContactTrustCard({
   const claimHref = `/betriebe/${company.slug}/claim` as Route;
   const updateHref = `/betriebe/${company.slug}/profil-ergaenzen` as Route;
   const contactName = company.contact_person_name || company.contact_name || "Ansprechpartner";
-  const contactPhone = company.phone || "";
+  const contactPhone = company.contact_person_phone || company.phone || "";
+  const contactEmail = company.contact_person_email || "";
+  const hasNamedContact = Boolean(company.contact_person_name || company.contact_name);
 
   return (
     <ProfileCard title="Ansprechpartner">
@@ -492,18 +511,25 @@ function ContactTrustCard({
             </div>
             <div className="min-w-0">
               <h3 className="text-base font-semibold text-ink">
-                {company.profile_image_url ? contactName : "Ansprechpartner ergänzbar"}
+                {hasNamedContact ? contactName : "Ansprechpartner ergänzbar"}
               </h3>
-              {company.profile_image_url && company.contact_person_role ? (
+              {company.contact_person_role ? (
                 <p className="mt-1 text-sm font-semibold text-muted">{company.contact_person_role}</p>
               ) : null}
-              {company.profile_image_url && contactPhone ? (
+              {contactPhone ? (
                 <a className="mt-2 inline-flex text-sm font-semibold text-action hover:underline" href={`tel:${contactPhone}`}>
                   {contactPhone}
                 </a>
               ) : null}
-              {!company.profile_image_url ? (
+              {contactEmail ? (
+                <a className="mt-1 block text-sm font-semibold text-action hover:underline" href={`mailto:${contactEmail}`}>
+                  {contactEmail}
+                </a>
+              ) : null}
+              {!company.profile_image_url && !hasNamedContact ? (
                 <p className="mt-1 text-sm leading-6 text-muted">Noch kein Ansprechpartnerbild freigegeben.</p>
+              ) : !company.profile_image_url ? (
+                <p className="mt-2 text-xs leading-5 text-muted">Ansprechpartnerbild noch nicht öffentlich freigegeben.</p>
               ) : null}
             </div>
           </div>
@@ -917,6 +943,9 @@ function businessProfileDescription(description: string) {
   const blockedSignals = [
     "Ausgewählte Leistungen:",
     "Ausgewaehlte Leistungen:",
+    "Leistungen:",
+    "Tätigkeitsgebiet:",
+    "Taetigkeitsgebiet:",
     "Nachweisangaben:",
     "Gewerbenachweis kann bei Bedarf nachgereicht werden",
     "Startphase:",
@@ -926,12 +955,12 @@ function businessProfileDescription(description: string) {
     "Status: automatisch wird nichts berechnet",
   ];
 
-  const cleaned = cleanCompanyDescription(description)
-    .split(/(?<=[.!?])\s+/)
-    .filter((sentence) => !blockedSignals.some((signal) => sentence.includes(signal)))
-    .slice(0, 4)
-    .join(" ")
-    .replace(/\s+/g, " ")
+  const cleaned = description
+    .replace(/\r\n/g, "\n")
+    .split(/\n+/)
+    .map((line) => line.trim())
+    .filter((line) => line && !blockedSignals.some((signal) => line.includes(signal)))
+    .join("\n\n")
     .trim();
 
   return cleaned;
@@ -943,7 +972,8 @@ function getRecognizableServices(company: PublicCompanyWithTrade, executedTrades
     .flatMap((match) => [...splitEvidence(match.evidence), ...extractServiceKeywordsFromText(match.evidence)]);
 
   const descriptionItems = extractServiceListFromDescription(company.description);
-  return [...new Set([...descriptionItems, ...evidenceItems, ...executedTrades])];
+  const specializationItems = getSpecializationItems(company);
+  return [...new Set([...descriptionItems, ...specializationItems, ...evidenceItems, ...executedTrades])];
 }
 
 function splitEvidence(value: string | null) {
@@ -997,11 +1027,19 @@ function getProfileCompletionItems(company: PublicCompanyWithTrade, description:
 function getServiceAreaItems(company: PublicCompanyWithTrade) {
   const regions = Array.isArray(company.service_regions) ? company.service_regions : [];
   const postalCodes = Array.isArray(company.service_postal_codes) ? company.service_postal_codes : [];
+  const countries = Array.isArray(company.service_countries) ? company.service_countries : [];
 
-  return [...regions, ...postalCodes]
+  return [...regions, ...postalCodes, ...countries]
     .map((item) => String(item).trim())
     .filter(Boolean)
-    .slice(0, 8);
+    .slice(0, 12);
+}
+
+function getSpecializationItems(company: PublicCompanyWithTrade) {
+  return (Array.isArray(company.specializations) ? company.specializations : [])
+    .map((item) => String(item).trim())
+    .filter(Boolean)
+    .slice(0, 12);
 }
 
 function getTextBlockItems(value?: string | null) {
