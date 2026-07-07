@@ -395,19 +395,13 @@ export async function getCompanyBySlugForMetadata(slug: string): Promise<PublicC
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("companies")
-    .select("name, city, postal_code, description, trades(name)")
+    .select("*, trades(name)")
     .eq("slug", slug)
     .eq("public_visible", true)
     .single();
 
   if (error || !data) return null;
-  const raw = data as unknown as {
-    name: string;
-    city: string;
-    postal_code: string;
-    description: string;
-    trades: { name: string } | { name: string }[] | null;
-  };
+  const raw = await applyApprovedSubmissionPublicDetails(data as PublicCompanyWithTrade);
   const trade = Array.isArray(raw.trades) ? raw.trades[0] || null : raw.trades;
 
   return {
