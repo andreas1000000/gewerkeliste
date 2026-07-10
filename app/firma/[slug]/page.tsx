@@ -105,7 +105,7 @@ export default async function CompanyPublicPage({ params }: PageProps) {
     const localBusiness = localBusinessJsonLd(company, `/firma/${company.slug}`, profileDescription);
 
     return (
-      <main className="min-h-screen bg-[#f6f8fb] text-ink">
+      <main className="min-h-screen overflow-x-hidden bg-[#f6f8fb] text-ink">
         <SiteHeader />
         <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(breadcrumb)} />
         <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(localBusiness)} />
@@ -597,9 +597,10 @@ function PremiumTrustSections({ premiumProfile }: { premiumProfile: NonNullable<
                         <figure key={media.id} className="overflow-hidden rounded-md border border-line bg-white">
                           <Image
                             alt={media.alt_text || media.caption || `Referenzbild zu ${reference.title}`}
-                            className="h-48 w-full object-cover"
-                            height={240}
-                            src={media.file_url}
+                          className="h-48 w-full object-cover"
+                          height={240}
+                          loading="eager"
+                          src={media.file_url}
                             width={420}
                             sizes="(min-width: 1024px) 330px, (min-width: 640px) 50vw, 100vw"
                           />
@@ -625,6 +626,7 @@ function PremiumTrustSections({ premiumProfile }: { premiumProfile: NonNullable<
                   alt={media.alt_text || media.caption || "Referenzbild"}
                   className="h-48 w-full object-cover"
                   height={240}
+                  loading="eager"
                   src={media.file_url}
                   width={420}
                   sizes="(min-width: 1024px) 330px, (min-width: 640px) 50vw, 100vw"

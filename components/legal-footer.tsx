@@ -16,7 +16,7 @@ export function LegalFooter() {
         <div>
           <div className="flex items-center gap-3 text-xl font-semibold">
             <span className="flex h-10 w-10 items-center justify-center rounded-md bg-white p-1" aria-hidden="true">
-              <img alt="" className="h-full w-full object-contain" src="/images/gewerkeliste-logo.png" />
+              <img alt="" aria-hidden="true" className="h-full w-full object-contain" src="/images/gewerkeliste-logo.png" />
             </span>
             GewerkeListe.com
           </div>
