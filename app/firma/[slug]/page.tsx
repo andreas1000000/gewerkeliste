@@ -753,7 +753,7 @@ function ServiceGroups({ groups, totalCount }: { groups: Array<{ label: string; 
 function ServiceAccordion({ group, open }: { group: { label: string; items: string[] }; open: boolean }) {
   return (
     <details className="group rounded-md border border-line bg-[#fbfcff] p-4" open={open}>
-      <summary className="cursor-pointer list-none">
+      <summary className="cursor-pointer list-none rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-action">
         <span className="flex items-center justify-between gap-4">
           <span>
             <span className="block text-sm font-semibold text-ink">{group.label}</span>
