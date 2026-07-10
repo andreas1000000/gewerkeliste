@@ -9,7 +9,6 @@ import {
   extractServiceListFromDescription,
   groupServicesForDisplay,
   publicProfileDescription,
-  publicResultDescription,
 } from "@/lib/company-display";
 import {
   canonicalPublicCompanySlug,
@@ -17,6 +16,7 @@ import {
   getCompanyBySlug,
   getCompanyBySlugForMetadata,
 } from "@/lib/data/public-directory";
+import { certificateVerificationInfo, getPublicProfileEntitlements } from "@/lib/public-profile-rules";
 import { breadcrumbJsonLd, jsonLd, localBusinessJsonLd } from "@/lib/seo";
 import { slugify as slugifyService } from "@/lib/service-taxonomy";
 import type { PublicClaimStatus, PublicCompanyWithTrade } from "@/lib/types/public-directory";
@@ -91,7 +91,7 @@ export default async function CompanyPublicPage({ params }: PageProps) {
     const referenceItems = getTextBlockItems(company.references_text);
     const proofItems = getProfileProofItems(company);
     const premiumProfile = company.premium_profile || emptyPremiumProfile();
-    const isVerifiedStartProfile = hasVerifiedStartProfile(company);
+    const entitlements = getPublicProfileEntitlements({ ...company, premium_profile: premiumProfile });
     const hasDirectContact = Boolean(company.email || company.phone || company.contact_person_email || company.contact_person_phone || websiteHref);
     const headline = trade === "Gewerk" ? `Bau- und Handwerksbetrieb in ${company.city}` : `${trade} in ${company.city}`;
 
@@ -217,7 +217,7 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                 </ProfileCard>
               ) : null}
 
-              {(referenceItems.length || proofItems.length || hasPremiumTrustContent(premiumProfile)) ? (
+              {(entitlements.modules.references || entitlements.modules.certificates || hasPremiumTrustContent(premiumProfile)) ? (
                 <ProfileCard title="Referenzen und Nachweise">
                   {hasPremiumTrustContent(premiumProfile) ? (
                     <PremiumTrustSections premiumProfile={premiumProfile} />
@@ -245,6 +245,10 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                     </div>
                   ) : null}
                 </ProfileCard>
+              ) : null}
+
+              {entitlements.modules.profileSections ? (
+                <ProfileSections sections={premiumProfile.profileSections} />
               ) : null}
 
               {company.verified ? (
@@ -298,7 +302,9 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                 </dl>
               </ProfileCard>
 
-              {hasContactPersonContent(company, premiumProfile.contacts) ? (
+              {entitlements.modules.socialLinks ? <SocialLinksCard links={premiumProfile.socialLinks} /> : null}
+
+              {entitlements.modules.contacts && hasContactPersonContent(company, premiumProfile.contacts) ? (
                 <ContactTrustCard company={company} premiumContacts={premiumProfile.contacts} />
               ) : null}
 
@@ -323,7 +329,7 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                 </dl>
               </ProfileCard>
 
-              {isVerifiedStartProfile && premiumProfile.teamMembers.length ? (
+              {entitlements.modules.team ? (
                 <ProfileCard title="Team">
                   <TeamList companyName={company.name} items={premiumProfile.teamMembers} />
                 </ProfileCard>
@@ -438,9 +444,11 @@ function ContactTrustCard({
                   initialsSource={contact.name}
                   name={contact.name}
                   role={contact.role}
+                  responsibilityArea={contact.responsibility_area}
                   phone={contact.phone}
                   email={contact.email}
                   primary={contact.is_primary}
+                  primaryContactMethod={contact.primary_contact_method}
                 />
               </div>
             ))}
@@ -494,19 +502,25 @@ function PersonRow({
   initialsSource,
   name,
   role,
+  responsibilityArea,
   phone,
   email,
   primary,
+  primaryContactMethod,
 }: {
   imageUrl?: string | null;
   imageAlt: string;
   initialsSource: string;
   name: string;
   role?: string | null;
+  responsibilityArea?: string | null;
   phone?: string | null;
   email?: string | null;
   primary?: boolean;
+  primaryContactMethod?: string | null;
 }) {
+  const primaryLabel = primaryContactMethod ? primaryContactMethodLabel(primaryContactMethod) : "";
+
   return (
     <div className="flex items-center gap-4">
       <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border border-line bg-white text-center text-lg font-semibold leading-4 text-brand shadow-soft">
@@ -518,10 +532,12 @@ function PersonRow({
           {primary ? <span className="rounded-md border border-line bg-white px-2 py-1 text-xs font-semibold text-muted">Hauptkontakt</span> : null}
         </div>
         {role ? <p className="mt-1 text-sm font-semibold text-muted">{role}</p> : null}
+        {responsibilityArea ? <p className="mt-1 text-sm leading-5 text-muted">{responsibilityArea}</p> : null}
         <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-sm font-semibold">
           {phone ? <a className="text-action hover:underline" href={`tel:${phone}`}>{phone}</a> : null}
           {email ? <a className="text-action hover:underline" href={`mailto:${email}`}>{email}</a> : null}
         </div>
+        {primaryLabel ? <p className="mt-2 text-xs leading-5 text-muted">Primaere Kontaktmoeglichkeit: {primaryLabel}</p> : null}
       </div>
     </div>
   );
@@ -544,6 +560,7 @@ function TeamList({
             initialsSource={item.name}
             name={item.name}
             role={item.role}
+            responsibilityArea={item.department}
           />
           {item.description ? <p className="mt-3 text-sm leading-6 text-muted">{item.description}</p> : null}
         </div>
@@ -552,9 +569,46 @@ function TeamList({
   );
 }
 
+function SocialLinksCard({ links }: { links: NonNullable<PublicCompanyWithTrade["premium_profile"]>["socialLinks"] }) {
+  return (
+    <ProfileCard title="Online-Profile">
+      <ul className="grid gap-2">
+        {links.map((link) => {
+          const label = link.label || socialPlatformLabel(link.platform);
+          return (
+            <li key={link.id}>
+              <a
+                aria-label={`${label} von ${link.platform || "Betrieb"} oeffnen`}
+                className="flex min-h-11 items-center justify-between gap-3 rounded-md border border-line bg-[#fbfcff] px-4 py-2 text-sm font-semibold text-action hover:border-action"
+                href={link.url}
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                <span>{label}</span>
+                <span aria-hidden="true" className="text-muted">↗</span>
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    </ProfileCard>
+  );
+}
+
+function ProfileSections({ sections }: { sections: NonNullable<PublicCompanyWithTrade["premium_profile"]>["profileSections"] }) {
+  return (
+    <div className="grid gap-5">
+      {sections.map((section) => (
+        <ProfileCard key={section.id} title={section.title}>
+          <p className="whitespace-pre-line text-sm leading-7 text-muted">{section.body}</p>
+        </ProfileCard>
+      ))}
+    </div>
+  );
+}
+
 function PremiumTrustSections({ premiumProfile }: { premiumProfile: NonNullable<PublicCompanyWithTrade["premium_profile"]> }) {
   const mediaByReference = groupReferenceMedia(premiumProfile);
-  const orphanMedia = mediaByReference.get("__orphan__") || [];
 
   return (
     <div className="grid gap-5">
@@ -579,11 +633,23 @@ function PremiumTrustSections({ premiumProfile }: { premiumProfile: NonNullable<
                     <div>
                       <h4 className="text-base font-semibold text-ink">{reference.title}</h4>
                       <p className="mt-1 text-sm text-muted">
-                        {[reference.project_type, reference.location, reference.year, reference.client_type].filter(Boolean).join(" · ")}
+                        {referenceMetaParts(reference).join(" · ")}
                       </p>
                     </div>
                   </div>
                   {reference.description ? <p className="mt-3 text-sm leading-6 text-muted">{reference.description}</p> : null}
+                  {reference.challenge && reference.solution ? (
+                    <div className="mt-3 grid gap-3 md:grid-cols-2">
+                      <div className="rounded-md border border-line bg-white p-3">
+                        <div className="text-xs font-semibold uppercase tracking-normal text-muted">Herausforderung</div>
+                        <p className="mt-2 text-sm leading-6 text-muted">{reference.challenge}</p>
+                      </div>
+                      <div className="rounded-md border border-line bg-white p-3">
+                        <div className="text-xs font-semibold uppercase tracking-normal text-muted">Loesung</div>
+                        <p className="mt-2 text-sm leading-6 text-muted">{reference.solution}</p>
+                      </div>
+                    </div>
+                  ) : null}
                   {reference.services.length ? (
                     <div className="mt-3 flex flex-wrap gap-2">
                       {reference.services.map((service) => (
@@ -598,10 +664,9 @@ function PremiumTrustSections({ premiumProfile }: { premiumProfile: NonNullable<
                           <Image
                             alt={media.alt_text || media.caption || `Referenzbild zu ${reference.title}`}
                           className="h-48 w-full object-cover"
-                          height={240}
-                          loading="eager"
+                          height={media.height || 240}
                           src={media.file_url}
-                            width={420}
+                            width={media.width || 420}
                             sizes="(min-width: 1024px) 330px, (min-width: 640px) 50vw, 100vw"
                           />
                           {media.caption ? <figcaption className="px-3 py-2 text-sm leading-5 text-muted">{media.caption}</figcaption> : null}
@@ -616,48 +681,30 @@ function PremiumTrustSections({ premiumProfile }: { premiumProfile: NonNullable<
         </div>
       ) : null}
 
-      {orphanMedia.length ? (
-        <div>
-          <h3 className="text-sm font-semibold text-ink">Referenzbilder</h3>
-          <div className="mt-3 grid gap-3 sm:grid-cols-2">
-            {orphanMedia.map((media) => (
-              <figure key={media.id} className="overflow-hidden rounded-md border border-line bg-[#fbfcff]">
-                <Image
-                  alt={media.alt_text || media.caption || "Referenzbild"}
-                  className="h-48 w-full object-cover"
-                  height={240}
-                  loading="eager"
-                  src={media.file_url}
-                  width={420}
-                  sizes="(min-width: 1024px) 330px, (min-width: 640px) 50vw, 100vw"
-                />
-                {media.caption ? <figcaption className="px-3 py-2 text-sm leading-5 text-muted">{media.caption}</figcaption> : null}
-              </figure>
-            ))}
-          </div>
-        </div>
-      ) : null}
-
       {premiumProfile.certificates.length ? (
         <div>
           <h3 className="text-sm font-semibold text-ink">Nachweise und Zertifikate</h3>
           <div className="mt-3 grid gap-3">
-            {premiumProfile.certificates.map((certificate) => (
-              <div key={certificate.id} className="rounded-md border border-line bg-[#fbfcff] p-4">
-                <div className="font-semibold text-ink">{certificate.title}</div>
-                <p className="mt-1 text-sm text-muted">
-                  {[certificate.issuer, certificate.issued_at ? `seit ${formatDate(certificate.issued_at)}` : null, certificate.valid_until ? `gültig bis ${formatDate(certificate.valid_until)}` : null]
-                    .filter(Boolean)
-                    .join(" · ")}
-                </p>
-                {certificate.description ? <p className="mt-3 text-sm leading-6 text-muted">{certificate.description}</p> : null}
-                {certificate.file_url ? (
-                  <a className="mt-3 inline-flex text-sm font-semibold text-action hover:underline" href={certificate.file_url} rel="noreferrer" target="_blank">
-                    Nachweis ansehen
-                  </a>
-                ) : null}
-              </div>
-            ))}
+            {premiumProfile.certificates.map((certificate) => {
+              const verification = certificateVerificationInfo(certificate.verification_level);
+              return (
+                <div key={certificate.id} className="rounded-md border border-line bg-[#fbfcff] p-4">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <div className="font-semibold text-ink">{certificate.title}</div>
+                      <p className="mt-1 text-sm text-muted">
+                        {certificateMetaParts(certificate).join(" · ")}
+                      </p>
+                    </div>
+                    <span className="rounded-md border border-line bg-white px-2.5 py-1 text-xs font-semibold text-muted">
+                      {verification.label}
+                    </span>
+                  </div>
+                  {certificate.description ? <p className="mt-3 text-sm leading-6 text-muted">{certificate.description}</p> : null}
+                  <p className="mt-3 text-xs leading-5 text-muted">{verification.description}</p>
+                </div>
+              );
+            })}
           </div>
         </div>
       ) : null}
@@ -679,6 +726,54 @@ function groupReferenceMedia(premiumProfile: NonNullable<PublicCompanyWithTrade[
   }
 
   return groups;
+}
+
+function referenceMetaParts(reference: NonNullable<PublicCompanyWithTrade["premium_profile"]>["references"][number]) {
+  const period = reference.period || (reference.year ? String(reference.year) : "");
+  const year = reference.year ? String(reference.year) : "";
+  return [
+    reference.project_type,
+    reference.location,
+    period,
+    period && year && period.includes(year) ? null : year,
+    reference.client_type,
+    reference.client_public ? reference.client_name : null,
+  ].filter((value): value is string => Boolean(value));
+}
+
+function certificateMetaParts(certificate: NonNullable<PublicCompanyWithTrade["premium_profile"]>["certificates"][number]) {
+  return [
+    certificate.proof_type,
+    certificate.issuer,
+    certificate.issued_at ? `seit ${formatDate(certificate.issued_at)}` : null,
+    certificate.valid_until ? `gueltig bis ${formatDate(certificate.valid_until)}` : null,
+  ].filter((value): value is string => Boolean(value));
+}
+
+function primaryContactMethodLabel(value: string) {
+  const labels: Record<string, string> = {
+    phone: "Telefon",
+    email: "E-Mail",
+    website: "Website",
+    form: "Kontaktformular",
+    none: "nicht festgelegt",
+  };
+
+  return labels[value] || value;
+}
+
+function socialPlatformLabel(value: string) {
+  const normalized = value.trim().toLowerCase();
+  const labels: Record<string, string> = {
+    facebook: "Facebook",
+    instagram: "Instagram",
+    linkedin: "LinkedIn",
+    pinterest: "Pinterest",
+    tiktok: "TikTok",
+    youtube: "YouTube",
+  };
+
+  return labels[normalized] || value || "Externes Profil";
 }
 
 function ActionBar({
@@ -999,12 +1094,8 @@ function getProfileProofItems(company: PublicCompanyWithTrade) {
     .slice(0, 12);
 }
 
-function hasVerifiedStartProfile(company: PublicCompanyWithTrade) {
-  return company.profile_package === "verified_start" && (company.verified || company.profile_status === "verified");
-}
-
 function hasPremiumTrustContent(profile: NonNullable<PublicCompanyWithTrade["premium_profile"]>) {
-  return Boolean(profile.references.length || profile.referenceMedia.length || profile.certificates.length || profile.notes);
+  return Boolean(profile.references.length || profile.certificates.length || profile.notes);
 }
 
 function hasContactPersonContent(
@@ -1028,6 +1119,8 @@ function emptyPremiumProfile(): NonNullable<PublicCompanyWithTrade["premium_prof
     references: [],
     referenceMedia: [],
     certificates: [],
+    socialLinks: [],
+    profileSections: [],
     notes: null,
   };
 }
