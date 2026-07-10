@@ -1,4 +1,11 @@
 import { getSupabaseAdmin } from "@/lib/supabase";
+import {
+  isApprovedPublicStatus,
+  isMissingPublicProfileSchemaError,
+  mergePublicItemsByKey,
+  normalizePublicExternalUrl,
+  publicReferenceClientName,
+} from "@/lib/public-profile-rules";
 import { serviceTermsByTradeSlug, serviceTaxonomy } from "@/lib/service-taxonomy";
 import { companySlug } from "@/lib/slug";
 import type {
@@ -13,8 +20,10 @@ import type {
   CompanyPremiumSubmissionPayload,
   CompanyReference,
   CompanyReferenceMedia,
+  CompanySocialLink,
   CompanySubmission,
   CompanyTeamMember,
+  CompanyProfileSection,
   SubmissionUploadedFile,
 } from "@/lib/types";
 
@@ -620,69 +629,34 @@ async function resolveCompanyMedia<T extends PublicCompanyWithTrade>(companies: 
 }
 
 async function attachPublicPremiumProfile<T extends PublicCompanyWithTrade>(company: T) {
-  if (!hasVerifiedStartPackage(company)) {
-    return { ...company, premium_profile: await getApprovedSubmissionPremiumProfile(company) };
-  }
-
-  const premiumProfile = await getApprovedCompanyPremiumProfile(company);
-  return { ...company, premium_profile: premiumProfile };
-}
-
-function hasVerifiedStartPackage(company: PublicCompanyWithTrade) {
-  return company.profile_package === "verified_start" && (company.verified || company.profile_status === "verified");
+  return { ...company, premium_profile: await getApprovedCompanyPremiumProfile(company) };
 }
 
 async function getApprovedCompanyPremiumProfile(company: PublicCompanyWithTrade): Promise<CompanyPremiumProfile> {
-  const supabase = getSupabaseAdmin();
   const companyId = company.id;
-  const [contacts, teamMembers, references, referenceMedia, certificates] = await Promise.all([
-    supabase
-      .from("company_contacts")
-      .select("*")
-      .eq("company_id", companyId)
-      .eq("review_status", "approved")
-      .order("is_primary", { ascending: false })
-      .order("sort_order", { ascending: true }),
-    supabase
-      .from("company_team_members")
-      .select("*")
-      .eq("company_id", companyId)
-      .eq("review_status", "approved")
-      .order("sort_order", { ascending: true }),
-    supabase
-      .from("company_references")
-      .select("*")
-      .eq("company_id", companyId)
-      .eq("review_status", "approved")
-      .order("sort_order", { ascending: true }),
-    supabase
-      .from("company_reference_media")
-      .select("*")
-      .eq("company_id", companyId)
-      .eq("review_status", "approved")
-      .order("sort_order", { ascending: true }),
-    supabase
-      .from("company_certificates")
-      .select("*")
-      .eq("company_id", companyId)
-      .eq("review_status", "approved")
-      .order("sort_order", { ascending: true }),
+  const [contacts, teamMembers, references, referenceMedia, certificates, socialLinks, profileSections, submissionProfile] = await Promise.all([
+    selectApprovedProfileRows<CompanyContact>("company_contacts", companyId),
+    selectApprovedProfileRows<CompanyTeamMember>("company_team_members", companyId),
+    selectApprovedProfileRows<CompanyReference>("company_references", companyId),
+    selectApprovedProfileRows<CompanyReferenceMedia>("company_reference_media", companyId),
+    selectApprovedProfileRows<CompanyCertificate>("company_certificates", companyId),
+    selectApprovedProfileRows<CompanySocialLink>("company_social_links", companyId),
+    selectApprovedProfileRows<CompanyProfileSection>("company_profile_sections", companyId),
+    getApprovedSubmissionPremiumProfile(company),
   ]);
 
-  const profile = {
-    contacts: contacts.error ? [] : await resolvePremiumMediaRows((contacts.data || []) as CompanyContact[], "image_url"),
-    teamMembers: teamMembers.error ? [] : await resolvePremiumMediaRows((teamMembers.data || []) as CompanyTeamMember[], "image_url"),
-    references: references.error ? [] : normalizeReferenceRows((references.data || []) as CompanyReference[]),
-    referenceMedia: referenceMedia.error ? [] : await resolvePremiumMediaRows((referenceMedia.data || []) as CompanyReferenceMedia[], "file_url"),
-    certificates: certificates.error ? [] : await resolvePremiumMediaRows((certificates.data || []) as CompanyCertificate[], "file_url"),
+  const structuredProfile: CompanyPremiumProfile = {
+    contacts: normalizeContactRows(await resolvePremiumMediaRows(contacts, "image_url")),
+    teamMembers: normalizeTeamRows(await resolvePremiumMediaRows(teamMembers, "image_url")),
+    references: normalizeReferenceRows(references),
+    referenceMedia: normalizeReferenceMediaRows(await resolvePremiumMediaRows(referenceMedia, "file_url")),
+    certificates: normalizeCertificateRows(certificates),
+    socialLinks: normalizeSocialLinkRows(socialLinks),
+    profileSections: normalizeProfileSectionRows(profileSections),
     notes: null,
   };
 
-  if (hasPremiumProfileContent(profile)) {
-    return { ...profile, notes: await getApprovedSubmissionPremiumNotes(company) };
-  }
-
-  return getApprovedSubmissionPremiumProfile(company);
+  return mergePremiumProfiles(structuredProfile, submissionProfile);
 }
 
 function emptyPremiumProfile(): CompanyPremiumProfile {
@@ -692,15 +666,146 @@ function emptyPremiumProfile(): CompanyPremiumProfile {
     references: [],
     referenceMedia: [],
     certificates: [],
+    socialLinks: [],
+    profileSections: [],
     notes: null,
   };
 }
 
+async function selectApprovedProfileRows<T>(table: string, companyId: string): Promise<T[]> {
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from(table)
+    .select("*")
+    .eq("company_id", companyId)
+    .eq("review_status", "approved")
+    .order("sort_order", { ascending: true });
+
+  if (!error) return (data || []) as T[];
+
+  if (isMissingPublicProfileSchemaError(error)) {
+    console.warn(`Public profile module skipped because schema is not available: ${table}`, {
+      code: error.code,
+      message: error.message,
+    });
+    return [];
+  }
+
+  console.error(`Public profile module query failed: ${table}`, {
+    code: error.code,
+    message: error.message,
+  });
+  return [];
+}
+
+function normalizeContactRows(rows: CompanyContact[]) {
+  return rows
+    .filter((row) => isApprovedPublicStatus(row.review_status))
+    .filter((row) => cleanString(row.name))
+    .map((row) => ({
+      ...row,
+      name: cleanString(row.name) || "Ansprechpartner",
+      role: cleanString(row.role) || null,
+      responsibility_area: cleanString(row.responsibility_area) || null,
+      phone: cleanString(row.phone) || null,
+      email: cleanString(row.email) || null,
+      image_url: cleanString(row.image_url) || null,
+      primary_contact_method: row.primary_contact_method || null,
+    }))
+    .sort((a, b) => Number(b.is_primary) - Number(a.is_primary) || a.sort_order - b.sort_order);
+}
+
+function normalizeTeamRows(rows: CompanyTeamMember[]) {
+  return rows
+    .filter((row) => isApprovedPublicStatus(row.review_status))
+    .filter((row) => cleanString(row.name))
+    .map((row) => ({
+      ...row,
+      name: cleanString(row.name) || "Teammitglied",
+      role: cleanString(row.role) || null,
+      department: cleanString(row.department) || null,
+      description: cleanString(row.description) || null,
+      image_url: cleanString(row.image_url) || null,
+    }));
+}
+
 function normalizeReferenceRows(rows: CompanyReference[]) {
-  return rows.map((row) => ({
-    ...row,
-    services: Array.isArray(row.services) ? row.services : [],
-  }));
+  return rows
+    .filter((row) => isApprovedPublicStatus(row.review_status))
+    .filter((row) => cleanString(row.title) || cleanString(row.description) || nonEmptyList(row.services).length)
+    .map((row, index) => ({
+      ...row,
+      title: cleanString(row.title) || `Referenz ${index + 1}`,
+      project_type: cleanString(row.project_type) || null,
+      location: cleanString(row.location) || null,
+      year: typeof row.year === "number" ? row.year : null,
+      period: cleanString(row.period) || null,
+      description: cleanString(row.description) || null,
+      services: nonEmptyList(row.services),
+      client_type: cleanString(row.client_type) || null,
+      client_public: row.client_public === true,
+      client_name: publicReferenceClientName(row.client_name, row.client_public),
+      challenge: cleanString(row.challenge) || null,
+      solution: cleanString(row.solution) || null,
+    }));
+}
+
+function normalizeReferenceMediaRows(rows: CompanyReferenceMedia[]) {
+  return rows
+    .filter((row) => isApprovedPublicStatus(row.review_status))
+    .filter((row) => cleanString(row.file_url))
+    .map((row) => ({
+      ...row,
+      file_url: cleanString(row.file_url),
+      media_type: row.media_type || "image",
+      width: typeof row.width === "number" && row.width > 0 ? row.width : null,
+      height: typeof row.height === "number" && row.height > 0 ? row.height : null,
+      category: cleanString(row.category) || null,
+      alt_text: cleanString(row.alt_text) || null,
+      caption: cleanString(row.caption) || null,
+    }))
+    .filter((row) => row.media_type === "image");
+}
+
+function normalizeCertificateRows(rows: CompanyCertificate[]) {
+  return rows
+    .filter((row) => isApprovedPublicStatus(row.review_status))
+    .filter((row) => cleanString(row.title))
+    .map((row) => ({
+      ...row,
+      title: cleanString(row.title) || "Nachweis",
+      issuer: cleanString(row.issuer) || null,
+      issued_at: cleanString(row.issued_at) || null,
+      valid_until: cleanString(row.valid_until) || null,
+      description: cleanString(row.description) || null,
+      file_url: null,
+      proof_type: cleanString(row.proof_type) || null,
+      verification_level: normalizeCertificateVerificationLevel(row.verification_level),
+    }));
+}
+
+function normalizeSocialLinkRows(rows: CompanySocialLink[]) {
+  return rows
+    .filter((row) => isApprovedPublicStatus(row.review_status))
+    .map((row) => ({
+      ...row,
+      platform: cleanString(row.platform) || "Profil",
+      label: cleanString(row.label) || null,
+      url: normalizePublicExternalUrl(row.url) || "",
+    }))
+    .filter((row) => row.url);
+}
+
+function normalizeProfileSectionRows(rows: CompanyProfileSection[]) {
+  return rows
+    .filter((row) => isApprovedPublicStatus(row.review_status))
+    .map((row) => ({
+      ...row,
+      title: cleanString(row.title),
+      body: cleanString(row.body),
+      section_type: cleanString(row.section_type) || null,
+    }))
+    .filter((row) => row.title && row.body);
 }
 
 async function getApprovedSubmissionPremiumProfile(company: PublicCompanyWithTrade): Promise<CompanyPremiumProfile> {
@@ -708,11 +813,6 @@ async function getApprovedSubmissionPremiumProfile(company: PublicCompanyWithTra
   if (!payload?.requested) return emptyPremiumProfile();
 
   return premiumPayloadToPublicProfile(company.id, payload);
-}
-
-async function getApprovedSubmissionPremiumNotes(company: PublicCompanyWithTrade) {
-  const payload = await getApprovedSubmissionPremiumPayload(company);
-  return payload?.requested ? payload.notes : null;
 }
 
 async function getApprovedSubmissionPremiumPayload(company: PublicCompanyWithTrade): Promise<CompanyPremiumSubmissionPayload | null> {
@@ -767,6 +867,8 @@ function normalizeSubmissionPremiumPayload(payload: unknown): CompanyPremiumSubm
     references: Array.isArray(candidate.references) ? candidate.references : [],
     reference_media: Array.isArray(candidate.reference_media) ? candidate.reference_media : [],
     certificates: Array.isArray(candidate.certificates) ? candidate.certificates : [],
+    social_links: Array.isArray(candidate.social_links) ? candidate.social_links : [],
+    profile_sections: Array.isArray(candidate.profile_sections) ? candidate.profile_sections : [],
     notes: typeof candidate.notes === "string" ? candidate.notes : null,
   };
 }
@@ -781,9 +883,14 @@ async function premiumPayloadToPublicProfile(companyId: string, payload: Company
       project_type: item.project_type,
       location: item.location,
       year: item.year,
+      period: item.period || null,
       description: item.description,
       services: item.services,
       client_type: item.client_type,
+      client_name: publicReferenceClientName(item.client_name, item.client_public),
+      client_public: item.client_public === true,
+      challenge: item.challenge || null,
+      solution: item.solution || null,
       sort_order: item.sort_order || index + 1,
       review_status: "approved",
       created_at: "",
@@ -799,9 +906,11 @@ async function premiumPayloadToPublicProfile(companyId: string, payload: Company
           company_id: companyId,
           name: item.name || `Ansprechpartner ${index + 1}`,
           role: item.role,
+          responsibility_area: item.responsibility_area || null,
           phone: item.phone,
           email: item.email,
           image_url: await resolvePayloadMediaUrl(item.image_file || null),
+          primary_contact_method: null,
           sort_order: item.sort_order || index + 1,
           is_primary: index === 0,
           review_status: "approved",
@@ -817,6 +926,7 @@ async function premiumPayloadToPublicProfile(companyId: string, payload: Company
           company_id: companyId,
           name: item.name || `Teammitglied ${index + 1}`,
           role: item.role,
+          department: item.department || null,
           description: item.description,
           image_url: await resolvePayloadMediaUrl(item.image_file || null),
           sort_order: item.sort_order || index + 1,
@@ -833,15 +943,19 @@ async function premiumPayloadToPublicProfile(companyId: string, payload: Company
           id: `submission-reference-media-${index + 1}`,
           company_id: companyId,
           reference_id: referenceIdForTitle(references, item.reference_title),
-          file_url: await resolvePayloadMediaUrl(item.file || null),
+          file_url: (await resolvePayloadMediaUrl(item.file || null)) || "",
+          media_type: item.media_type || "image",
+          width: item.width || null,
+          height: item.height || null,
+          category: item.category || null,
           alt_text: item.alt_text,
           caption: item.caption || item.file_note,
           sort_order: item.sort_order || index + 1,
-          review_status: "approved",
+          review_status: "approved" as const,
           created_at: "",
           updated_at: "",
         })),
-    )).filter((item): item is CompanyReferenceMedia => Boolean(item.file_url)),
+    )).filter((item) => Boolean(item.file_url)),
     certificates: await Promise.all(
       payload.certificates
         .filter((item) => item.title || item.issuer || item.description || item.file)
@@ -853,26 +967,108 @@ async function premiumPayloadToPublicProfile(companyId: string, payload: Company
           issued_at: null,
           valid_until: item.valid_until,
           description: item.description || item.file_note,
-          file_url: await resolvePayloadMediaUrl(item.file || null),
+          file_url: null,
+          proof_type: item.proof_type || null,
+          verification_level: normalizeCertificateVerificationLevel(item.verification_level),
           sort_order: item.sort_order || index + 1,
           review_status: "approved",
           created_at: "",
           updated_at: "",
         })),
     ),
+    socialLinks: payload.social_links
+      .filter((item) => item.platform || item.url || item.label)
+      .map((item, index) => ({
+        id: `submission-social-link-${index + 1}`,
+        company_id: companyId,
+        platform: item.platform || item.label || "Profil",
+        url: normalizePublicExternalUrl(item.url) || "",
+        label: item.label,
+        sort_order: item.sort_order || index + 1,
+        review_status: "approved" as const,
+        created_at: "",
+        updated_at: "",
+      }))
+      .filter((item) => item.url),
+    profileSections: payload.profile_sections
+      .filter((item) => item.title || item.body)
+      .map((item, index) => ({
+        id: `submission-profile-section-${index + 1}`,
+        company_id: companyId,
+        title: item.title || `Profilabschnitt ${index + 1}`,
+        body: item.body,
+        section_type: item.section_type,
+        sort_order: item.sort_order || index + 1,
+        review_status: "approved" as const,
+        created_at: "",
+        updated_at: "",
+      }))
+      .filter((item) => item.title && item.body),
     notes: payload.notes,
   };
 }
 
-function hasPremiumProfileContent(profile: CompanyPremiumProfile) {
-  return Boolean(
-    profile.contacts.length ||
-      profile.teamMembers.length ||
-      profile.references.length ||
-      profile.referenceMedia.length ||
-      profile.certificates.length ||
-      Boolean(profile.notes),
+function mergePremiumProfiles(structured: CompanyPremiumProfile, fallback: CompanyPremiumProfile): CompanyPremiumProfile {
+  const references = mergePublicItemsByKey(structured.references, fallback.references, referenceDedupeKey);
+  const referenceKeyToId = new Map(references.map((reference) => [referenceDedupeKey(reference), reference.id]));
+  const fallbackReferenceIdToMergedId = new Map(
+    fallback.references.map((reference) => [reference.id, referenceKeyToId.get(referenceDedupeKey(reference)) || reference.id]),
   );
+  const fallbackMedia = fallback.referenceMedia.map((media) => ({
+    ...media,
+    reference_id: media.reference_id ? fallbackReferenceIdToMergedId.get(media.reference_id) || media.reference_id : null,
+  }));
+
+  return {
+    contacts: mergePublicItemsByKey(structured.contacts, fallback.contacts, contactDedupeKey),
+    teamMembers: mergePublicItemsByKey(structured.teamMembers, fallback.teamMembers, teamMemberDedupeKey),
+    references,
+    referenceMedia: mergePublicItemsByKey(structured.referenceMedia, fallbackMedia, referenceMediaDedupeKey),
+    certificates: mergePublicItemsByKey(structured.certificates, fallback.certificates, certificateDedupeKey),
+    socialLinks: mergePublicItemsByKey(structured.socialLinks, fallback.socialLinks, socialLinkDedupeKey),
+    profileSections: mergePublicItemsByKey(structured.profileSections, fallback.profileSections, profileSectionDedupeKey),
+    notes: structured.notes || fallback.notes || null,
+  };
+}
+
+function contactDedupeKey(contact: CompanyContact) {
+  return normalizedDedupeKey([contact.name, contact.email, contact.phone, contact.role]);
+}
+
+function teamMemberDedupeKey(member: CompanyTeamMember) {
+  return normalizedDedupeKey([member.name, member.role, member.department]);
+}
+
+function referenceDedupeKey(reference: CompanyReference) {
+  return normalizedDedupeKey([reference.title, reference.location, reference.year, reference.period]);
+}
+
+function referenceMediaDedupeKey(media: CompanyReferenceMedia) {
+  return normalizedDedupeKey([media.file_url, media.reference_id, media.caption, media.alt_text]);
+}
+
+function certificateDedupeKey(certificate: CompanyCertificate) {
+  return normalizedDedupeKey([certificate.title, certificate.issuer, certificate.valid_until]);
+}
+
+function socialLinkDedupeKey(link: CompanySocialLink) {
+  return normalizedDedupeKey([link.platform, link.url]);
+}
+
+function profileSectionDedupeKey(section: CompanyProfileSection) {
+  return normalizedDedupeKey([section.title, section.body]);
+}
+
+function normalizeCertificateVerificationLevel(value?: string | null): CompanyCertificate["verification_level"] {
+  if (value === "document_uploaded" || value === "gewerkeliste_checked") return value;
+  return "self_declared";
+}
+
+function normalizedDedupeKey(values: Array<string | number | null | undefined>) {
+  return values
+    .map((value) => String(value || "").trim().toLowerCase())
+    .filter(Boolean)
+    .join("|");
 }
 
 function referenceIdForTitle(references: CompanyReference[], title: string | null) {

@@ -75,6 +75,9 @@ export function localBusinessJsonLd(company: PublicCompanyWithTrade, path: strin
       .map((match) => match.trades?.name),
     company.trades?.name,
   ].filter((value): value is string => Boolean(value));
+  const sameAs = (company.premium_profile?.socialLinks || [])
+    .map((link) => link.url)
+    .filter((value): value is string => Boolean(value));
 
   const address = {
     "@type": "PostalAddress",
@@ -99,6 +102,7 @@ export function localBusinessJsonLd(company: PublicCompanyWithTrade, path: strin
     areaServed: jsonLdAreas(company),
     knowsAbout: tradeNames.length ? Array.from(new Set(tradeNames)) : undefined,
     serviceType: services.length ? Array.from(new Set(services)) : tradeNames.length ? Array.from(new Set(tradeNames)) : undefined,
+    sameAs: sameAs.length ? Array.from(new Set(sameAs)) : undefined,
   });
 }
 
