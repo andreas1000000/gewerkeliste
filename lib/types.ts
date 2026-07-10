@@ -48,6 +48,10 @@ export type Company = {
 
 export type PremiumReviewStatus = "pending" | "approved" | "rejected" | "internal";
 
+export type CertificateVerificationLevel = "self_declared" | "document_uploaded" | "gewerkeliste_checked";
+
+export type ReferenceMediaType = "image" | "document" | "video" | "other";
+
 export type SubmissionUploadedFile = {
   storage_path: string;
   original_filename: string;
@@ -62,9 +66,11 @@ export type CompanyContact = {
   company_id: string;
   name: string;
   role: string | null;
+  responsibility_area?: string | null;
   phone: string | null;
   email: string | null;
   image_url: string | null;
+  primary_contact_method?: "phone" | "email" | "website" | "form" | "none" | null;
   sort_order: number;
   is_primary: boolean;
   review_status: PremiumReviewStatus;
@@ -77,6 +83,7 @@ export type CompanyTeamMember = {
   company_id: string;
   name: string;
   role: string | null;
+  department?: string | null;
   description: string | null;
   image_url: string | null;
   sort_order: number;
@@ -92,9 +99,14 @@ export type CompanyReference = {
   project_type: string | null;
   location: string | null;
   year: number | null;
+  period?: string | null;
   description: string | null;
   services: string[];
   client_type: string | null;
+  client_name?: string | null;
+  client_public?: boolean;
+  challenge?: string | null;
+  solution?: string | null;
   sort_order: number;
   review_status: PremiumReviewStatus;
   created_at: string;
@@ -106,6 +118,10 @@ export type CompanyReferenceMedia = {
   company_id: string;
   reference_id: string | null;
   file_url: string;
+  media_type?: ReferenceMediaType | null;
+  width?: number | null;
+  height?: number | null;
+  category?: string | null;
   alt_text: string | null;
   caption: string | null;
   sort_order: number;
@@ -123,8 +139,34 @@ export type CompanyCertificate = {
   valid_until: string | null;
   description: string | null;
   file_url: string | null;
+  proof_type?: string | null;
+  verification_level?: CertificateVerificationLevel;
   sort_order: number;
   review_status: PremiumReviewStatus;
+  created_at: string;
+  updated_at: string;
+};
+
+export type CompanySocialLink = {
+  id: string;
+  company_id: string;
+  platform: string;
+  url: string;
+  label: string | null;
+  review_status: PremiumReviewStatus;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+};
+
+export type CompanyProfileSection = {
+  id: string;
+  company_id: string;
+  title: string;
+  body: string;
+  section_type: string | null;
+  review_status: PremiumReviewStatus;
+  sort_order: number;
   created_at: string;
   updated_at: string;
 };
@@ -135,12 +177,15 @@ export type CompanyPremiumProfile = {
   references: CompanyReference[];
   referenceMedia: CompanyReferenceMedia[];
   certificates: CompanyCertificate[];
+  socialLinks: CompanySocialLink[];
+  profileSections: CompanyProfileSection[];
   notes?: string | null;
 };
 
 export type PremiumSubmissionContact = {
   name: string;
   role: string | null;
+  responsibility_area?: string | null;
   phone: string | null;
   email: string | null;
   image_note: string | null;
@@ -151,6 +196,7 @@ export type PremiumSubmissionContact = {
 export type PremiumSubmissionTeamMember = {
   name: string;
   role: string | null;
+  department?: string | null;
   description: string | null;
   image_note: string | null;
   image_file?: SubmissionUploadedFile | null;
@@ -161,10 +207,15 @@ export type PremiumSubmissionReference = {
   title: string;
   location: string | null;
   year: number | null;
+  period?: string | null;
   project_type: string | null;
   services: string[];
   description: string | null;
   client_type: string | null;
+  client_name?: string | null;
+  client_public?: boolean;
+  challenge?: string | null;
+  solution?: string | null;
   sort_order: number;
 };
 
@@ -174,6 +225,10 @@ export type PremiumSubmissionMedia = {
   file?: SubmissionUploadedFile | null;
   caption: string | null;
   alt_text: string | null;
+  media_type?: ReferenceMediaType | null;
+  width?: number | null;
+  height?: number | null;
+  category?: string | null;
   sort_order: number;
 };
 
@@ -184,6 +239,22 @@ export type PremiumSubmissionCertificate = {
   description: string | null;
   file_note: string | null;
   file?: SubmissionUploadedFile | null;
+  proof_type?: string | null;
+  verification_level?: CertificateVerificationLevel;
+  sort_order: number;
+};
+
+export type PremiumSubmissionSocialLink = {
+  platform: string;
+  url: string;
+  label: string | null;
+  sort_order: number;
+};
+
+export type PremiumSubmissionProfileSection = {
+  title: string;
+  body: string;
+  section_type: string | null;
   sort_order: number;
 };
 
@@ -195,6 +266,8 @@ export type CompanyPremiumSubmissionPayload = {
   references: PremiumSubmissionReference[];
   reference_media: PremiumSubmissionMedia[];
   certificates: PremiumSubmissionCertificate[];
+  social_links: PremiumSubmissionSocialLink[];
+  profile_sections: PremiumSubmissionProfileSection[];
   notes: string | null;
 };
 

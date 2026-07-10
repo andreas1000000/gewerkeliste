@@ -73,12 +73,14 @@ export async function getCompanyForPremiumAdmin(id: string) {
 
 export async function getCompanyPremiumProfileForAdmin(companyId: string): Promise<CompanyPremiumProfile> {
   const supabase = getSupabaseAdmin();
-  const [contacts, teamMembers, references, referenceMedia, certificates] = await Promise.all([
+  const [contacts, teamMembers, references, referenceMedia, certificates, socialLinks, profileSections] = await Promise.all([
     supabase.from("company_contacts").select("*").eq("company_id", companyId).order("sort_order", { ascending: true }),
     supabase.from("company_team_members").select("*").eq("company_id", companyId).order("sort_order", { ascending: true }),
     supabase.from("company_references").select("*").eq("company_id", companyId).order("sort_order", { ascending: true }),
     supabase.from("company_reference_media").select("*").eq("company_id", companyId).order("sort_order", { ascending: true }),
     supabase.from("company_certificates").select("*").eq("company_id", companyId).order("sort_order", { ascending: true }),
+    supabase.from("company_social_links").select("*").eq("company_id", companyId).order("sort_order", { ascending: true }),
+    supabase.from("company_profile_sections").select("*").eq("company_id", companyId).order("sort_order", { ascending: true }),
   ]);
 
   if (contacts.error || teamMembers.error || references.error || referenceMedia.error || certificates.error) {
@@ -88,6 +90,8 @@ export async function getCompanyPremiumProfileForAdmin(companyId: string): Promi
       references: [],
       referenceMedia: [],
       certificates: [],
+      socialLinks: [],
+      profileSections: [],
     };
   }
 
@@ -97,6 +101,8 @@ export async function getCompanyPremiumProfileForAdmin(companyId: string): Promi
     references: references.data || [],
     referenceMedia: referenceMedia.data || [],
     certificates: certificates.data || [],
+    socialLinks: socialLinks.error ? [] : socialLinks.data || [],
+    profileSections: profileSections.error ? [] : profileSections.data || [],
   } as CompanyPremiumProfile;
 }
 

@@ -450,6 +450,8 @@ function normalizePremiumPayload(payload: CompanyPremiumSubmissionPayload | null
     references: Array.isArray(payload.references) ? payload.references : [],
     reference_media: Array.isArray(payload.reference_media) ? payload.reference_media : [],
     certificates: Array.isArray(payload.certificates) ? payload.certificates : [],
+    social_links: Array.isArray(payload.social_links) ? payload.social_links : [],
+    profile_sections: Array.isArray(payload.profile_sections) ? payload.profile_sections : [],
     notes: payload.notes || null,
   };
 }

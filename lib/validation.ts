@@ -314,6 +314,8 @@ export function parsePremiumSubmissionPayload(formData: FormData): CompanyPremiu
           sort_order: index + 1,
         })).filter((item, index) => item.title || item.issuer || item.valid_until || item.description || item.file_note || hasUploadedFileAt(formData, "premiumCertificateFile", index))
       : [],
+    social_links: [],
+    profile_sections: [],
     notes: requested ? emptyToNullableString(getString(formData, "premiumSubmissionNotes")) : null,
   };
 
