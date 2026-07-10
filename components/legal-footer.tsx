@@ -27,28 +27,28 @@ export function LegalFooter() {
         <nav>
           <h2 className="font-semibold">Navigation</h2>
           <div className="mt-3 grid gap-2 text-blue-100">
-            <Link className="hover:text-white" href="/betriebe">
+            <Link className="inline-flex min-h-9 items-center hover:text-white" href="/betriebe">
               Betriebe suchen
             </Link>
-            <Link className="hover:text-white" href="/gewerke">
+            <Link className="inline-flex min-h-9 items-center hover:text-white" href="/gewerke">
               Gewerke
             </Link>
-            <Link className="hover:text-white" href="/betriebe">
+            <Link className="inline-flex min-h-9 items-center hover:text-white" href="/betriebe">
               Betriebe
             </Link>
-            <Link className="hover:text-white" href="/betrieb-eintragen">
+            <Link className="inline-flex min-h-9 items-center hover:text-white" href="/betrieb-eintragen">
               Betrieb eintragen
             </Link>
-            <Link className="hover:text-white" href="/eintrag-beanspruchen">
+            <Link className="inline-flex min-h-9 items-center hover:text-white" href="/eintrag-beanspruchen">
               Eintrag beanspruchen
             </Link>
-            <Link className="hover:text-white" href="/preise">
+            <Link className="inline-flex min-h-9 items-center hover:text-white" href="/preise">
               Preise
             </Link>
-            <Link className="hover:text-white" href="/faq">
+            <Link className="inline-flex min-h-9 items-center hover:text-white" href="/faq">
               FAQ
             </Link>
-            <Link className="hover:text-white" href="/ueber-gewerkeliste">
+            <Link className="inline-flex min-h-9 items-center hover:text-white" href="/ueber-gewerkeliste">
               Über uns
             </Link>
           </div>
@@ -56,10 +56,10 @@ export function LegalFooter() {
         <nav>
           <h2 className="font-semibold">Rechtliches</h2>
           <div className="mt-3 grid gap-2 text-blue-100">
-            <Link className="hover:text-white" href="/impressum">
+            <Link className="inline-flex min-h-9 items-center hover:text-white" href="/impressum">
               Impressum
             </Link>
-            <Link className="hover:text-white" href="/datenschutz">
+            <Link className="inline-flex min-h-9 items-center hover:text-white" href="/datenschutz">
               Datenschutz
             </Link>
           </div>
@@ -69,7 +69,7 @@ export function LegalFooter() {
           <div className="mt-3 grid gap-2 text-blue-100">
             <span>GewerkeListe.com</span>
             <span>Deutschland</span>
-            <a className="break-words hover:text-white" href={`mailto:${siteConfig.publicContactEmail}`}>
+            <a className="inline-flex min-h-9 items-center break-words hover:text-white" href={`mailto:${siteConfig.publicContactEmail}`}>
               {siteConfig.publicContactEmail}
             </a>
           </div>

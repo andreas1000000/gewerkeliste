@@ -1,6 +1,7 @@
-import { siteConfig } from "@/lib/site-config";
-import { publicJsonLdSocialUrls } from "@/lib/public-profile-rules";
-import type { PublicCompanyWithTrade } from "@/lib/types/public-directory";
+import { siteConfig } from "./site-config.ts";
+import { normalizePublicExternalUrl, publicJsonLdSocialUrls } from "./public-profile-rules.ts";
+import { publicJsonLdMediaUrl } from "./public-profile-seo.ts";
+import type { PublicCompanyWithTrade } from "./types/public-directory.ts";
 
 export function siteUrl(path = "/") {
   const base = siteConfig.url.replace(/\/+$/, "");
@@ -66,6 +67,7 @@ export function collectionPageJsonLd({
 export function localBusinessJsonLd(company: PublicCompanyWithTrade, path: string, description?: string) {
   const logo = publicJsonLdMediaUrl(company.logo_url);
   const profileImage = publicJsonLdMediaUrl(company.profile_image_url);
+  const website = normalizePublicExternalUrl(company.website_url);
   const services = (company.company_services || [])
     .filter((match) => match.status === "confirmed" && Boolean(match.services?.name))
     .map((match) => match.services?.name)
@@ -90,11 +92,12 @@ export function localBusinessJsonLd(company: PublicCompanyWithTrade, path: strin
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
     name: company.name,
-    url: company.website_url || siteUrl(path),
+    url: website || siteUrl(path),
     mainEntityOfPage: siteUrl(path),
     description: description || undefined,
     telephone: company.phone || undefined,
     email: company.email || undefined,
+    contactPoint: jsonLdContactPoint(company),
     image: profileImage || logo,
     logo,
     address,
@@ -128,21 +131,17 @@ function jsonLdAreas(company: PublicCompanyWithTrade) {
     : undefined;
 }
 
-function publicJsonLdMediaUrl(value?: string | null) {
-  if (!value) return undefined;
+function jsonLdContactPoint(company: PublicCompanyWithTrade) {
+  if (!company.phone && !company.email) return undefined;
 
-  try {
-    const url = new URL(value);
-
-    if (url.protocol !== "https:") return undefined;
-    if (url.hostname === "localhost" || url.hostname === "127.0.0.1") return undefined;
-    if (url.pathname.includes("/storage/v1/object/sign/")) return undefined;
-    if (url.searchParams.has("token")) return undefined;
-
-    return url.toString();
-  } catch {
-    return undefined;
-  }
+  return {
+    "@type": "ContactPoint",
+    telephone: company.phone || undefined,
+    email: company.email || undefined,
+    contactType: "customer service",
+    areaServed: "DE",
+    availableLanguage: ["de"],
+  };
 }
 
 function removeUndefined<T>(value: T): T {

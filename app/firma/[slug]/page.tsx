@@ -5,7 +5,6 @@ import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import {
-  cleanCompanyDescription,
   extractServiceListFromDescription,
   groupServicesForDisplay,
   publicProfileDescription,
@@ -17,8 +16,15 @@ import {
   getCompanyBySlugForMetadata,
 } from "@/lib/data/public-directory";
 import { certificateVerificationInfo, getPublicProfileEntitlements } from "@/lib/public-profile-rules";
+import {
+  buildPublicProfileDescription,
+  buildPublicProfileTitle,
+  canonicalProfileUrl,
+  publicJsonLdMediaUrl,
+  publicProfileRobots,
+} from "@/lib/public-profile-seo";
 import { breadcrumbJsonLd, jsonLd, localBusinessJsonLd } from "@/lib/seo";
-import { slugify as slugifyService } from "@/lib/service-taxonomy";
+import { findServiceSeoEntry, slugify as slugifyService } from "@/lib/service-taxonomy";
 import type { PublicClaimStatus, PublicCompanyWithTrade } from "@/lib/types/public-directory";
 
 export const dynamic = "force-dynamic";
@@ -34,30 +40,64 @@ type ProfileStatus = {
   tone: "verified" | "claimed" | "unverified";
 };
 
+type ServiceDisplayItem = {
+  label: string;
+  slug?: string;
+};
+
+type ServiceDisplayGroup = {
+  label: string;
+  items: ServiceDisplayItem[];
+};
+
+const VERIFIED_SCOPE_TEXT =
+  "GewerkeListe.com hat ausgewählte Unternehmens- und Kontaktdaten dieses Betriebs geprüft. Leistungsangaben, Referenzen und weitere Inhalte stammen vom Betrieb, sofern sie nicht gesondert als geprüft gekennzeichnet sind.";
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const company = await getCompanyBySlugForMetadata(slug);
+  const canonicalSlug = canonicalPublicCompanySlugFromSlug(slug);
+  const company = await getCompanyBySlugForMetadata(canonicalSlug);
 
   if (!company) {
-    return { title: "Firma nicht gefunden" };
+    return {
+      title: "Firma nicht gefunden | GewerkeListe.com",
+      robots: {
+        index: false,
+        follow: false,
+      },
+    };
   }
 
   const trade = company.trades?.name || "Handwerk";
-  const description =
-    businessProfileDescription(cleanCompanyDescription(company.description)) ||
-    `Unternehmensprofil von ${company.name} in ${company.city}: Gewerk, Leistungen, Kontakt und Datenstatus auf GewerkeListe.com.`;
+  const title = buildPublicProfileTitle({ name: company.name, trade, city: company.city });
+  const description = buildPublicProfileDescription({
+    name: company.name,
+    trade,
+    city: company.city,
+    serviceRegion: company.service_regions?.[0] || null,
+  });
+  const canonical = canonicalProfileUrl(canonicalSlug);
+  const image = publicJsonLdMediaUrl(company.profile_image_url) || publicJsonLdMediaUrl(company.logo_url);
 
   return {
-    title: `${company.name} – ${trade} in ${company.city} | GewerkeListe.com`,
+    title,
     description,
+    robots: publicProfileRobots(),
     alternates: {
-      canonical: `/firma/${slug}`,
+      canonical,
     },
     openGraph: {
-      title: `${company.name} | ${trade} in ${company.city}`,
+      title,
       description,
-      url: `/firma/${slug}`,
+      url: canonical,
       type: "website",
+      images: image ? [{ url: image, alt: `Profilbild oder Logo von ${company.name}` }] : undefined,
+    },
+    twitter: {
+      card: image ? "summary_large_image" : "summary",
+      title,
+      description,
+      images: image ? [image] : undefined,
     },
   };
 }
@@ -69,12 +109,13 @@ export default async function CompanyPublicPage({ params }: PageProps) {
     permanentRedirect(`/firma/${canonicalRequestedSlug}`);
   }
 
-  try {
-    const company = await getCompanyBySlug(slug);
-    const canonicalSlug = canonicalPublicCompanySlug(company);
-    if (canonicalSlug !== slug) {
-      permanentRedirect(`/firma/${canonicalSlug}`);
-    }
+  const company = await getCompanyBySlug(slug);
+  if (!company) notFound();
+
+  const canonicalSlug = canonicalPublicCompanySlug(company);
+  if (canonicalSlug !== slug) {
+    permanentRedirect(`/firma/${canonicalSlug}`);
+  }
 
     const trade = company.trades?.name || "Gewerk";
     const status = getProfileStatus(company);
@@ -94,12 +135,16 @@ export default async function CompanyPublicPage({ params }: PageProps) {
     const entitlements = getPublicProfileEntitlements({ ...company, premium_profile: premiumProfile });
     const hasDirectContact = Boolean(company.email || company.phone || company.contact_person_email || company.contact_person_phone || websiteHref);
     const headline = trade === "Gewerk" ? `Bau- und Handwerksbetrieb in ${company.city}` : `${trade} in ${company.city}`;
+    const tradeSlug = company.trades?.slug || "";
+    const citySlug = locationSlug(company.city);
+    const tradePath = tradeSlug ? `/gewerke/${tradeSlug}` : "/betriebe";
+    const cityPath = tradeSlug ? `/gewerke/${tradeSlug}/${citySlug}` : `/orte/${citySlug}`;
 
     const breadcrumb = breadcrumbJsonLd([
       { name: "Startseite", path: "/" },
       { name: "Betriebe", path: "/betriebe" },
-      { name: trade, path: `/gewerke/${company.trades?.slug || ""}` },
-      { name: company.city, path: `/gewerke/${company.trades?.slug || ""}/${locationSlug(company.city)}` },
+      { name: trade, path: tradePath },
+      { name: company.city, path: cityPath },
       { name: company.name, path: `/firma/${company.slug}` },
     ]);
     const localBusiness = localBusinessJsonLd(company, `/firma/${company.slug}`, profileDescription);
@@ -112,19 +157,19 @@ export default async function CompanyPublicPage({ params }: PageProps) {
 
         <div className="mx-auto max-w-7xl px-4 py-5 sm:px-6 lg:px-8">
           <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-2 text-sm text-muted">
-            <Link className="hover:text-ink" href={"/" as Route}>
+            <Link className="inline-flex min-h-8 items-center hover:text-ink" href={"/" as Route}>
               Startseite
             </Link>
             <span aria-hidden="true">/</span>
-            <Link className="hover:text-ink" href={"/betriebe" as Route}>
+            <Link className="inline-flex min-h-8 items-center hover:text-ink" href={"/betriebe" as Route}>
               Betriebe
             </Link>
             <span aria-hidden="true">/</span>
-            <Link className="hover:text-ink" href={`/betriebe?gewerk=${company.trades?.slug || ""}` as Route}>
+            <Link className="inline-flex min-h-8 items-center hover:text-ink" href={tradePath as Route}>
               {trade}
             </Link>
             <span aria-hidden="true">/</span>
-            <Link className="hover:text-ink" href={`/betriebe?ort=${encodeURIComponent(company.city)}` as Route}>
+            <Link className="inline-flex min-h-8 items-center hover:text-ink" href={cityPath as Route}>
               {company.city}
             </Link>
             <span aria-hidden="true">/</span>
@@ -161,7 +206,7 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                 <ProfileMetric label="Profilstatus" value={status.shortLabel} />
               </div>
               <div className="mt-6 border-t border-line py-4">
-                <ActionBar company={company} websiteHref={websiteHref} canClaim={canClaim} />
+                <ActionBar company={company} websiteHref={websiteHref} />
               </div>
             </div>
           </section>
@@ -187,7 +232,7 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                   subtitle={serviceDisplay.sourceLabel}
                 >
                   {serviceDisplay.groups.length ? (
-                    <ServiceGroups groups={serviceDisplay.groups} totalCount={serviceDisplay.totalCount} />
+                    <ServiceGroups groups={serviceDisplay.groups} />
                   ) : null}
                   {specializationItems.length ? (
                     <div className={serviceDisplay.groups.length ? "mt-5 border-t border-line pt-4" : ""}>
@@ -255,10 +300,7 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                 <ProfileCard title="Verifizierungskennzeichnung">
                   <div className="rounded-md border border-[#8ab9aa] bg-[#e8f3ef] px-4 py-4 text-sm leading-6 text-[#25584c]">
                     <div className="font-semibold text-ink">Verifiziertes Profil</div>
-                    <p className="mt-2">
-                      Die veröffentlichten Betriebsdaten wurden geprüft oder vom Betrieb bestätigt. Das ist ein Hinweis
-                      auf nachvollziehbare Profildaten, keine Qualitäts-, Verfügbarkeits- oder Auftragsgarantie.
-                    </p>
+                    <p className="mt-2">{VERIFIED_SCOPE_TEXT}</p>
                     {company.verification_date ? (
                       <p className="mt-2 text-xs">Bestätigt am {formatDate(company.verification_date)}</p>
                     ) : null}
@@ -274,7 +316,7 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                         <li key={`${item.label}-${item.value}`} className="rounded-md border border-line bg-[#fbfcff] px-4 py-3">
                           <div className="text-sm font-semibold text-ink">{item.label}</div>
                           {item.href ? (
-                            <a className="mt-1 block break-words text-sm text-action hover:underline" href={item.href} rel="noreferrer" target="_blank">
+                            <a className="mt-1 inline-flex min-h-8 items-center break-words text-sm text-action hover:underline" href={item.href} rel="noreferrer" target="_blank">
                               {item.value}
                             </a>
                           ) : (
@@ -374,20 +416,20 @@ export default async function CompanyPublicPage({ params }: PageProps) {
               Vergleichen Sie weitere öffentlich gelistete Betriebe nach Gewerk und Region.
             </p>
             <div className="mt-5 flex flex-wrap gap-3">
-              {company.trades?.slug ? (
+              {tradeSlug ? (
                 <Link
                   className="inline-flex min-h-11 items-center justify-center rounded-md bg-action px-5 text-sm font-semibold text-white hover:bg-brand"
-                  href={`/betriebe?gewerk=${company.trades.slug}` as Route}
+                  href={tradePath as Route}
                 >
                   Weitere Betriebe in diesem Gewerk suchen
                 </Link>
               ) : null}
-              {company.trades?.slug ? (
+              {tradeSlug ? (
                 <Link
                   className="inline-flex min-h-11 items-center justify-center rounded-md border border-line bg-white px-5 text-sm font-semibold text-action hover:border-action"
-                  href={`/betriebe?gewerk=${company.trades.slug}&ort=${encodeURIComponent(company.city)}` as Route}
+                  href={cityPath as Route}
                 >
-                  Gewerke in der Region durchsuchen
+                  Betriebe in {company.city} vergleichen
                 </Link>
               ) : null}
             </div>
@@ -395,9 +437,6 @@ export default async function CompanyPublicPage({ params }: PageProps) {
         </div>
       </main>
     );
-  } catch {
-    notFound();
-  }
 }
 
 function ProfileMark({ company, canClaim }: { company: PublicCompanyWithTrade; canClaim: boolean }) {
@@ -487,12 +526,12 @@ function ContactTrustCard({
                   <p className="mt-1 text-sm font-semibold text-muted">{company.contact_person_role}</p>
                 ) : null}
                 {contactPhone ? (
-                  <a className="mt-2 inline-flex text-sm font-semibold text-action hover:underline" href={`tel:${contactPhone}`}>
+                  <a className="mt-2 inline-flex min-h-9 items-center text-sm font-semibold text-action hover:underline" href={`tel:${contactPhone}`}>
                     {contactPhone}
                   </a>
                 ) : null}
                 {contactEmail ? (
-                  <a className="mt-1 block text-sm font-semibold text-action hover:underline" href={`mailto:${contactEmail}`}>
+                  <a className="mt-1 inline-flex min-h-9 items-center text-sm font-semibold text-action hover:underline" href={`mailto:${contactEmail}`}>
                     {contactEmail}
                   </a>
                 ) : null}
@@ -553,8 +592,8 @@ function PersonRow({
         {role ? <p className="mt-1 text-sm font-semibold text-muted">{role}</p> : null}
         {responsibilityArea ? <p className="mt-1 text-sm leading-5 text-muted">{responsibilityArea}</p> : null}
         <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-sm font-semibold">
-          {phone ? <a className="text-action hover:underline" href={`tel:${phone}`}>{phone}</a> : null}
-          {email ? <a className="text-action hover:underline" href={`mailto:${email}`}>{email}</a> : null}
+          {phone ? <a className="inline-flex min-h-9 items-center text-action hover:underline" href={`tel:${phone}`}>{phone}</a> : null}
+          {email ? <a className="inline-flex min-h-9 items-center text-action hover:underline" href={`mailto:${email}`}>{email}</a> : null}
         </div>
         {primaryLabel ? <p className="mt-2 text-xs leading-5 text-muted">Primaere Kontaktmoeglichkeit: {primaryLabel}</p> : null}
       </div>
@@ -799,11 +838,9 @@ function socialPlatformLabel(value: string) {
 function ActionBar({
   company,
   websiteHref,
-  canClaim,
 }: {
   company: PublicCompanyWithTrade;
   websiteHref?: string;
-  canClaim: boolean;
 }) {
   const primaryAction = getPrimaryContactAction(company, websiteHref);
 
@@ -814,33 +851,13 @@ function ActionBar({
           Betrieb kontaktieren
         </ContactButton>
       ) : null}
-      {websiteHref ? (
+      {websiteHref && primaryAction?.href !== websiteHref ? (
         <ContactButton href={websiteHref} external>
           Website besuchen
         </ContactButton>
       ) : null}
       {company.phone && primaryAction?.href !== `tel:${company.phone}` ? <ContactButton href={`tel:${company.phone}`}>Anrufen</ContactButton> : null}
       {company.email && primaryAction?.href !== `mailto:${company.email}` ? <ContactButton href={`mailto:${company.email}`}>E-Mail schreiben</ContactButton> : null}
-      {canClaim ? (
-        <Link
-          className="inline-flex min-h-11 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-action hover:border-action"
-          href={`/betriebe/${company.slug}/claim` as Route}
-        >
-          Profil übernehmen
-        </Link>
-      ) : null}
-      <Link
-        className="inline-flex min-h-11 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-action hover:border-action"
-        href={`/betriebe/${company.slug}/profil-ergaenzen` as Route}
-      >
-        Eintrag korrigieren oder löschen lassen
-      </Link>
-      <Link
-        className="inline-flex min-h-11 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-action hover:border-action"
-        href="/datenschutz"
-      >
-        Datenschutzhinweise
-      </Link>
     </div>
   );
 }
@@ -854,18 +871,29 @@ function getPrimaryContactAction(company: PublicCompanyWithTrade, websiteHref?: 
   return null;
 }
 
-function ServiceGroups({ groups, totalCount }: { groups: Array<{ label: string; items: string[] }>; totalCount: number }) {
+function serviceDisplayGroupsFromNames(services: string[]): ServiceDisplayGroup[] {
+  return groupServicesForDisplay(services).map((group) => ({
+    label: group.label,
+    items: group.items.map(serviceDisplayItemFromName),
+  }));
+}
+
+function serviceDisplayItemFromName(name: string): ServiceDisplayItem {
+  const slug = slugifyService(name);
+  return findServiceSeoEntry(slug) ? { label: name, slug } : { label: name };
+}
+
+function ServiceGroups({ groups }: { groups: ServiceDisplayGroup[] }) {
   return (
     <div className="grid gap-3">
       {groups.map((group, index) => (
         <ServiceAccordion key={group.label} group={group} open={index === 0} />
       ))}
-      <p className="text-xs leading-5 text-muted">{totalCount} Leistungen in {groups.length} Gruppen dargestellt.</p>
     </div>
   );
 }
 
-function ServiceAccordion({ group, open }: { group: { label: string; items: string[] }; open: boolean }) {
+function ServiceAccordion({ group, open }: { group: ServiceDisplayGroup; open: boolean }) {
   return (
     <details className="group rounded-md border border-line bg-[#fbfcff] p-4" open={open}>
       <summary className="cursor-pointer list-none rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-action">
@@ -882,13 +910,19 @@ function ServiceAccordion({ group, open }: { group: { label: string; items: stri
       </summary>
       <div className="mt-4 flex flex-wrap gap-2">
         {group.items.map((item) => (
-          <Link
-            key={item}
-            className="rounded-md border border-line bg-[#fbfcff] px-3 py-2 text-sm font-semibold text-ink hover:border-action hover:text-action"
-            href={`/leistungen/${slugifyService(item)}` as Route}
-          >
-            {item}
-          </Link>
+          item.slug ? (
+            <Link
+              key={item.label}
+              className="rounded-md border border-line bg-[#fbfcff] px-3 py-2 text-sm font-semibold text-ink hover:border-action hover:text-action"
+              href={`/leistungen/${item.slug}` as Route}
+            >
+              {item.label}
+            </Link>
+          ) : (
+            <span key={item.label} className="rounded-md border border-line bg-white px-3 py-2 text-sm font-semibold text-ink">
+              {item.label}
+            </span>
+          )
         ))}
       </div>
     </details>
@@ -910,7 +944,7 @@ function getProfileStatus(company: PublicCompanyWithTrade): ProfileStatus {
     return {
       label: "Verifiziertes Profil",
       shortLabel: "Verifiziertes Profil",
-      note: "Die veröffentlichten Betriebsdaten wurden geprüft oder vom Betrieb bestätigt.",
+      note: VERIFIED_SCOPE_TEXT,
       tone: "verified",
     };
   }
@@ -1003,13 +1037,15 @@ function getServiceDisplay(company: PublicCompanyWithTrade) {
     .sort((a, b) => (b.confidence_score || 0) - (a.confidence_score || 0));
 
   if (confirmedServices.length) {
-    const groupsByFamily = new Map<string, string[]>();
+    const groupsByFamily = new Map<string, ServiceDisplayItem[]>();
     for (const match of confirmedServices) {
       const service = match.services;
       if (!service?.name) continue;
       const family = service.service_families?.name || "Weitere Leistungen";
       const current = groupsByFamily.get(family) || [];
-      if (!current.includes(service.name)) current.push(service.name);
+      if (!current.some((item) => item.label === service.name)) {
+        current.push({ label: service.name, slug: service.slug });
+      }
       groupsByFamily.set(family, current);
     }
 
@@ -1027,7 +1063,7 @@ function getServiceDisplay(company: PublicCompanyWithTrade) {
   if (selectedServices.length) {
     const services = Array.from(new Set(selectedServices));
     return {
-      groups: groupServicesForDisplay(services),
+      groups: serviceDisplayGroupsFromNames(services),
       totalCount: services.length,
       sourceLabel: "Freigegebene Leistungen aus dem genehmigten Betriebseintrag.",
     };
@@ -1037,7 +1073,7 @@ function getServiceDisplay(company: PublicCompanyWithTrade) {
   if (descriptionServices.length) {
     const services = Array.from(new Set(descriptionServices));
     return {
-      groups: groupServicesForDisplay(services),
+      groups: serviceDisplayGroupsFromNames(services),
       totalCount: services.length,
       sourceLabel: "Aus dem freigegebenen Profiltext erkennbare Leistungen.",
     };
@@ -1054,6 +1090,7 @@ function getSourceItems(company: PublicCompanyWithTrade, websiteHref?: string) {
 
   for (const match of company.company_trades || []) {
     if (!match.source || match.status === "rejected" || match.visibility_level === "internal") continue;
+    if (match.source.includes("phase3-local-fixture")) continue;
     const label = sourceLabel(match.source);
     const value = match.evidence ? `${label}: ${match.evidence}` : label;
     if (!items.some((item) => item.value === value)) {
@@ -1192,7 +1229,7 @@ function DataRow({
       <dd className="min-w-0 text-sm leading-6 text-muted">
         {href ? (
           <a
-            className="break-words text-[#1f5fd4] hover:underline"
+            className="inline-flex min-h-9 items-center break-words text-[#1f5fd4] hover:underline"
             href={href}
             rel={external ? "noreferrer" : undefined}
             target={external ? "_blank" : undefined}

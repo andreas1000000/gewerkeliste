@@ -3,9 +3,9 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { createClient } from "@supabase/supabase-js";
+import { assertLocalFixtureEnvironment } from "./local-fixture-guards.mjs";
 
 const COMPANY_MEDIA_BUCKET = "company-media";
-const LOCAL_HOSTS = new Set(["127.0.0.1", "localhost"]);
 const FIXTURE_SLUGS = [
   "metallteq-83101-rohrdorf",
   "angerer-elektrotechnik-83083-riedering",
@@ -20,7 +20,12 @@ const PNG_1X1 = Buffer.from(
 await loadEnvFile(".env.local");
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-assertLocalSupabaseTarget(supabaseUrl);
+let fixtureGuard;
+try {
+  fixtureGuard = assertLocalFixtureEnvironment(process.env);
+} catch (error) {
+  fail(error instanceof Error ? error.message : String(error));
+}
 if (!serviceRoleKey) fail("SUPABASE_SERVICE_ROLE_KEY fehlt fuer die lokale Fixture-Erstellung.");
 
 const supabase = createClient(supabaseUrl, serviceRoleKey, {
@@ -61,7 +66,7 @@ await insertRows("company_profile_sections", profileSectionRows(companies));
 
 console.log(JSON.stringify({
   status: "ok",
-  target: safeTargetSummary(supabaseUrl),
+  target: fixtureGuard.target,
   slugs: FIXTURE_SLUGS,
 }, null, 2));
 
@@ -83,28 +88,6 @@ async function loadEnvFile(filePath) {
     if (!key || process.env[key] !== undefined) continue;
     process.env[key] = rawValue.replace(/^["']|["']$/g, "");
   }
-}
-
-function assertLocalSupabaseTarget(value) {
-  if (!value) fail("NEXT_PUBLIC_SUPABASE_URL fehlt.");
-
-  let url;
-  try {
-    url = new URL(value);
-  } catch {
-    fail("NEXT_PUBLIC_SUPABASE_URL ist keine gueltige URL.");
-  }
-
-  if (!LOCAL_HOSTS.has(url.hostname)) fail(`Abbruch: Supabase-Ziel ist nicht lokal (${url.hostname}).`);
-  if (url.protocol !== "http:") fail(`Abbruch: Lokale Supabase-URL muss http verwenden (${url.protocol}).`);
-  if (url.port && url.port !== "54321") fail(`Abbruch: unerwarteter lokaler Supabase-Port ${url.port}.`);
-  if (process.env.NODE_ENV === "production") fail("Abbruch: NODE_ENV=production.");
-  if (process.env.VERCEL_ENV === "production" || process.env.VERCEL === "1") fail("Abbruch: Vercel/Production-Umgebung erkannt.");
-}
-
-function safeTargetSummary(value) {
-  const url = new URL(value);
-  return `${url.protocol}//${url.hostname}${url.port ? `:${url.port}` : ""}`;
 }
 
 async function uploadFixtureAssets() {
@@ -203,8 +186,8 @@ function fixtureCompanies(trades, assets) {
       profile_image_alt: null,
       gallery_image_urls: [],
       is_free_founding_member: false,
-      trust_badge: null,
-      voluntary_support_status: null,
+      trust_badge: "phase3-local-fixture",
+      voluntary_support_status: "local-test",
       profile_status: "imported",
       verification_date: null,
       image_consent_given: false,
@@ -242,8 +225,8 @@ function fixtureCompanies(trades, assets) {
       profile_image_alt: null,
       gallery_image_urls: [],
       is_free_founding_member: false,
-      trust_badge: null,
-      voluntary_support_status: null,
+      trust_badge: "phase3-local-fixture",
+      voluntary_support_status: "local-test",
       profile_status: "imported",
       verification_date: null,
       image_consent_given: false,

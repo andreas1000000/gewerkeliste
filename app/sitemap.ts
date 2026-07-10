@@ -11,6 +11,8 @@ import { siteConfig } from "@/lib/site-config";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { publicTradeTaxonomy } from "@/lib/trade-taxonomy";
 
+export const dynamic = "force-dynamic";
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = siteConfig.url;
   const [companies, locations, tradeLocations, serviceLocations, tradeCounts] = await Promise.all([

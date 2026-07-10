@@ -82,6 +82,9 @@ export type PublicCompanyMetadata = {
   postal_code: string;
   description: string;
   trades: { name: string } | null;
+  logo_url?: string | null;
+  profile_image_url?: string | null;
+  service_regions?: string[] | null;
 };
 
 export type PublicClaimStatus = ClaimStatus;

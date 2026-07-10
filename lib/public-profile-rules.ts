@@ -169,6 +169,37 @@ export function publicProfileRowsOrEmpty<T>(data: T[] | null | undefined, error:
   return Array.isArray(data) ? data : [];
 }
 
+export function isPublicCompanyNotFoundError(error: unknown) {
+  const candidate = error as { code?: unknown; message?: unknown; details?: unknown };
+  const code = typeof candidate?.code === "string" ? candidate.code : "";
+  const message = [candidate?.message, candidate?.details]
+    .map((item) => (typeof item === "string" ? item : ""))
+    .join(" ")
+    .toLowerCase();
+
+  return code === "PGRST116" || message.includes("contains 0 rows");
+}
+
+export function isLocalFixtureCompanyRecord(company: {
+  trust_badge?: unknown;
+  voluntary_support_status?: unknown;
+  email?: unknown;
+  description?: unknown;
+} | null | undefined) {
+  if (!company) return false;
+  const marker = [company.trust_badge, company.voluntary_support_status]
+    .map((value) => (typeof value === "string" ? value.trim().toLowerCase() : ""))
+    .filter(Boolean);
+  const description = typeof company.description === "string" ? company.description.toLowerCase() : "";
+  const email = typeof company.email === "string" ? company.email.toLowerCase() : "";
+
+  return (
+    marker.includes("phase3-local-fixture") ||
+    marker.includes("local-test") ||
+    (email.endsWith("@example.invalid") && description.includes("lokale phase-3-testdaten"))
+  );
+}
+
 export function getPublicProfileEntitlements(company: EntitlementCompany): PublicProfileEntitlements {
   const premiumProfile = company.premium_profile || {};
   const profilePackage = company.profile_package === "verified_start" ? "verified_start" : company.profile_package === "basis" ? "basis" : "unknown";

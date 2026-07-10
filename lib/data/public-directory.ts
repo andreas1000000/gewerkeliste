@@ -3,13 +3,16 @@ import {
   approvedSubmissionFileStoragePath,
   isPublicReferenceImageMediaType,
   isApprovedPublicStatus,
+  isLocalFixtureCompanyRecord,
   isMissingPublicProfileSchemaError,
+  isPublicCompanyNotFoundError,
   mergePublicItemsByKey,
   normalizePublicExternalUrl,
   publicCertificateFileUrl,
   publicProfileRowsOrEmpty,
   publicReferenceClientName,
 } from "@/lib/public-profile-rules";
+import { isIndexableProductionEnvironment } from "@/lib/public-profile-seo";
 import { serviceTermsByTradeSlug, serviceTaxonomy } from "@/lib/service-taxonomy";
 import { companySlug } from "@/lib/slug";
 import type {
@@ -104,7 +107,7 @@ export async function getPublicCompanies(params?: {
 
   const { data, error } = await query;
   if (error) return getPublicCompaniesFallback(params);
-  return dedupePublicCompanies(await resolveCompanyMedia(data as PublicCompanyWithTrade[]));
+  return dedupePublicCompanies(excludeLocalFixtureCompanies(await resolveCompanyMedia(data as PublicCompanyWithTrade[])));
 }
 
 export async function getBusinessDirectoryCompanies(params?: {
@@ -133,7 +136,7 @@ export async function getBusinessDirectoryCompanies(params?: {
     return getBusinessDirectoryCompaniesFallback(params);
   }
 
-  const companies = dedupePublicCompanies(await resolveCompanyMedia(data as PublicCompanyWithTrade[]));
+  const companies = dedupePublicCompanies(excludeLocalFixtureCompanies(await resolveCompanyMedia(data as PublicCompanyWithTrade[])));
   if (!hasFilter) return companies.slice(0, params?.limit || 40);
 
   return companies
@@ -175,14 +178,14 @@ export async function getServiceDirectoryCompanies(params: {
   if (error) return [];
 
   const companies = dedupePublicCompanies(
-    await resolveCompanyMedia(
+    excludeLocalFixtureCompanies(await resolveCompanyMedia(
       (data || [])
         .map((row) => {
           const raw = row as unknown as { companies: PublicCompanyWithTrade | PublicCompanyWithTrade[] | null };
           return Array.isArray(raw.companies) ? raw.companies[0] : raw.companies;
         })
         .filter((company): company is PublicCompanyWithTrade => Boolean(company)),
-    ),
+    )),
   );
   return companies
     .filter((company) => companyMatchesDirectoryLocation(company, params.location))
@@ -248,14 +251,14 @@ export async function getPublicCompaniesByTrade(
     .filter((company): company is PublicCompanyWithTrade & { trade_match: { confidence_score: number; source: string; evidence: string | null } } => Boolean(company?.id))
     .sort(sortMatchedCompanies);
 
-  return resolveCompanyMedia(companies);
+  return resolveCompanyMedia(excludeLocalFixtureCompanies(companies));
 }
 
 export async function getPublicCompanyTradeCounts() {
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("company_trades")
-    .select("status, trades(slug), companies!inner(public_visible)")
+    .select("status, trades(slug), companies!inner(public_visible, trust_badge, voluntary_support_status, email, description)")
     .eq("companies.public_visible", true);
 
   if (error) {
@@ -274,8 +277,11 @@ export async function getPublicCompanyTradeCounts() {
       status?: string | null;
       visibility_level?: string | null;
       trades: { slug: string } | { slug: string }[] | null;
+      companies: Partial<PublicCompanyWithTrade> | Partial<PublicCompanyWithTrade>[] | null;
     };
     if (raw.status === "rejected" || raw.visibility_level === "internal") return counts;
+    const company = Array.isArray(raw.companies) ? raw.companies[0] : raw.companies;
+    if (isLocalFixtureCompanyRecord(company)) return counts;
     const trade = Array.isArray(raw.trades) ? raw.trades[0] : raw.trades;
     if (!trade?.slug) return counts;
     counts[trade.slug] = (counts[trade.slug] || 0) + 1;
@@ -293,10 +299,14 @@ export async function getAllPublicCompanySlugs() {
 
 export async function getPublicCompanySitemapEntries() {
   const supabase = getSupabaseAdmin();
-  const { data, error } = await supabase.from("companies").select("slug, updated_at").eq("public_visible", true);
+  const { data, error } = await supabase
+    .from("companies")
+    .select("slug, updated_at, trust_badge, voluntary_support_status, email, description")
+    .eq("public_visible", true);
 
   if (error) throw error;
-  return ((data || []) as Array<{ slug: unknown; updated_at: unknown }>)
+  return ((data || []) as Array<{ slug: unknown; updated_at: unknown } & Partial<PublicCompanyWithTrade>>)
+    .filter((item) => !isLocalFixtureCompanyRecord(item))
     .filter((item) => typeof item.slug === "string" && item.slug)
     .map((item) => ({
       slug: item.slug as string,
@@ -308,7 +318,7 @@ export async function getPublicTradeLocationSitemapEntries(limit = 500) {
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("company_trades")
-    .select("trades(slug), companies!inner(city, public_visible)")
+    .select("trades(slug), companies!inner(city, public_visible, trust_badge, voluntary_support_status, email, description)")
     .eq("companies.public_visible", true)
     .limit(limit * 4);
 
@@ -318,10 +328,11 @@ export async function getPublicTradeLocationSitemapEntries(limit = 500) {
   for (const row of data || []) {
     const raw = row as unknown as {
       trades: { slug: string } | { slug: string }[] | null;
-      companies: { city: string } | { city: string }[] | null;
+      companies: Partial<PublicCompanyWithTrade> | Partial<PublicCompanyWithTrade>[] | null;
     };
     const trade = Array.isArray(raw.trades) ? raw.trades[0] : raw.trades;
     const company = Array.isArray(raw.companies) ? raw.companies[0] : raw.companies;
+    if (isLocalFixtureCompanyRecord(company)) continue;
     if (!trade?.slug || !company?.city) continue;
     const citySlug = slugifyLocation(company.city);
     if (!citySlug) continue;
@@ -336,7 +347,7 @@ export async function getPublicServiceLocationSitemapEntries(limit = 700) {
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("company_services")
-    .select("services!inner(slug), companies!inner(city, public_visible)")
+    .select("services!inner(slug), companies!inner(city, public_visible, trust_badge, voluntary_support_status, email, description)")
     .eq("status", "confirmed")
     .eq("companies.public_visible", true)
     .not("companies.city", "is", null)
@@ -349,10 +360,11 @@ export async function getPublicServiceLocationSitemapEntries(limit = 700) {
   for (const row of data || []) {
     const raw = row as unknown as {
       services: { slug: string } | { slug: string }[] | null;
-      companies: { city: string } | { city: string }[] | null;
+      companies: Partial<PublicCompanyWithTrade> | Partial<PublicCompanyWithTrade>[] | null;
     };
     const service = Array.isArray(raw.services) ? raw.services[0] : raw.services;
     const company = Array.isArray(raw.companies) ? raw.companies[0] : raw.companies;
+    if (isLocalFixtureCompanyRecord(company)) continue;
     if (!service?.slug) continue;
     if (!company?.city) continue;
     const city = slugifyLocation(company.city);
@@ -368,7 +380,7 @@ export async function getPublicLocationSitemapEntries(limit = 300) {
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("companies")
-    .select("city")
+    .select("city, trust_badge, voluntary_support_status, email, description")
     .eq("public_visible", true)
     .not("city", "is", null)
     .limit(limit * 4);
@@ -377,6 +389,7 @@ export async function getPublicLocationSitemapEntries(limit = 300) {
 
   const entries = new Map<string, { city: string; slug: string }>();
   for (const row of data || []) {
+    if (isLocalFixtureCompanyRecord(row as Partial<PublicCompanyWithTrade>)) continue;
     const city = typeof row.city === "string" ? row.city.trim() : "";
     if (!city) continue;
     const slug = slugifyLocation(city);
@@ -399,8 +412,13 @@ export async function getCompanyBySlug(slug: string) {
     .eq("public_visible", true)
     .single();
 
-  if (error) return getCompanyBySlugFallback(slug);
+  if (error) {
+    if (isPublicCompanyNotFoundError(error)) return null;
+    if (isMissingPublicProfileSchemaError(error)) return getCompanyBySlugFallback(slug);
+    throw error;
+  }
   const company = await applyApprovedSubmissionPublicDetails(normalizePublicCompanyServices(data as PublicCompanyWithTrade));
+  if (isIndexableProductionEnvironment() && isLocalFixtureCompanyRecord(company)) return null;
   const resolvedCompany = await resolveSingleCompanyMedia(company);
   return attachPublicPremiumProfile(resolvedCompany);
 }
@@ -416,6 +434,7 @@ export async function getCompanyBySlugForMetadata(slug: string): Promise<PublicC
 
   if (error || !data) return null;
   const raw = await applyApprovedSubmissionPublicDetails(data as PublicCompanyWithTrade);
+  if (isIndexableProductionEnvironment() && isLocalFixtureCompanyRecord(raw)) return null;
   const trade = Array.isArray(raw.trades) ? raw.trades[0] || null : raw.trades;
 
   return {
@@ -424,6 +443,9 @@ export async function getCompanyBySlugForMetadata(slug: string): Promise<PublicC
     postal_code: raw.postal_code,
     description: raw.description,
     trades: trade,
+    logo_url: raw.logo_url,
+    profile_image_url: raw.profile_image_url,
+    service_regions: raw.service_regions,
   };
 }
 
@@ -455,7 +477,7 @@ async function getPublicCompaniesByPrimaryTradeFallback(
 
   const { data, error } = await query;
   if (error) throw error;
-  return dedupePublicCompanies(await resolveCompanyMedia(data as PublicCompanyWithTrade[]));
+  return dedupePublicCompanies(excludeLocalFixtureCompanies(await resolveCompanyMedia(data as PublicCompanyWithTrade[])));
 }
 
 async function getPublicCompaniesFallback(params?: {
@@ -482,7 +504,7 @@ async function getPublicCompaniesFallback(params?: {
 
   const { data, error } = await query;
   if (error) throw error;
-  return resolveCompanyMedia(data as PublicCompanyWithTrade[]);
+  return resolveCompanyMedia(excludeLocalFixtureCompanies(data as PublicCompanyWithTrade[]));
 }
 
 async function getBusinessDirectoryCompaniesFallback(params?: {
@@ -507,7 +529,7 @@ async function getBusinessDirectoryCompaniesFallback(params?: {
 
   if (error) throw error;
 
-  const companies = dedupePublicCompanies(await resolveCompanyMedia(data as PublicCompanyWithTrade[]));
+  const companies = dedupePublicCompanies(excludeLocalFixtureCompanies(await resolveCompanyMedia(data as PublicCompanyWithTrade[])));
   if (!hasFilter) return companies.slice(0, params?.limit || 40);
 
   return companies
@@ -532,6 +554,10 @@ export function canonicalPublicCompanySlug(company: PublicCompanyWithTrade) {
 
 export function canonicalPublicCompanySlugFromSlug(slug: string) {
   return PUBLIC_COMPANY_SLUG_ALIASES[slug] || slug;
+}
+
+function excludeLocalFixtureCompanies<T extends PublicCompanyWithTrade>(companies: T[]) {
+  return companies.filter((company) => !isLocalFixtureCompanyRecord(company));
 }
 
 function dedupePublicCompanies<T extends PublicCompanyWithTrade>(companies: T[]) {
@@ -585,8 +611,12 @@ async function getCompanyBySlugFallback(slug: string) {
     .eq("public_visible", true)
     .single();
 
-  if (error) throw error;
+  if (error) {
+    if (isPublicCompanyNotFoundError(error)) return null;
+    throw error;
+  }
   const company = await applyApprovedSubmissionPublicDetails(data as PublicCompanyWithTrade);
+  if (isIndexableProductionEnvironment() && isLocalFixtureCompanyRecord(company)) return null;
   const resolvedCompany = await resolveSingleCompanyMedia(company);
   return attachPublicPremiumProfile(resolvedCompany);
 }
@@ -595,7 +625,7 @@ async function getPublicTradeLocationSitemapEntriesFallback(limit: number) {
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("companies")
-    .select("city, trades(slug)")
+    .select("city, trust_badge, voluntary_support_status, email, description, trades(slug)")
     .eq("public_visible", true)
     .limit(limit * 2);
 
@@ -603,7 +633,8 @@ async function getPublicTradeLocationSitemapEntriesFallback(limit: number) {
 
   const entries = new Map<string, { tradeSlug: string; city: string }>();
   for (const row of data || []) {
-    const raw = row as unknown as { city: string; trades: { slug: string } | { slug: string }[] | null };
+    const raw = row as unknown as Partial<PublicCompanyWithTrade> & { city: string; trades: { slug: string } | { slug: string }[] | null };
+    if (isLocalFixtureCompanyRecord(raw)) continue;
     const trade = Array.isArray(raw.trades) ? raw.trades[0] : raw.trades;
     if (!trade?.slug || !raw.city) continue;
     const citySlug = slugifyLocation(raw.city);

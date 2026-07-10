@@ -84,7 +84,7 @@ export function SiteHeader({ locale = "de" }: SiteHeaderProps) {
             return (
               <Link
                 key={item.href}
-                className={active ? "text-action" : "hover:text-action"}
+                className={`inline-flex min-h-10 items-center ${active ? "text-action" : "hover:text-action"}`}
                 href={item.href}
               >
                 {item.label}
