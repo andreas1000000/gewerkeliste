@@ -1,6 +1,7 @@
 import { revalidatePath } from "next/cache";
 import { getAgentDefinition } from "@/lib/agents/agent-registry";
 import { getUniqueCompanySlug } from "@/lib/data";
+import { assertWritesAllowed } from "@/lib/runtime/write-guard";
 import { BraveSearchProvider } from "@/lib/search/brave-search-provider";
 import type { SearchResult } from "@/lib/search/search-provider";
 import { companySlug, slugify } from "@/lib/slug";
@@ -107,6 +108,8 @@ export function normalizeMunicipalityDiscoveryInput(formInput: Partial<Municipal
 }
 
 export async function runMunicipalityDiscovery(input: MunicipalityDiscoveryInput): Promise<MunicipalityDiscoveryResult> {
+  assertWritesAllowed({ operation: "agent.municipality-discovery.run" });
+
   const normalized = normalizeMunicipalityDiscoveryInput(input);
   if (!normalized.municipality) throw new Error("Gemeinde oder Stadt ist erforderlich.");
   if (normalized.email_mode === "send_after_approval") {

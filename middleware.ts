@@ -1,13 +1,13 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { isAdminProtectedPathname } from "./lib/runtime/request-guard.ts";
+import { blockedWriteResponse, shouldBlockHttpWrite } from "./lib/runtime/write-guard.ts";
 
 export function middleware(request: NextRequest) {
-  const isProtected =
-    request.nextUrl.pathname.startsWith("/admin") ||
-    request.nextUrl.pathname.startsWith("/planner") ||
-    request.nextUrl.pathname.startsWith("/companies") ||
-    request.nextUrl.pathname.startsWith("/trades");
+  if (shouldBlockHttpWrite(request.method)) {
+    return blockedWriteResponse();
+  }
 
-  if (!isProtected) {
+  if (!isAdminProtectedPathname(request.nextUrl.pathname)) {
     return NextResponse.next();
   }
 
@@ -53,5 +53,5 @@ function basicAuthPassword(auth: string) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/planner/:path*", "/companies/:path*", "/trades/:path*"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };
