@@ -73,7 +73,7 @@ export async function getPublicCompanies(params?: {
   let query = supabase
     .from("companies")
     .select(
-      "*, trades!inner(id, name, slug), company_trades(confidence_score, source, evidence, status, visibility_level, trades(id, name, slug))",
+      "*, trades!inner(id, name, slug), company_trades(confidence_score, source, evidence, status, trades(id, name, slug))",
     )
     .eq("public_visible", true)
     .order("verified", { ascending: false })
@@ -110,7 +110,7 @@ export async function getBusinessDirectoryCompanies(params?: {
   const { data, error } = await supabase
     .from("companies")
     .select(
-      "*, trades(id, name, slug), company_trades(confidence_score, source, evidence, status, visibility_level, trades(id, name, slug))",
+      "*, trades(id, name, slug), company_trades(confidence_score, source, evidence, status, trades(id, name, slug))",
     )
     .eq("public_visible", true)
     .order("created_at", { ascending: false })
@@ -151,7 +151,7 @@ export async function getServiceDirectoryCompanies(params: {
   const { data, error } = await supabase
     .from("company_services")
     .select(
-      "confidence_score, services!inner(slug), companies!inner(*, trades(id, name, slug), company_trades(confidence_score, source, evidence, status, visibility_level, trades(id, name, slug)))",
+      "confidence_score, services!inner(slug), companies!inner(*, trades(id, name, slug), company_trades(confidence_score, source, evidence, status, trades(id, name, slug)))",
     )
     .eq("status", "confirmed")
     .eq("services.slug", service.slug)
@@ -201,7 +201,7 @@ export async function getPublicCompaniesByTrade(
 
   let query = supabase
     .from("company_trades")
-    .select("id, confidence_score, source, evidence, status, visibility_level, companies!inner(*, trades(id, name, slug)), trades(id, name, slug)")
+    .select("id, confidence_score, source, evidence, status, companies!inner(*, trades(id, name, slug)), trades(id, name, slug)")
     .eq("trade_id", trade.id)
     .eq("companies.public_visible", true)
     .order("confidence_score", { ascending: false });
@@ -242,7 +242,7 @@ export async function getPublicCompanyTradeCounts() {
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("company_trades")
-    .select("status, visibility_level, trades(slug), companies!inner(public_visible)")
+    .select("status, trades(slug), companies!inner(public_visible)")
     .eq("companies.public_visible", true);
 
   if (error) {
@@ -297,7 +297,6 @@ export async function getPublicTradeLocationSitemapEntries(limit = 500) {
     .from("company_trades")
     .select("trades(slug), companies!inner(city, public_visible)")
     .eq("companies.public_visible", true)
-    .neq("visibility_level", "internal")
     .limit(limit * 4);
 
   if (error) return getPublicTradeLocationSitemapEntriesFallback(limit);
@@ -380,7 +379,7 @@ export async function getCompanyBySlug(slug: string) {
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("companies")
-    .select("*, trades(id, name, slug), company_trades(confidence_score, source, evidence, status, visibility_level, trades(id, name, slug))")
+    .select("*, trades(id, name, slug), company_trades(confidence_score, source, evidence, status, trades(id, name, slug))")
     .eq("slug", slug)
     .eq("public_visible", true)
     .single();
