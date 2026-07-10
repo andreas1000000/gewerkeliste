@@ -406,7 +406,15 @@ function ProfileMark({ company, canClaim }: { company: PublicCompanyWithTrade; c
   return (
     <div className="flex h-28 w-28 shrink-0 items-center justify-center rounded-lg border border-line bg-white p-3 shadow-soft sm:h-32 sm:w-32">
       {company.logo_url ? (
-        <Image alt={`Logo von ${company.name}`} className="h-full w-full rounded-md object-contain" height={128} src={company.logo_url} width={128} sizes="128px" />
+        <Image
+          alt={`Logo von ${company.name}`}
+          className="h-full w-full rounded-md object-contain"
+          height={128}
+          src={company.logo_url}
+          width={128}
+          sizes="128px"
+          unoptimized={isLocalSignedMediaUrl(company.logo_url)}
+        />
       ) : (
         <div className="grid h-full w-full place-items-center rounded-md bg-[#07173d] px-3 text-center text-white">
           <div>
@@ -465,6 +473,7 @@ function ContactTrustCard({
                     src={company.profile_image_url}
                     width={96}
                     sizes="96px"
+                    unoptimized={isLocalSignedMediaUrl(company.profile_image_url)}
                   />
                 ) : (
                   initials(company.name)
@@ -524,7 +533,17 @@ function PersonRow({
   return (
     <div className="flex items-center gap-4">
       <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border border-line bg-white text-center text-lg font-semibold leading-4 text-brand shadow-soft">
-        {imageUrl ? <Image alt={imageAlt} className="h-full w-full object-cover" height={80} src={imageUrl} width={80} sizes="80px" /> : initials(initialsSource)}
+        {imageUrl ? (
+          <Image
+            alt={imageAlt}
+            className="h-full w-full object-cover"
+            height={80}
+            src={imageUrl}
+            width={80}
+            sizes="80px"
+            unoptimized={isLocalSignedMediaUrl(imageUrl)}
+          />
+        ) : initials(initialsSource)}
       </div>
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-2">
@@ -668,6 +687,7 @@ function PremiumTrustSections({ premiumProfile }: { premiumProfile: NonNullable<
                           src={media.file_url}
                             width={media.width || 420}
                             sizes="(min-width: 1024px) 330px, (min-width: 640px) 50vw, 100vw"
+                            unoptimized={isLocalSignedMediaUrl(media.file_url)}
                           />
                           {media.caption ? <figcaption className="px-3 py-2 text-sm leading-5 text-muted">{media.caption}</figcaption> : null}
                         </figure>
@@ -1142,6 +1162,17 @@ function getProfileAddress(company: PublicCompanyWithTrade) {
     full: street ? `${street}, ${cityLine}` : `Standort: ${cityLine}`,
     hasStreet: Boolean(street),
   };
+}
+
+function isLocalSignedMediaUrl(value?: string | null) {
+  if (!value) return false;
+
+  try {
+    const url = new URL(value);
+    return (url.hostname === "127.0.0.1" || url.hostname === "localhost") && url.pathname.includes("/storage/v1/object/");
+  } catch {
+    return false;
+  }
 }
 
 function DataRow({
