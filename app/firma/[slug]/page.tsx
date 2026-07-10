@@ -105,7 +105,7 @@ export default async function CompanyPublicPage({ params }: PageProps) {
     const localBusiness = localBusinessJsonLd(company, `/firma/${company.slug}`, profileDescription);
 
     return (
-      <main className="min-h-screen overflow-x-hidden bg-[#f6f8fb] text-ink">
+      <main className="min-h-screen overflow-x-hidden bg-[#f6f8fb] text-ink [&_a:focus-visible]:outline [&_a:focus-visible]:outline-2 [&_a:focus-visible]:outline-offset-2 [&_a:focus-visible]:outline-action [&_button:focus-visible]:outline [&_button:focus-visible]:outline-2 [&_button:focus-visible]:outline-offset-2 [&_button:focus-visible]:outline-action [&_input:focus-visible]:outline [&_input:focus-visible]:outline-2 [&_input:focus-visible]:outline-offset-2 [&_input:focus-visible]:outline-action [&_select:focus-visible]:outline [&_select:focus-visible]:outline-2 [&_select:focus-visible]:outline-offset-2 [&_select:focus-visible]:outline-action [&_summary:focus-visible]:outline [&_summary:focus-visible]:outline-2 [&_summary:focus-visible]:outline-offset-4 [&_summary:focus-visible]:outline-action [&_textarea:focus-visible]:outline [&_textarea:focus-visible]:outline-2 [&_textarea:focus-visible]:outline-offset-2 [&_textarea:focus-visible]:outline-action">
         <SiteHeader />
         <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(breadcrumb)} />
         <script type="application/ld+json" dangerouslySetInnerHTML={jsonLd(localBusiness)} />
