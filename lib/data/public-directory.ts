@@ -379,13 +379,15 @@ export async function getCompanyBySlug(slug: string) {
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("companies")
-    .select("*, trades(id, name, slug), company_trades(confidence_score, source, evidence, status, trades(id, name, slug))")
+    .select(
+      "*, trades(id, name, slug), company_trades(confidence_score, source, evidence, status, trades(id, name, slug)), company_services(confidence_score, source, status, services(id, name, slug, service_families(name, slug, trades(name, slug))))",
+    )
     .eq("slug", slug)
     .eq("public_visible", true)
     .single();
 
   if (error) return getCompanyBySlugFallback(slug);
-  const company = await applyApprovedSubmissionPublicDetails(data as PublicCompanyWithTrade);
+  const company = await applyApprovedSubmissionPublicDetails(normalizePublicCompanyServices(data as PublicCompanyWithTrade));
   const resolvedCompany = await resolveSingleCompanyMedia(company);
   return attachPublicPremiumProfile(resolvedCompany);
 }
@@ -939,6 +941,7 @@ async function applyApprovedSubmissionPublicDetails<T extends PublicCompanyWithT
     service_regions: nonEmptyList(submission.service_regions).length ? nonEmptyList(submission.service_regions) : company.service_regions || [],
     service_postal_codes: nonEmptyList(submission.postal_codes).length ? nonEmptyList(submission.postal_codes) : company.service_postal_codes || [],
     service_countries: nonEmptyList(submission.service_countries).length ? nonEmptyList(submission.service_countries) : company.service_countries || [],
+    selected_services: nonEmptyList(submission.selected_services).length ? nonEmptyList(submission.selected_services) : company.selected_services || [],
     specializations: nonEmptyList(submission.specializations).length ? nonEmptyList(submission.specializations) : company.specializations || [],
     references_text: cleanString(submission.references_text) || company.references_text || null,
     memberships: nonEmptyList(submission.memberships).length ? nonEmptyList(submission.memberships) : company.memberships || [],
@@ -946,6 +949,14 @@ async function applyApprovedSubmissionPublicDetails<T extends PublicCompanyWithT
     manufacturer_certificates: nonEmptyList(submission.manufacturer_certificates).length
       ? nonEmptyList(submission.manufacturer_certificates)
       : company.manufacturer_certificates || [],
+  };
+}
+
+function normalizePublicCompanyServices<T extends PublicCompanyWithTrade>(company: T): T {
+  const services = (company.company_services || []).filter((match) => match.status === "confirmed" && Boolean(match.services?.name));
+  return {
+    ...company,
+    company_services: services,
   };
 }
 

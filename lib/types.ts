@@ -37,6 +37,7 @@ export type Company = {
   service_radius_km?: number | null;
   service_regions?: string[] | null;
   service_postal_codes?: string[] | null;
+  service_countries?: string[] | null;
   references_text?: string | null;
   memberships?: string[] | null;
   certificates?: string[] | null;

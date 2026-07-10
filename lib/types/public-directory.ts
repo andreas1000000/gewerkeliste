@@ -21,6 +21,7 @@ export type PublicCompany = Company & {
   service_regions?: string[] | null;
   service_postal_codes?: string[] | null;
   service_countries?: string[] | null;
+  selected_services?: string[] | null;
   specializations?: string[] | null;
   references_text?: string | null;
   memberships?: string[] | null;
@@ -31,7 +32,24 @@ export type PublicCompany = Company & {
 export type PublicCompanyWithTrade = PublicCompany & {
   trades: Pick<Trade, "id" | "name" | "slug"> | null;
   company_trades?: PublicCompanyTradeRelation[] | null;
+  company_services?: PublicCompanyServiceRelation[] | null;
   premium_profile?: CompanyPremiumProfile | null;
+};
+
+export type PublicCompanyServiceRelation = {
+  confidence_score: number;
+  source: string | null;
+  status?: string | null;
+  services: {
+    id: string;
+    name: string;
+    slug: string;
+    service_families?: {
+      name: string;
+      slug: string;
+      trades?: Pick<Trade, "name" | "slug"> | null;
+    } | null;
+  } | null;
 };
 
 export type PublicCompanyTradeRelation = {

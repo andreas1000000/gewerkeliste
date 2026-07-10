@@ -65,6 +65,10 @@ export function collectionPageJsonLd({
 export function localBusinessJsonLd(company: PublicCompanyWithTrade, path: string, description?: string) {
   const logo = publicJsonLdMediaUrl(company.logo_url);
   const profileImage = publicJsonLdMediaUrl(company.profile_image_url);
+  const services = (company.company_services || [])
+    .filter((match) => match.status === "confirmed" && Boolean(match.services?.name))
+    .map((match) => match.services?.name)
+    .filter((value): value is string => Boolean(value));
   const tradeNames = [
     ...(company.company_trades || [])
       .filter((match) => match.status !== "rejected" && match.visibility_level !== "internal" && Boolean(match.trades?.name))
@@ -84,23 +88,41 @@ export function localBusinessJsonLd(company: PublicCompanyWithTrade, path: strin
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
     name: company.name,
-    url: siteUrl(path),
+    url: company.website_url || siteUrl(path),
+    mainEntityOfPage: siteUrl(path),
     description: description || undefined,
     telephone: company.phone || undefined,
     email: company.email || undefined,
     image: profileImage || logo,
     logo,
     address,
-    areaServed: company.city
-      ? {
-          "@type": "AdministrativeArea",
-          name: company.city,
-        }
-      : undefined,
+    areaServed: jsonLdAreas(company),
     knowsAbout: tradeNames.length ? Array.from(new Set(tradeNames)) : undefined,
-    serviceType: tradeNames.length ? Array.from(new Set(tradeNames)) : undefined,
-    sameAs: company.website_url || undefined,
+    serviceType: services.length ? Array.from(new Set(services)) : tradeNames.length ? Array.from(new Set(tradeNames)) : undefined,
   });
+}
+
+function jsonLdAreas(company: PublicCompanyWithTrade) {
+  const areas = [
+    ...(Array.isArray(company.service_regions) ? company.service_regions : []),
+    ...(Array.isArray(company.service_countries) ? company.service_countries : []),
+  ]
+    .map((item) => String(item).trim())
+    .filter(Boolean);
+
+  if (areas.length) {
+    return Array.from(new Set(areas)).map((name) => ({
+      "@type": "AdministrativeArea",
+      name,
+    }));
+  }
+
+  return company.city
+    ? {
+        "@type": "AdministrativeArea",
+        name: company.city,
+      }
+    : undefined;
 }
 
 function publicJsonLdMediaUrl(value?: string | null) {

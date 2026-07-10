@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
 import type { Route } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
 import {
   cleanCompanyDescription,
   extractServiceListFromDescription,
-  extractServiceKeywordsFromText,
   groupServicesForDisplay,
   publicProfileDescription,
   publicResultDescription,
@@ -84,9 +84,7 @@ export default async function CompanyPublicPage({ params }: PageProps) {
     const address = getProfileAddress(company);
     const visibleDescription = businessProfileDescription(publicProfileDescription(company.description));
     const profileDescription = getProfileDescription(company, trade, location, visibleDescription);
-    const executedTrades = getExecutedTrades(company);
-    const services = getRecognizableServices(company, executedTrades);
-    const groupedServices = groupServicesForDisplay(services);
+    const serviceDisplay = getServiceDisplay(company);
     const specializationItems = getSpecializationItems(company);
     const sourceItems = getSourceItems(company, websiteHref);
     const serviceAreaItems = getServiceAreaItems(company);
@@ -94,13 +92,7 @@ export default async function CompanyPublicPage({ params }: PageProps) {
     const proofItems = getProfileProofItems(company);
     const premiumProfile = company.premium_profile || emptyPremiumProfile();
     const isVerifiedStartProfile = hasVerifiedStartProfile(company);
-    const hasCoordinates =
-      Number.isFinite(company.latitude) &&
-      Number.isFinite(company.longitude) &&
-      !(company.latitude === 0 && company.longitude === 0);
     const hasDirectContact = Boolean(company.email || company.phone || company.contact_person_email || company.contact_person_phone || websiteHref);
-    const profileCompletionItems = getProfileCompletionItems(company, visibleDescription, services.length, hasCoordinates);
-    const completionScore = getProfileCompletionScore(company, visibleDescription, services.length, hasCoordinates);
     const headline = trade === "Gewerk" ? `Bau- und Handwerksbetrieb in ${company.city}` : `${trade} in ${company.city}`;
 
     const breadcrumb = breadcrumbJsonLd([
@@ -163,11 +155,10 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                   </div>
                 </div>
               </div>
-              <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 <ProfileMetric label="Standort" value={address.compact} />
                 <ProfileMetric label="Schwerpunkt" value={trade} />
                 <ProfileMetric label="Profilstatus" value={status.shortLabel} />
-                <ProfileMetric label="Profilvollständigkeit" value={`${completionScore}%`} />
               </div>
               <div className="mt-6 border-t border-line py-4">
                 <ActionBar company={company} websiteHref={websiteHref} canClaim={canClaim} />
@@ -186,68 +177,53 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                 <div className="mt-5 grid gap-3 sm:grid-cols-3">
                   <Fact label="Gewerk" value={trade} />
                   <Fact label="Region" value={company.city} />
-                  <Fact label="Kontaktstatus" value={hasDirectContact ? "Kontaktdaten hinterlegt" : "Kontaktdaten ergänzbar"} />
+                  {hasDirectContact ? <Fact label="Kontakt" value="Direkte Kontaktdaten hinterlegt" /> : null}
                 </div>
               </ProfileCard>
 
-              <ProfileCard
-                title="Leistungen"
-                subtitle="Auf der Firmenwebsite oder im Profil genannte Leistungen."
-              >
-                {groupedServices.length ? (
-                  <ServiceGroups groups={groupedServices} totalCount={services.length} />
-                ) : (
-                  <p className="text-sm leading-6 text-muted">
-                    Für diesen Betrieb sind noch keine konkreten Leistungen strukturiert hinterlegt. Nach Profilübernahme
-                    können Leistungen und Spezialisierungen ergänzt werden.
-                  </p>
-                )}
-                {specializationItems.length ? (
-                  <div className="mt-5 border-t border-line pt-4">
-                    <h3 className="text-sm font-semibold text-ink">Spezialisierungen</h3>
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {specializationItems.map((item) => (
-                        <span key={item} className="rounded-md border border-line bg-white px-3 py-2 text-sm font-semibold text-ink">
-                          {item}
-                        </span>
-                      ))}
+              {serviceDisplay.groups.length || specializationItems.length ? (
+                <ProfileCard
+                  title="Leistungen"
+                  subtitle={serviceDisplay.sourceLabel}
+                >
+                  {serviceDisplay.groups.length ? (
+                    <ServiceGroups groups={serviceDisplay.groups} totalCount={serviceDisplay.totalCount} />
+                  ) : null}
+                  {specializationItems.length ? (
+                    <div className={serviceDisplay.groups.length ? "mt-5 border-t border-line pt-4" : ""}>
+                      <h3 className="text-sm font-semibold text-ink">Spezialisierungen</h3>
+                      <div className="mt-3 flex flex-wrap gap-2">
+                        {specializationItems.map((item) => (
+                          <span key={item} className="rounded-md border border-line bg-white px-3 py-2 text-sm font-semibold text-ink">
+                            {item}
+                          </span>
+                        ))}
+                      </div>
                     </div>
+                  ) : null}
+                </ProfileCard>
+              ) : null}
+
+              {(address.hasStreet || serviceAreaItems.length || company.service_radius_km) ? (
+                <ProfileCard title="Standort und Wirkungskreis">
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    <Fact label="Standort" value={address.full} />
+                    <Fact label="Ort" value={company.city} />
+                    {serviceAreaItems.length ? <Fact label="Wirkungskreis" value={serviceAreaItems.join(", ")} /> : null}
                   </div>
-                ) : null}
-              </ProfileCard>
+                  {company.service_radius_km ? (
+                    <p className="mt-4 text-sm leading-6 text-muted">Angegebener Einsatzradius: {company.service_radius_km} km.</p>
+                  ) : null}
+                </ProfileCard>
+              ) : null}
 
-              <ProfileCard title="Standort und Wirkungskreis">
-                <div className="grid gap-3 sm:grid-cols-3">
-                  <Fact label="Standort" value={address.full} />
-                  <Fact label="Ort" value={company.city} />
-                  <Fact
-                    label="Wirkungskreis"
-                    value={
-                      serviceAreaItems.length
-                        ? serviceAreaItems.join(", ")
-                        : "Regionale Tätigkeit kann nach Profilübernahme präzisiert werden."
-                    }
-                  />
-                </div>
-                {!address.hasStreet ? (
-                  <p className="mt-3 text-xs leading-5 text-muted">Straße/Hausnummer ist noch nicht hinterlegt.</p>
-                ) : null}
-                {company.service_radius_km ? (
-                  <p className="mt-4 text-sm leading-6 text-muted">
-                    Angegebener Einsatzradius: {company.service_radius_km} km. Angaben zum Wirkungskreis werden vor Veröffentlichung geprüft.
-                  </p>
-                ) : (
-                  <p className="mt-4 text-sm leading-6 text-muted">
-                    Aktuell wird der Betrieb mit dem bekannten Standort geführt. Ein genauer Einsatzradius oder einzelne Orte werden erst nach
-                    Prüfung und Profilübernahme veröffentlicht.
-                  </p>
-                )}
-              </ProfileCard>
-
-              {(referenceItems.length || proofItems.length) ? (
+              {(referenceItems.length || proofItems.length || hasPremiumTrustContent(premiumProfile)) ? (
                 <ProfileCard title="Referenzen und Nachweise">
+                  {hasPremiumTrustContent(premiumProfile) ? (
+                    <PremiumTrustSections premiumProfile={premiumProfile} />
+                  ) : null}
                   {referenceItems.length ? (
-                    <div>
+                    <div className={hasPremiumTrustContent(premiumProfile) ? "mt-5 border-t border-line pt-5" : ""}>
                       <h3 className="text-sm font-semibold text-ink">Referenzen</h3>
                       <ul className="mt-3 grid gap-2 text-sm leading-6 text-muted">
                         {referenceItems.map((item) => (
@@ -257,7 +233,7 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                     </div>
                   ) : null}
                   {proofItems.length ? (
-                    <div className={referenceItems.length ? "mt-5" : ""}>
+                    <div className={(referenceItems.length || hasPremiumTrustContent(premiumProfile)) ? "mt-5" : ""}>
                       <h3 className="text-sm font-semibold text-ink">Nachweise und Zugehörigkeiten</h3>
                       <ul className="mt-3 flex flex-wrap gap-2">
                         {proofItems.map((item) => (
@@ -268,9 +244,6 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                       </ul>
                     </div>
                   ) : null}
-                  <p className="mt-4 text-xs leading-5 text-muted">
-                    Referenzen und Nachweise werden als Textangaben dargestellt. Bilder oder Dokumentdateien werden derzeit nicht öffentlich angezeigt.
-                  </p>
                 </ProfileCard>
               ) : null}
 
@@ -289,42 +262,30 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                 </ProfileCard>
               ) : null}
 
-              {isVerifiedStartProfile && hasPremiumTrustContent(premiumProfile) ? (
-                <ProfileCard
-                  title="Vertrauensprofil"
-                  subtitle="Referenzen und Nachweise werden vom Betrieb bereitgestellt und strukturiert dargestellt."
-                >
-                  <PremiumTrustSections premiumProfile={premiumProfile} />
+              {(sourceItems.length || company.verified) ? (
+                <ProfileCard title="Datenquellen / Datenstatus">
+                  {sourceItems.length ? (
+                    <ul className="grid gap-3">
+                      {sourceItems.map((item) => (
+                        <li key={`${item.label}-${item.value}`} className="rounded-md border border-line bg-[#fbfcff] px-4 py-3">
+                          <div className="text-sm font-semibold text-ink">{item.label}</div>
+                          {item.href ? (
+                            <a className="mt-1 block break-words text-sm text-action hover:underline" href={item.href} rel="noreferrer" target="_blank">
+                              {item.value}
+                            </a>
+                          ) : (
+                            <p className="mt-1 text-sm leading-6 text-muted">{item.value}</p>
+                          )}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                  <p className={sourceItems.length ? "mt-4 text-xs leading-5 text-muted" : "text-xs leading-5 text-muted"}>
+                    GewerkeListe beschreibt Datenstatus und öffentlich erkennbare Angaben. Daraus entsteht keine
+                    Qualitäts-, Verfügbarkeits- oder Empfehlungsgarantie.
+                  </p>
                 </ProfileCard>
               ) : null}
-
-              <ProfileCard title="Datenquellen / Datenstatus">
-                {sourceItems.length ? (
-                  <ul className="grid gap-3">
-                    {sourceItems.map((item) => (
-                      <li key={`${item.label}-${item.value}`} className="rounded-md border border-line bg-[#fbfcff] px-4 py-3">
-                        <div className="text-sm font-semibold text-ink">{item.label}</div>
-                        {item.href ? (
-                          <a className="mt-1 block break-words text-sm text-action hover:underline" href={item.href} rel="noreferrer" target="_blank">
-                            {item.value}
-                          </a>
-                        ) : (
-                          <p className="mt-1 text-sm leading-6 text-muted">{item.value}</p>
-                        )}
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <p className="text-sm leading-6 text-muted">
-                    Für diesen Eintrag ist aktuell keine öffentliche Quelle hinterlegt. Der Eintrag sollte geprüft oder
-                    vom Betrieb übernommen werden.
-                  </p>
-                )}
-                <p className="mt-4 text-xs leading-5 text-muted">
-                  GewerkeListe beschreibt Datenstatus und öffentlich erkennbare Angaben. Daraus entsteht keine
-                  Qualitäts-, Verfügbarkeits- oder Empfehlungsgarantie.
-                </p>
-              </ProfileCard>
             </div>
 
             <aside className="order-1 grid content-start gap-5 lg:order-2">
@@ -335,17 +296,11 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                   {company.phone ? <DataRow label="Telefon" value={company.phone} href={`tel:${company.phone}`} /> : null}
                   {company.email ? <DataRow label="E-Mail" value={company.email} href={`mailto:${company.email}`} /> : null}
                 </dl>
-                {!address.hasStreet ? (
-                  <p className="mt-3 text-xs leading-5 text-muted">Straße/Hausnummer ist noch nicht hinterlegt.</p>
-                ) : null}
-                {!hasDirectContact ? (
-                  <p className="mt-4 rounded-md border border-line bg-[#fbfcff] px-4 py-3 text-sm leading-6 text-muted">
-                    Für diesen Betrieb sind noch keine direkten Kontaktdaten hinterlegt.
-                  </p>
-                ) : null}
               </ProfileCard>
 
-              <ContactTrustCard company={company} canClaim={canClaim} premiumContacts={premiumProfile.contacts} />
+              {hasContactPersonContent(company, premiumProfile.contacts) ? (
+                <ContactTrustCard company={company} premiumContacts={premiumProfile.contacts} />
+              ) : null}
 
               <ProfileCard title="Datenstatus">
                 <div className={`rounded-md border px-4 py-4 text-sm leading-6 ${statusBoxClass(status.tone)}`}>
@@ -404,7 +359,6 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                 </section>
               ) : null}
 
-              <ProfileCompletionCard company={company} canClaim={canClaim} items={profileCompletionItems} />
             </aside>
           </div>
 
@@ -446,7 +400,7 @@ function ProfileMark({ company, canClaim }: { company: PublicCompanyWithTrade; c
   return (
     <div className="flex h-28 w-28 shrink-0 items-center justify-center rounded-lg border border-line bg-white p-3 shadow-soft sm:h-32 sm:w-32">
       {company.logo_url ? (
-        <img alt={`Logo von ${company.name}`} className="h-full w-full rounded-md object-contain" src={company.logo_url} />
+        <Image alt={`Logo von ${company.name}`} className="h-full w-full rounded-md object-contain" height={128} src={company.logo_url} width={128} sizes="128px" />
       ) : (
         <div className="grid h-full w-full place-items-center rounded-md bg-[#07173d] px-3 text-center text-white">
           <div>
@@ -461,15 +415,11 @@ function ProfileMark({ company, canClaim }: { company: PublicCompanyWithTrade; c
 
 function ContactTrustCard({
   company,
-  canClaim,
   premiumContacts,
 }: {
   company: PublicCompanyWithTrade;
-  canClaim: boolean;
   premiumContacts: NonNullable<PublicCompanyWithTrade["premium_profile"]>["contacts"];
 }) {
-  const claimHref = `/betriebe/${company.slug}/claim` as Route;
-  const updateHref = `/betriebe/${company.slug}/profil-ergaenzen` as Route;
   const contactName = company.contact_person_name || company.contact_name || "Ansprechpartner";
   const contactPhone = company.contact_person_phone || company.phone || "";
   const contactEmail = company.contact_person_email || "";
@@ -497,118 +447,42 @@ function ContactTrustCard({
           </div>
         ) : (
           <div className="rounded-md border border-line bg-[#fbfcff] p-4">
-          <div className="flex items-center gap-4">
-            <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full border border-line bg-white text-center text-xl font-semibold leading-4 text-brand shadow-soft">
-              {company.profile_image_url ? (
-                <img
-                  alt={company.profile_image_alt || `Ansprechpartner von ${company.name}`}
-                  className="h-full w-full object-cover"
-                  src={company.profile_image_url}
-                />
-              ) : (
-                initials(company.name)
-              )}
-            </div>
-            <div className="min-w-0">
-              <h3 className="text-base font-semibold text-ink">
-                {hasNamedContact ? contactName : "Ansprechpartner ergänzbar"}
-              </h3>
-              {company.contact_person_role ? (
-                <p className="mt-1 text-sm font-semibold text-muted">{company.contact_person_role}</p>
-              ) : null}
-              {contactPhone ? (
-                <a className="mt-2 inline-flex text-sm font-semibold text-action hover:underline" href={`tel:${contactPhone}`}>
-                  {contactPhone}
-                </a>
-              ) : null}
-              {contactEmail ? (
-                <a className="mt-1 block text-sm font-semibold text-action hover:underline" href={`mailto:${contactEmail}`}>
-                  {contactEmail}
-                </a>
-              ) : null}
-              {!company.profile_image_url && !hasNamedContact ? (
-                <p className="mt-1 text-sm leading-6 text-muted">Noch kein Ansprechpartnerbild freigegeben.</p>
-              ) : !company.profile_image_url ? (
-                <p className="mt-2 text-xs leading-5 text-muted">Ansprechpartnerbild noch nicht öffentlich freigegeben.</p>
-              ) : null}
+            <div className="flex items-center gap-4">
+              <div className="flex h-24 w-24 shrink-0 items-center justify-center overflow-hidden rounded-full border border-line bg-white text-center text-xl font-semibold leading-4 text-brand shadow-soft">
+                {company.profile_image_url ? (
+                  <Image
+                    alt={company.profile_image_alt || `Ansprechpartner von ${company.name}`}
+                    className="h-full w-full object-cover"
+                    height={96}
+                    src={company.profile_image_url}
+                    width={96}
+                    sizes="96px"
+                  />
+                ) : (
+                  initials(company.name)
+                )}
+              </div>
+              <div className="min-w-0">
+                <h3 className="text-base font-semibold text-ink">
+                  {hasNamedContact ? contactName : "Ansprechpartner"}
+                </h3>
+                {company.contact_person_role ? (
+                  <p className="mt-1 text-sm font-semibold text-muted">{company.contact_person_role}</p>
+                ) : null}
+                {contactPhone ? (
+                  <a className="mt-2 inline-flex text-sm font-semibold text-action hover:underline" href={`tel:${contactPhone}`}>
+                    {contactPhone}
+                  </a>
+                ) : null}
+                {contactEmail ? (
+                  <a className="mt-1 block text-sm font-semibold text-action hover:underline" href={`mailto:${contactEmail}`}>
+                    {contactEmail}
+                  </a>
+                ) : null}
+              </div>
             </div>
           </div>
-        </div>
         )}
-
-        {canClaim ? (
-          <Link className="inline-flex min-h-10 items-center justify-center rounded-md bg-action px-4 text-sm font-semibold text-white hover:bg-brand" href={claimHref}>
-            Profil übernehmen und Ansprechpartner ergänzen
-          </Link>
-        ) : (
-          <Link className="inline-flex min-h-10 items-center justify-center rounded-md bg-action px-4 text-sm font-semibold text-white hover:bg-brand" href={updateHref}>
-            Ansprechpartner ergänzen
-          </Link>
-        )}
-      </div>
-    </ProfileCard>
-  );
-}
-
-function ProfileCompletionCard({
-  company,
-  canClaim,
-  items,
-}: {
-  company: PublicCompanyWithTrade;
-  canClaim: boolean;
-  items: string[];
-}) {
-  const updateHref = `/betriebe/${company.slug}/profil-ergaenzen` as Route;
-
-  return (
-    <ProfileCard title="Ihr Basisprofil bleibt kostenlos.">
-      <p className="text-sm leading-6 text-muted">
-        Ihr Betrieb kann auf GewerkeListe.com kostenlos sichtbar bleiben – mit Name, Ort, Kontaktwegen, Gewerken und Leistungen.
-        Sie können Ihr Profil übernehmen, Stammdaten korrigieren und Ihr tatsächliches Leistungsspektrum vollständig darstellen.
-      </p>
-      <ul className="mt-4 grid gap-2 text-sm leading-6 text-muted">
-        {items.map((item) => (
-          <li key={item} className="flex gap-2">
-            <span aria-hidden="true">-</span>
-            <span>{item}</span>
-          </li>
-        ))}
-      </ul>
-      {canClaim ? (
-        <Link
-          className="mt-5 inline-flex w-full min-h-11 items-center justify-center rounded-md bg-action px-4 text-sm font-semibold text-white hover:bg-brand"
-          href={`/betriebe/${company.slug}/claim` as Route}
-        >
-          Kostenloses Basisprofil übernehmen
-        </Link>
-      ) : (
-        <Link
-          className="mt-5 inline-flex w-full min-h-11 items-center justify-center rounded-md bg-action px-4 text-sm font-semibold text-white hover:bg-brand"
-          href={updateHref}
-        >
-          Profil kostenlos vervollständigen
-        </Link>
-      )}
-      <Link
-        className="mt-3 inline-flex w-full min-h-10 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-action hover:border-action"
-        href={updateHref}
-      >
-        Eintrag korrigieren oder löschen lassen
-      </Link>
-      <Link
-        className="mt-3 inline-flex w-full min-h-10 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-action hover:border-action"
-        href="/datenschutz"
-      >
-        Datenschutzhinweise
-      </Link>
-      <div className="mt-4 grid gap-3 text-xs leading-5 text-muted">
-        <p>
-          Betriebe können ihr Profil übernehmen, Stammdaten korrigieren und Leistungen vollständig darstellen.
-        </p>
-        <p>
-          Erweiterte Darstellungsfunktionen wie Ansprechpartnerbild, Referenzen, QR-Code, Sichtbarkeitsreport oder besondere Profilgestaltung können später optional angeboten werden. Das kostenlose Basisprofil bleibt davon unabhängig bestehen.
-        </p>
       </div>
     </ProfileCard>
   );
@@ -636,7 +510,7 @@ function PersonRow({
   return (
     <div className="flex items-center gap-4">
       <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border border-line bg-white text-center text-lg font-semibold leading-4 text-brand shadow-soft">
-        {imageUrl ? <img alt={imageAlt} className="h-full w-full object-cover" src={imageUrl} /> : initials(initialsSource)}
+        {imageUrl ? <Image alt={imageAlt} className="h-full w-full object-cover" height={80} src={imageUrl} width={80} sizes="80px" /> : initials(initialsSource)}
       </div>
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-2">
@@ -679,6 +553,9 @@ function TeamList({
 }
 
 function PremiumTrustSections({ premiumProfile }: { premiumProfile: NonNullable<PublicCompanyWithTrade["premium_profile"]> }) {
+  const mediaByReference = groupReferenceMedia(premiumProfile);
+  const orphanMedia = mediaByReference.get("__orphan__") || [];
+
   return (
     <div className="grid gap-5">
       {premiumProfile.notes ? (
@@ -694,37 +571,64 @@ function PremiumTrustSections({ premiumProfile }: { premiumProfile: NonNullable<
         <div>
           <h3 className="text-sm font-semibold text-ink">Strukturierte Referenzen</h3>
           <div className="mt-3 grid gap-3">
-            {premiumProfile.references.map((reference) => (
-              <article key={reference.id} className="rounded-md border border-line bg-[#fbfcff] p-4">
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div>
-                    <h4 className="text-base font-semibold text-ink">{reference.title}</h4>
-                    <p className="mt-1 text-sm text-muted">
-                      {[reference.project_type, reference.location, reference.year, reference.client_type].filter(Boolean).join(" · ")}
-                    </p>
+            {premiumProfile.references.map((reference) => {
+              const mediaItems = mediaByReference.get(reference.id) || [];
+              return (
+                <article key={reference.id} className="rounded-md border border-line bg-[#fbfcff] p-4">
+                  <div className="flex flex-wrap items-start justify-between gap-3">
+                    <div>
+                      <h4 className="text-base font-semibold text-ink">{reference.title}</h4>
+                      <p className="mt-1 text-sm text-muted">
+                        {[reference.project_type, reference.location, reference.year, reference.client_type].filter(Boolean).join(" · ")}
+                      </p>
+                    </div>
                   </div>
-                </div>
-                {reference.description ? <p className="mt-3 text-sm leading-6 text-muted">{reference.description}</p> : null}
-                {reference.services.length ? (
-                  <div className="mt-3 flex flex-wrap gap-2">
-                    {reference.services.map((service) => (
-                      <span key={service} className="rounded-md border border-line bg-white px-2.5 py-1 text-xs font-semibold text-ink">{service}</span>
-                    ))}
-                  </div>
-                ) : null}
-              </article>
-            ))}
+                  {reference.description ? <p className="mt-3 text-sm leading-6 text-muted">{reference.description}</p> : null}
+                  {reference.services.length ? (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {reference.services.map((service) => (
+                        <span key={service} className="rounded-md border border-line bg-white px-2.5 py-1 text-xs font-semibold text-ink">{service}</span>
+                      ))}
+                    </div>
+                  ) : null}
+                  {mediaItems.length ? (
+                    <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                      {mediaItems.map((media) => (
+                        <figure key={media.id} className="overflow-hidden rounded-md border border-line bg-white">
+                          <Image
+                            alt={media.alt_text || media.caption || `Referenzbild zu ${reference.title}`}
+                            className="h-48 w-full object-cover"
+                            height={240}
+                            src={media.file_url}
+                            width={420}
+                            sizes="(min-width: 1024px) 330px, (min-width: 640px) 50vw, 100vw"
+                          />
+                          {media.caption ? <figcaption className="px-3 py-2 text-sm leading-5 text-muted">{media.caption}</figcaption> : null}
+                        </figure>
+                      ))}
+                    </div>
+                  ) : null}
+                </article>
+              );
+            })}
           </div>
         </div>
       ) : null}
 
-      {premiumProfile.referenceMedia.length ? (
+      {orphanMedia.length ? (
         <div>
           <h3 className="text-sm font-semibold text-ink">Referenzbilder</h3>
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
-            {premiumProfile.referenceMedia.map((media) => (
+            {orphanMedia.map((media) => (
               <figure key={media.id} className="overflow-hidden rounded-md border border-line bg-[#fbfcff]">
-                <img alt={media.alt_text || media.caption || "Referenzbild"} className="h-48 w-full object-cover" src={media.file_url} />
+                <Image
+                  alt={media.alt_text || media.caption || "Referenzbild"}
+                  className="h-48 w-full object-cover"
+                  height={240}
+                  src={media.file_url}
+                  width={420}
+                  sizes="(min-width: 1024px) 330px, (min-width: 640px) 50vw, 100vw"
+                />
                 {media.caption ? <figcaption className="px-3 py-2 text-sm leading-5 text-muted">{media.caption}</figcaption> : null}
               </figure>
             ))}
@@ -763,6 +667,18 @@ function PremiumTrustSections({ premiumProfile }: { premiumProfile: NonNullable<
   );
 }
 
+function groupReferenceMedia(premiumProfile: NonNullable<PublicCompanyWithTrade["premium_profile"]>) {
+  const referenceIds = new Set(premiumProfile.references.map((reference) => reference.id));
+  const groups = new Map<string, typeof premiumProfile.referenceMedia>();
+
+  for (const media of premiumProfile.referenceMedia) {
+    const key = media.reference_id && referenceIds.has(media.reference_id) ? media.reference_id : "__orphan__";
+    groups.set(key, [...(groups.get(key) || []), media]);
+  }
+
+  return groups;
+}
+
 function ActionBar({
   company,
   websiteHref,
@@ -772,15 +688,22 @@ function ActionBar({
   websiteHref?: string;
   canClaim: boolean;
 }) {
+  const primaryAction = getPrimaryContactAction(company, websiteHref);
+
   return (
     <div className="flex w-full flex-wrap gap-3 lg:w-auto lg:justify-end">
+      {primaryAction ? (
+        <ContactButton kind="primary" href={primaryAction.href} external={primaryAction.external}>
+          Betrieb kontaktieren
+        </ContactButton>
+      ) : null}
       {websiteHref ? (
-        <ContactButton kind="primary" href={websiteHref} external>
+        <ContactButton href={websiteHref} external>
           Website besuchen
         </ContactButton>
       ) : null}
-      {company.phone ? <ContactButton href={`tel:${company.phone}`}>Anrufen</ContactButton> : null}
-      {company.email ? <ContactButton href={`mailto:${company.email}`}>E-Mail schreiben</ContactButton> : null}
+      {company.phone && primaryAction?.href !== `tel:${company.phone}` ? <ContactButton href={`tel:${company.phone}`}>Anrufen</ContactButton> : null}
+      {company.email && primaryAction?.href !== `mailto:${company.email}` ? <ContactButton href={`mailto:${company.email}`}>E-Mail schreiben</ContactButton> : null}
       {canClaim ? (
         <Link
           className="inline-flex min-h-11 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-semibold text-action hover:border-action"
@@ -803,6 +726,15 @@ function ActionBar({
       </Link>
     </div>
   );
+}
+
+function getPrimaryContactAction(company: PublicCompanyWithTrade, websiteHref?: string) {
+  const email = company.contact_person_email || company.email;
+  if (email) return { href: `mailto:${email}` };
+  const phone = company.contact_person_phone || company.phone;
+  if (phone) return { href: `tel:${phone}` };
+  if (websiteHref) return { href: websiteHref, external: true };
+  return null;
 }
 
 function ServiceGroups({ groups, totalCount }: { groups: Array<{ label: string; items: string[] }>; totalCount: number }) {
@@ -909,24 +841,6 @@ function ProfileMetric({ label, value }: { label: string; value: string }) {
   );
 }
 
-function getExecutedTrades(company: PublicCompanyWithTrade) {
-  const tradeNames = [
-    company.trades?.name,
-    ...(company.company_trades || [])
-      .filter(
-        (match) =>
-          (match.confidence_score || 0) >= 70 &&
-          match.status !== "rejected" &&
-          match.visibility_level !== "internal" &&
-          Boolean(match.trades?.name),
-      )
-      .sort((a, b) => (b.confidence_score || 0) - (a.confidence_score || 0))
-      .map((match) => match.trades?.name),
-  ].filter((name): name is string => Boolean(name));
-
-  return [...new Set(tradeNames)].slice(0, 12);
-}
-
 function getProfileDescription(company: PublicCompanyWithTrade, trade: string, location: string, visibleDescription: string) {
   if (visibleDescription) return visibleDescription;
 
@@ -966,22 +880,53 @@ function businessProfileDescription(description: string) {
   return cleaned;
 }
 
-function getRecognizableServices(company: PublicCompanyWithTrade, executedTrades: string[]) {
-  const evidenceItems = (company.company_trades || [])
-    .filter((match) => match.status !== "rejected" && match.visibility_level !== "internal")
-    .flatMap((match) => [...splitEvidence(match.evidence), ...extractServiceKeywordsFromText(match.evidence)]);
+function getServiceDisplay(company: PublicCompanyWithTrade) {
+  const confirmedServices = (company.company_services || [])
+    .filter((match) => match.status === "confirmed" && Boolean(match.services?.name))
+    .sort((a, b) => (b.confidence_score || 0) - (a.confidence_score || 0));
 
-  const descriptionItems = extractServiceListFromDescription(company.description);
-  const specializationItems = getSpecializationItems(company);
-  return [...new Set([...descriptionItems, ...specializationItems, ...evidenceItems, ...executedTrades])];
-}
+  if (confirmedServices.length) {
+    const groupsByFamily = new Map<string, string[]>();
+    for (const match of confirmedServices) {
+      const service = match.services;
+      if (!service?.name) continue;
+      const family = service.service_families?.name || "Weitere Leistungen";
+      const current = groupsByFamily.get(family) || [];
+      if (!current.includes(service.name)) current.push(service.name);
+      groupsByFamily.set(family, current);
+    }
 
-function splitEvidence(value: string | null) {
-  if (!value) return [];
-  return value
-    .split(/[;,|/]+/)
-    .map((item) => item.trim().replace(/^[✓\-–•\s]+/, ""))
-    .filter((item) => item.length >= 3 && item.length <= 80);
+    const groups = Array.from(groupsByFamily.entries()).map(([label, items]) => ({ label, items }));
+    return {
+      groups,
+      totalCount: groups.reduce((count, group) => count + group.items.length, 0),
+      sourceLabel: "Bestätigte, strukturierte Leistungen des öffentlichen Profils.",
+    };
+  }
+
+  const selectedServices = Array.isArray(company.selected_services)
+    ? company.selected_services.map((item) => String(item).trim()).filter(Boolean)
+    : [];
+  if (selectedServices.length) {
+    const services = Array.from(new Set(selectedServices));
+    return {
+      groups: groupServicesForDisplay(services),
+      totalCount: services.length,
+      sourceLabel: "Freigegebene Leistungen aus dem genehmigten Betriebseintrag.",
+    };
+  }
+
+  const descriptionServices = extractServiceListFromDescription(company.description);
+  if (descriptionServices.length) {
+    const services = Array.from(new Set(descriptionServices));
+    return {
+      groups: groupServicesForDisplay(services),
+      totalCount: services.length,
+      sourceLabel: "Aus dem freigegebenen Profiltext erkennbare Leistungen.",
+    };
+  }
+
+  return { groups: [], totalCount: 0, sourceLabel: "" };
 }
 
 function getSourceItems(company: PublicCompanyWithTrade, websiteHref?: string) {
@@ -1011,17 +956,6 @@ function sourceLabel(value: string) {
   if (normalized.includes("mapping")) return "Strukturierte Gewerkezuordnung";
   if (normalized.includes("regional") || normalized.includes("coverage")) return "Regionale Recherche";
   return value.replace(/[-_]+/g, " ");
-}
-
-function getProfileCompletionItems(company: PublicCompanyWithTrade, description: string, serviceCount: number, hasCoordinates: boolean) {
-  return [
-    company.logo_url ? "Logo ist hinterlegt" : "Logo hinzufügen",
-    company.profile_image_url ? "Ansprechpartner ist sichtbar" : "Ansprechpartner ergänzen",
-    serviceCount ? "Leistungen weiter schärfen" : "Leistungen ergänzen",
-    description ? "Kurzbeschreibung aktuell halten" : "Kurzbeschreibung ergänzen",
-    hasCoordinates ? "Wirkungskreis präzisieren" : "Wirkungskreis markieren",
-    "Kontaktwege aktuell halten",
-  ];
 }
 
 function getServiceAreaItems(company: PublicCompanyWithTrade) {
@@ -1071,6 +1005,20 @@ function hasPremiumTrustContent(profile: NonNullable<PublicCompanyWithTrade["pre
   return Boolean(profile.references.length || profile.referenceMedia.length || profile.certificates.length || profile.notes);
 }
 
+function hasContactPersonContent(
+  company: PublicCompanyWithTrade,
+  premiumContacts: NonNullable<PublicCompanyWithTrade["premium_profile"]>["contacts"],
+) {
+  return Boolean(
+    premiumContacts.length ||
+      company.contact_person_name ||
+      company.contact_name ||
+      company.contact_person_phone ||
+      company.contact_person_email ||
+      company.profile_image_url,
+  );
+}
+
 function emptyPremiumProfile(): NonNullable<PublicCompanyWithTrade["premium_profile"]> {
   return {
     contacts: [],
@@ -1099,27 +1047,6 @@ function getProfileAddress(company: PublicCompanyWithTrade) {
     full: street ? `${street}, ${cityLine}` : `Standort: ${cityLine}`,
     hasStreet: Boolean(street),
   };
-}
-
-function getProfileCompletionScore(
-  company: PublicCompanyWithTrade,
-  description: string,
-  serviceCount: number,
-  hasCoordinates: boolean,
-) {
-  const checks = [
-    Boolean(company.name),
-    Boolean(company.city),
-    Boolean(company.trades?.name),
-    Boolean(company.website_url || company.phone || company.email),
-    Boolean(description),
-    serviceCount > 0,
-    Boolean(company.logo_url),
-    Boolean(company.profile_image_url),
-    hasCoordinates,
-  ];
-
-  return Math.round((checks.filter(Boolean).length / checks.length) * 100);
 }
 
 function DataRow({
