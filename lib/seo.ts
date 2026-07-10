@@ -1,4 +1,5 @@
 import { siteConfig } from "@/lib/site-config";
+import { publicJsonLdSocialUrls } from "@/lib/public-profile-rules";
 import type { PublicCompanyWithTrade } from "@/lib/types/public-directory";
 
 export function siteUrl(path = "/") {
@@ -75,9 +76,7 @@ export function localBusinessJsonLd(company: PublicCompanyWithTrade, path: strin
       .map((match) => match.trades?.name),
     company.trades?.name,
   ].filter((value): value is string => Boolean(value));
-  const sameAs = (company.premium_profile?.socialLinks || [])
-    .map((link) => link.url)
-    .filter((value): value is string => Boolean(value));
+  const sameAs = publicJsonLdSocialUrls(company.premium_profile?.socialLinks);
 
   const address = {
     "@type": "PostalAddress",

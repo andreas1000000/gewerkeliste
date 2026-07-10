@@ -89,6 +89,14 @@ export function normalizePublicExternalUrl(value?: string | null) {
   }
 }
 
+export function publicJsonLdSocialUrls(links?: readonly { url?: string | null }[] | null) {
+  const safeUrls = (Array.isArray(links) ? links : [])
+    .map((link) => normalizePublicExternalUrl(link.url))
+    .filter((value): value is string => Boolean(value));
+
+  return Array.from(new Set(safeUrls));
+}
+
 export function certificateVerificationInfo(value?: string | null) {
   if (value === "document_uploaded" || value === "gewerkeliste_checked") {
     return CERTIFICATE_VERIFICATION_LABELS[value];
@@ -97,10 +105,28 @@ export function certificateVerificationInfo(value?: string | null) {
   return CERTIFICATE_VERIFICATION_LABELS.self_declared;
 }
 
+export function publicCertificateFileUrl() {
+  return null;
+}
+
 export function publicReferenceClientName(value: unknown, clientPublic: unknown) {
   if (clientPublic !== true) return null;
   const name = typeof value === "string" ? value.trim() : "";
   return name || null;
+}
+
+export function isPublicReferenceImageMediaType(value: unknown) {
+  const mediaType = typeof value === "string" ? value.trim().toLowerCase() : "";
+  return !mediaType || mediaType === "image";
+}
+
+export function approvedSubmissionFileStoragePath(file: unknown) {
+  if (!file || typeof file !== "object") return null;
+  const candidate = file as { review_status?: unknown; storage_path?: unknown };
+  if (candidate.review_status !== PUBLIC_REVIEW_STATUS) return null;
+  const storagePath = typeof candidate.storage_path === "string" ? candidate.storage_path.trim() : "";
+  if (!storagePath || storagePath.includes("\0")) return null;
+  return storagePath;
 }
 
 export function mergePublicItemsByKey<T>(primary: T[], fallback: T[], keyFor: (item: T) => string) {
@@ -136,6 +162,11 @@ export function isMissingPublicProfileSchemaError(error: unknown) {
     message.includes("does not exist") ||
     message.includes("column")
   );
+}
+
+export function publicProfileRowsOrEmpty<T>(data: T[] | null | undefined, error: unknown) {
+  if (error) return [];
+  return Array.isArray(data) ? data : [];
 }
 
 export function getPublicProfileEntitlements(company: EntitlementCompany): PublicProfileEntitlements {

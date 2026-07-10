@@ -1,9 +1,13 @@
 import { getSupabaseAdmin } from "@/lib/supabase";
 import {
+  approvedSubmissionFileStoragePath,
+  isPublicReferenceImageMediaType,
   isApprovedPublicStatus,
   isMissingPublicProfileSchemaError,
   mergePublicItemsByKey,
   normalizePublicExternalUrl,
+  publicCertificateFileUrl,
+  publicProfileRowsOrEmpty,
   publicReferenceClientName,
 } from "@/lib/public-profile-rules";
 import { serviceTermsByTradeSlug, serviceTaxonomy } from "@/lib/service-taxonomy";
@@ -681,21 +685,21 @@ async function selectApprovedProfileRows<T>(table: string, companyId: string): P
     .eq("review_status", "approved")
     .order("sort_order", { ascending: true });
 
-  if (!error) return (data || []) as T[];
+  if (!error) return publicProfileRowsOrEmpty(data as T[] | null, null);
 
   if (isMissingPublicProfileSchemaError(error)) {
     console.warn(`Public profile module skipped because schema is not available: ${table}`, {
       code: error.code,
       message: error.message,
     });
-    return [];
+    return publicProfileRowsOrEmpty<T>(null, error);
   }
 
   console.error(`Public profile module query failed: ${table}`, {
     code: error.code,
     message: error.message,
   });
-  return [];
+  return publicProfileRowsOrEmpty<T>(null, error);
 }
 
 function normalizeContactRows(rows: CompanyContact[]) {
@@ -764,7 +768,7 @@ function normalizeReferenceMediaRows(rows: CompanyReferenceMedia[]) {
       alt_text: cleanString(row.alt_text) || null,
       caption: cleanString(row.caption) || null,
     }))
-    .filter((row) => row.media_type === "image");
+    .filter((row) => isPublicReferenceImageMediaType(row.media_type));
 }
 
 function normalizeCertificateRows(rows: CompanyCertificate[]) {
@@ -778,7 +782,7 @@ function normalizeCertificateRows(rows: CompanyCertificate[]) {
       issued_at: cleanString(row.issued_at) || null,
       valid_until: cleanString(row.valid_until) || null,
       description: cleanString(row.description) || null,
-      file_url: null,
+      file_url: publicCertificateFileUrl(),
       proof_type: cleanString(row.proof_type) || null,
       verification_level: normalizeCertificateVerificationLevel(row.verification_level),
     }));
@@ -939,6 +943,7 @@ async function premiumPayloadToPublicProfile(companyId: string, payload: Company
     referenceMedia: (await Promise.all(
       payload.reference_media
         .filter((item) => item.file || item.caption || item.alt_text || item.file_note)
+        .filter((item) => isPublicReferenceImageMediaType(item.media_type))
         .map(async (item, index) => ({
           id: `submission-reference-media-${index + 1}`,
           company_id: companyId,
@@ -955,7 +960,7 @@ async function premiumPayloadToPublicProfile(companyId: string, payload: Company
           created_at: "",
           updated_at: "",
         })),
-    )).filter((item) => Boolean(item.file_url)),
+    )).filter((item) => Boolean(item.file_url) && isPublicReferenceImageMediaType(item.media_type)),
     certificates: await Promise.all(
       payload.certificates
         .filter((item) => item.title || item.issuer || item.description || item.file)
@@ -967,7 +972,7 @@ async function premiumPayloadToPublicProfile(companyId: string, payload: Company
           issued_at: null,
           valid_until: item.valid_until,
           description: item.description || item.file_note,
-          file_url: null,
+          file_url: publicCertificateFileUrl(),
           proof_type: item.proof_type || null,
           verification_level: normalizeCertificateVerificationLevel(item.verification_level),
           sort_order: item.sort_order || index + 1,
@@ -1078,7 +1083,7 @@ function referenceIdForTitle(references: CompanyReference[], title: string | nul
 }
 
 async function resolvePayloadMediaUrl(file: SubmissionUploadedFile | null) {
-  return resolveCompanyMediaUrl(file?.storage_path || null);
+  return resolveCompanyMediaUrl(approvedSubmissionFileStoragePath(file));
 }
 
 async function resolvePremiumMediaRows<T extends Record<string, unknown>>(rows: T[], field: keyof T) {
