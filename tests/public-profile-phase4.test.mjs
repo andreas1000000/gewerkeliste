@@ -428,6 +428,7 @@ test("wagner fallback services render every approved submitted service without c
     new Set(display.groups.flatMap((group) => group.items.map((item) => item.label))),
     new Set(wagnerServices),
   );
+  assert.equal(display.groups.some((group) => group.label === "Weitere Leistungen"), false);
 });
 
 test("structured references media and certificates are rendered as public project content", async () => {

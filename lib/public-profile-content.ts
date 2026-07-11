@@ -62,7 +62,7 @@ function confirmedServiceCandidates(services: PublicCompanyServiceRelation[]): S
     .map((match) => ({
       label: match.services?.name || "",
       slug: match.services?.slug,
-      family: match.services?.service_families?.name || "Weitere Leistungen",
+      family: match.services?.service_families?.name || "Leistungsspektrum",
       source: "confirmed" as const,
     }))
     .filter((candidate) => Boolean(candidate.label));
@@ -85,7 +85,7 @@ function groupCandidates(candidates: ServiceCandidate[]) {
     if (!key || seen.has(key)) continue;
     seen.add(key);
 
-    const family = candidate.family || groupServicesForDisplay([candidate.label])[0]?.label || "Weitere Leistungen";
+    const family = candidate.family || groupServicesForDisplay([candidate.label])[0]?.label || "Leistungsspektrum";
     const current = groupsByLabel.get(family) || [];
     current.push({ label: candidate.label, slug: candidate.slug });
     groupsByLabel.set(family, current);

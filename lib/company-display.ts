@@ -241,12 +241,12 @@ const serviceKeywordRules: Array<{ label: string; keywords: string[] }> = [
 function serviceGroupLabel(value: string) {
   const normalized = value.toLowerCase();
   if (/(beratung|planung|entwurf|bauleitung|antrag|statik|gutachten)/.test(normalized)) return "Planung / Beratung";
-  if (/(rohbau|mauer|mauerwerk|beton|schalung|bewehrung|fundament)/.test(normalized)) return "Rohbau / Mauerwerk";
+  if (/(hochbau|maurer|rohbau|mauer|mauerwerk|beton|schalung|bewehrung|fundament)/.test(normalized)) return "Rohbau / Mauerwerk";
   if (/(erd|tiefbau|bagger|kanal|leitung|aushub)/.test(normalized)) return "Erdarbeiten / Tiefbau";
   if (/(garten|landschaft|pflaster|außenanlage|aussenanlage|hof|zufahrt)/.test(normalized)) return "Außenanlagen / Pflaster";
   if (/(sanierung|umbau|bestand|modernisierung|renovierung)/.test(normalized)) return "Sanierung / Umbau";
   if (/(dach|holz|zimmer|fassade)/.test(normalized)) return "Dach / Holzbau";
   if (/(innen|trockenbau|ausbau|boden|fliese|maler|putz)/.test(normalized)) return "Innenausbau";
   if (/(abdichtung|feuchte|schaden|trocknung)/.test(normalized)) return "Abdichtung / Schadensbehebung";
-  return "Weitere Leistungen";
+  return "Leistungsspektrum";
 }
