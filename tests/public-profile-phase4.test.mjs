@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { breadcrumbJsonLd, localBusinessJsonLd } from "../lib/seo.ts";
+import { publicProfileDescription } from "../lib/company-display.ts";
 import {
   buildPublicProfileDescription,
   buildPublicProfileTitle,
@@ -84,6 +85,18 @@ test("metadata title and description use only stable profile facts", () => {
     buildPublicProfileDescription({ name: "MetallteQ", trade: "Metallbau", city: "Rohrdorf" }),
     /Informationen zu Leistungen, Standort und direkter Kontaktaufnahme/,
   );
+});
+
+test("public profile descriptions preserve approved paragraph breaks", () => {
+  const source = [
+    "Individuelle Sonderlösungen aus Metall.",
+    "Design bedeutet bei uns mehr als Optik. Wir bieten eine unkomplizierte Umsetzung des zuvor erarbeiteten Designs.",
+  ].join("\n\n");
+
+  const description = publicProfileDescription(source);
+
+  assert.equal(description, source);
+  assert.equal(description.length, source.length);
 });
 
 test("local and signed media URLs are excluded from public metadata", () => {

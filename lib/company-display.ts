@@ -31,13 +31,17 @@ export function publicProfileDescription(description: string | null | undefined)
 }
 
 export function cleanCompanyDescription(description: string | null | undefined, maxLength = 420) {
-  const text = dedupeRepeatedDescription(removeInternalSubmissionFragments(description));
+  const rawText = removeInternalSubmissionFragments(description);
+  const text = maxLength > 0 ? dedupeRepeatedDescription(rawText) : rawText;
   if (!text) return "";
 
   const withoutServiceIntro = text
     .replace(/\b(Ausgewählte|Ausgewaehlte)\s+Leistungen\s*:\s*/gi, "")
     .replace(/\bLeistungen\s*:\s*((?:[^.?!]|,\s*){80,})/gi, "")
-    .replace(/\s+/g, " ")
+    .split(/\n{2,}/)
+    .map((paragraph) => paragraph.replace(/\s+/g, " ").trim())
+    .filter(Boolean)
+    .join(maxLength > 0 ? " " : "\n\n")
     .trim();
 
   return maxLength > 0 ? truncateDescription(withoutServiceIntro, maxLength) : ensureFinalPunctuation(tidyDescriptionEnding(withoutServiceIntro));
@@ -125,8 +129,9 @@ export function removeInternalSubmissionFragments(description: string | null | u
 
   return fragments
     .reduce((value, pattern) => value.replace(pattern, " "), description)
-    .replace(/\s+/g, " ")
-    .replace(/\s+([,.!?])/g, "$1")
+    .replace(/[^\S\r\n]+/g, " ")
+    .replace(/[ \t]+([,.!?])/g, "$1")
+    .replace(/\n{3,}/g, "\n\n")
     .trim();
 }
 
