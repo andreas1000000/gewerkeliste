@@ -4,6 +4,11 @@ import test from "node:test";
 import { breadcrumbJsonLd, localBusinessJsonLd } from "../lib/seo.ts";
 import { publicProfileDescription } from "../lib/company-display.ts";
 import {
+  contactsMatch,
+  getAdditionalProfileContacts,
+  getPrimaryProfileContacts,
+} from "../lib/public-profile-contacts.ts";
+import {
   buildPublicProfileDescription,
   buildPublicProfileTitle,
   canonicalProfileUrl,
@@ -278,11 +283,72 @@ test("JSON-LD test data is blocked by excluding fixture records from company rou
   assert.match(source, /user_agent/);
 });
 
-test("primary contact card is not repeated for a single structured contact", async () => {
-  const source = await readFile("app/firma/[slug]/page.tsx", "utf8");
+test("single-contact profiles keep one header contact without lower duplication", () => {
+  const company = {
+    name: "MetallteQ GmbH",
+    contact_person_name: "Johannes Lechner",
+    contact_person_role: "Geschäftsführer",
+    contact_person_phone: "015156574906",
+    contact_person_email: "lechner@metallteq.de",
+    profile_image_url: "https://assets.example.com/johannes.jpg",
+    profile_image_alt: "Johannes Lechner",
+  };
+  const contacts = [];
 
-  assert.match(source, /const primaryContact = getPrimaryProfileContact\(company, premiumProfile\.contacts\);/);
-  assert.match(source, /\{multipleContacts\.length > 1 \?/);
+  const primaryContacts = getPrimaryProfileContacts(company, contacts);
+  const additionalContacts = getAdditionalProfileContacts(contacts, primaryContacts);
+
+  assert.equal(primaryContacts.length, 1);
+  assert.equal(primaryContacts[0].name, "Johannes Lechner");
+  assert.equal(additionalContacts.length, 0);
+});
+
+test("two-contact profiles show both distinct contacts in the profile header", () => {
+  const company = { name: "Wagner & Spielvogel", contact_person_name: "Andreas Wagner" };
+  const contacts = [
+    {
+      id: "andreas",
+      name: "Andreas Wagner",
+      role: "Geschäftsführer / Hochbaumeister / Techniker",
+      phone: "0151 / 41467634",
+      email: "info@wagner-spielvogel.de",
+      image_url: "andreas.png",
+      is_primary: true,
+      sort_order: 0,
+    },
+    {
+      id: "otto",
+      name: "Otto Spielvogel",
+      role: "Geschäftsführer / Gartenbau Meister",
+      phone: "0171 / 9090132",
+      email: "info@wagner-spielvogel.de",
+      image_url: "otto.png",
+      is_primary: false,
+      sort_order: 1,
+    },
+  ];
+
+  const primaryContacts = getPrimaryProfileContacts(company, contacts);
+  const additionalContacts = getAdditionalProfileContacts(contacts, primaryContacts);
+
+  assert.deepEqual(primaryContacts.map((contact) => contact.name), ["Andreas Wagner", "Otto Spielvogel"]);
+  assert.equal(contactsMatch(primaryContacts[0], primaryContacts[1]), false);
+  assert.equal(additionalContacts.length, 0);
+});
+
+test("additional contact area excludes the two primary header contacts", () => {
+  const company = { name: "Drei Kontakt Betrieb" };
+  const contacts = [
+    { id: "first", name: "Erster Kontakt", is_primary: true, sort_order: 0 },
+    { id: "second", name: "Zweiter Kontakt", is_primary: false, sort_order: 1 },
+    { id: "third", name: "Dritter Kontakt", is_primary: false, sort_order: 2 },
+  ];
+
+  const primaryContacts = getPrimaryProfileContacts(company, contacts);
+  const additionalContacts = getAdditionalProfileContacts(contacts, primaryContacts);
+
+  assert.deepEqual(primaryContacts.map((contact) => contact.name), ["Erster Kontakt", "Zweiter Kontakt"]);
+  assert.deepEqual(additionalContacts.map((contact) => contact.name), ["Dritter Kontakt"]);
 });
 
 test("public profile services show all confirmed and submitted items without a visible cap", () => {
@@ -330,6 +396,74 @@ test("public profile services fall back to approved submission services for basi
     "Geländerbau",
   ]);
   assert.match(display.sourceLabel, /Betriebseintrag/);
+});
+
+test("wagner fallback services render every approved submitted service without caps", () => {
+  const wagnerServices = [
+    "Bauantrag",
+    "Hochbau",
+    "Maurerarbeiten",
+    "Umbau",
+    "Sanierung",
+    "Verputzarbeiten",
+    "Betonarbeiten",
+    "Erdarbeiten",
+    "Garten- und Landschaftsbau",
+    "Pflasterarbeiten",
+    "Dacharbeiten",
+    "Zimmererarbeiten",
+    "Bodenarbeiten",
+    "Fliesenarbeiten",
+  ];
+
+  const display = buildPublicServiceDisplay({
+    company_services: [],
+    selected_services: wagnerServices,
+    specializations: [],
+    description: null,
+  });
+
+  assert.equal(display.totalCount, 14);
+  assert.deepEqual(
+    new Set(display.groups.flatMap((group) => group.items.map((item) => item.label))),
+    new Set(wagnerServices),
+  );
+});
+
+test("structured references media and certificates are rendered as public project content", async () => {
+  const source = await readFile("app/firma/[slug]/page.tsx", "utf8");
+
+  assert.match(source, /premiumProfile\.references\.map/);
+  assert.match(source, /mediaItems\.map/);
+  assert.match(source, /figcaption/);
+  assert.match(source, /reference\.project_type/);
+  assert.match(source, /reference\.description/);
+  assert.match(source, /reference\.services\.map/);
+  assert.match(source, /premiumProfile\.certificates\.map/);
+  assert.match(source, /certificateVerificationInfo\(certificate\.verification_level\)/);
+});
+
+test("legacy reference text is hidden when structured references exist", async () => {
+  const source = await readFile("app/firma/[slug]/page.tsx", "utf8");
+
+  assert.match(source, /const referenceItems = publishedPremiumProfile\.references\.length \? \[\] : getTextBlockItems\(company\.references_text\);/);
+});
+
+test("missing legal form is not derived from the slug or submission name", async () => {
+  const source = await readFile("lib/data/public-directory.ts", "utf8");
+
+  assert.match(source, /publicCompanyNameForApprovedSubmission/);
+  assert.match(source, /const legalForm = cleanString\(submission\.legal_form\) \|\| cleanString\(company\.legal_form\);/);
+  assert.match(source, /companyNameWithoutKnownLegalForm\(company\.name\)/);
+  assert.doesNotMatch(source, /slug.*legalForm|legalForm.*slug/);
+});
+
+test("old profile status and data-status modules are not present on public profiles", async () => {
+  const source = await readFile("app/firma/[slug]/page.tsx", "utf8");
+
+  assert.doesNotMatch(source, /Profilvollständigkeit|Profilvollstaendigkeit|Datenstatus|Datenquellen|technische Prüfhinweise|technische Pruefhinweise/);
+  assert.match(source, /overflow-x-hidden/);
+  assert.match(source, /break-all text-action/);
 });
 
 function sampleCompany() {

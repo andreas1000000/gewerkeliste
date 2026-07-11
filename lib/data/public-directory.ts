@@ -1231,7 +1231,7 @@ async function applyApprovedSubmissionPublicDetails<T extends PublicCompanyWithT
   const submission = await getLatestApprovedSubmissionForCompany(company);
   if (!submission) return company;
 
-  const legalName = companyNameWithLegalForm(submission.company_name, submission.legal_form);
+  const legalName = publicCompanyNameForApprovedSubmission(company, submission);
   const description = submissionDescriptionForPublicProfile(submission);
   const contactName =
     cleanString(submission.contact_person_name) ||
@@ -1298,10 +1298,25 @@ function companyNameWithLegalForm(companyName?: string | null, legalForm?: strin
   return `${name} ${form}`;
 }
 
+function publicCompanyNameForApprovedSubmission<T extends PublicCompanyWithTrade>(
+  company: T,
+  submission: Partial<CompanySubmission>,
+) {
+  const legalForm = cleanString(submission.legal_form) || cleanString(company.legal_form);
+  if (legalForm) return companyNameWithLegalForm(submission.company_name || company.name, legalForm);
+  return companyNameWithoutKnownLegalForm(company.name);
+}
+
 function companyNameWithoutLegalForm(name: string, legalForm?: string | null) {
   const form = cleanString(legalForm);
   if (!form) return name;
   return name.replace(new RegExp(`\\s+${escapeRegExp(form)}$`, "i"), "").trim() || name;
+}
+
+function companyNameWithoutKnownLegalForm(name: string) {
+  return name
+    .replace(/\s+(gmbh\s*&\s*co\.?\s*kg|gmbh|ug(?:\s*\(haftungsbeschränkt\))?|gbr|gdbr|kg|ohg|ag|eg)$/i, "")
+    .trim() || name;
 }
 
 function normalizeLegalFormMatchValue(value: string) {

@@ -12,6 +12,11 @@ import {
   getCompanyBySlug,
   getCompanyBySlugForMetadata,
 } from "@/lib/data/public-directory";
+import {
+  getAdditionalProfileContacts,
+  getPrimaryProfileContacts,
+  type PublicProfileHeaderContact,
+} from "@/lib/public-profile-contacts";
 import { buildPublicServiceDisplay, type PublicServiceDisplayGroup } from "@/lib/public-profile-content";
 import { certificateVerificationInfo, getPublicProfileEntitlements, type PublicProfileEntitlements } from "@/lib/public-profile-rules";
 import {
@@ -35,15 +40,6 @@ type PageProps = {
 type ProfileStatus = {
   shortLabel: string;
   tone: "verified" | "claimed" | "unverified";
-};
-
-type PrimaryProfileContact = {
-  name: string;
-  role?: string | null;
-  phone?: string | null;
-  email?: string | null;
-  imageUrl?: string | null;
-  imageAlt: string;
 };
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -121,15 +117,21 @@ export default async function CompanyPublicPage({ params }: PageProps) {
     const serviceDisplay = buildPublicServiceDisplay(company);
     const specializationItems = getSpecializationItems(company);
     const serviceAreaItems = getServiceAreaItems(company);
-    const referenceItems = getTextBlockItems(company.references_text);
     const proofItems = getProfileProofItems(company);
     const premiumProfile = company.premium_profile || emptyPremiumProfile();
     const entitlements = getPublicProfileEntitlements({ ...company, premium_profile: premiumProfile });
     const publishedPremiumProfile = publicPremiumProfileForDisplay(premiumProfile, entitlements);
-    const primaryContact = getPrimaryProfileContact(company, premiumProfile.contacts);
+    const primaryContacts = getPrimaryProfileContacts(company, premiumProfile.contacts);
+    const additionalContacts = getAdditionalProfileContacts(publishedPremiumProfile.contacts, primaryContacts);
+    const referenceItems = publishedPremiumProfile.references.length ? [] : getTextBlockItems(company.references_text);
     const publicSocialLinks = entitlements.canUseBasicSocialLinks ? premiumProfile.socialLinks : [];
-    const multipleContacts = publishedPremiumProfile.contacts;
     const hasDirectContact = Boolean(company.email || company.phone || company.contact_person_email || company.contact_person_phone || websiteHref);
+    const profileHeaderGridClass =
+      primaryContacts.length > 1
+        ? "grid gap-6 xl:grid-cols-[minmax(0,1fr)_620px]"
+        : primaryContacts.length
+          ? "grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]"
+          : "grid gap-6";
     const headline = trade === "Gewerk" ? `Bau- und Handwerksbetrieb in ${company.city}` : `${trade} in ${company.city}`;
     const tradeSlug = company.trades?.slug || "";
     const directoryPath = "/suche";
@@ -188,7 +190,7 @@ export default async function CompanyPublicPage({ params }: PageProps) {
               </div>
             </div>
             <div className="px-5 pb-0 pt-5 sm:px-7 sm:pt-6">
-              <div className={primaryContact ? "grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]" : "grid gap-6"}>
+              <div className={profileHeaderGridClass}>
                 <div className="min-w-0">
                   <div className="flex flex-col gap-4 sm:flex-row sm:items-start">
                     <ProfileMark company={company} canClaim={canClaim} />
@@ -212,7 +214,7 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                     <ProfileMetric label="Schwerpunkt" value={trade} />
                   </div>
                 </div>
-                {primaryContact ? <PrimaryContactCard contact={primaryContact} companyName={company.name} /> : null}
+                {primaryContacts.length ? <PrimaryContactCard contacts={primaryContacts} companyName={company.name} /> : null}
               </div>
               <div className="mt-6 flex flex-col gap-4 border-t border-line py-4 lg:flex-row lg:items-center lg:justify-between">
                 <div className="order-2 lg:order-1">
@@ -310,8 +312,8 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                 <ProfileSections sections={publishedPremiumProfile.profileSections} />
               ) : null}
 
-              {multipleContacts.length > 1 ? (
-                <ContactTrustCard company={company} premiumContacts={multipleContacts} />
+              {additionalContacts.length ? (
+                <ContactTrustCard company={company} premiumContacts={additionalContacts} />
               ) : null}
 
             </div>
@@ -412,42 +414,91 @@ function ProfileMark({ company, canClaim }: { company: PublicCompanyWithTrade; c
   );
 }
 
-function PrimaryContactCard({ contact, companyName }: { contact: PrimaryProfileContact; companyName: string }) {
+function PrimaryContactCard({ contacts, companyName }: { contacts: PublicProfileHeaderContact[]; companyName: string }) {
+  if (contacts.length === 1) {
+    const contact = contacts[0];
+    return (
+      <aside className="rounded-lg border border-line bg-[#fbfcff] p-4">
+        <h2 className="text-base font-semibold text-[#07173d]">Ansprechpartner</h2>
+        <div className="mt-4 flex min-w-0 items-center gap-4">
+          <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border border-line bg-white text-center text-lg font-semibold leading-4 text-brand shadow-soft sm:h-24 sm:w-24">
+            {contact.imageUrl ? (
+              <Image
+                alt={contact.imageAlt}
+                className="h-full w-full object-cover"
+                height={96}
+                src={contact.imageUrl}
+                width={96}
+                sizes="96px"
+                unoptimized={isLocalSignedMediaUrl(contact.imageUrl)}
+              />
+            ) : (
+              initials(contact.name)
+            )}
+          </div>
+          <div className="min-w-0">
+            <h3 className="text-base font-semibold text-ink">{contact.name}</h3>
+            {contact.role ? <p className="mt-1 text-sm leading-5 text-muted">{contact.role}</p> : null}
+            <div className="mt-2 grid min-w-0 gap-1 text-sm font-semibold">
+              {contact.phone ? (
+                <a className="min-h-8 break-words text-action hover:underline" href={phoneHref(contact.phone)}>
+                  {formatPhoneDisplay(contact.phone)}
+                </a>
+              ) : null}
+              {contact.email ? (
+                <a className="min-h-8 break-words text-action hover:underline" href={`mailto:${contact.email}`}>
+                  {contact.email}
+                </a>
+              ) : null}
+            </div>
+          </div>
+        </div>
+        <p className="sr-only">Ansprechpartner für {companyName}</p>
+      </aside>
+    );
+  }
+
   return (
     <aside className="rounded-lg border border-line bg-[#fbfcff] p-4">
       <h2 className="text-base font-semibold text-[#07173d]">Ansprechpartner</h2>
-      <div className="mt-4 flex min-w-0 items-center gap-4">
-        <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border border-line bg-white text-center text-lg font-semibold leading-4 text-brand shadow-soft sm:h-24 sm:w-24">
-          {contact.imageUrl ? (
-            <Image
-              alt={contact.imageAlt}
-              className="h-full w-full object-cover"
-              height={96}
-              src={contact.imageUrl}
-              width={96}
-              sizes="96px"
-              unoptimized={isLocalSignedMediaUrl(contact.imageUrl)}
-            />
-          ) : (
-            initials(contact.name)
-          )}
-        </div>
-        <div className="min-w-0">
-          <h3 className="text-base font-semibold text-ink">{contact.name}</h3>
-          {contact.role ? <p className="mt-1 text-sm leading-5 text-muted">{contact.role}</p> : null}
-          <div className="mt-2 grid min-w-0 gap-1 text-sm font-semibold">
-            {contact.phone ? (
-              <a className="min-h-8 break-words text-action hover:underline" href={phoneHref(contact.phone)}>
-                {formatPhoneDisplay(contact.phone)}
-              </a>
-            ) : null}
-            {contact.email ? (
-              <a className="min-h-8 break-words text-action hover:underline" href={`mailto:${contact.email}`}>
-                {contact.email}
-              </a>
-            ) : null}
+      <div className="mt-4 grid min-w-0 gap-3 md:grid-cols-2">
+        {contacts.map((contact) => (
+          <div key={contact.id || contact.name} className="min-w-0 rounded-md border border-line bg-white p-3">
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-full border border-line bg-white text-center text-base font-semibold leading-4 text-brand shadow-soft">
+                {contact.imageUrl ? (
+                  <Image
+                    alt={contact.imageAlt}
+                    className="h-full w-full object-cover"
+                    height={64}
+                    src={contact.imageUrl}
+                    width={64}
+                    sizes="64px"
+                    unoptimized={isLocalSignedMediaUrl(contact.imageUrl)}
+                  />
+                ) : (
+                  initials(contact.name)
+                )}
+              </div>
+              <div className="min-w-0">
+                <h3 className="break-words text-sm font-semibold leading-5 text-ink">{contact.name}</h3>
+                {contact.role ? <p className="mt-1 break-words text-xs leading-5 text-muted">{contact.role}</p> : null}
+              </div>
+            </div>
+            <div className="mt-3 grid min-w-0 gap-1 text-sm font-semibold">
+              {contact.phone ? (
+                <a className="inline-flex min-h-9 items-center break-words text-action hover:underline" href={phoneHref(contact.phone)}>
+                  {formatPhoneDisplay(contact.phone)}
+                </a>
+              ) : null}
+              {contact.email ? (
+                <a className="inline-flex min-h-9 items-center break-all text-action hover:underline" href={`mailto:${contact.email}`}>
+                  {contact.email}
+                </a>
+              ) : null}
+            </div>
           </div>
-        </div>
+        ))}
       </div>
       <p className="sr-only">Ansprechpartner für {companyName}</p>
     </aside>
@@ -929,35 +980,6 @@ function ProfileMetric({ label, value }: { label: string; value: string }) {
       <div className="mt-1 truncate text-sm font-semibold text-ink">{value}</div>
     </div>
   );
-}
-
-function getPrimaryProfileContact(
-  company: PublicCompanyWithTrade,
-  premiumContacts: NonNullable<PublicCompanyWithTrade["premium_profile"]>["contacts"],
-): PrimaryProfileContact | null {
-  const structured = premiumContacts.find((contact) => contact.is_primary) || premiumContacts[0];
-  if (structured?.name) {
-    return {
-      name: structured.name,
-      role: structured.role,
-      phone: structured.phone,
-      email: structured.email,
-      imageUrl: structured.image_url,
-      imageAlt: `${structured.name} Ansprechpartner bei ${company.name}`,
-    };
-  }
-
-  const name = company.contact_person_name || company.contact_name || "";
-  if (!name) return null;
-
-  return {
-    name,
-    role: company.contact_person_role,
-    phone: company.contact_person_phone || company.phone,
-    email: company.contact_person_email || company.email,
-    imageUrl: company.profile_image_url,
-    imageAlt: company.profile_image_alt || `${name} Ansprechpartner bei ${company.name}`,
-  };
 }
 
 function getProfileDescription(company: PublicCompanyWithTrade, trade: string, location: string, visibleDescription: string) {
