@@ -1,4 +1,4 @@
-import type { ClaimStatus, Company, Trade } from "@/lib/types";
+import type { ClaimStatus, Company, CompanyPremiumProfile, Trade } from "@/lib/types";
 
 export type PublicCompany = Company & {
   logo_url?: string | null;
@@ -6,18 +6,58 @@ export type PublicCompany = Company & {
   profile_image_alt?: string | null;
   contact_person_name?: string | null;
   contact_person_role?: string | null;
+  contact_person_email?: string | null;
+  contact_person_phone?: string | null;
+  legal_form?: string | null;
+  profile_package?: "basis" | "verified_start" | null;
   profile_status?: "imported" | "verified" | "claimed" | "needs_review" | "removed" | null;
+  verification_date?: string | null;
+  premium_started_at?: string | null;
+  premium_expires_at?: string | null;
+  is_free_founding_member?: boolean | null;
+  trust_badge?: string | null;
+  voluntary_support_status?: string | null;
+  service_radius_km?: number | null;
+  service_regions?: string[] | null;
+  service_postal_codes?: string[] | null;
+  service_countries?: string[] | null;
+  selected_services?: string[] | null;
+  specializations?: string[] | null;
+  references_text?: string | null;
+  memberships?: string[] | null;
+  certificates?: string[] | null;
+  manufacturer_certificates?: string[] | null;
 };
 
 export type PublicCompanyWithTrade = PublicCompany & {
   trades: Pick<Trade, "id" | "name" | "slug"> | null;
   company_trades?: PublicCompanyTradeRelation[] | null;
+  company_services?: PublicCompanyServiceRelation[] | null;
+  premium_profile?: CompanyPremiumProfile | null;
+};
+
+export type PublicCompanyServiceRelation = {
+  confidence_score: number;
+  source: string | null;
+  status?: string | null;
+  services: {
+    id: string;
+    name: string;
+    slug: string;
+    service_families?: {
+      name: string;
+      slug: string;
+      trades?: Pick<Trade, "name" | "slug"> | null;
+    } | null;
+  } | null;
 };
 
 export type PublicCompanyTradeRelation = {
   confidence_score: number;
   source: string | null;
   evidence: string | null;
+  status?: string | null;
+  visibility_level?: string | null;
   trades: Pick<Trade, "id" | "name" | "slug"> | null;
 };
 
@@ -28,6 +68,8 @@ export type PublicCompanyTradeMatch = {
   confidence_score: number;
   source: string;
   evidence: string | null;
+  status?: string | null;
+  visibility_level?: string | null;
   created_at: string;
   updated_at: string;
   companies: PublicCompanyWithTrade | null;
@@ -40,6 +82,9 @@ export type PublicCompanyMetadata = {
   postal_code: string;
   description: string;
   trades: { name: string } | null;
+  logo_url?: string | null;
+  profile_image_url?: string | null;
+  service_regions?: string[] | null;
 };
 
 export type PublicClaimStatus = ClaimStatus;

@@ -8,6 +8,9 @@ import { getCompany, getCompanyBySlug } from "@/lib/data";
 export const metadata: Metadata = {
   title: "Eintrag übernehmen | GewerkeListe.com",
   description: "Bestehenden Betriebseintrag finden, Betriebsdaten prüfen und vollständiges Leistungsspektrum zur Prüfung einreichen.",
+  alternates: {
+    canonical: "/eintrag-beanspruchen",
+  },
 };
 
 type PageProps = {
@@ -35,6 +38,14 @@ export default async function LegacyClaimEntryPage({ searchParams }: PageProps) 
             Suchen Sie zuerst Ihren bestehenden Betriebseintrag. Auf der Profilseite können Sie das kostenlose
             Basisprofil übernehmen, Korrekturen einreichen und Ihr tatsächliches Leistungsspektrum strukturiert
             darstellen. Änderungen werden geprüft, bevor sie veröffentlicht werden.
+          </p>
+          <p className="mt-4 text-sm leading-6 text-muted">
+            <Link
+              className="font-semibold text-action hover:underline"
+              href={"/firma/wagner-und-spielvogel-gbr-83083-riedering" as Route}
+            >
+              Beispiel eines verifizierten Profils ansehen
+            </Link>
           </p>
           <div className="mt-6 grid gap-3 sm:grid-cols-2">
             <Link

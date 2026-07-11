@@ -1,21 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useActionState } from "react";
+import { PremiumSubmissionFields } from "@/components/premium-submission-fields";
+import { SocialLinksFields } from "@/components/social-links-fields";
 import { TradeCheckboxGroups } from "@/components/trade-checkbox-groups";
+import { serviceNamesForTrades, TradeServiceSelection } from "@/components/trade-service-selection";
 import { submitBusinessEntry } from "@/lib/actions/business-entry";
 import type { CompanyFormState } from "@/lib/types";
 import type { TaxonomyTrade } from "@/lib/trade-taxonomy";
 
 const initialState: CompanyFormState = { ok: false, message: "" };
-const supportOptions = [
-  { value: "none", label: "Ohne Förderbeitrag einreichen" },
-  { value: "49", label: "49 € Förderbeitrag" },
-  { value: "99", label: "99 € Förderbeitrag" },
-  { value: "199", label: "199 € Förderbeitrag" },
-  { value: "custom", label: "Eigenen Betrag wählen" },
-];
 
 export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
   const [state, formAction, pending] = useActionState(submitBusinessEntry, initialState);
@@ -23,20 +19,10 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
   const [selectedTrades, setSelectedTrades] = useState<string[]>([]);
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [founderVerification, setFounderVerification] = useState(true);
-  const [supportContribution, setSupportContribution] = useState("none");
-  const [contactProfileImageSelected, setContactProfileImageSelected] = useState(false);
+  const [mediaFilesSelected, setMediaFilesSelected] = useState(false);
   const errors = state.fieldErrors || {};
   const values = state.values || {};
   const formKey = JSON.stringify(values);
-
-  const selectedTrade = useMemo(
-    () => trades.find((trade) => trade.slug === primaryTrade),
-    [primaryTrade, trades],
-  );
-  const serviceOptions = useMemo(() => {
-    if (!selectedTrade) return [];
-    return Array.from(new Set([...selectedTrade.subTrades, ...selectedTrade.coreServices, ...selectedTrade.specializations]));
-  }, [selectedTrade]);
 
   useEffect(() => {
     if (!state.values) return;
@@ -47,7 +33,6 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
     setSelectedTrades([restoredPrimaryTrade, ...restoredSecondary].filter(Boolean));
     setSelectedServices(arrayValue(restoredValues, "selectedServices"));
     setFounderVerification(booleanValue(restoredValues, "wantsFounderVerification", true));
-    setSupportContribution(textValue(restoredValues, "supportContribution", "none"));
   }, [state.values, trades]);
 
   function toggleService(service: string) {
@@ -61,7 +46,8 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
       const next = current.includes(slug) ? current.filter((item) => item !== slug) : [...current, slug];
       const nextPrimary = next[0] || "";
       setPrimaryTrade(nextPrimary);
-      setSelectedServices([]);
+      const allowedServices = serviceNamesForTrades(next);
+      setSelectedServices((services) => services.filter((service) => allowedServices.has(service)));
       return next;
     });
   }
@@ -72,15 +58,15 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
         <p className="text-sm font-semibold uppercase tracking-normal text-[#2f8f5b]">Einreichung gespeichert</p>
         <h2 className="mt-3 text-3xl font-semibold text-brand">Vielen Dank. Ihr Betriebseintrag wurde eingereicht.</h2>
         <p className="mt-4 max-w-2xl text-sm leading-6 text-muted">
-          Wir prüfen die Angaben und melden uns, falls Rückfragen bestehen. Nach erfolgreicher Prüfung kann der
-          Betriebseintrag auf GewerkeListe.com veröffentlicht werden.
+          Danke. Ihre Angaben wurden übermittelt und werden geprüft. Der kostenlose Basiseintrag bleibt erhalten. Wir
+          melden uns, falls Rückfragen bestehen.
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
           <Link className="inline-flex min-h-11 items-center rounded-md bg-action px-5 text-sm font-semibold text-white" href="/suche">
             Zur Suche
           </Link>
-          <Link className="inline-flex min-h-11 items-center rounded-md border border-line bg-white px-5 text-sm font-semibold text-action" href="/fuer-betriebe">
-            Weitere Informationen für Betriebe
+          <Link className="inline-flex min-h-11 items-center rounded-md border border-line bg-white px-5 text-sm font-semibold text-action" href="/suche">
+            Betriebe suchen
           </Link>
         </div>
       </section>
@@ -88,7 +74,7 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
   }
 
   return (
-    <form action={formAction} className="grid gap-6" key={formKey} noValidate>
+    <form action={formAction} className="grid min-w-0 gap-6" encType="multipart/form-data" key={formKey} method="post" noValidate>
       <input className="hidden" name="websiteExtra" tabIndex={-1} autoComplete="off" />
 
       <FormSection number="1" title="Betriebsdaten" help="Diese Angaben bilden die Grundlage Ihres Betriebseintrags.">
@@ -116,8 +102,8 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
 
       <FormSection
         number="2"
-        title="Ansprechpartner"
-        help="Der Ansprechpartner wird für Rückfragen zur Prüfung des Eintrags verwendet. Er muss nicht öffentlich angezeigt werden."
+        title="Kontakt und Ansprechpartner"
+        help="Diese Angaben helfen bei Rückfragen zur Prüfung des Eintrags. Angaben zum Ansprechpartner müssen nicht öffentlich angezeigt werden."
       >
         <div className="grid gap-4 md:grid-cols-2">
           <Field label="Vorname" error={errors.contactFirstName}>
@@ -138,48 +124,44 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
         </div>
       </FormSection>
 
+      <SocialLinksFields />
+
       <FormSection
         number="2a"
-        title="Logo und persönlicher Ansprechpartner"
-        help="Menschen kaufen von Menschen. Ein persönliches Bild und ein professionelles Logo schaffen Vertrauen."
+        title="Profil optisch vervollständigen"
+        help="Logo und Ansprechpartnerbild sind freiwillig. Ihr kostenloses Basisprofil kann auch ohne Bilder eingetragen werden. Eingereichte Bilder werden geprüft, bevor sie öffentlich erscheinen."
       >
         <div className="grid gap-4 lg:grid-cols-2">
-          <div className="rounded-lg border border-line bg-[#fbfcff] p-4">
-            <label className="grid gap-2 text-sm font-semibold text-ink">
-              Firmenlogo hochladen
-              <input className="rounded-md border border-line bg-white px-3 py-2 text-sm" name="companyLogo" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" />
-            </label>
-            <p className="mt-3 text-sm leading-6 text-muted">
-              Ein professionelles Firmenlogo erhöht den Wiedererkennungswert und macht dein Profil vertrauenswürdiger.
-            </p>
-          </div>
-          <div className="rounded-lg border border-line bg-[#fbfcff] p-4">
-            <label className="grid gap-2 text-sm font-semibold text-ink">
-              Profilbild des Ansprechpartners
-              <input
-                className="rounded-md border border-line bg-white px-3 py-2 text-sm"
-                name="contactProfileImage"
-                type="file"
-                accept="image/png,image/jpeg,image/webp"
-                onChange={(event) => setContactProfileImageSelected(Boolean(event.target.files?.length))}
-              />
-            </label>
-            <p className="mt-3 text-sm font-semibold text-brand">Menschen kaufen von Menschen.</p>
-            <p className="mt-2 text-sm leading-6 text-muted">
-              Ein persönliches Bild schafft Vertrauen und erhöht die Wahrscheinlichkeit, dass Auftraggeber Kontakt aufnehmen.
-              Geeignet sind Geschäftsführer, Inhaber, Meister, Bauleiter oder Ansprechpartner.
-            </p>
-            <p className="mt-2 text-xs leading-5 text-muted">
-              Keine privaten Bilder, keine Urlaubsbilder, keine Gruppenbilder und keine unscharfen Bilder.
-            </p>
-            <label className="mt-4 flex items-start gap-3 text-sm font-medium leading-6 text-ink">
-              <input className="mt-1 h-4 w-4 accent-action" name="imageConsentGiven" type="checkbox" required={contactProfileImageSelected} />
-              Ich bestätige, dass ich berechtigt bin, dieses Bild hochzuladen und die abgebildete Person der Veröffentlichung zugestimmt hat.
-            </label>
-          </div>
+          <MediaFileField
+            accept="image/jpeg,image/png,image/webp"
+            error={errors.companyLogo}
+            help="JPG, PNG oder WebP. Maximal 2 MB. SVG, GIF und PDF sind nicht erlaubt."
+            label="Firmenlogo hochladen"
+            maxBytes={2 * 1024 * 1024}
+            name="companyLogo"
+            onMediaChange={setMediaFilesSelected}
+          />
+          <MediaFileField
+            accept="image/jpeg,image/png,image/webp"
+            error={errors.contactProfileImage}
+            help="JPG, PNG oder WebP. Maximal 5 MB. Nur ein Bild einreichen, wenn die abgebildete Person zugestimmt hat."
+            label="Ansprechpartnerbild hochladen"
+            maxBytes={5 * 1024 * 1024}
+            name="contactProfileImage"
+            onMediaChange={setMediaFilesSelected}
+          />
+          <Field label="Ansprechpartner Name" error={errors.mediaContactName}>
+            <input className={inputClass} defaultValue={textValue(values, "mediaContactName")} name="mediaContactName" />
+          </Field>
+          <Field label="Rolle/Funktion" error={errors.mediaContactRole}>
+            <input className={inputClass} defaultValue={textValue(values, "mediaContactRole")} name="mediaContactRole" placeholder="z. B. Inhaber, Geschäftsführung, Bauleitung" />
+          </Field>
         </div>
+        <Consent checked={booleanValue(values, "imageConsentGiven")} name="imageConsentGiven" error={errors.imageConsentGiven} required={mediaFilesSelected}>
+          Ich bin berechtigt, diese Bilder für den Betrieb einzureichen.
+        </Consent>
         <p className="mt-3 rounded-md border border-line bg-white px-4 py-3 text-xs leading-5 text-muted">
-          Medien werden erst nach Prüfung und technischer Freigabe der Profilverwaltung veröffentlicht.
+          Logo und Ansprechpartnerbild sind freiwillig. Sie können Ihr Profil auch ohne Medien kostenlos eintragen. Bilder werden erst nach Prüfung veröffentlicht.
         </p>
       </FormSection>
 
@@ -220,29 +202,14 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
         {errors.secondaryTrades ? <p className="mt-2 text-xs font-semibold text-[#a4442b]">{errors.secondaryTrades}</p> : null}
       </FormSection>
 
-      <FormSection number="5" title="Leistungen auswählen" help="Benennen Sie die Leistungen und Spezialisierungen, die Auftraggeber bei Ihrem Betrieb erkennen sollen.">
-        <div className="rounded-md border border-line bg-[#fbfcff] p-4 text-sm leading-6 text-muted">
-          {selectedTrade ? (
-            <>
-              Strukturierendes Gewerk: <span className="font-semibold text-ink">{selectedTrade.name}</span>. Wählen Sie
-              die passenden Leistungen aus und ergänzen Sie weitere Spezialisierungen im Freitext.
-            </>
-          ) : (
-            "Wählen Sie zuerst oben ein Gewerk aus. Danach erscheinen hier passende Leistungen und Spezialisierungen."
-          )}
-        </div>
-        <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-          {serviceOptions.map((service) => (
-            <CheckCard
-              key={service}
-              checked={selectedServices.includes(service)}
-              label={service}
-              name="selectedServices"
-              onChange={() => toggleService(service)}
-              value={service}
-            />
-          ))}
-        </div>
+      <FormSection number="5" title="Leistungen auswählen" help="Wählen Sie die konkreten Leistungen aus, die Ihr Betrieb innerhalb der gewählten Gewerke tatsächlich anbietet.">
+        <TradeServiceSelection selectedServices={selectedServices} selectedTrades={selectedTrades} onToggleService={toggleService} />
+        {selectedTrades.length && !selectedServices.length ? (
+          <p className="mt-4 rounded-md border border-[#f2d3a7] bg-[#fff8ea] px-4 py-3 text-sm leading-6 text-[#7a4a00]">
+            Sie haben noch keine konkreten Leistungen ausgewählt. Detailleistungen verbessern die Auffindbarkeit Ihres
+            Betriebs.
+          </p>
+        ) : null}
         {errors.selectedServices ? <p className="mt-2 text-xs font-semibold text-[#a4442b]">{errors.selectedServices}</p> : null}
         <Field label="Spezialisierungen ergänzen" error={errors.additionalSpecializations}>
           <input className={inputClass} defaultValue={textValue(values, "additionalSpecializations")} name="additionalSpecializations" placeholder="z. B. Altbausanierung, Naturstein, Gewerbeflächen" />
@@ -251,8 +218,8 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
 
       <FormSection
         number="6"
-        title="Tätigkeitsgebiet"
-        help="Das Tätigkeitsgebiet hilft Auftraggebern einzuschätzen, ob Ihr Betrieb für eine Region relevant ist."
+        title="Region und Wirkungskreis"
+        help="Der Wirkungskreis hilft Auftraggebern einzuschätzen, in welchen Orten und Regionen Ihr Betrieb tätig werden möchte."
       >
         <div className="grid gap-4 md:grid-cols-2">
           <Field label="Einsatzradius in km" error={errors.serviceRadiusKm} required>
@@ -306,7 +273,9 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
         </div>
       </FormSection>
 
-      <FormSection number="9" title="Eintrag zur Prüfung einreichen" help="Die Angaben werden vor der Veröffentlichung geprüft. Ein verifizierter Eintrag zeigt, dass Betriebsdaten bestätigt wurden. Es wird dadurch keine Aussage über Qualität, Zuverlässigkeit oder Ausführung garantiert.">
+      <PremiumSubmissionFields />
+
+      <FormSection number="9" title="Prüfung und Absenden" help="Die Angaben werden vor der Veröffentlichung geprüft. Eine spätere Datenbestätigung bedeutet nur, dass Profildaten bestätigt wurden. Sie ist keine Qualitätsbewertung.">
         <label className="flex items-start gap-3 text-sm font-medium leading-6 text-ink">
           <input
             checked={founderVerification}
@@ -317,44 +286,8 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
           />
           Ich möchte meinen kostenlosen Basiseintrag prüfen und bestätigen lassen.
         </label>
-
-        <section className="mt-5 rounded-lg border border-line bg-[#fbfcff] p-4">
-          <h3 className="text-sm font-semibold text-brand">GewerkeListe.com freiwillig unterstützen</h3>
-          <p className="mt-2 text-sm leading-6 text-muted">
-            Der freiwillige Förderbeitrag hilft beim Aufbau des regionalen Verzeichnisses. Er hat keinen Einfluss auf
-            Prüfung, Darstellung oder Verifizierung des Basiseintrags.
-          </p>
-          <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
-            {supportOptions.map((option) => (
-              <label key={option.value} className="flex items-center gap-2 rounded-md border border-line bg-white px-3 py-2 text-sm font-semibold text-ink">
-                <input
-                  checked={supportContribution === option.value}
-                  className="h-4 w-4 accent-action"
-                  name="supportContribution"
-                  onChange={() => setSupportContribution(option.value)}
-                  type="radio"
-                  value={option.value}
-                />
-                {option.label}
-              </label>
-            ))}
-          </div>
-          {supportContribution === "custom" ? (
-            <Field label="Eigener Betrag in Euro" error={errors.supportCustomAmount}>
-              <input className={inputClass} defaultValue={textValue(values, "supportCustomAmount")} name="supportCustomAmount" type="number" min="1" />
-            </Field>
-          ) : (
-            <input name="supportCustomAmount" type="hidden" value="" />
-          )}
-          <label className="mt-4 flex items-start gap-3 text-sm font-medium leading-6 text-ink">
-            <input className="mt-1 h-4 w-4 accent-action" defaultChecked={booleanValue(values, "supportInvoiceRequested")} name="supportInvoiceRequested" type="checkbox" />
-            Rechnung auf Wunsch
-          </label>
-          <p className="mt-3 text-xs leading-5 text-muted">
-            Es handelt sich nicht um einen steuerbegünstigten Beitrag. Auf Wunsch kann eine Rechnung über den freiwilligen
-            Förderbeitrag ausgestellt werden. An dieser Stelle wird automatisch nichts berechnet.
-          </p>
-        </section>
+        <input name="supportContribution" type="hidden" value="none" />
+        <input name="supportCustomAmount" type="hidden" value="" />
 
         <div className="mt-5 grid gap-3">
           <Consent checked={booleanValue(values, "consentAuthorized")} name="consentAuthorized" error={errors.consentAuthorized}>
@@ -381,13 +314,13 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
         ) : null}
         <div className="mt-5 flex flex-wrap gap-3">
           <button
-            className="inline-flex min-h-11 items-center justify-center rounded-md bg-action px-5 text-sm font-semibold text-white hover:bg-brand disabled:opacity-60"
+            className="inline-flex min-h-11 w-full items-center justify-center rounded-md bg-action px-5 text-sm font-semibold text-white hover:bg-brand disabled:opacity-60 sm:w-auto"
             disabled={pending}
           >
             {pending ? "Einreichung wird gespeichert..." : "Betriebseintrag zur Prüfung einreichen"}
           </button>
           <Link
-            className="inline-flex min-h-11 items-center justify-center rounded-md border border-line bg-white px-5 text-sm font-semibold text-action hover:border-action"
+            className="inline-flex min-h-11 w-full items-center justify-center rounded-md border border-line bg-white px-5 text-sm font-semibold text-action hover:border-action sm:w-auto"
             href="/eintrag-beanspruchen"
           >
             Bestehenden Eintrag beanspruchen
@@ -398,8 +331,8 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
   );
 }
 
-const inputClass = "w-full rounded-md border border-line px-3 py-2 outline-none focus:border-action";
-const textareaClass = "min-h-28 w-full rounded-md border border-line px-3 py-2 outline-none focus:border-action";
+const inputClass = "w-full min-w-0 rounded-md border border-line px-3 py-2 outline-none focus:border-action";
+const textareaClass = "min-h-28 w-full min-w-0 rounded-md border border-line px-3 py-2 outline-none focus:border-action";
 
 function textValue(values: CompanyFormState["values"], key: string, fallback = "") {
   const value = values?.[key];
@@ -418,8 +351,8 @@ function booleanValue(values: CompanyFormState["values"], key: string, fallback 
 
 function FormSection({ number, title, help, children }: { number: string; title: string; help: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-lg border border-line bg-white p-5 shadow-soft sm:p-6">
-      <div className="flex gap-4">
+    <section className="min-w-0 overflow-hidden rounded-lg border border-line bg-white p-4 shadow-soft sm:p-6">
+      <div className="flex min-w-0 gap-3 sm:gap-4">
         <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-action text-sm font-semibold text-white">
           {number}
         </span>
@@ -433,9 +366,54 @@ function FormSection({ number, title, help, children }: { number: string; title:
   );
 }
 
+function MediaFileField({
+  accept,
+  error,
+  help,
+  label,
+  maxBytes,
+  name,
+  onMediaChange,
+}: {
+  accept: string;
+  error?: string;
+  help: string;
+  label: string;
+  maxBytes: number;
+  name: string;
+  onMediaChange: (selected: boolean) => void;
+}) {
+  return (
+    <label className="grid min-w-0 gap-2 rounded-lg border border-line bg-[#fbfcff] p-4 text-sm font-semibold text-ink">
+      {label}
+      <input
+        accept={accept}
+        className="w-full min-w-0 max-w-full rounded-md border border-line bg-white px-3 py-2 text-xs sm:text-sm"
+        name={name}
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+          const maxMb = Math.round(maxBytes / 1024 / 1024);
+          event.target.setCustomValidity("");
+          if (file && !allowedTypes.includes(file.type)) {
+            event.target.setCustomValidity("Bitte nur JPG, PNG oder WebP hochladen.");
+          } else if (file && file.size > maxBytes) {
+            event.target.setCustomValidity(`Die Datei ist zu groß. Maximal ${maxMb} MB sind erlaubt.`);
+          }
+          if (file) onMediaChange(true);
+          event.target.reportValidity();
+        }}
+        type="file"
+      />
+      <span className="text-xs font-normal leading-5 text-muted">{help}</span>
+      {error ? <span className="text-xs font-semibold text-[#a4442b]">{error}</span> : null}
+    </label>
+  );
+}
+
 function Field({ label, error, required, children }: { label: string; error?: string; required?: boolean; children: React.ReactNode }) {
   return (
-    <label className="grid gap-1.5 text-sm font-medium text-ink">
+    <label className="grid min-w-0 gap-1.5 text-sm font-medium text-ink">
       <span>
         {label}
         {required ? <span className="text-[#a4442b]"> *</span> : null}
@@ -446,47 +424,12 @@ function Field({ label, error, required, children }: { label: string; error?: st
   );
 }
 
-function CheckCard({
-  checked,
-  disabled,
-  label,
-  name,
-  onChange,
-  value,
-}: {
-  checked: boolean;
-  disabled?: boolean;
-  label: string;
-  name: string;
-  onChange: () => void;
-  value: string;
-}) {
+function Consent({ name, checked, error, required, children }: { name: string; checked?: boolean; error?: string; required?: boolean; children: React.ReactNode }) {
   return (
-    <label
-      className={`flex min-h-11 items-center gap-3 rounded-md border px-3 py-2 text-sm font-medium ${
-        checked ? "border-action bg-[#eef4ff] text-brand" : "border-line bg-white text-ink"
-      } ${disabled ? "opacity-50" : ""}`}
-    >
-      <input
-        checked={checked}
-        className="h-4 w-4 accent-action"
-        disabled={disabled}
-        name={name}
-        onChange={onChange}
-        type="checkbox"
-        value={value}
-      />
-      {label}
-    </label>
-  );
-}
-
-function Consent({ name, checked, error, children }: { name: string; checked?: boolean; error?: string; children: React.ReactNode }) {
-  return (
-    <label className="grid gap-1 text-sm font-medium leading-6 text-ink">
-      <span className="flex items-start gap-3">
-        <input className="mt-1 h-4 w-4 accent-action" defaultChecked={checked} name={name} type="checkbox" />
-        <span>{children}</span>
+    <label className="grid min-w-0 gap-1 text-sm font-medium leading-6 text-ink">
+      <span className="flex min-w-0 items-start gap-3">
+        <input className="mt-1 h-4 w-4 accent-action" defaultChecked={checked} name={name} required={required} type="checkbox" />
+        <span className="min-w-0">{children}</span>
       </span>
       {error ? <span className="pl-7 text-xs font-semibold text-[#a4442b]">{error}</span> : null}
     </label>

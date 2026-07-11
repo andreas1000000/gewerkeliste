@@ -4,8 +4,10 @@ import { notFound } from "next/navigation";
 import { Shell } from "@/components/shell";
 import { approveSubmission, setSubmissionStatus, updateSubmission } from "@/lib/actions";
 import { getCompanySubmission, getSubmissionDuplicates } from "@/lib/data";
+import { socialPlatformLabel } from "@/lib/social-links";
+import { getSupabaseAdmin } from "@/lib/supabase";
 import { tradeTaxonomy } from "@/lib/trade-taxonomy";
-import type { CompanySubmission } from "@/lib/types";
+import type { CompanyPremiumSubmissionPayload, CompanySubmission, SubmissionUploadedFile } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +24,8 @@ export default async function SubmissionDetailPage({ params, searchParams }: Pag
     const submission = await getCompanySubmission(id);
     const duplicates = await getSubmissionDuplicates(submission);
     const approvedSlug = typeof query.approved === "string" ? query.approved : null;
+    const errorMessage = typeof query.error === "string" ? query.error : null;
+    const media = await getSubmissionMedia(submission);
 
     return (
       <Shell>
@@ -44,6 +48,12 @@ export default async function SubmissionDetailPage({ params, searchParams }: Pag
             <Link className="ml-1 underline" href={`/firma/${approvedSlug}` as Route}>
               Profil ansehen
             </Link>
+          </div>
+        ) : null}
+
+        {errorMessage ? (
+          <div className="mb-6 rounded-lg border border-[#f0b4b4] bg-[#fff5f5] p-4 text-sm font-semibold text-[#8a1f1f]">
+            Freigabe nicht abgeschlossen: {errorMessage}
           </div>
         ) : null}
 
@@ -94,6 +104,44 @@ export default async function SubmissionDetailPage({ params, searchParams }: Pag
               <Data label="Telefon" value={submission.contact_person_phone} />
             </ReadSection>
 
+            <ReadSection title="Medien zur Prüfung">
+              <div className="grid gap-4 md:grid-cols-2">
+                <MediaPreview
+                  alt={`${submission.company_name} Firmenlogo`}
+                  emptyText="Kein Firmenlogo hochgeladen."
+                  label="Firmenlogo"
+                  note="Logo kann nach fachlicher Prüfung in den öffentlichen Betriebseintrag übernommen werden."
+                  src={media.logo.previewUrl}
+                  storedValue={submission.logo_url}
+                  status={mediaStatusLabel(media.logo.status, "Neu hochgeladen")}
+                />
+                <MediaPreview
+                  alt={submission.profile_image_alt || `${submission.company_name} Ansprechpartnerbild`}
+                  emptyText="Kein Ansprechpartnerbild hochgeladen."
+                  label="Ansprechpartnerbild / Kontaktbild"
+                  note="Personenbild nur veröffentlichen, wenn Berechtigung und Zustimmung plausibel sind. Nicht automatisch bei unbestätigten Basisprofilen anzeigen."
+                  src={media.profileImage.previewUrl}
+                  storedValue={submission.profile_image_url}
+                  status={mediaStatusLabel(media.profileImage.status, "Zur Prüfung")}
+                />
+              </div>
+              <div className="grid gap-3 rounded-md border border-line bg-white p-4">
+                <Data label="Ansprechpartner Name pending" value={submission.contact_person_name} />
+                <Data label="Rolle/Funktion pending" value={submission.contact_person_role} />
+              </div>
+              <div className="rounded-md border border-line bg-panel p-4 text-xs leading-5 text-muted">
+                <div className="font-semibold text-ink">Datenschutz-Hinweis</div>
+                <p className="mt-1">
+                  Firmenlogo und Ansprechpartnerbild wurden vom Einreicher hochgeladen. Ein Ansprechpartnerbild ist
+                  personenbezogen und darf erst nach plausibler Berechtigung/Zustimmung öffentlich verwendet werden.
+                </p>
+                <p className="mt-2">
+                  Zustimmung laut Formular: {submission.image_consent_given ? "ja" : "nein"}
+                  {submission.image_consent_timestamp ? ` · ${formatDate(submission.image_consent_timestamp)}` : ""}
+                </p>
+              </div>
+            </ReadSection>
+
             <ReadSection title="Standort">
               <Data label="Adresse" value={[submission.street, submission.house_number].filter(Boolean).join(" ")} />
               <Data label="PLZ / Ort" value={`${submission.postal_code} ${submission.city}`} />
@@ -123,6 +171,8 @@ export default async function SubmissionDetailPage({ params, searchParams }: Pag
               <TagList label="Zertifikate" items={submission.certificates} />
               <TagList label="Herstellerzertifikate" items={submission.manufacturer_certificates} />
             </ReadSection>
+
+            <PremiumSubmissionReview payload={submission.premium_submission_payload} />
           </div>
 
           <aside className="grid gap-6 content-start">
@@ -172,6 +222,10 @@ export default async function SubmissionDetailPage({ params, searchParams }: Pag
                 <label className="flex items-start gap-3 text-sm font-medium text-ink">
                   <input className="mt-1 h-4 w-4 accent-brand" name="verified" type="checkbox" defaultChecked={submission.wants_founder_verification} />
                   Betriebsdaten bestätigt
+                </label>
+                <label className="flex items-start gap-3 text-sm font-medium text-ink">
+                  <input className="mt-1 h-4 w-4 accent-brand" name="verified_start_profile" type="checkbox" defaultChecked={submission.wants_founder_verification} />
+                  Als verifiziertes Startprofil freigeben
                 </label>
                 <label className="flex items-start gap-3 text-sm font-medium text-ink">
                   <input className="mt-1 h-4 w-4 accent-brand" name="public_visible" type="checkbox" defaultChecked />
@@ -260,6 +314,228 @@ function TagList({ label, items }: { label: string; items: string[] }) {
   );
 }
 
+async function PremiumSubmissionReview({ payload }: { payload: CompanyPremiumSubmissionPayload | null }) {
+  if (!payload || (!payload.requested && !payload.social_links.length)) return null;
+
+  const contacts = await Promise.all(payload.contacts.map(async (item) => ({ item, image: await resolvePayloadFile(item.image_file || null) })));
+  const teamMembers = await Promise.all(payload.team_members.map(async (item) => ({ item, image: await resolvePayloadFile(item.image_file || null) })));
+  const referenceMedia = await Promise.all(payload.reference_media.map(async (item) => ({ item, file: await resolvePayloadFile(item.file || null) })));
+  const certificates = await Promise.all(payload.certificates.map(async (item) => ({ item, file: await resolvePayloadFile(item.file || null) })));
+
+  return (
+    <ReadSection title={payload.requested ? "Verifiziertes Startprofil angefragt" : "Kostenlose Profilergänzungen"}>
+      <div className="rounded-md border border-[#9bbbd2] bg-[#f1f7fb] p-4 text-sm leading-6 text-[#17395c]">
+        <div className="font-semibold text-ink">Vom Betrieb eingereicht, noch nicht automatisch öffentlich</div>
+        <p className="mt-1">
+          Social-Media-Links gehören zum Basisprofil. Premiumangaben dienen als Arbeitsgrundlage für das verifizierte
+          Startprofil. Alle Angaben werden erst nach Prüfung in öffentliche Profilmodule übernommen.
+        </p>
+      </div>
+      <PremiumList title="Social Media & weitere Kontaktwege" items={payload.social_links} render={(item) => (
+        <>
+          <Data label="Plattform" value={socialPlatformLabel(item.platform)} />
+          <Data label="URL" value={item.url} />
+          <Data label="Label" value={item.label} />
+        </>
+      )} />
+      <PremiumList title="Ansprechpartner" items={contacts} render={({ item, image }) => (
+        <>
+          <Data label="Name" value={item.name} />
+          <Data label="Rolle" value={item.role} />
+          <Data label="Telefon" value={item.phone} />
+          <Data label="E-Mail" value={item.email} />
+          <PayloadFilePreview file={item.image_file || null} label="Bilddatei" resolved={image} />
+          <Data label="Bildhinweis" value={item.image_note} multiline />
+        </>
+      )} />
+      <PremiumList title="Teamvorstellung" items={teamMembers} render={({ item, image }) => (
+        <>
+          <Data label="Name" value={item.name} />
+          <Data label="Rolle" value={item.role} />
+          <Data label="Beschreibung" value={item.description} multiline />
+          <PayloadFilePreview file={item.image_file || null} label="Bilddatei" resolved={image} />
+          <Data label="Bildhinweis" value={item.image_note} multiline />
+        </>
+      )} />
+      <PremiumList title="Referenzen" items={payload.references} render={(item) => (
+        <>
+          <Data label="Titel" value={item.title} />
+          <Data label="Ort" value={item.location} />
+          <Data label="Jahr" value={item.year ? String(item.year) : null} />
+          <Data label="Zeitraum" value={item.period} />
+          <Data label="Projektart" value={item.project_type} />
+          <TagList label="Leistungen" items={item.services} />
+          <Data label="Beschreibung" value={item.description} multiline />
+          <Data label="Herausforderung" value={item.challenge} multiline />
+          <Data label="Lösung" value={item.solution} multiline />
+          <Data label="Kundentyp" value={item.client_type} />
+        </>
+      )} />
+      <PremiumList title="Referenzbilder" items={referenceMedia} render={({ item, file }) => (
+        <>
+          <Data label="Referenz" value={item.reference_title} />
+          <PayloadFilePreview file={item.file || null} label="Bilddatei" resolved={file} />
+          <Data label="Dateihinweis" value={item.file_note} multiline />
+          <Data label="Bildtitel / Beschreibung" value={item.caption} multiline />
+          <Data label="Alt-Text" value={item.alt_text} />
+        </>
+      )} />
+      <PremiumList title="Nachweise / Zertifikate" items={certificates} render={({ item, file }) => (
+        <>
+          <Data label="Titel" value={item.title} />
+          <Data label="Aussteller" value={item.issuer} />
+          <Data label="Gültig bis" value={item.valid_until} />
+          <Data label="Beschreibung" value={item.description} multiline />
+          <PayloadFilePreview file={item.file || null} label="Datei" resolved={file} />
+          <Data label="Dateihinweis" value={item.file_note} multiline />
+        </>
+      )} />
+      <Data label="Weitere Hinweise" value={payload.notes} multiline />
+    </ReadSection>
+  );
+}
+
+function PremiumList<T>({ items, render, title }: { items: T[]; render: (item: T) => React.ReactNode; title: string }) {
+  return (
+    <div className="rounded-md border border-line bg-[#fbfcff] p-4">
+      <h3 className="text-sm font-semibold text-brand">{title}</h3>
+      {items.length ? (
+        <div className="mt-3 grid gap-3">
+          {items.map((item, index) => (
+            <div key={index} className="grid gap-3 rounded-md border border-line bg-white p-4">
+              {render(item)}
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p className="mt-2 text-sm text-muted">Nicht angegeben</p>
+      )}
+    </div>
+  );
+}
+
+function MediaPreview({
+  alt,
+  emptyText,
+  label,
+  note,
+  src,
+  storedValue,
+  status,
+}: {
+  alt: string;
+  emptyText: string;
+  label: string;
+  note: string;
+  src?: string | null;
+  storedValue?: string | null;
+  status: string;
+}) {
+  return (
+    <div className="rounded-md border border-line bg-[#fbfcff] p-4">
+      <div className="flex items-center justify-between gap-3">
+        <div className="text-sm font-semibold text-ink">{label}</div>
+        <span className="rounded-full border border-line bg-white px-2 py-1 text-xs font-semibold text-muted">{status}</span>
+      </div>
+      {src ? (
+        <>
+          <a className="mt-3 block overflow-hidden rounded-md border border-line bg-white" href={src} rel="noreferrer" target="_blank">
+            <img alt={alt} className="h-44 w-full object-contain p-3" src={src} />
+          </a>
+          <div className="mt-2 break-all text-xs text-muted">{storedValue || src}</div>
+        </>
+      ) : storedValue ? (
+        <div className="mt-3 rounded-md border border-[#f1d08a] bg-[#fff8e8] px-4 py-6 text-sm leading-6 text-[#6d4a00]">
+          Upload-Pfad gespeichert, aber Datei aktuell nicht abrufbar.
+          <div className="mt-2 break-all text-xs">{storedValue}</div>
+        </div>
+      ) : (
+        <div className="mt-3 rounded-md border border-dashed border-line bg-white px-4 py-8 text-center text-sm text-muted">
+          Kein Upload gespeichert. {emptyText}
+        </div>
+      )}
+      <p className="mt-3 text-xs leading-5 text-muted">{note}</p>
+    </div>
+  );
+}
+
+function PayloadFilePreview({
+  file,
+  label,
+  resolved,
+}: {
+  file: SubmissionUploadedFile | null;
+  label: string;
+  resolved: Awaited<ReturnType<typeof resolvePayloadFile>>;
+}) {
+  if (!file) {
+    return <Data label={label} value={null} />;
+  }
+
+  const isImage = file.mime_type.startsWith("image/");
+
+  return (
+    <div className="grid gap-2 border-b border-line pb-3 last:border-b-0 last:pb-0">
+      <dt className="text-xs font-semibold uppercase tracking-normal text-muted">{label}</dt>
+      <dd className="grid gap-2 text-sm text-ink">
+        <div className="flex flex-wrap gap-2 text-xs text-muted">
+          <span className="rounded-full border border-line bg-white px-2 py-1 font-semibold">{file.review_status}</span>
+          <span>{file.original_filename}</span>
+          <span>{file.mime_type}</span>
+          <span>{formatBytes(file.file_size)}</span>
+        </div>
+        {resolved.previewUrl ? (
+          isImage ? (
+            <a className="block overflow-hidden rounded-md border border-line bg-white" href={resolved.previewUrl} rel="noreferrer" target="_blank">
+              <img alt={file.original_filename} className="h-44 w-full object-contain p-3" src={resolved.previewUrl} />
+            </a>
+          ) : (
+            <a className="inline-flex w-fit rounded-md border border-line bg-white px-3 py-2 text-sm font-semibold text-action hover:border-action" href={resolved.previewUrl} rel="noreferrer" target="_blank">
+              Datei zur Prüfung öffnen
+            </a>
+          )
+        ) : (
+          <div className="rounded-md border border-[#f1d08a] bg-[#fff8e8] px-4 py-3 text-sm leading-6 text-[#6d4a00]">
+            Upload-Pfad gespeichert, aber Datei aktuell nicht abrufbar.
+          </div>
+        )}
+        <div className="break-all text-xs text-muted">{file.storage_path}</div>
+      </dd>
+    </div>
+  );
+}
+
+async function getSubmissionMedia(submission: CompanySubmission) {
+  const [logo, profileImage] = await Promise.all([
+    resolveSubmissionMedia(submission.logo_url),
+    resolveSubmissionMedia(submission.profile_image_url),
+  ]);
+
+  return { logo, profileImage };
+}
+
+async function resolveSubmissionMedia(value: string | null) {
+  if (!value) return { previewUrl: null as string | null, status: "missing" as const };
+  if (/^https?:\/\//i.test(value)) return { previewUrl: value, status: "available" as const };
+
+  const supabase = getSupabaseAdmin();
+  const path = value.replace(/^company-media\//, "");
+  const { data, error } = await supabase.storage.from("company-media").createSignedUrl(path, 60 * 60);
+  if (error || !data?.signedUrl) return { previewUrl: null as string | null, status: "unavailable" as const };
+
+  return { previewUrl: data.signedUrl, status: "available" as const };
+}
+
+async function resolvePayloadFile(file: SubmissionUploadedFile | null) {
+  return resolveSubmissionMedia(file?.storage_path || null);
+}
+
+function mediaStatusLabel(status: "missing" | "available" | "unavailable", availableLabel: string) {
+  if (status === "available") return availableLabel;
+  if (status === "unavailable") return "Pfad vorhanden, nicht abrufbar";
+  return "Nicht vorhanden";
+}
+
 function InfoCard({ title, value }: { title: string; value: string }) {
   return (
     <div className="rounded-lg border border-line bg-white p-5 shadow-soft">
@@ -302,6 +578,13 @@ function tradeLabel(slug: string) {
 function supportLabel(submission: CompanySubmission) {
   if (!submission.wants_support_contribution) return "nein";
   return submission.support_contribution_amount ? `${submission.support_contribution_amount} EUR` : "ja";
+}
+
+function formatBytes(value: number) {
+  if (!Number.isFinite(value)) return "unbekannte Größe";
+  if (value < 1024) return `${value} B`;
+  if (value < 1024 * 1024) return `${Math.round(value / 1024)} KB`;
+  return `${(value / 1024 / 1024).toFixed(1)} MB`;
 }
 
 function statusLabel(status: string) {

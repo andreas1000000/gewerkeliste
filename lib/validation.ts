@@ -1,5 +1,6 @@
 import { z } from "zod";
-import type { ClaimStatus, CompanyFormState } from "@/lib/types";
+import type { ClaimStatus, CompanyFormState, CompanyPremiumSubmissionPayload } from "@/lib/types";
+import { normalizeSocialLink } from "@/lib/social-links";
 import { canonicalTradeSlug, publicTradeTaxonomy } from "@/lib/trade-taxonomy";
 
 export type CompanyInput = {
@@ -122,6 +123,7 @@ export const businessSubmissionSchema = z
     memberships: z.array(z.string()),
     certificates: z.array(z.string()),
     manufacturerCertificates: z.array(z.string()),
+    imageConsentGiven: z.boolean(),
     wantsFounderVerification: z.boolean(),
     supportContribution: z.enum(["none", "49", "99", "199", "custom"]),
     supportCustomAmount: z.preprocess(emptyToNull, z.coerce.number().min(1, "Bitte Betrag angeben.").nullable()),
@@ -209,6 +211,8 @@ export function parseBusinessSubmissionForm(formData: FormData) {
     contactRole: getString(formData, "contactRole"),
     contactPersonEmail: getString(formData, "contactPersonEmail"),
     contactPersonPhone: getString(formData, "contactPersonPhone"),
+    mediaContactName: getString(formData, "mediaContactName"),
+    mediaContactRole: getString(formData, "mediaContactRole"),
     street: getString(formData, "street"),
     houseNumber: getString(formData, "houseNumber"),
     postalCode: getString(formData, "postalCode"),
@@ -230,6 +234,7 @@ export function parseBusinessSubmissionForm(formData: FormData) {
     memberships: splitList(getString(formData, "memberships")),
     certificates: splitList(getString(formData, "certificates")),
     manufacturerCertificates: splitList(getString(formData, "manufacturerCertificates")),
+    imageConsentGiven: formData.get("imageConsentGiven") === "on",
     wantsFounderVerification: formData.get("wantsFounderVerification") === "on",
     supportContribution: getString(formData, "supportContribution") || "none",
     supportCustomAmount: getString(formData, "supportCustomAmount"),
@@ -251,7 +256,89 @@ export function parseBusinessSubmissionForm(formData: FormData) {
     };
   }
 
-  return { data: result.data };
+  return { data: { ...result.data, premiumSubmissionPayload: parsePremiumSubmissionPayload(formData) } };
+}
+
+export function parsePremiumSubmissionPayload(formData: FormData): CompanyPremiumSubmissionPayload {
+  const requested = formData.get("premiumStartProfileRequested") === "on";
+  const socialLinks = rowsFromFormData(formData, ["socialPlatform", "socialUrl"]).map((_, index) => {
+    const normalized = normalizeSocialLink(
+      getStringAt(formData, "socialPlatform", index),
+      getStringAt(formData, "socialUrl", index),
+      getStringAt(formData, "socialLabel", index),
+    );
+    return normalized
+      ? {
+          platform: normalized.platform,
+          url: normalized.url,
+          label: normalized.label,
+          sort_order: index + 1,
+        }
+      : null;
+  }).filter((item): item is NonNullable<typeof item> => Boolean(item));
+
+  const payload: CompanyPremiumSubmissionPayload = {
+    requested,
+    request_label: requested ? "Verifiziertes Startprofil fuer 490 EUR netto / 12 Monate angefragt" : null,
+    contacts: requested
+      ? rowsFromFormData(formData, ["premiumContactName", "premiumContactImageFile"]).map((_, index) => ({
+          name: getStringAt(formData, "premiumContactName", index),
+          role: emptyToNullableString(getStringAt(formData, "premiumContactRole", index)),
+          phone: emptyToNullableString(getStringAt(formData, "premiumContactPhone", index)),
+          email: emptyToNullableString(getStringAt(formData, "premiumContactEmail", index)),
+          image_note: emptyToNullableString(getStringAt(formData, "premiumContactImageNote", index)),
+          sort_order: index + 1,
+        })).filter((item, index) => item.name || item.role || item.phone || item.email || item.image_note || hasUploadedFileAt(formData, "premiumContactImageFile", index))
+      : [],
+    team_members: requested
+      ? rowsFromFormData(formData, ["premiumTeamName", "premiumTeamImageFile"]).map((_, index) => ({
+          name: getStringAt(formData, "premiumTeamName", index),
+          role: emptyToNullableString(getStringAt(formData, "premiumTeamRole", index)),
+          description: emptyToNullableString(getStringAt(formData, "premiumTeamDescription", index)),
+          image_note: emptyToNullableString(getStringAt(formData, "premiumTeamImageNote", index)),
+          sort_order: index + 1,
+        })).filter((item, index) => item.name || item.role || item.description || item.image_note || hasUploadedFileAt(formData, "premiumTeamImageFile", index))
+      : [],
+    references: requested
+      ? rowsFromFormData(formData, ["premiumReferenceTitle"]).map((_, index) => ({
+          title: getStringAt(formData, "premiumReferenceTitle", index),
+          location: emptyToNullableString(getStringAt(formData, "premiumReferenceLocation", index)),
+          year: parseOptionalYear(getStringAt(formData, "premiumReferenceYear", index)),
+          period: parseOptionalPeriod(getStringAt(formData, "premiumReferenceYear", index)),
+          project_type: emptyToNullableString(getStringAt(formData, "premiumReferenceProjectType", index)),
+          services: splitList(getStringAt(formData, "premiumReferenceServices", index)),
+          description: emptyToNullableString(getStringAt(formData, "premiumReferenceDescription", index)),
+          challenge: emptyToNullableString(getStringAt(formData, "premiumReferenceChallenge", index)),
+          solution: emptyToNullableString(getStringAt(formData, "premiumReferenceSolution", index)),
+          client_type: emptyToNullableString(getStringAt(formData, "premiumReferenceClientType", index)),
+          sort_order: index + 1,
+        })).filter((item) => item.title || item.location || item.project_type || item.services.length || item.description || item.challenge || item.solution || item.client_type)
+      : [],
+    reference_media: requested
+      ? rowsFromFormData(formData, ["premiumReferenceMediaFileNote", "premiumReferenceMediaFile"]).map((_, index) => ({
+          reference_title: emptyToNullableString(getStringAt(formData, "premiumReferenceMediaReferenceTitle", index)),
+          file_note: emptyToNullableString(getStringAt(formData, "premiumReferenceMediaFileNote", index)),
+          caption: emptyToNullableString(getStringAt(formData, "premiumReferenceMediaCaption", index)),
+          alt_text: emptyToNullableString(getStringAt(formData, "premiumReferenceMediaAltText", index)),
+          sort_order: index + 1,
+        })).filter((item, index) => item.reference_title || item.file_note || item.caption || item.alt_text || hasUploadedFileAt(formData, "premiumReferenceMediaFile", index))
+      : [],
+    certificates: requested
+      ? rowsFromFormData(formData, ["premiumCertificateTitle", "premiumCertificateFile"]).map((_, index) => ({
+          title: getStringAt(formData, "premiumCertificateTitle", index),
+          issuer: emptyToNullableString(getStringAt(formData, "premiumCertificateIssuer", index)),
+          valid_until: emptyToNullableString(getStringAt(formData, "premiumCertificateValidUntil", index)),
+          description: emptyToNullableString(getStringAt(formData, "premiumCertificateDescription", index)),
+          file_note: emptyToNullableString(getStringAt(formData, "premiumCertificateFileNote", index)),
+          sort_order: index + 1,
+        })).filter((item, index) => item.title || item.issuer || item.valid_until || item.description || item.file_note || hasUploadedFileAt(formData, "premiumCertificateFile", index))
+      : [],
+    social_links: socialLinks,
+    profile_sections: [],
+    notes: requested ? emptyToNullableString(getString(formData, "premiumSubmissionNotes")) : null,
+  };
+
+  return payload;
 }
 
 function getString(formData: FormData, key: string) {
@@ -261,6 +348,42 @@ function getString(formData: FormData, key: string) {
 
 function getStringArray(formData: FormData, key: string) {
   return formData.getAll(key).filter((value): value is string => typeof value === "string" && value.trim().length > 0);
+}
+
+function rowsFromFormData(formData: FormData, keys: string[]) {
+  const length = Math.max(0, ...keys.map((key) => formData.getAll(key).length));
+  return Array.from({ length });
+}
+
+function getStringAt(formData: FormData, key: string, index: number) {
+  const value = formData.getAll(key)[index];
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function emptyToNullableString(value: string) {
+  const trimmed = value.trim();
+  return trimmed ? trimmed : null;
+}
+
+function hasUploadedFileAt(formData: FormData, key: string, index: number) {
+  const value = formData.getAll(key)[index];
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    typeof (value as File).size === "number" &&
+    (value as File).size > 0
+  );
+}
+
+function parseOptionalYear(value: string) {
+  const parsed = Number(value);
+  return Number.isInteger(parsed) && parsed >= 1900 && parsed <= 2100 ? parsed : null;
+}
+
+function parseOptionalPeriod(value: string) {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  return parseOptionalYear(trimmed) ? null : trimmed;
 }
 
 function splitList(value: string) {
@@ -283,6 +406,8 @@ function getBusinessSubmissionValues(formData: FormData) {
     contactRole: getString(formData, "contactRole"),
     contactPersonEmail: getString(formData, "contactPersonEmail"),
     contactPersonPhone: getString(formData, "contactPersonPhone"),
+    mediaContactName: getString(formData, "mediaContactName"),
+    mediaContactRole: getString(formData, "mediaContactRole"),
     street: getString(formData, "street"),
     houseNumber: getString(formData, "houseNumber"),
     postalCode: getString(formData, "postalCode"),
@@ -303,6 +428,7 @@ function getBusinessSubmissionValues(formData: FormData) {
     memberships: getString(formData, "memberships"),
     certificates: getString(formData, "certificates"),
     manufacturerCertificates: getString(formData, "manufacturerCertificates"),
+    imageConsentGiven: formData.get("imageConsentGiven") === "on",
     wantsFounderVerification: formData.get("wantsFounderVerification") === "on",
     supportContribution: getString(formData, "supportContribution") || "none",
     supportCustomAmount: getString(formData, "supportCustomAmount"),

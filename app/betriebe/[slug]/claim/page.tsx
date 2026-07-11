@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import type { Route } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { ClaimAssistant } from "@/components/claim-assistant";
 import { SiteHeader } from "@/components/site-header";
-import { getCompanyBySlug } from "@/lib/data";
+import { canonicalPublicCompanySlug, canonicalPublicCompanySlugFromSlug, getCompanyBySlug } from "@/lib/data/public-directory";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -21,15 +21,28 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   return {
     title: `${company.name} kostenlos übernehmen | GewerkeListe.com`,
     description: `Kostenloses Basisprofil von ${company.name} übernehmen, Daten korrigieren und Leistungen zur Prüfung einreichen.`,
+    robots: {
+      index: false,
+      follow: true,
+    },
   };
 }
 
 export default async function CompanyClaimWizardPage({ params }: PageProps) {
   const { slug } = await params;
+  const canonicalRequestedSlug = canonicalPublicCompanySlugFromSlug(slug);
+  if (canonicalRequestedSlug !== slug) {
+    permanentRedirect(`/betriebe/${canonicalRequestedSlug}/claim`);
+  }
+
   const company = await getClaimCompany(slug);
   if (!company) notFound();
+  const canonicalSlug = canonicalPublicCompanySlug(company);
+  if (canonicalSlug !== slug) {
+    permanentRedirect(`/betriebe/${canonicalSlug}/claim`);
+  }
 
-  const initialTrades = [company.trades?.slug].filter((item): item is string => Boolean(item));
+  const initialTrades = getInitialTrades(company);
 
   return (
     <main className="min-h-screen bg-[#f7f8fb] text-ink">
@@ -52,16 +65,20 @@ export default async function CompanyClaimWizardPage({ params }: PageProps) {
           <h1 className="mt-3 text-4xl font-semibold tracking-normal text-[#07173d]">Profil kostenlos übernehmen</h1>
           <p className="mt-4 max-w-3xl text-base leading-7 text-ink">
             Übernehmen Sie den bestehenden Betriebseintrag für <span className="font-semibold">{company.name}</span>,
-            korrigieren Sie Ihre Angaben und zeigen Sie Auftraggebern klar, welche Leistungen Sie anbieten.
+            korrigieren Sie Angaben und ergänzen Sie Gewerke, Leistungen und Kontaktinformationen zur Prüfung.
           </p>
           <div className="mt-5 grid gap-3 sm:grid-cols-3">
             <Benefit>Kontaktdaten korrigieren</Benefit>
             <Benefit>Leistungen sichtbar machen</Benefit>
-            <Benefit>Vertrauen durch geprüfte Betriebsdaten aufbauen</Benefit>
+            <Benefit>Datenbestätigung nachvollziehbar machen</Benefit>
           </div>
           <p className="mt-5 rounded-md border border-[#bde7cc] bg-[#f1fbf5] px-4 py-3 text-sm leading-6 text-[#24523a]">
             Die Übernahme des Basisprofils ist kostenlos. Änderungen werden geprüft, bevor sie veröffentlicht werden.
             Freiwillige Förderbeiträge haben keinen Einfluss auf Prüfung, Darstellung oder Verifizierung.
+          </p>
+          <p className="mt-3 rounded-md border border-line bg-[#fbfcff] px-4 py-3 text-xs leading-5 text-muted">
+            Eine Profilübernahme bestätigt Profildaten. Sie ist keine Empfehlung, keine Qualitätsgarantie und keine
+            Bewertung der ausgeführten Arbeiten.
           </p>
         </section>
 
@@ -79,6 +96,21 @@ async function getClaimCompany(slug: string) {
   } catch {
     return null;
   }
+}
+
+function getInitialTrades(company: Awaited<ReturnType<typeof getClaimCompany>>) {
+  if (!company) return [];
+
+  const confirmedCompanyTrades = (company.company_trades || [])
+    .filter((match) => match.status !== "rejected" && match.visibility_level !== "internal" && Boolean(match.trades?.slug))
+    .sort((a, b) => (b.confidence_score || 0) - (a.confidence_score || 0))
+    .map((match) => match.trades?.slug);
+
+  return [company.trades?.slug, ...confirmedCompanyTrades].filter(uniqueString);
+}
+
+function uniqueString(value: string | null | undefined, index: number, values: Array<string | null | undefined>): value is string {
+  return Boolean(value) && values.indexOf(value) === index;
 }
 
 function Benefit({ children }: { children: React.ReactNode }) {
