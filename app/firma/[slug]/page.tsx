@@ -127,7 +127,6 @@ export default async function CompanyPublicPage({ params }: PageProps) {
     const profileDescription = getProfileDescription(company, trade, location, visibleDescription);
     const serviceDisplay = getServiceDisplay(company);
     const specializationItems = getSpecializationItems(company);
-    const sourceItems = getSourceItems(company, websiteHref);
     const serviceAreaItems = getServiceAreaItems(company);
     const referenceItems = getTextBlockItems(company.references_text);
     const proofItems = getProfileProofItems(company);
@@ -308,30 +307,6 @@ export default async function CompanyPublicPage({ params }: PageProps) {
                 </ProfileCard>
               ) : null}
 
-              {(sourceItems.length || company.verified) ? (
-                <ProfileCard title="Datenquellen / Datenstatus">
-                  {sourceItems.length ? (
-                    <ul className="grid gap-3">
-                      {sourceItems.map((item) => (
-                        <li key={`${item.label}-${item.value}`} className="rounded-md border border-line bg-[#fbfcff] px-4 py-3">
-                          <div className="text-sm font-semibold text-ink">{item.label}</div>
-                          {item.href ? (
-                            <a className="mt-1 inline-flex min-h-8 items-center break-words text-sm text-action hover:underline" href={item.href} rel="noreferrer" target="_blank">
-                              {item.value}
-                            </a>
-                          ) : (
-                            <p className="mt-1 text-sm leading-6 text-muted">{item.value}</p>
-                          )}
-                        </li>
-                      ))}
-                    </ul>
-                  ) : null}
-                  <p className={sourceItems.length ? "mt-4 text-xs leading-5 text-muted" : "text-xs leading-5 text-muted"}>
-                    GewerkeListe beschreibt Datenstatus und öffentlich erkennbare Angaben. Daraus entsteht keine
-                    Qualitäts-, Verfügbarkeits- oder Empfehlungsgarantie.
-                  </p>
-                </ProfileCard>
-              ) : null}
             </div>
 
             <aside className="order-1 grid content-start gap-5 lg:order-2">
@@ -1080,36 +1055,6 @@ function getServiceDisplay(company: PublicCompanyWithTrade) {
   }
 
   return { groups: [], totalCount: 0, sourceLabel: "" };
-}
-
-function getSourceItems(company: PublicCompanyWithTrade, websiteHref?: string) {
-  const items: Array<{ label: string; value: string; href?: string }> = [];
-  if (websiteHref) {
-    items.push({ label: "Firmenwebsite", value: company.website_url || websiteHref, href: websiteHref });
-  }
-
-  for (const match of company.company_trades || []) {
-    if (!match.source || match.status === "rejected" || match.visibility_level === "internal") continue;
-    if (match.source.includes("phase3-local-fixture")) continue;
-    const label = sourceLabel(match.source);
-    const value = match.evidence ? `${label}: ${match.evidence}` : label;
-    if (!items.some((item) => item.value === value)) {
-      items.push({ label: "Gewerkesignal", value });
-    }
-    if (items.length >= 5) break;
-  }
-
-  return items;
-}
-
-function sourceLabel(value: string) {
-  const normalized = value.toLowerCase();
-  if (normalized.includes("official") || normalized.includes("website")) return "Firmenwebsite";
-  if (normalized.includes("impressum")) return "Impressum";
-  if (normalized.includes("submission")) return "Betriebseintrag";
-  if (normalized.includes("mapping")) return "Strukturierte Gewerkezuordnung";
-  if (normalized.includes("regional") || normalized.includes("coverage")) return "Regionale Recherche";
-  return value.replace(/[-_]+/g, " ");
 }
 
 function getServiceAreaItems(company: PublicCompanyWithTrade) {

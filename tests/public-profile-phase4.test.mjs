@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 import { breadcrumbJsonLd, localBusinessJsonLd } from "../lib/seo.ts";
 import {
@@ -99,6 +100,53 @@ test("local business JSON-LD parses and includes required public fields", () => 
   assert.equal(parsed.name, "MetallteQ");
   assert.equal(parsed.mainEntityOfPage, "https://gewerkeliste.com/firma/metallteq-83101-rohrdorf");
   assert.equal(parsed.contactPoint["@type"], "ContactPoint");
+});
+
+test("public profile page does not render internal trade signal evidence", async () => {
+  const source = await readFile("app/firma/[slug]/page.tsx", "utf8");
+
+  assert.doesNotMatch(source, /Gewerkesignal/);
+  assert.doesNotMatch(source, /Betriebseintrag:/);
+  assert.doesNotMatch(source, /match\.evidence/);
+  assert.doesNotMatch(source, /Datenquellen \/ Datenstatus/);
+  assert.doesNotMatch(source, /GewerkeListe beschreibt Datenstatus/);
+  assert.match(source, /title="Leistungen"/);
+  assert.match(source, /<ServiceGroups groups=\{serviceDisplay\.groups\}/);
+});
+
+test("trade evidence is excluded from public JSON-LD while confirmed trades and services remain", () => {
+  const jsonLd = localBusinessJsonLd(
+    {
+      ...sampleCompany(),
+      company_trades: [
+        {
+          status: "admin_confirmed",
+          visibility_level: "verified_public",
+          source: "submission",
+          evidence: "Betriebseintrag: interner Rohtext mit wiederholten Gewerken und Leistungen",
+          trades: { name: "Metallbau", slug: "metallbau" },
+        },
+      ],
+      company_services: [
+        {
+          status: "confirmed",
+          confidence_score: 100,
+          source: "submission",
+          evidence: "Evidence-Rohtext: Balkone, Gelaender und Stahlbau",
+          services: { name: "Balkone", slug: "balkone" },
+        },
+      ],
+    },
+    "/firma/metallteq-83101-rohrdorf",
+    "Metallbau in Rohrdorf",
+  );
+  const serialized = JSON.stringify(jsonLd);
+
+  assert.doesNotMatch(serialized, /Betriebseintrag:/);
+  assert.doesNotMatch(serialized, /Evidence-Rohtext/);
+  assert.doesNotMatch(serialized, /submission/);
+  assert.match(serialized, /Metallbau/);
+  assert.match(serialized, /Balkone/);
 });
 
 test("JSON-LD does not contain local URLs, website sameAs, or unsafe links", () => {
