@@ -9,6 +9,7 @@ import {
   publicJsonLdMediaUrl,
   publicProfileRobots,
 } from "../lib/public-profile-seo.ts";
+import { buildPublicServiceDisplay } from "../lib/public-profile-content.ts";
 import {
   getPublicProfileEntitlements,
   isApprovedPublicStatus,
@@ -269,6 +270,53 @@ test("primary contact card is not repeated for a single structured contact", asy
 
   assert.match(source, /const primaryContact = getPrimaryProfileContact\(company, premiumProfile\.contacts\);/);
   assert.match(source, /\{multipleContacts\.length > 1 \?/);
+});
+
+test("public profile services show all confirmed and submitted items without a visible cap", () => {
+  const confirmedServices = Array.from({ length: 29 }, (_, index) => ({
+    status: "confirmed",
+    confidence_score: 100 - index,
+    source: "test",
+    services: {
+      id: `service-${index}`,
+      name: `Bestätigte Leistung ${index + 1}`,
+      slug: `bestaetigte-leistung-${index + 1}`,
+      service_families: {
+        name: index < 15 ? "Metallbau" : "Sonderbau",
+        slug: index < 15 ? "metallbau" : "sonderbau",
+        trades: { name: "Metallbau", slug: "metallbau" },
+      },
+    },
+  }));
+
+  const display = buildPublicServiceDisplay({
+    company_services: confirmedServices,
+    selected_services: ["Bestätigte Leistung 1", "Sonderanfertigung"],
+    specializations: ["Designmetallbau"],
+    description: "Leistungen: Sollte nicht benutzt werden, wenn Struktur vorhanden ist.",
+  });
+
+  assert.equal(display.totalCount, 31);
+  assert.equal(display.groups.flatMap((group) => group.items).length, 31);
+  assert.equal(display.groups.flatMap((group) => group.items).at(-1)?.label, "Designmetallbau");
+  assert.match(display.sourceLabel, /Strukturierte und freigegebene Leistungen/);
+});
+
+test("public profile services fall back to approved submission services for basis profiles", () => {
+  const display = buildPublicServiceDisplay({
+    company_services: [],
+    selected_services: ["Balkone", "Treppen", "Balkone"],
+    specializations: ["Geländerbau"],
+    description: null,
+  });
+
+  assert.equal(display.totalCount, 3);
+  assert.deepEqual(display.groups.flatMap((group) => group.items.map((item) => item.label)), [
+    "Balkone",
+    "Treppen",
+    "Geländerbau",
+  ]);
+  assert.match(display.sourceLabel, /Betriebseintrag/);
 });
 
 function sampleCompany() {

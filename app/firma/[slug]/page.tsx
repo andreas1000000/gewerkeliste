@@ -4,17 +4,15 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import { SiteHeader } from "@/components/site-header";
-import {
-  extractServiceListFromDescription,
-  groupServicesForDisplay,
-  publicProfileDescription,
-} from "@/lib/company-display";
+import { SocialPlatformIcon } from "@/components/social-platform-icon";
+import { publicProfileDescription } from "@/lib/company-display";
 import {
   canonicalPublicCompanySlug,
   canonicalPublicCompanySlugFromSlug,
   getCompanyBySlug,
   getCompanyBySlugForMetadata,
 } from "@/lib/data/public-directory";
+import { buildPublicServiceDisplay, type PublicServiceDisplayGroup } from "@/lib/public-profile-content";
 import { certificateVerificationInfo, getPublicProfileEntitlements, type PublicProfileEntitlements } from "@/lib/public-profile-rules";
 import {
   buildPublicProfileDescription,
@@ -25,7 +23,7 @@ import {
 } from "@/lib/public-profile-seo";
 import { breadcrumbJsonLd, jsonLd, localBusinessJsonLd } from "@/lib/seo";
 import { siteConfig } from "@/lib/site-config";
-import { socialPlatformColorClass, socialPlatformLabel, socialPlatformMark } from "@/lib/social-links";
+import { normalizeSocialPlatform, socialPlatformColorClass, socialPlatformLabel } from "@/lib/social-links";
 import type { PublicClaimStatus, PublicCompanyWithTrade } from "@/lib/types/public-directory";
 
 export const dynamic = "force-dynamic";
@@ -37,16 +35,6 @@ type PageProps = {
 type ProfileStatus = {
   shortLabel: string;
   tone: "verified" | "claimed" | "unverified";
-};
-
-type ServiceDisplayItem = {
-  label: string;
-  slug?: string;
-};
-
-type ServiceDisplayGroup = {
-  label: string;
-  items: ServiceDisplayItem[];
 };
 
 type PrimaryProfileContact = {
@@ -130,7 +118,7 @@ export default async function CompanyPublicPage({ params }: PageProps) {
     const address = getProfileAddress(company);
     const visibleDescription = businessProfileDescription(publicProfileDescription(company.description));
     const profileDescription = getProfileDescription(company, trade, location, visibleDescription);
-    const serviceDisplay = getServiceDisplay(company);
+    const serviceDisplay = buildPublicServiceDisplay(company);
     const specializationItems = getSpecializationItems(company);
     const serviceAreaItems = getServiceAreaItems(company);
     const referenceItems = getTextBlockItems(company.references_text);
@@ -476,18 +464,20 @@ function SocialIconLinks({
   return (
     <ul className="flex flex-wrap gap-2">
       {links.map((link) => {
-        const label = link.label || socialPlatformLabel(link.platform);
+        const platform = normalizeSocialPlatform(link.platform);
+        if (!platform) return null;
+        const label = link.label || socialPlatformLabel(platform);
         return (
           <li key={link.id}>
             <a
-              aria-label={`${label} von ${companyName} öffnen`}
-              className={`inline-flex h-10 w-10 items-center justify-center rounded-full border text-xs font-bold shadow-soft transition hover:-translate-y-0.5 hover:shadow-md ${socialPlatformColorClass(link.platform)}`}
+              aria-label={`${companyName} auf ${label} öffnen`}
+              className={`inline-flex h-11 w-11 items-center justify-center rounded-full border shadow-soft transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-action ${socialPlatformColorClass(platform)}`}
               href={link.url}
               rel="noopener noreferrer"
               target="_blank"
               title={label}
             >
-              <span aria-hidden="true">{socialPlatformMark(link.platform)}</span>
+              <SocialPlatformIcon platform={platform} />
             </a>
           </li>
         );
@@ -866,50 +856,25 @@ function getPrimaryContactAction(
   return null;
 }
 
-function serviceDisplayGroupsFromNames(services: string[]): ServiceDisplayGroup[] {
-  return groupServicesForDisplay(services).map((group) => ({
-    label: group.label,
-    items: group.items.map(serviceDisplayItemFromName),
-  }));
-}
-
-function serviceDisplayItemFromName(name: string): ServiceDisplayItem {
-  return { label: name };
-}
-
-function ServiceGroups({ groups }: { groups: ServiceDisplayGroup[] }) {
+function ServiceGroups({ groups }: { groups: PublicServiceDisplayGroup[] }) {
   return (
     <div className="grid gap-3">
-      {groups.map((group, index) => (
-        <ServiceAccordion key={group.label} group={group} open={index === 0} />
+      {groups.map((group) => (
+        <section key={group.label} className="rounded-md border border-line bg-[#fbfcff] p-4">
+          <div>
+            <h3 className="text-sm font-semibold text-ink">{group.label}</h3>
+            <p className="mt-1 text-xs text-muted">{group.items.length} Leistungen</p>
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {group.items.map((item) => (
+              <span key={item.label} className="rounded-md border border-line bg-white px-3 py-2 text-sm font-semibold text-ink">
+                {item.label}
+              </span>
+            ))}
+          </div>
+        </section>
       ))}
     </div>
-  );
-}
-
-function ServiceAccordion({ group, open }: { group: ServiceDisplayGroup; open: boolean }) {
-  return (
-    <details className="group rounded-md border border-line bg-[#fbfcff] p-4" open={open}>
-      <summary className="cursor-pointer list-none rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-action">
-        <span className="flex items-center justify-between gap-4">
-          <span>
-            <span className="block text-sm font-semibold text-ink">{group.label}</span>
-            <span className="mt-1 block text-xs text-muted">{group.items.length} Leistungen</span>
-          </span>
-          <span className="rounded-md border border-line bg-white px-3 py-1 text-xs font-semibold text-action">
-            <span className="group-open:hidden">Leistungen anzeigen</span>
-            <span className="hidden group-open:inline">Leistungen ausblenden</span>
-          </span>
-        </span>
-      </summary>
-      <div className="mt-4 flex flex-wrap gap-2">
-        {group.items.map((item) => (
-          <span key={item.label} className="rounded-md border border-line bg-white px-3 py-2 text-sm font-semibold text-ink">
-            {item.label}
-          </span>
-        ))}
-      </div>
-    </details>
   );
 }
 
@@ -1034,57 +999,6 @@ function businessProfileDescription(description: string) {
   return cleaned;
 }
 
-function getServiceDisplay(company: PublicCompanyWithTrade) {
-  const confirmedServices = (company.company_services || [])
-    .filter((match) => match.status === "confirmed" && Boolean(match.services?.name))
-    .sort((a, b) => (b.confidence_score || 0) - (a.confidence_score || 0));
-
-  if (confirmedServices.length) {
-    const groupsByFamily = new Map<string, ServiceDisplayItem[]>();
-    for (const match of confirmedServices) {
-      const service = match.services;
-      if (!service?.name) continue;
-      const family = service.service_families?.name || "Weitere Leistungen";
-      const current = groupsByFamily.get(family) || [];
-      if (!current.some((item) => item.label === service.name)) {
-        current.push({ label: service.name, slug: service.slug });
-      }
-      groupsByFamily.set(family, current);
-    }
-
-    const groups = Array.from(groupsByFamily.entries()).map(([label, items]) => ({ label, items }));
-    return {
-      groups,
-      totalCount: groups.reduce((count, group) => count + group.items.length, 0),
-      sourceLabel: "Strukturierte Leistungen aus dem öffentlichen Profil.",
-    };
-  }
-
-  const selectedServices = Array.isArray(company.selected_services)
-    ? company.selected_services.map((item) => String(item).trim()).filter(Boolean)
-    : [];
-  if (selectedServices.length) {
-    const services = Array.from(new Set(selectedServices));
-    return {
-      groups: serviceDisplayGroupsFromNames(services),
-      totalCount: services.length,
-      sourceLabel: "Leistungen aus dem öffentlichen Betriebseintrag.",
-    };
-  }
-
-  const descriptionServices = extractServiceListFromDescription(company.description);
-  if (descriptionServices.length) {
-    const services = Array.from(new Set(descriptionServices));
-    return {
-      groups: serviceDisplayGroupsFromNames(services),
-      totalCount: services.length,
-      sourceLabel: "Leistungen aus der öffentlichen Profilbeschreibung.",
-    };
-  }
-
-  return { groups: [], totalCount: 0, sourceLabel: "" };
-}
-
 function getServiceAreaItems(company: PublicCompanyWithTrade) {
   const regions = Array.isArray(company.service_regions) ? company.service_regions : [];
   const postalCodes = Array.isArray(company.service_postal_codes) ? company.service_postal_codes : [];
@@ -1092,15 +1006,13 @@ function getServiceAreaItems(company: PublicCompanyWithTrade) {
 
   return [...regions, ...postalCodes, ...countries]
     .map((item) => String(item).trim())
-    .filter(Boolean)
-    .slice(0, 12);
+    .filter(Boolean);
 }
 
 function getSpecializationItems(company: PublicCompanyWithTrade) {
   return (Array.isArray(company.specializations) ? company.specializations : [])
     .map((item) => String(item).trim())
-    .filter(Boolean)
-    .slice(0, 12);
+    .filter(Boolean);
 }
 
 function getTextBlockItems(value?: string | null) {
@@ -1109,8 +1021,7 @@ function getTextBlockItems(value?: string | null) {
   return value
     .split(/\n|;/)
     .map((item) => item.trim().replace(/^[\-–•\s]+/, ""))
-    .filter((item) => item.length >= 3)
-    .slice(0, 8);
+    .filter((item) => item.length >= 3);
 }
 
 function getProfileProofItems(company: PublicCompanyWithTrade) {
@@ -1120,8 +1031,7 @@ function getProfileProofItems(company: PublicCompanyWithTrade) {
     ...(Array.isArray(company.manufacturer_certificates) ? company.manufacturer_certificates : []),
   ]
     .map((item) => String(item).trim())
-    .filter(Boolean)
-    .slice(0, 12);
+    .filter(Boolean);
 }
 
 function hasPremiumTrustContent(profile: NonNullable<PublicCompanyWithTrade["premium_profile"]>) {

@@ -30,21 +30,9 @@ const PLATFORM_LABELS: Record<SocialPlatform, string> = {
   xing: "Xing",
 };
 
-const PLATFORM_MARKS: Record<SocialPlatform, string> = {
-  instagram: "IG",
-  whatsapp: "WA",
-  facebook: "f",
-  linkedin: "in",
-  tiktok: "TT",
-  youtube: "YT",
-  x: "X",
-  pinterest: "P",
-  xing: "X",
-};
-
 const PLATFORM_COLOR_CLASSES: Record<SocialPlatform, string> = {
   instagram: "border-[#d62976]/30 bg-[#d62976] text-white",
-  whatsapp: "border-[#25d366]/30 bg-[#25d366] text-[#053b1d]",
+  whatsapp: "border-[#25d366]/30 bg-[#25d366] text-white",
   facebook: "border-[#1877f2]/30 bg-[#1877f2] text-white",
   linkedin: "border-[#0a66c2]/30 bg-[#0a66c2] text-white",
   tiktok: "border-[#111111]/30 bg-[#111111] text-white",
@@ -77,11 +65,6 @@ export function normalizeSocialPlatform(value?: string | null): SocialPlatform |
 export function socialPlatformLabel(value?: string | null) {
   const platform = normalizeSocialPlatform(value);
   return platform ? PLATFORM_LABELS[platform] : "Online-Profil";
-}
-
-export function socialPlatformMark(value?: string | null) {
-  const platform = normalizeSocialPlatform(value);
-  return platform ? PLATFORM_MARKS[platform] : "↗";
 }
 
 export function socialPlatformColorClass(value?: string | null) {

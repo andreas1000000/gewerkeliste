@@ -16,6 +16,7 @@ import { companySlug } from "@/lib/slug";
 import { normalizeSocialLink } from "@/lib/social-links";
 import type {
   PublicCompanyMetadata,
+  PublicCompanyServiceRelation,
   PublicCompanyTradeMatch,
   PublicCompanyWithTrade,
 } from "@/lib/types/public-directory";
@@ -405,9 +406,7 @@ export async function getCompanyBySlug(slug: string) {
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("companies")
-    .select(
-      "*, trades(id, name, slug), company_trades(confidence_score, source, evidence, status, trades(id, name, slug)), company_services(confidence_score, source, status, services(id, name, slug, service_families(name, slug, trades(name, slug))))",
-    )
+    .select("*, trades(id, name, slug), company_trades(confidence_score, source, evidence, status, trades(id, name, slug))")
     .eq("slug", slug)
     .eq("public_visible", true)
     .single();
@@ -417,7 +416,8 @@ export async function getCompanyBySlug(slug: string) {
     if (isMissingPublicProfileSchemaError(error)) return getCompanyBySlugFallback(slug);
     throw error;
   }
-  const company = await applyApprovedSubmissionPublicDetails(normalizePublicCompanyServices(data as PublicCompanyWithTrade));
+  const withServices = await attachConfirmedCompanyServices(data as PublicCompanyWithTrade);
+  const company = await applyApprovedSubmissionPublicDetails(normalizePublicCompanyServices(withServices));
   if (isLocalFixtureCompanyRecord(company)) return null;
   const resolvedCompany = await resolveSingleCompanyMedia(company);
   return attachPublicPremiumProfile(resolvedCompany);
@@ -615,7 +615,8 @@ async function getCompanyBySlugFallback(slug: string) {
     if (isPublicCompanyNotFoundError(error)) return null;
     throw error;
   }
-  const company = await applyApprovedSubmissionPublicDetails(data as PublicCompanyWithTrade);
+  const withServices = await attachConfirmedCompanyServices(data as PublicCompanyWithTrade);
+  const company = await applyApprovedSubmissionPublicDetails(normalizePublicCompanyServices(withServices));
   if (isLocalFixtureCompanyRecord(company)) return null;
   const resolvedCompany = await resolveSingleCompanyMedia(company);
   return attachPublicPremiumProfile(resolvedCompany);
@@ -665,6 +666,48 @@ async function resolveCompanyMedia<T extends PublicCompanyWithTrade>(companies: 
 
 async function attachPublicPremiumProfile<T extends PublicCompanyWithTrade>(company: T) {
   return { ...company, premium_profile: await getApprovedCompanyPremiumProfile(company) };
+}
+
+async function attachConfirmedCompanyServices<T extends PublicCompanyWithTrade>(company: T): Promise<T> {
+  return {
+    ...company,
+    company_services: await selectConfirmedCompanyServices(company.id),
+  };
+}
+
+async function selectConfirmedCompanyServices(companyId: string): Promise<PublicCompanyServiceRelation[]> {
+  const supabase = getSupabaseAdmin();
+  const fullSelect = "confidence_score, source, status, services(id, name, slug, service_families(name, slug, trades(name, slug)))";
+  const basicSelect = "confidence_score, source, status, services(id, name, slug)";
+  const { data, error } = await supabase
+    .from("company_services")
+    .select(fullSelect)
+    .eq("company_id", companyId)
+    .eq("status", "confirmed")
+    .order("confidence_score", { ascending: false });
+
+  if (!error) return normalizeServiceRows(data);
+  if (!isMissingPublicProfileSchemaError(error)) throw error;
+
+  const fallback = await supabase
+    .from("company_services")
+    .select(basicSelect)
+    .eq("company_id", companyId)
+    .eq("status", "confirmed")
+    .order("confidence_score", { ascending: false });
+
+  if (fallback.error) {
+    if (isMissingPublicProfileSchemaError(fallback.error)) return [];
+    throw fallback.error;
+  }
+
+  return normalizeServiceRows(fallback.data);
+}
+
+function normalizeServiceRows(data: unknown): PublicCompanyServiceRelation[] {
+  return ((Array.isArray(data) ? data : []) as PublicCompanyServiceRelation[]).filter(
+    (match) => match.status === "confirmed" && Boolean(match.services?.name),
+  );
 }
 
 async function getApprovedCompanyPremiumProfile(company: PublicCompanyWithTrade): Promise<CompanyPremiumProfile> {

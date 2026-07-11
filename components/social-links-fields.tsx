@@ -1,8 +1,8 @@
+import { SocialPlatformIcon } from "@/components/social-platform-icon";
 import {
   SOCIAL_PLATFORMS,
   socialPlatformColorClass,
   socialPlatformLabel,
-  socialPlatformMark,
   type SocialPlatform,
 } from "@/lib/social-links";
 
@@ -54,9 +54,9 @@ function SocialLinkRow({ platform, value }: { platform: SocialPlatform; value?: 
       <div className="flex min-w-0 items-center gap-3">
         <span
           aria-hidden="true"
-          className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border text-xs font-bold ${socialPlatformColorClass(platform)}`}
+          className={`inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border ${socialPlatformColorClass(platform)}`}
         >
-          {socialPlatformMark(platform)}
+          <SocialPlatformIcon platform={platform} className="h-6 w-6" />
         </span>
         <div className="min-w-0">
           <div className="text-sm font-semibold text-ink">{socialPlatformLabel(platform)}</div>
