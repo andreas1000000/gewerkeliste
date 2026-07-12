@@ -88,4 +88,6 @@ Secret-Vergleich soll keine direkte String-Gleichheit als zusätzliche Timing-Si
 
 Auswirkung: Es gibt keine Änderung an Secrets, Environment-Werten, Service-Role-Rechten, Datenbank,
 RLS oder Nutzerrollen. Die Schutzgrenze bleibt Basic Auth; weitergehende Authentifizierung und
-feingranulare RLS bleiben separate P0-Arbeit.
+feingranulare RLS bleiben separate P0-Arbeit. Wenn eine Preview-Umgebung vor der Anwendung durch
+Vercel-SSO geschützt wird, wird diese Einschränkung in der Preview-Abnahme offengelegt und nicht
+durch einen Bypass umgangen; die Middleware-Antwort bleibt durch direkte Tests abzusichern.
