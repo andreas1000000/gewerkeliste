@@ -30,7 +30,7 @@ wenn sichtbarer Produkt-, Sicherheits- oder Skalierungsnutzen, Tests und unabhae
 
 - [x] Product-Owner-Betriebsmodell, CI und geschuetzter `main`-Branch (Stufe 1A/1B, auf `main`).
 - [~] Autonome Product-Engine mit Roadmap-, Delivery- und Release-Skills (dieser Draft-PR).
-- [ ] Unabhaengige Reviews und Preview-QA als wiederholbarer Delivery-Gate ausfuehren und nachweisen.
+- [x] Unabhaengige Reviews und Preview-QA als wiederholbarer Delivery-Gate ausfuehren und nachweisen.
 - [ ] Admin- und interne Zugangswege weiter absichern.
 - [ ] Service-Role-Nutzung auf Least Privilege reduzieren.
 - [ ] Dependency-Risiken kontrolliert beheben.

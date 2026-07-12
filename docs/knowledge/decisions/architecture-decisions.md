@@ -56,3 +56,21 @@ Auswahl, Lieferung und Release-Nachkontrolle als getrennte Schritte ab.
 Grund: Andreas Moser soll technische Einzelschritte nicht orchestrieren muessen. Gleichzeitig bleiben
 Arbeitspakete einzeln, Reviews unabhaengig, Production-Freigaben menschlich und Releases ueber den
 geschuetzten Pull-Request-Prozess nachvollziehbar.
+
+## ADR-006: Delivery-Evidenz als geschlossener CI-Gate
+
+Status: active
+
+Entscheidung: Jeder Pull Request weist die Preview-QA-Klassifizierung, die vollständige Diff-Einordnung,
+ein unabhängiges Review und den Status offener P0-/P1-Findings im PR-Text aus. Der CI-Gate leitet die
+erwartete Klassifizierung aus einer geschlossenen Allowlist nicht laufzeitwirksamer Governance-/CI-Dateien
+ab. Unbekannte Pfade und alle ausgelieferten Anwendungsänderungen werden immer als `REQUIRED` behandelt.
+
+Grund: Preview-QA darf nur bei vollständig belegtem, nicht laufzeitwirksamem Diff entfallen. Eine
+deterministische Prüfung verhindert, dass ein PR durch eine unpassende Selbsteinstufung oder offene
+P0-/P1-Findings als abgeschlossen erscheint.
+
+Auswirkung: Der Gate liest nur Git-Diff und PR-Evidenz, nutzt keine Secrets, keine Supabase-Verbindung
+und keine externe Aktion. Für reine Governance-/CI-PRs bleibt die Einordnung `NOT APPLICABLE – keine
+ausgelieferte Anwendung geändert`; bei Anwendungscode, Daten-, Auth-, SEO- oder Konfigurationsänderungen
+ist Preview-QA verpflichtend.
