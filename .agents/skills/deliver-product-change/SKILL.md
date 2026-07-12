@@ -20,15 +20,23 @@ Arbeit bei einem geprueften Draft-PR. Merge und Production bleiben ausserhalb di
 5. Einen primaeren Implementierungsagenten auf eigenem Branch arbeiten lassen. Pro Branch schreibt nur
    dieser Agent Anwendungscode.
 6. Automatische Tests ausfuehren: Typecheck, Lint, Tests und Build; weitere relevante Checks ergaenzen.
-7. Einen unabhaengigen Review-Agenten mit Diff und Akzeptanzkriterien beauftragen. Der Implementierer
-   darf die eigene Arbeit nicht allein freigeben.
+7. Einen unabhaengigen Review-Agenten mit vollstaendigem Diff, Akzeptanzkriterien und der
+   Laufzeitklassifizierung beauftragen. Der Implementierer darf die eigene Arbeit nicht allein
+   freigeben.
 8. Bei Auth, RLS, Service Role, Migrationen, Claims, Verifizierung, Sichtbarkeit, Uploads, E-Mail,
    Zahlungen oder Massenaktionen eine Security- und Datenpruefung durchfuehren.
 9. Branch pushen und einen Draft-PR gegen `main` erstellen. CI abwarten.
-10. Vercel-Preview pruefen, wenn eine Preview erzeugt wird. Domain-Alias und Preview-URL nicht mit
-    Production verwechseln.
-11. Preview-QA anhand der sichtbaren Akzeptanzkriterien ausfuehren.
-12. Nach jedem Lauf eine Product-Owner-Statuskarte ausgeben. Nur bei gruenen Gates darf sie eine
+10. Den vollstaendigen PR-Diff als `PREVIEW-QA: REQUIRED` oder `PREVIEW-QA: NOT APPLICABLE`
+    klassifizieren.
+11. Bei `REQUIRED` die Vercel-Preview und die sichtbaren Akzeptanzkriterien pruefen. Bei SSO oder
+    anderer fehlender Pruefbarkeit keinen Umgehungsversuch starten; das Ergebnis bleibt `YELLOW` oder
+    `RED`.
+12. `NOT APPLICABLE` nur setzen, wenn der vollstaendige Diff ausschliesslich Dokumentation,
+    Repository-Skills, Agentenanweisungen, Roadmaps, Entscheidungsregister, GitHub-Vorlagen, reine
+    Governance oder CI-Konfiguration ohne ausgelieferte Anwendungsveraenderung betrifft. Die
+    Product-Owner-Statuskarte muss die Begruendung `PREVIEW-QA: NOT APPLICABLE – keine ausgelieferte
+    Anwendung geändert` enthalten, und der unabhaengige Reviewer muss diese Einordnung bestaetigen.
+13. Nach jedem Lauf eine Product-Owner-Statuskarte ausgeben. Nur bei gruenen Gates darf sie eine
     Freigabeempfehlung enthalten.
 
 ## Gate-Regeln
@@ -42,8 +50,11 @@ Arbeit bei einem geprueften Draft-PR. Merge und Production bleiben ausserhalb di
   ausgefuehrt oder als Blocker berichtet ist.
 - Die beiden Required Checks `Quality gates` und `Dependency audit` muessen erfolgreich sein. Ein
   fehlender oder fehlgeschlagener Check stoppt die Freigabe.
-- Eine fehlende Preview oder nicht durchgefuehrte Preview-QA wird als `YELLOW` oder `RED` gemeldet,
-  nicht als Erfolg behauptet und nicht zur Freigabe empfohlen.
+- Bei laufzeitwirksamen Aenderungen wird eine fehlende, wegen SSO nicht pruefbare oder nicht
+  durchgefuehrte Preview-QA als `YELLOW` oder `RED` gemeldet, nicht als Erfolg behauptet und nicht zur
+  Freigabe empfohlen.
+- `NOT APPLICABLE` ist nicht `NOT RUN` oder `SKIPPED` und darf nur nach vollstaendiger Diff-Pruefung
+  und unabhaengiger Bestaetigung verwendet werden.
 - Tests muessen den konkreten Scope abdecken; Dokumentation allein gilt nicht als Produktabschluss.
 - Bei kritischen Daten- oder Sicherheitsbereichen sind Diff, Migration, RLS, Service-Role-Nutzung,
   personenbezogene Daten und Rollback-Punkt einzeln zu pruefen.
@@ -51,6 +62,8 @@ Arbeit bei einem geprueften Draft-PR. Merge und Production bleiben ausserhalb di
 ## Harte Grenzen
 
 - Niemals mergen, `main` direkt pushen oder Production deployen.
+- Niemals `vercel --yes` verwenden, wenn dadurch fuer einen reinen Dokumentations- oder Agenten-PR
+  ein Projekt oder eine Verknuepfung entstehen kann. Vercel-SSO wird nicht umgangen.
 - Keine Remote-SQL-Aktion, keine Live-Datenveraenderung, keine oeffentliche Massenaktion und keine
   E-Mail ohne die jeweils erforderliche Freigabe.
 - Keine Secrets in Logs, Reports, PR-Beschreibung oder Entscheidungskarte.
@@ -62,19 +75,22 @@ Arbeit bei einem geprueften Draft-PR. Merge und Production bleiben ausserhalb di
 STATUS: GREEN | YELLOW | RED
 GESCHAEFTLICHES ERGEBNIS: <was ist fuer Nutzer oder Betriebe besser?>
 PREVIEW: <exakte URL oder unverifiziert>
+PREVIEW-QA: REQUIRED - <Ergebnis> | NOT APPLICABLE – keine ausgelieferte Anwendung geändert
+APPLICABILITY-BEGRUENDUNG: <vollstaendiger Diff und Einordnung>
 FACHLICHE ABNAHME:
 1. <sichtbarer Punkt>
 2. <sichtbarer Punkt>
 3. <sichtbarer Punkt>
 AUTOMATISCHE PRUEFUNGEN: Typecheck, Lint, Tests, Build, GitHub-CI
 UNABHAENGIGES REVIEW: <Ergebnis und offene Findings>
+REVIEW-BESTAETIGUNG: <Reviewer bestaetigt REQUIRED oder NOT APPLICABLE>
 SECURITY/DATENPRUEFUNG: <Ergebnis oder nicht relevant>
 OFFENE RISIKEN: <nur echte Restrisiken>
 EMPFEHLUNG: freigeben | Aenderungen verlangen | nicht freigeben
 ```
 
-Bei `GREEN`, erfolgreicher Preview-QA, gruenen Required Checks und `EMPFEHLUNG: freigeben` wird der
-exakte Freigabesatz angezeigt:
+Bei `GREEN`, erfolgreicher Preview-QA oder belastbar bestaetigtem `NOT APPLICABLE`, gruenen Required
+Checks und `EMPFEHLUNG: freigeben` wird der exakte Freigabesatz angezeigt:
 
 `Product-Owner-Freigabe für PR #X erteilt.`
 

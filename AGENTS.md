@@ -95,6 +95,8 @@ Die operative Produktentwicklung wird ueber die Repository-Skills unter `.agents
 - `run-product-roadmap` bestimmt aus dem kanonischen Roadmap- und Entscheidungsstand genau ein naechstes unblocked Arbeitspaket.
 - `deliver-product-change` liefert dieses Arbeitspaket vollstaendig bis Draft-PR, Preview-QA und unabhaengigem Review.
 - `release-approved-change` darf nur nach dem exakten Product-Owner-Freigabesatz mergen und den automatischen Production-Release nachkontrollieren.
+- Preview-QA ist bei laufzeitwirksamen Aenderungen Pflicht. Bei reinen Dokumentations-, Skill-, Governance-, Roadmap-, Entscheidungsregister-, Vorlagen- oder CI-only-Aenderungen darf sie nur nach vollstaendiger Diff-Pruefung und unabhaengiger Bestaetigung als `NOT APPLICABLE` dokumentiert werden.
+- `NOT APPLICABLE` ist nie gleich `NOT RUN` oder `SKIPPED`. Vercel-SSO wird nicht umgangen und `vercel --yes` wird fuer reine Dokumentations- oder Agenten-PRs nicht verwendet.
 
 Die kanonische operative Reihenfolge steht in `docs/agent-company/IMPLEMENTATION_ROADMAP.md`. Strategische Dokumente liefern Leitplanken und Kontext, ersetzen diese operative Reihenfolge aber nicht.
 

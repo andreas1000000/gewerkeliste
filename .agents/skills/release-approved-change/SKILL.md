@@ -27,8 +27,29 @@ oder ein GitHub-Vercel-Success-Status ersetzt die Freigabe nicht.
 2. Pruefen, dass der Head-Commit seit der Freigabe unveraendert ist.
 3. Diff gegen `main`, Freigabeumfang, offene Review-Threads, CI, Required Checks und Branch Protection
    verifizieren.
-4. Preview, Akzeptanzkriterien und offene P0-/P1-Findings verifizieren.
+4. Preview-QA-Einordnung, Akzeptanzkriterien und offene P0-/P1-Findings verifizieren.
 5. Bei Abweichung, fehlender Zuordnung oder offenem Blocker stoppen und berichten.
+
+## Preview-QA-Einordnung
+
+Vor jeder Preview-Entscheidung den vollstaendigen, unveraenderten PR-Diff pruefen.
+
+- `PREVIEW-QA: REQUIRED` gilt bei Anwendungscode, UI, oeffentlichen oder internen Routen, Rendering,
+  Suche, SEO, Datenfluessen, Authentifizierung, Supabase/Datenbank, API-Verhalten oder Environment-/
+  Vercel-Konfiguration.
+- `PREVIEW-QA: NOT APPLICABLE – keine ausgelieferte Anwendung geändert` ist nur zulaessig, wenn der
+  vollstaendige Diff ausschliesslich Dokumentation, Repository-Skills, Agentenanweisungen, Roadmaps,
+  Entscheidungsregister, GitHub-Issue-/PR-Vorlagen, reine Governance oder CI-Konfiguration ohne
+  ausgelieferte Anwendungsveraenderung betrifft.
+- Fuer `NOT APPLICABLE` muessen die vollstaendige Diff-Pruefung, die Begruendung in der Product-Owner-
+  Statuskarte und die Bestaetigung des unabhaengigen Reviewers vorliegen.
+- `NOT APPLICABLE` ist nicht `NOT RUN` oder `SKIPPED`. Bei laufzeitwirksamen oder unklaren Aenderungen
+  bleibt eine fehlende oder wegen SSO nicht pruefbare Preview-QA ein `YELLOW`-/`RED`-Blocker.
+
+Ein Release-Preflight darf `NOT APPLICABLE` akzeptieren, wenn genau diese Bedingungen, unveraenderter
+Head-Commit, erfolgreiche Required Checks und keine offenen P0-/P1-Findings belegt sind. Vercel-SSO
+wird nicht umgangen; `vercel --yes` und temporaere Projekte werden fuer reine Governance-PRs nicht
+verwendet.
 
 ## Geschuetzter Release
 
