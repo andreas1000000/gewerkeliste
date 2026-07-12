@@ -93,6 +93,7 @@ test("migration models pending and approved municipality assignments without pub
   assert.equal(explicitGrantStatements.length, 1);
   assert.match(explicitGrantStatements[0], /\bto\s+service_role\s*;/i);
   assert.ok(migration.indexOf("revoke all on table") < migration.indexOf("grant select, insert, update, delete"));
+  assert.ok(migration.indexOf("revoke all on function") < migration.indexOf("grant select, insert, update, delete"));
   assert.match(seedMigration, /insert into municipalities/);
   assert.equal((seedMigration.match(/\('[0-9]{8}',/g) || []).length, pilotMunicipalities.length);
   assert.match(seedMigration, /Source SHA256: [a-f0-9]{64}/);
