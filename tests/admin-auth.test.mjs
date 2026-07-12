@@ -4,9 +4,16 @@ import { NextRequest } from "next/server.js";
 import {
   hasMatchingSecret,
   isAuthorized,
-  isProtectedPath,
   parseBasicCredentials,
 } from "../lib/admin-auth.ts";
+import {
+  canAccessRequiredRole,
+  getInternalAccessPolicy,
+  getRequiredRole,
+  internalRoles,
+  isProtectedPath,
+  roleMatrix,
+} from "../lib/internal-access-policy.ts";
 import { middleware } from "../middleware.ts";
 
 function basic(username, password) {
@@ -22,6 +29,35 @@ test("protects only the intended internal path segments", () => {
   assert.equal(isProtectedPath("/administer"), false);
   assert.equal(isProtectedPath("/company/example"), false);
   assert.equal(isProtectedPath("/gewerke"), false);
+});
+
+test("exposes the minimal role matrix without activating future identities", () => {
+  assert.deepEqual(internalRoles, ["admin", "internal_editor", "business_user", "public_user"]);
+  assert.deepEqual(roleMatrix.map((item) => [item.role, item.status]), [
+    ["admin", "active"],
+    ["internal_editor", "planned"],
+    ["business_user", "planned"],
+    ["public_user", "active"],
+  ]);
+  assert.equal(canAccessRequiredRole("admin", "admin"), true);
+  assert.equal(canAccessRequiredRole("internal_editor", "admin"), false);
+  assert.equal(canAccessRequiredRole("business_user", "admin"), false);
+  assert.equal(canAccessRequiredRole("public_user", "admin"), false);
+});
+
+test("maps protected segments to the active admin policy and leaves similar prefixes public", () => {
+  assert.equal(getRequiredRole("/admin"), "admin");
+  assert.equal(getRequiredRole("/admin/claims"), "admin");
+  assert.equal(getRequiredRole("/planner/contacts"), "admin");
+  assert.equal(getRequiredRole("/companies/example/edit"), "admin");
+  assert.equal(getRequiredRole("/trades"), "admin");
+  assert.deepEqual(getInternalAccessPolicy("/admin"), {
+    requiredRole: "admin",
+    authentication: "basic_secret",
+    status: "active",
+  });
+  assert.equal(getInternalAccessPolicy("/administer"), null);
+  assert.equal(canAccessRequiredRole("public_user", getRequiredRole("/administer")), true);
 });
 
 test("malformed Basic authorization fails closed without throwing", () => {

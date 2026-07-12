@@ -39,8 +39,8 @@ Roadmap-Backlog entsteht nicht.
 - [x] Product-Owner-Betriebsmodell, CI und geschuetzter `main`-Branch (Stufe 1A/1B, auf `main`).
 - [x] Autonome Product-Engine mit Roadmap-, Delivery- und Release-Skills.
 - [x] Unabhaengige Reviews, Delivery-Evidenz und Preview-QA-Klassifizierung als wiederholbaren Gate ausfuehren und nachweisen.
-- [x] Bestehende Admin- und interne Zugangswege fail-closed haerten (PR #4, Basic Auth). Eine vollstaendige Benutzer-, Rollen- und RLS-Architektur ist ausdruecklich nicht Teil dieses Abschlusses.
-- [ ] Naechsten minimalen Admin-/Benutzer-/Rollen-Architektur-Slice festlegen und umsetzen.
+- [~] Admin- und interne Zugangswege weiter absichern (Basic-Auth-Grenze und minimaler Rollenvertrag umgesetzt; echte Benutzer-/RLS-Arbeiten offen).
+- [x] Minimalen Admin-/Benutzer-/Rollen-Architektur-Slice festlegen und umsetzen.
   - Exit-Kriterien: Entscheidungsregister mit Bedrohungsmodell und Rollenmatrix fuer Admin, interne Bearbeitung, Betrieb und oeffentliche Nutzer.
   - Exit-Kriterien: Ein minimaler, getesteter Slice ist implementiert; keine Live-RLS- oder Datenbankmigration ohne separates Arbeitspaket und ausdrueckliche Freigabe.
   - Exit-Kriterien: Unautorisierte, autorisierte und fehlerhafte Pfade sind mit reproduzierbaren Tests belegt.

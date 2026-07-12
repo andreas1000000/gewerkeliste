@@ -198,3 +198,38 @@ Auswirkung: Die Roadmap ordnet zunaechst den minimalen Admin-/Rollen-Slice, Serv
 Dependency-Risiken sowie Backup/Migration/Release/Rollback. Danach folgen Profile, Claim/Review,
 Suche, Taxonomie, Provenienz und fachlich reduzierte Admin-Prozesse; jedes Paket benoetigt eigene
 Akzeptanz- und Exit-Kriterien.
+
+## ADR-013: Minimaler Rollenvertrag fuer interne Pfade
+
+Status: active
+
+Entscheidung: Die Rollen `admin`, `internal_editor`, `business_user` und `public_user` bilden den
+verbindlichen Minimalvertrag fuer spaetere Benutzer- und Berechtigungsarbeit. Aktuell ist nur
+`admin` fuer die internen Pfade `/admin`, `/planner`, `/companies` und `/trades` aktiv. Dieser
+Zugriff wird weiterhin ausschliesslich ueber das vorhandene `ADMIN_SECRET` in der Basic-Auth-
+Middleware nachgewiesen. `internal_editor` und `business_user` bleiben geplant und erhalten bis
+zu einer separaten Identitaets-, Scope- und RLS-Entscheidung keinen Zugriff. `public_user` darf nur
+oeffentliche, freigegebene Verzeichnisdaten lesen.
+
+Rollenmatrix:
+
+| Rolle | Status | Zugriff | Authentifizierung |
+| --- | --- | --- | --- |
+| `admin` | aktiv | Alle aktuell geschuetzten internen Pfade und Freigabeentscheidungen | Basic Auth mit `ADMIN_SECRET` |
+| `internal_editor` | geplant | Interne Bearbeitung ohne finale Freigabe | Explizite Benutzeridentitaet und Berechtigung erforderlich |
+| `business_user` | geplant | Eigene Betriebsdaten nach einem freigegebenen Claim-Prozess | Explizite Benutzeridentitaet, Besitzbezug und Scope-Pruefung erforderlich |
+| `public_user` | aktiv | Oeffentliche, freigegebene Verzeichnisdaten | Keine Anmeldung erforderlich |
+
+Threat Model und Gegenmassnahmen:
+
+| Bedrohung | Gegenmassnahme | Verbleibende Luecke |
+| --- | --- | --- |
+| Unauthentifizierter Zugriff auf interne Pfade | Segmentgenaue Middleware-Policy und fail-closed Basic Auth | Keine individuelle Benutzeridentitaet |
+| Aehnlicher Pfad wie `/administer` wird versehentlich geschuetzt | Exakte Segmentgrenzen in einer zentralen Policy | Neue Pfade muessen bewusst in die Policy aufgenommen werden |
+| Fehlerhafter oder manipulierter Authorization-Header | Parser verwirft ungueltige Header; Middleware antwortet reproduzierbar mit 401 | Basic Auth bleibt ein gemeinsames Secret |
+| Fehlende Laufzeitkonfiguration | Middleware verweigert den Request mit privater 500-Antwort | Secret-Rotation und Monitoring sind noch nicht modelliert |
+| Gestohlenes Secret oder fehlende Trennung von Verantwortlichkeiten | Keine Aktivierung weiterer Rollen ohne separate Auth-/RLS-Arbeit | Session-, Nutzer-, Scope- und Audit-Modell fehlen noch |
+
+Auswirkung: Die Rollenmatrix ist zentral im Code testbar, ohne Benutzerkonten, Claims, Migrationen,
+RLS-Policies, Service-Role-Rechte oder Nutzerdaten zu veraendern. Die Policy ist ein enger
+Architekturbaustein, kein Ersatz fuer eine spaetere echte Benutzer- und Rollenarchitektur.
