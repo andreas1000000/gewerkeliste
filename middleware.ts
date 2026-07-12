@@ -16,7 +16,7 @@ export async function middleware(request: NextRequest) {
 
   const adminSecret = process.env.ADMIN_SECRET;
   if (!adminSecret) {
-    return new NextResponse("Internal authentication configuration error", {
+    return new NextResponse("Internal server error", {
       status: 500,
       headers: PRIVATE_RESPONSE_HEADERS,
     });

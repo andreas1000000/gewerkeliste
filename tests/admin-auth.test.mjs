@@ -137,7 +137,9 @@ test("middleware fails closed without revealing configuration details", async ()
     const response = await middleware(request("/admin"));
 
     assert.equal(response.status, 500);
-    assert.equal(await response.text(), "Internal authentication configuration error");
+    const body = await response.text();
+    assert.equal(body, "Internal server error");
+    assert.doesNotMatch(body, /ADMIN_SECRET|configuration|Supabase|service.role/i);
     assert.equal(response.headers.get("cache-control"), "no-store");
     assert.equal(response.headers.get("x-robots-tag"), "noindex, nofollow");
   } finally {
