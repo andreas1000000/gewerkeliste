@@ -4,6 +4,7 @@ import Link from "next/link";
 import { BusinessEntryForm } from "@/components/business-entry-form";
 import { SiteHeader } from "@/components/site-header";
 import { publicTradeTaxonomy } from "@/lib/trade-taxonomy";
+import { pilotCounties, pilotMunicipalities } from "@/lib/municipality-catalog";
 
 export const metadata: Metadata = {
   title: "Betrieb kostenlos eintragen oder Profil übernehmen | GewerkeListe.com",
@@ -78,7 +79,7 @@ export default function RegisterCompanyPage() {
         </div>
 
         <div id="eintrag-starten" className="mt-8 scroll-mt-6">
-          <BusinessEntryForm trades={publicTradeTaxonomy()} />
+          <BusinessEntryForm counties={pilotCounties} municipalities={pilotMunicipalities} trades={publicTradeTaxonomy()} />
         </div>
       </section>
     </main>

@@ -514,6 +514,7 @@ function normalizeSubmission(item: unknown) {
     service_regions: arrayField(raw.service_regions),
     postal_codes: arrayField(raw.postal_codes),
     service_countries: arrayField(raw.service_countries),
+    municipality_codes: arrayField(raw.municipality_codes),
     memberships: arrayField(raw.memberships),
     certificates: arrayField(raw.certificates),
     manufacturer_certificates: arrayField(raw.manufacturer_certificates),

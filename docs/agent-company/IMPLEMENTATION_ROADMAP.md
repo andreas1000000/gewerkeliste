@@ -79,6 +79,18 @@ Roadmap-Backlog entsteht nicht.
 - [~] Admin-Prozesse auf fachliche Entscheidungen reduzieren.
   - Exit-Kriterien: Jeder Admin-Schritt ist einer fachlichen Entscheidung, einem Status, einer Begruendung und einer Audit-Spur zugeordnet.
   - Exit-Kriterien: Technische Routine wird automatisiert; offene Produkt-, Rechts-, Secret-, Live-Daten- und irreversible Entscheidungen bleiben beim Product Owner.
+- [~] Gemeindebasierte Tätigkeitsgebiete im Rosenheimer Pilotcluster (Slice 1: amtlicher Katalog, lokale Karte und Submission-Speicherung; Slice 2: Review, exakte Gemeindesuche und Profil; Slice 3: öffentliche regionale Verfügbarkeit und Erweiterungsworkflow).
+  - Exit-Kriterien Slice 1: Die freigegebene Pilot-Allowlist stammt reproduzierbar aus VG250, ist AGS-basiert, lokal visualisiert und serverseitig validiert.
+  - Exit-Kriterien Slice 2: Nur freigegebene Betrieb-Gemeinde-Zuordnungen wirken auf exakte Suche und öffentliche Profile; Sitz, Radius und PLZ reichen nicht.
+  - Exit-Kriterien Slice 3: Regionale Verfügbarkeit und spätere Kreis-Erweiterungen werden aus demselben Manifest transparent und ohne Vollständigkeitsbehauptung abgeleitet.
+- [ ] Footer-, Hilfe-, Sicherheits- und Service-Informationsarchitektur schrittweise umsetzen (Referenz: `docs/knowledge/product/footer-service-pages.md`).
+  - Slice 1: vorhandene Navigation und tote Links bereinigen.
+  - Slice 2: Hilfe/FAQ und Datenkorrektur.
+  - Slice 3: Sicherheit und Inhalte melden.
+  - Slice 4: Nutzungsbedingungen und rechtliche Bedarfspruefung.
+  - Slice 5: Orte-, Regionen- und Firmenuebersichten.
+  - Slice 6: Presse und Sicherheitskontakt.
+  - Slice 7: Magazin, Karriere und Partnerschaften.
 
 ## P2 - Datenqualitaet und Marktabdeckung
 
@@ -101,6 +113,18 @@ Roadmap-Backlog entsteht nicht.
 - [ ] Verifiziertes Startprofil erst anbieten, wenn die zugesagten Funktionen stabil verfuegbar, getestet und fachlich abgenommen sind.
 - [ ] Die derzeitige Preisgrundlage von 490 EUR netto fuer 12 Monate bleibt dokumentiert und wird ohne neue Freigabe nicht live veraendert.
 - [ ] Zahlung, Rechnung, Verlaengerung und Kuendigung erst nach gesonderter Security-, Rechts- und Product-Owner-Freigabe aktivieren.
+
+### Verbindliche Preis-/Entitlement-Slices
+
+- [~] Slice 1: Preis- und Entitlement-Vertrag als zentrale Grundlage (dieser Draft-PR).
+  - Exit-Kriterien: Zentrale Konfiguration definiert Basisprofil, verifiziertes Startprofil, 490 EUR netto Gesamtpreis, zwölf Monate, einmalige Zahlung, keine automatische Verlängerung, kein Monatsabo, keine monatliche Kündigung, keine Leadgebühr, keine Provision sowie keine Änderung von Suchrelevanz oder Ranking durch Zahlung.
+  - Exit-Kriterien: Basis-/Verified-Feature-Matrix und nicht-destruktive Bestandsschutzregeln sind zentral testbar dokumentiert.
+  - Exit-Kriterien: Verkaufsfreigabe bleibt NEIN; es gibt keine Bestellung, Zahlung, Rechnung oder Aktivierung eines kostenpflichtigen Zeitraums.
+- [ ] Slice 2: Datenmodell und Bestandsschutz mit eigener Security-/Datenprüfung und sicherer, wiederholbarer Migration.
+- [ ] Slice 3: Formular, Validierung und Speicherung für Basis-Kontakt und verifizierte Unternehmenskanäle.
+- [ ] Slice 4: Serverseitige Entitlements und öffentliche Profile einschließlich HTML, Accessibility, JSON-LD, OpenGraph und Twitter Cards.
+- [ ] Slice 5: Preisseite und öffentliche Kommunikation erst nach belegter Funktionsreife.
+- [ ] Slice 6: Laufzeit, Ablauf und sichere Reaktivierung ohne Datenlöschung.
 
 ## Delivery-Status und Entscheidungsregister
 

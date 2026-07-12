@@ -199,37 +199,131 @@ Dependency-Risiken sowie Backup/Migration/Release/Rollback. Danach folgen Profil
 Suche, Taxonomie, Provenienz und fachlich reduzierte Admin-Prozesse; jedes Paket benoetigt eigene
 Akzeptanz- und Exit-Kriterien.
 
-## ADR-013: Minimaler Rollenvertrag fuer interne Pfade
+## ADR-013: Zentraler Preis-/Entitlement-Vertrag vor öffentlicher Kommunikation
 
 Status: active
+Datum: 2026-07-12
+
+Entscheidung: Das dauerhaft kostenlose Basisprofil umfasst vollständige fachliche Auffindbarkeit,
+bestätigte Gewerke und Leistungen, Spezialisierungen, Einsatzregionen, direkte Kontaktaufnahme,
+Firmenlogo sowie einen Hauptansprechpartner mit Name und Funktion. Das verifizierte Startprofil ist
+das einzige kostenpflichtige Profil: 490 EUR netto Gesamtpreis für zwölf Monate, einmalige Zahlung,
+keine automatische Verlängerung, kein Monatsabo und keine monatliche Kündigung. Der rechnerische
+Monatswert von 40,83 EUR netto ist ausschließlich eine Einordnung. Zahlung, Rechnung, Bestellung und
+Aktivierung bleiben bis zur vollständigen fachlichen Abnahme gesperrt; Verkaufsfreigabe bleibt NEIN.
+Eine Zahlung verändert weder Suchrelevanz noch Ranking.
+
+Grund: Eine zentrale, testbare Vertragsdefinition verhindert abweichende Preisstrings, ein versehentliches
+Abomodell und eine Vermischung von kostenloser Leistungswahrheit mit kostenpflichtiger erweiterter
+Darstellung. Sie schafft eine sichere Grundlage für die folgenden getrennten Daten-, Formular-,
+Entitlement-, Kommunikations- und Laufzeit-Slices.
+
+Ersetzte ältere Annahmen: Ersetzt frühere Supporter-, Pro-, Premium-, Monats- und automatische
+Verlängerungsannahmen als Produktvertrag. Bestehende interne `premium`-Bezeichner dürfen bis zur
+separaten Umbenennung aus Migrationsgründen bestehen bleiben.
+
+Auswirkung: Die zentrale Feature-Matrix definiert Basis- und verifizierte Funktionen sowie den
+Bestandsschutz für bereits freigegebene Social Links und Ansprechpartnerbilder. Neue Ansprechpartnerbilder
+und Unternehmenskanäle gehören nicht zum regulären Basisprofil; WhatsApp bleibt Basiskontakt. Zahlung,
+öffentliche Preisseite, Formulare, Migrationen, öffentliche Entitlements und Laufzeitverhalten werden
+in separaten Slices umgesetzt und jeweils unabhängig geprüft.
+
+## ADR-014: Gemeindebasierte Tätigkeitsgebiete als kanonische Pilotlogik
+
+Status: active
+Datum: 2026-07-12
+
+Entscheidung: Im ersten Pilotcluster werden Tätigkeitsgebiete fachlich anhand amtlicher Gemeinden
+abgebildet. Der achtstellige AGS ist die stabile technische ID. Der Betrieb wählt Gemeinden
+ausdrücklich über eine lokale Karte und eine vollständige Alternativliste. Die Auswahl wird
+serverseitig gegen den versionierten VG250-Allowlist-Katalog geprüft und zunächst als ungeprüfte
+Submission gespeichert. Erst eine spätere Review-Freigabe darf öffentliche Suchwirkung erzeugen.
+
+Quelle und Transformation: Verwendet wird der jeweils aktuelle auf der BKG-Produktseite belegte
+VG250-Datenstand, derzeit 01.01.2025. Für den Pilotcluster werden die sieben Kreis-Allowlist-Codes
+`09163`, `09175`, `09182`, `09183`, `09184`, `09187` und `09189` gefiltert. Die Geometrien werden
+auf die amtlichen `BEZ`-Typen `Gemeinde` und `Stadt` beschränkt. Die Geometrien werden von UTM32s
+nach WGS84 projiziert und mit einer lokalen, topologieschonenden weighted-Visvalingam-
+Vereinfachung für die Webdarstellung erzeugt. Es gibt keine Kartenkacheln, externe Karten- oder
+Geocoding-API und keinen Laufzeit-API-Key.
+
+Grund: Betriebssitz, Radius, PLZ-Nähe oder freie Regionsangaben sind keine belastbare Aussage dafür,
+dass ein Betrieb in einer bestimmten Gemeinde tätig werden möchte. Ein exakter Gemeindefilter darf
+nur ausdrücklich und öffentlich freigegebene Betrieb-Gemeinde-Zuordnungen berücksichtigen.
+
+Auswirkung: Bestehende Radius-, Regions- und PLZ-Felder werden nicht gelöscht und bleiben vorläufig
+für Rückwärtskompatibilität erhalten. Sie dürfen keinen exakten Gemeindetreffer vortäuschen. Die
+amtliche Datenquelle, die lokale Geometrie und die Datenbank-IDs werden aus einem gemeinsamen
+Manifest erzeugt. Die Datenbankmigration ist additiv, RLS bleibt service-role-only und es erfolgt
+keine Production-Migration in diesem Arbeitspaket.
+
+Scope-Slices: Slice 1 umfasst Katalog, lokale Karte, barrierearme Liste, Submission-Speicherung und
+Allowlist-Validierung. Slice 2 umfasst Review-/Freigabeansicht, exakte Gemeindesuche und öffentliche
+Profilanzeige. Slice 3 umfasst öffentliche regionale Verfügbarkeit und den Erweiterungsworkflow.
+Der österreichische Bezirk Kufstein bleibt eine dokumentierte spätere Erweiterung. Keine dieser
+Entscheidungen verändert organisches Ranking; Zahlung oder Profilplan erhalten keinen Suchvorteil.
+
+## ADR-015: Footer und Service-Seiten als Vertrauens- und Informationsarchitektur
+
+Status: active
+Datum: 2026-07-12
+
+Entscheidung: Der Footer von GewerkeListe.com wird als Vertrauens-, Orientierungs- und
+Informationsarchitektur geführt. Verlinkt werden ausschließlich reale, freigegebene und betreute
+Seiten. Die verbindliche Zielmatrix mit `NOW`, `NEXT`, `CONDITIONAL`, `LATER` und `NOT_PLANNED`
+steht in `docs/knowledge/product/footer-service-pages.md`.
+
+Grund: Suchende und Betriebe brauchen klare Wege zu Suche, Datenkorrektur, Hilfe, Sicherheit und
+rechtlichen Informationen. Ein größerer Footer ohne echte Zielseiten würde Vertrauen zerstören,
+leere Routen erzeugen und die fachliche Orientierung verschlechtern.
+
+Leitplanken: Rechtliche oder technisch bedingte Seiten werden erst bei tatsächlicher Anwendbarkeit
+veröffentlicht. Preise benötigen ein vollständig lieferbares Angebot und eine ausdrückliche
+Product-Owner-Verkaufsfreigabe. Sicherheitsmeldungen benötigen einen betreuten Eingang und einen
+definierten Prozess. Social-Media-Links dürfen nur auf aktive offizielle GewerkeListe-Kanäle zeigen.
+
+Abgrenzung: Der Aufbau kopiert weder Footer noch Wortlaut, `PRO`-Produktlogik, Bewertungsfunktionen,
+Pay-to-rank oder aggressive Werbeangebote anderer Plattformen. Eigene Bezeichnungen wie Für
+Betriebe, Preise, Verifiziertes Startprofil, Für Planer und Auftraggeber und Partnerschaften bleiben
+maßgeblich.
+
+Auswirkung: Die spätere Umsetzung erfolgt in kleinen, jeweils eigenen Branches und PRs. Dieses ADR
+ist keine zweite operative Roadmap. Es verändert in diesem Dokumentations-Slice weder Footer,
+Navigation, Sitemap, öffentliche Seiten, Datenbank noch Laufzeitlogik.
+
+## ADR-016: Minimaler Rollenvertrag für interne Pfade
+
+Status: active
+Datum: 2026-07-12
 
 Entscheidung: Die Rollen `admin`, `internal_editor`, `business_user` und `public_user` bilden den
-verbindlichen Minimalvertrag fuer spaetere Benutzer- und Berechtigungsarbeit. Aktuell ist nur
-`admin` fuer die internen Pfade `/admin`, `/planner`, `/companies` und `/trades` aktiv. Dieser
-Zugriff wird weiterhin ausschliesslich ueber das vorhandene `ADMIN_SECRET` in der Basic-Auth-
+verbindlichen Minimalvertrag für spätere Benutzer- und Berechtigungsarbeit. Aktuell ist nur
+`admin` für die internen Pfade `/admin`, `/planner`, `/companies` und `/trades` aktiv. Dieser
+Zugriff wird weiterhin ausschließlich über das vorhandene `ADMIN_SECRET` in der Basic-Auth-
 Middleware nachgewiesen. `internal_editor` und `business_user` bleiben geplant und erhalten bis
-zu einer separaten Identitaets-, Scope- und RLS-Entscheidung keinen Zugriff. `public_user` darf nur
-oeffentliche, freigegebene Verzeichnisdaten lesen.
+zu einer separaten Identitäts-, Scope- und RLS-Entscheidung keinen Zugriff. `public_user` darf nur
+öffentliche, freigegebene Verzeichnisdaten lesen.
 
 Rollenmatrix:
 
 | Rolle | Status | Zugriff | Authentifizierung |
 | --- | --- | --- | --- |
-| `admin` | aktiv | Alle aktuell geschuetzten internen Pfade und Freigabeentscheidungen | Basic Auth mit `ADMIN_SECRET` |
-| `internal_editor` | geplant | Interne Bearbeitung ohne finale Freigabe | Explizite Benutzeridentitaet und Berechtigung erforderlich |
-| `business_user` | geplant | Eigene Betriebsdaten nach einem freigegebenen Claim-Prozess | Explizite Benutzeridentitaet, Besitzbezug und Scope-Pruefung erforderlich |
-| `public_user` | aktiv | Oeffentliche, freigegebene Verzeichnisdaten | Keine Anmeldung erforderlich |
+| `admin` | aktiv | Alle aktuell geschützten internen Pfade und Freigabeentscheidungen | Basic Auth mit `ADMIN_SECRET` |
+| `internal_editor` | geplant | Interne Bearbeitung ohne finale Freigabe | Explizite Benutzeridentität und Berechtigung erforderlich |
+| `business_user` | geplant | Eigene Betriebsdaten nach einem freigegebenen Claim-Prozess | Explizite Benutzeridentität, Besitzbezug und Scope-Prüfung erforderlich |
+| `public_user` | aktiv | Öffentliche, freigegebene Verzeichnisdaten | Keine Anmeldung erforderlich |
 
-Threat Model und Gegenmassnahmen:
+Threat Model und Gegenmaßnahmen:
 
-| Bedrohung | Gegenmassnahme | Verbleibende Luecke |
+| Bedrohung | Gegenmaßnahme | Verbleibende Lücke |
 | --- | --- | --- |
-| Unauthentifizierter Zugriff auf interne Pfade | Segmentgenaue Middleware-Policy und fail-closed Basic Auth | Keine individuelle Benutzeridentitaet |
-| Aehnlicher Pfad wie `/administer` wird versehentlich geschuetzt | Exakte Segmentgrenzen in einer zentralen Policy | Neue Pfade muessen bewusst in die Policy aufgenommen werden |
-| Fehlerhafter oder manipulierter Authorization-Header | Parser verwirft ungueltige Header; Middleware antwortet reproduzierbar mit 401 | Basic Auth bleibt ein gemeinsames Secret |
+| Unauthentifizierter Zugriff auf interne Pfade | Segmentgenaue Middleware-Policy und fail-closed Basic Auth | Keine individuelle Benutzeridentität |
+| Ähnlicher Pfad wie `/administer` wird versehentlich geschützt | Exakte Segmentgrenzen in einer zentralen Policy | Neue Pfade müssen bewusst in die Policy aufgenommen werden |
+| Fehlerhafter oder manipulierter Authorization-Header | Parser verwirft ungültige Header; Middleware antwortet reproduzierbar mit 401 | Basic Auth bleibt ein gemeinsames Secret |
 | Fehlende Laufzeitkonfiguration | Middleware verweigert den Request mit privater 500-Antwort | Secret-Rotation und Monitoring sind noch nicht modelliert |
 | Gestohlenes Secret oder fehlende Trennung von Verantwortlichkeiten | Keine Aktivierung weiterer Rollen ohne separate Auth-/RLS-Arbeit | Session-, Nutzer-, Scope- und Audit-Modell fehlen noch |
 
 Auswirkung: Die Rollenmatrix ist zentral im Code testbar, ohne Benutzerkonten, Claims, Migrationen,
-RLS-Policies, Service-Role-Rechte oder Nutzerdaten zu veraendern. Die Policy ist ein enger
-Architekturbaustein, kein Ersatz fuer eine spaetere echte Benutzer- und Rollenarchitektur.
+RLS-Policies, Service-Role-Rechte oder Nutzerdaten zu verändern. Die Policy ist ein enger
+Architekturbaustein, kein Ersatz für eine spätere echte Benutzer- und Rollenarchitektur. Basic Auth
+bleibt ausdrücklich eine Übergangslösung und ist keine vollständige Benutzerarchitektur.
