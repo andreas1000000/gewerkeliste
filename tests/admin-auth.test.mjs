@@ -37,7 +37,7 @@ test("exposes the minimal role matrix without activating future identities", () 
     ["admin", "active"],
     ["internal_editor", "planned"],
     ["business_user", "planned"],
-    ["public_user", "active"],
+    ["public_user", "planned"],
   ]);
   assert.equal(canAccessRequiredRole("admin", "admin"), true);
   assert.equal(canAccessRequiredRole("internal_editor", "admin"), false);

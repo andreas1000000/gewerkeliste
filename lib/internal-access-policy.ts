@@ -31,7 +31,7 @@ export const roleMatrix = [
   },
   {
     role: "public_user",
-    status: "active",
+    status: "planned",
     access: "Öffentliche, freigegebene Verzeichnisdaten",
     authentication: "Keine Anmeldung erforderlich",
   },

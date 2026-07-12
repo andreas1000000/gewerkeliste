@@ -311,7 +311,7 @@ Rollenmatrix:
 | `admin` | aktiv | Alle aktuell geschützten internen Pfade und Freigabeentscheidungen | Basic Auth mit `ADMIN_SECRET` |
 | `internal_editor` | geplant | Interne Bearbeitung ohne finale Freigabe | Explizite Benutzeridentität und Berechtigung erforderlich |
 | `business_user` | geplant | Eigene Betriebsdaten nach einem freigegebenen Claim-Prozess | Explizite Benutzeridentität, Besitzbezug und Scope-Prüfung erforderlich |
-| `public_user` | aktiv | Öffentliche, freigegebene Verzeichnisdaten | Keine Anmeldung erforderlich |
+| `public_user` | geplant | Öffentliche, freigegebene Verzeichnisdaten bleiben anonym erreichbar; keine aktive Benutzerrolle | Keine Anmeldung erforderlich |
 
 Threat Model und Gegenmaßnahmen:
 
@@ -324,6 +324,8 @@ Threat Model und Gegenmaßnahmen:
 | Gestohlenes Secret oder fehlende Trennung von Verantwortlichkeiten | Keine Aktivierung weiterer Rollen ohne separate Auth-/RLS-Arbeit | Session-, Nutzer-, Scope- und Audit-Modell fehlen noch |
 
 Auswirkung: Die Rollenmatrix ist zentral im Code testbar, ohne Benutzerkonten, Claims, Migrationen,
-RLS-Policies, Service-Role-Rechte oder Nutzerdaten zu verändern. Die Policy ist ein enger
-Architekturbaustein, kein Ersatz für eine spätere echte Benutzer- und Rollenarchitektur. Basic Auth
-bleibt ausdrücklich eine Übergangslösung und ist keine vollständige Benutzerarchitektur.
+RLS-Policies, Service-Role-Rechte oder Nutzerdaten zu verändern. Aktuell ist ausschließlich `admin`
+als interne Rolle aktiv; öffentliche Routen bleiben anonym erreichbar, ohne `public_user` als aktive
+Benutzerrolle zu aktivieren. Die Policy ist ein enger Architekturbaustein, kein Ersatz für eine
+spätere echte Benutzer- und Rollenarchitektur. Basic Auth bleibt ausdrücklich eine Übergangslösung
+und ist keine vollständige Benutzerarchitektur.
