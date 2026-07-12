@@ -17,6 +17,7 @@ const geoJson = JSON.parse(geoJsonText);
 const geoJsonSha256 = createHash("sha256").update(geoJsonText).digest("hex");
 const migration = readFileSync(new URL("../supabase/migrations/20260712150000_municipality_service_areas.sql", import.meta.url), "utf8");
 const seedMigration = readFileSync(new URL("../supabase/migrations/20260712150100_municipality_catalog_seed.sql", import.meta.url), "utf8");
+const serviceRoleCorrectionMigration = readFileSync(new URL("../supabase/migrations/20260712224000_restrict_municipality_service_role_privileges.sql", import.meta.url), "utf8");
 const pickerSource = readFileSync(new URL("../components/municipality-service-area-picker.tsx", import.meta.url), "utf8");
 const importerSource = readFileSync(new URL("../scripts/import-vg250.mjs", import.meta.url), "utf8");
 
@@ -115,4 +116,18 @@ test("picker is local, list-first accessible, and has no external map runtime de
   assert.match(pickerSource, /role="button"/);
   assert.match(pickerSource, /onKeyDown/);
   assert.doesNotMatch(pickerSource, /google|mapbox|here\.com|bing\.com|tile/i);
+});
+
+test("service role correction migration restricts only the municipality tables", () => {
+  assert.match(serviceRoleCorrectionMigration, /^begin;[\s\S]*commit;\s*$/i);
+  assert.match(
+    serviceRoleCorrectionMigration,
+    /revoke\s+all\s+on\s+table\s+municipalities,\s+company_submission_service_areas,\s+company_service_areas\s+from\s+public,\s+anon,\s+authenticated,\s+service_role;/i,
+  );
+  assert.match(
+    serviceRoleCorrectionMigration,
+    /grant\s+select,\s*insert,\s*update,\s*delete\s+on\s+municipalities,\s+company_submission_service_areas,\s+company_service_areas\s+to\s+service_role;/i,
+  );
+  assert.doesNotMatch(serviceRoleCorrectionMigration, /alter\s+default\s+privileges/i);
+  assert.doesNotMatch(serviceRoleCorrectionMigration, /grant[\s\S]*\b(?:truncate|references|trigger|maintain)\b/i);
 });
