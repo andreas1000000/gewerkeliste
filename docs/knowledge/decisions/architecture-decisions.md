@@ -198,3 +198,32 @@ Auswirkung: Die Roadmap ordnet zunaechst den minimalen Admin-/Rollen-Slice, Serv
 Dependency-Risiken sowie Backup/Migration/Release/Rollback. Danach folgen Profile, Claim/Review,
 Suche, Taxonomie, Provenienz und fachlich reduzierte Admin-Prozesse; jedes Paket benoetigt eigene
 Akzeptanz- und Exit-Kriterien.
+
+## ADR-013: Zentraler Preis-/Entitlement-Vertrag vor öffentlicher Kommunikation
+
+Status: active
+Datum: 2026-07-12
+
+Entscheidung: Das dauerhaft kostenlose Basisprofil umfasst vollständige fachliche Auffindbarkeit,
+bestätigte Gewerke und Leistungen, Spezialisierungen, Einsatzregionen, direkte Kontaktaufnahme,
+Firmenlogo sowie einen Hauptansprechpartner mit Name und Funktion. Das verifizierte Startprofil ist
+das einzige kostenpflichtige Profil: 490 EUR netto Gesamtpreis für zwölf Monate, einmalige Zahlung,
+keine automatische Verlängerung, kein Monatsabo und keine monatliche Kündigung. Der rechnerische
+Monatswert von 40,83 EUR netto ist ausschließlich eine Einordnung. Zahlung, Rechnung, Bestellung und
+Aktivierung bleiben bis zur vollständigen fachlichen Abnahme gesperrt; Verkaufsfreigabe bleibt NEIN.
+Eine Zahlung verändert weder Suchrelevanz noch Ranking.
+
+Grund: Eine zentrale, testbare Vertragsdefinition verhindert abweichende Preisstrings, ein versehentliches
+Abomodell und eine Vermischung von kostenloser Leistungswahrheit mit kostenpflichtiger erweiterter
+Darstellung. Sie schafft eine sichere Grundlage für die folgenden getrennten Daten-, Formular-,
+Entitlement-, Kommunikations- und Laufzeit-Slices.
+
+Ersetzte ältere Annahmen: Ersetzt frühere Supporter-, Pro-, Premium-, Monats- und automatische
+Verlängerungsannahmen als Produktvertrag. Bestehende interne `premium`-Bezeichner dürfen bis zur
+separaten Umbenennung aus Migrationsgründen bestehen bleiben.
+
+Auswirkung: Die zentrale Feature-Matrix definiert Basis- und verifizierte Funktionen sowie den
+Bestandsschutz für bereits freigegebene Social Links und Ansprechpartnerbilder. Neue Ansprechpartnerbilder
+und Unternehmenskanäle gehören nicht zum regulären Basisprofil; WhatsApp bleibt Basiskontakt. Zahlung,
+öffentliche Preisseite, Formulare, Migrationen, öffentliche Entitlements und Laufzeitverhalten werden
+in separaten Slices umgesetzt und jeweils unabhängig geprüft.
