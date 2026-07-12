@@ -4,6 +4,16 @@ Diese Produktverfassung ist eine verbindliche Leitplanke fuer Produkt-, UX-, Dat
 
 GewerkeListe.com soll nicht zufaellig wachsen. Jede Funktion, jeder Agent und jede Datenentscheidung muss zur Mission passen: mehr Transparenz, bessere Auffindbarkeit und hoehere Datenqualitaet im Bau- und Handwerksmarkt.
 
+## Verbindliche Entscheidungsreihenfolge
+
+Es gilt: Sicherheits-, Datenschutz- und Compliance-Regeln, Grundsatz und Product Doctrine, neueste
+ausdrücklich dokumentierte Product-Owner-Entscheidungen im Entscheidungsregister, Businessplan,
+operative Roadmap, einzelne Featurewünsche und Hypothesen, technische Bequemlichkeit.
+
+Neuere Product-Owner-Entscheidungen ersetzen ausdrücklich ältere Businessplan-Annahmen. Diese Doctrine
+ist strategische Leitplanke; `docs/agent-company/IMPLEMENTATION_ROADMAP.md` bleibt die einzige operative
+Roadmap.
+
 ## 1. Grundidee
 
 GewerkeListe.com ist eine DACH-weite Plattform fuer Baugewerke, Handwerksbetriebe und baunahe Spezialleistungen.
@@ -92,6 +102,10 @@ Ein Betrieb soll moeglichst vollstaendig darstellen koennen:
 
 Vollstaendigkeit ist wertvoller als kuenstliche Limits.
 
+Das Basisprofil bleibt dauerhaft kostenlos und umfasst mindestens Betriebsname, Ort und Region, Gewerke,
+konkrete Leistungen und Angebote, Spezialisierungen, Einsatzregionen, Kontaktmöglichkeiten und Website-Link.
+Für die tatsächliche fachliche Leistungswahrheit gibt es weder eine Paywall noch künstliche Mengenlimits.
+
 Es gibt keine fachliche Produktlogik fuer:
 
 - maximal ein Hauptgewerk
@@ -139,28 +153,41 @@ Auf der Website steht die uebergeordnete Mission im Vordergrund: mehr Transparen
 
 GewerkeListe.com ist kein Wohlfahrtsprojekt. Entwicklung, Hosting, Datenpflege, Verifizierung, Support und Weiterentwicklung kosten Geld.
 
-Kurzfristig moeglich:
+Aktueller Status:
 
-- freiwillige Unterstuetzung oder Foerderbeitrag
-- Zusatzdienste
-- kein harter Paywall-Druck im Pilot
+- Das Basisprofil bleibt dauerhaft kostenlos.
+- Es gibt aktuell kein weiteres freigegebenes Bezahlangebot. Freiwillige Unterstuetzung oder
+  Foerderbeitraege sind keine aktuelle Verkaufs- oder Zahlungsstrecke.
+- Das verifizierte Startprofil fuer 490 EUR netto / 12 Monate ist als Preisentscheidung festgelegt,
+  aber bis zur fachlichen Verkaufsfreigabe gesperrt.
 
-Mittelfristig moeglich:
-
-- bessere Profilfunktionen
-- Verifizierung
-- bessere Darstellung
-- Matching
-- Recruiting
-- Daten- und Marktmodule
-- Partnerdienste
-- professionelle Werkzeuge fuer Planer, Architekten, Bauleiter und Auftraggeber
+Spaetere, gesondert freizugebende Zusatzdienste koennen bessere Profilfunktionen, Verifizierung,
+bessere Darstellung, Matching, Recruiting, Daten- und Marktmodule, Partnerdienste oder professionelle
+Werkzeuge fuer Planer, Architekten, Bauleiter und Auftraggeber umfassen. Sie sind keine aktuellen
+Angebote und duerfen weder die kostenlose Grundsichtbarkeit noch die organische fachliche Sortierung
+einschraenken.
 
 Wichtig:
 
 Monetarisierung darf nicht die Datenqualitaet oder das Vertrauen zerstoeren.
 
 GewerkeListe.com monetarisiert echten Mehrwert, nicht kuenstliche Einschraenkung.
+
+### Aktuelle Product-Owner-Entscheidung
+
+Das verifizierte Startprofil ist mit 490 EUR netto für 12 Monate festgelegt. Es darf erst aktiv verkauft
+und öffentlich beworben werden, wenn alle zugesagten Funktionen stabil verfügbar, getestet und fachlich
+abnehmbar sind. Der aktuelle Code enthält dafür bereits einen Anfrage-, Review-, Admin- und Public-
+Entitlement-Fluss, aber keine Zahlung, Rechnung, Verlängerung oder Kündigungsautomatik. Deshalb ist die
+Verkaufsfreigabe derzeit NEIN.
+
+Supporter 99–149 EUR/Jahr, Pro 29–49 EUR/Monat und Premium 79–149 EUR/Monat sind historische Hypothesen,
+verworfene Annahmen und nicht freigegebene Zukunftsideen. Sie sind keine aktuellen Angebote und dürfen
+nicht in aktuellen Angebots- oder Finanztabellen als verbindliches Modell erscheinen.
+
+Bezahlte organische Bevorzugung unpassender Betriebe ist ausgeschlossen. Organische Sortierung richtet
+sich an fachlicher Passung, Region, Datenqualität, Vertrauen und Nutzerrelevanz aus – nicht am gezahlten
+Betrag.
 
 ## 9. Agentenlogik
 

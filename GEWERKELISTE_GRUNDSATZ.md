@@ -26,6 +26,26 @@ Nicht die günstigsten Betriebe sollen gewinnen.
 Nicht die lautesten Betriebe sollen gewinnen.  
 Sondern die passenden Betriebe sollen auffindbar werden.
 
+GewerkeListe.com ist fachlich und B2B-orientiert, bleibt aber offen nutzbar für private und sonstige
+Auftraggeber. Es ist ausdrücklich ein professionelles Fachregister und eine offene Infrastruktur für
+transparente Gewerkesuche – kein gewöhnliches generisches Branchenbuch und keine Bewertungsplattform.
+
+## 1a. Verbindliche Dokumenten- und Entscheidungsreihenfolge
+
+Für strategische und operative Produktentscheidungen gilt diese Reihenfolge:
+
+1. Sicherheits-, Datenschutz- und Compliance-Regeln
+2. Grundsatz und Product Doctrine
+3. neueste ausdrücklich dokumentierte Product-Owner-Entscheidungen im Entscheidungsregister
+4. Businessplan
+5. operative Roadmap
+6. einzelne Featurewünsche und Hypothesen
+7. technische Bequemlichkeit
+
+Neuere Product-Owner-Entscheidungen ersetzen ausdrücklich ältere Businessplan-Annahmen. Historische
+Annahmen bleiben als Historie erkennbar und dürfen nicht als aktuelles Angebot oder verbindliches Modell
+weitergeführt werden.
+
 ---
 
 ## 2. Warum es GewerkeListe.com braucht
@@ -86,6 +106,9 @@ Keine Plattform, die Betriebe gegeneinander in einen Preiskampf zwingt.
 Keine Kommunikation, die Handwerker als austauschbare Anbieter behandelt.
 Keine Plattform, die Sichtbarkeit nur gegen Bezahlung ermöglicht.
 
+GewerkeListe.com ist außerdem keine Auktionsplattform, kein Marktplatz für den billigsten Anbieter,
+keine Bewertungsplattform, keine Qualitätsgarantie und kein Produkt, das Betriebe gegeneinander ausspielt.
+
 GewerkeListe.com soll nicht den billigsten Anbieter finden.
 
 GewerkeListe.com soll den passenden Anbieter sichtbar machen.
@@ -137,10 +160,19 @@ In der Aufbauphase ist die wichtigste Kennzahl deshalb nicht kurzfristiger Umsat
 ### Startphase
 
 - kostenloser Basiseintrag
-- freiwillige Förderbeiträge
-- Unterstützung durch Betriebe, Partner und Förderer
+- keine aktuell freigegebenen weiteren Bezahlangebote
+- historische Finanzierungsoptionen durch Betriebe, Partner und Förderer; kein aktuelles Angebot
 - regionale Pilotierung
 - Fokus auf Datenqualität, Vertrauen und Marktabdeckung
+
+Das Basisprofil bleibt dauerhaft kostenlos. Es umfasst mindestens Betriebsname, Ort und Region, Gewerke,
+konkrete Leistungen und Angebote, Spezialisierungen, Einsatzregionen, Kontaktmöglichkeiten und Website-Link.
+Für diese tatsächliche fachliche Leistungswahrheit gibt es keine künstlichen Limits und keine Paywall.
+
+Das aktuell verbindliche optionale Angebot ist ausschließlich das verifizierte Startprofil für 490 EUR
+netto mit 12 Monaten Laufzeit. Es darf erst aktiv verkauft oder öffentlich beworben werden, wenn alle
+zugesagten Funktionen stabil verfügbar, getestet und fachlich abnehmbar sind. Alte Supporter-, Pro- und
+Premium-Preisannahmen sind historische Hypothesen, verworfene Annahmen und nicht freigegebene Zukunftsideen.
 
 ### Spätere Zusatzdienste
 

@@ -2,8 +2,38 @@
 
 **Untertitel:** Die regionale B2B-Daten-, Sichtbarkeits-, Vertrauens- und Kapazitaetsinfrastruktur fuer das Baugewerbe im DACH-Raum  
 **Autor:** Andreas Moser  
-**Stand:** Juni 2026  
+**Stand:** 12. Juli 2026
 **Status:** Verbindliche Strategieversion fuer Produkt-, Codex- und Agentenentscheidungen. Finanzteil noch zu ergaenzen/finalisieren.
+
+## Aktuelle Product-Owner-Entscheidungen (2026-07-12)
+
+Diese Entscheidungen ergänzen und ersetzen ältere Annahmen dieses Businessplans, soweit sie
+widersprechen:
+
+- GewerkeListe.com ist ein professionelles, fachlich und B2B-orientiertes Fachregister sowie offene
+  Infrastruktur für transparente Gewerkesuche. Es bleibt offen nutzbar für private und sonstige
+  Auftraggeber.
+- Das Basisprofil bleibt dauerhaft kostenlos. Es umfasst mindestens Betriebsname, Ort und Region,
+  Gewerke, konkrete Leistungen und Angebote, Spezialisierungen, Einsatzregionen, Kontaktmöglichkeiten
+  und Website-Link. Die tatsächliche fachliche Leistungswahrheit darf nicht monetarisiert oder künstlich
+  begrenzt werden.
+- Das aktuell verbindliche optionale Angebot ist das verifizierte Startprofil für 490 EUR netto mit
+  12 Monaten Laufzeit. Es darf erst aktiv verkauft und öffentlich beworben werden, wenn alle zugesagten
+  Funktionen stabil verfügbar, getestet und fachlich abnehmbar sind.
+- „Verifiziert“ bedeutet ausschließlich bestätigte oder vom Betrieb übernommene Betriebsdaten; es ist
+  keine Qualitätsgarantie, Empfehlung, Bonitätsprüfung, Zertifizierung oder Gewähr für Leistung.
+- Organische Sortierung darf nicht durch Zahlung fachlich verfälscht werden. Monetarisiert werden echter
+  Zusatznutzen und belegbare Mehrwerte, nicht Passung, Datenwahrheit oder Preisdruck.
+- Andreas Moser ist Product Owner und alleinige geschäftliche, fachliche, Merge- und Production-
+  Freigabeinstanz. Das Agentensystem arbeitet technisch autonom bis zum geprüften Draft-PR; technische
+  Detailentscheidungen werden nicht als Rückfrage delegiert.
+- P0-Risiken werden zuerst in kleinen Slices mit messbaren Exit-Kriterien bearbeitet. Nach erfüllten
+  P0-Exit-Kriterien wechselt die operative Entwicklung zügig in P1-Kernproduktarbeit.
+
+Die Preisannahmen Supporter 99–149 EUR/Jahr, Pro 29–49 EUR/Monat und Premium 79–149 EUR/Monat sind
+historische Hypothesen, verworfene Annahmen und nicht freigegebene Zukunftsideen. Sie sind keine aktuellen
+Angebote und dürfen nur ausdrücklich als Historie, nicht als verbindliches Angebots- oder Finanzmodell,
+erscheinen.
 
 Dieser Businessplan ist zusammen mit:
 
@@ -15,13 +45,15 @@ die verbindliche strategische Grundlage fuer Codex und alle spaeteren KI-Agenten
 
 Bei Widerspruechen gilt:
 
-1. Sicherheits-/Compliance-Regeln
-2. Product Doctrine
-3. Businessplan
-4. Feature-Wuensche
-5. technische Bequemlichkeit
+1. Sicherheits-, Datenschutz- und Compliance-Regeln
+2. Grundsatz und Product Doctrine
+3. neueste ausdrücklich dokumentierte Product-Owner-Entscheidungen im Entscheidungsregister
+4. Businessplan
+5. operative Roadmap
+6. einzelne Featurewünsche und Hypothesen
+7. technische Bequemlichkeit
 
-GewerkeListe.com ist die hochspezialisierte, datengetriebene Such-, Vertrauens- und Infrastrukturschicht vor der eigentlichen Ausschreibung, Angebotsanfrage und Vergabe. Bezahlt wird fuer belegbare B2B-Sichtbarkeit, verifizierte Darstellung, Datenbestaetigung, Reputation und perspektivisch Kapazitaets- und Marktdaten.
+GewerkeListe.com ist die hochspezialisierte, datengetriebene Such-, Vertrauens- und Infrastrukturschicht vor der eigentlichen Ausschreibung, Angebotsanfrage und Vergabe. Das Basisprofil bleibt kostenlos. Ein optionales verifiziertes Startprofil darf erst nach stabiler, getesteter und fachlich abgenommener Funktionsreife fuer belegbare Zusatzwerte verkauft werden.
 
 ## Inhaltsverzeichnis
 
@@ -71,10 +103,10 @@ Langfristig entsteht aus GewerkeListe.com ein B2B-Gewerke-Graph: Betriebe, Gewer
 | Problem | Der Markt ist nicht leer, sondern schlecht sortiert: Planer suchen muehsam, Betriebe sind digital schwach sichtbar, Kapazitaeten werden nicht optimal genutzt. |
 | Loesung | Fachliche B2B-Suche nach Gewerk, Ort, Wirkungskreis, Spezialisierung, Verifizierungsstatus und spaeter Projekt-/Kapazitaetsbezug. |
 | Startmarkt | Rosenheim/Chiemgau als Proof-of-Market; regionale Dichte vor nationaler Streuung. |
-| Zahlungsgrund | Keine Leadgarantie, sondern belegbare Sichtbarkeit, Profilqualitaet, QR/Custom-URL, Sichtbarkeitsreport, Reputation. |
+| Zahlungsgrund (erst nach Freigabe) | Keine Leadgarantie, sondern belegbare Sichtbarkeit, Profilqualitaet, QR/Custom-URL, Sichtbarkeitsreport und Reputation. |
 | Moat | First-Party-Daten, Claims, rechtssichere Datenpipeline, Wirkungskreis-Daten, Planer-Nutzung und spaeter Gewerke-Graph. |
 | Hauptengpass | Datenqualitaet, rechtssichere Aktivierung, echte Planer-Retention und erster Bezahlbeweis. |
-| Naechster harter Schritt | 500-1.000 Profile, 20 Planer-Testnutzer, View-Tracking, Claim-Prozess, erster Sichtbarkeitsreport und Supporter-Test. |
+| Naechster harter Schritt | 500-1.000 Profile, 20 Planer-Testnutzer, View-Tracking, Claim-Prozess, erster Sichtbarkeitsreport und ein bezahltes Nutzensignal erst nach Verkaufsfreigabe. |
 
 ## Was GewerkeListe.com loest
 
@@ -152,7 +184,7 @@ GewerkeListe.com ist das digitale Betriebssystem fuer die B2B-Bausuche vor der A
 | Claim-/Korrekturprozess | Datenqualitaet, Eigentum am Profil, Verifizierung und Korrekturpfad. |
 | Custom-URL | Profil ist teilbar, druckbar und auf Fahrzeug, Banner oder Visitenkarte nutzbar. |
 | QR-Code | Offline-Werbung fuehrt direkt zum Profil. |
-| View-Tracking | Beweist Sichtbarkeit und ermoeglicht Pro-Verkauf. |
+| View-Tracking | Belegt Sichtbarkeit und kann später einen freigegebenen Zusatzdienst stützen. |
 | Sichtbarkeitsreport | Monatlicher Nachweis: Profilaufrufe, Trends, Suchkontext soweit datenschutzkonform. |
 
 ## Wirkungskreis-Suche statt nur Radius
@@ -174,9 +206,9 @@ Die frei markierbare Wirkungskreis-Suche ist als differenzierendes Feature zu be
 
 | Zielgruppe | Schmerz | Nutzen | Monetarisierung |
 | --- | --- | --- | --- |
-| Bau- und Handwerksbetriebe | Schwache digitale B2B-Sichtbarkeit, Leadportal-Frust, unklare Spezialisierungen. | Kostenlose Grundsichtbarkeit, Profil, Wirkungskreis, QR, Sichtbarkeitsreport, Reputation. | Verified/Supporter, Pro-Profil, Premium, Recruiting, Kapazitaetsmodule. |
-| Planer/Architekten/Bauleiter/GU | Suchzeit, alte Kontaktlisten, fehlende Leistungstiefe, unklare Einsatzgebiete. | Schnelle Fachsuche, Merklisten, bessere Marktuebersicht, spaetere Projektlisten/Exporte. | Spaeter Pro-Suche, Teamzugaenge, Enterprise. |
-| Kommunen/Hausverwaltungen/professionelle Bauherren | Bedarf an verlaesslicher regionaler Suche und Gewerkeabdeckung. | Strukturierte Suche, regionale Marktuebersicht, spaetere Kapazitaetsberichte. | Spaeter Datenmodule/Enterprise. |
+| Bau- und Handwerksbetriebe | Schwache digitale B2B-Sichtbarkeit, Leadportal-Frust, unklare Spezialisierungen. | Kostenlose Grundsichtbarkeit, Profil, Wirkungskreis, QR, Sichtbarkeitsreport, Reputation. | Aktuell kein Verkauf; verifiziertes Startprofil fuer 490 EUR netto / 12 Monate erst nach Verkaufsfreigabe. Historische Supporter-/Pro-/Premium-Ideen sind verworfen. |
+| Planer/Architekten/Bauleiter/GU | Suchzeit, alte Kontaktlisten, fehlende Leistungstiefe, unklare Einsatzgebiete. | Schnelle Fachsuche, Merklisten, bessere Marktuebersicht, spaetere Projektlisten/Exporte. | Aktuell keine freigegebene Monetarisierung; spaetere Team-, Export- oder Datenmodule nur als ungepruefte Zukunftsideen. |
+| Kommunen/Hausverwaltungen/professionelle Bauherren | Bedarf an verlaesslicher regionaler Suche und Gewerkeabdeckung. | Strukturierte Suche, regionale Marktuebersicht, spaetere Kapazitaetsberichte. | Aktuell keine freigegebene Monetarisierung; spaetere Datenmodule nur als ungepruefte Zukunftsideen. |
 | Baustofflieferanten/Hersteller/Fachgrosshandel | Kundenbeziehungen vorhanden, aber kein offener strukturierter Gewerke- und Bedarfsgraph. | Marktnaehe, Partnerprogramme, aggregierte Reports, sichtbare Fachhandelspartner mit Zustimmung. | Spaeter Partnerprofile, Sponsoring, Reports, Co-Branding, Events. |
 
 ## Partneroekosystem: Baustofflieferanten, Hersteller und Fachgrosshandel
@@ -284,7 +316,7 @@ Die bayerischen Handwerksunternehmen beschaeftigten 2024 1.117.348 taetige Perso
 
 Der SAM fokussiert sich auf Bau- und Ausbaugewerbe. Uebertragen auf die validierten Gesamtbestaende fuer 2024 ergibt sich ein bayerischer SAM von rund 50.000 bis 60.000 hochrelevanten Handwerksbetrieben im Bau- und Ausbausektor.
 
-Angenommen, das System erreicht mittelfristig eine Profil-Abdeckung von 80 Prozent in Bayern (ca. 40.000 bis 48.000 Profile) und konvertiert davon konservativ 3 Prozent als zahlende Kunden. Bei 1.200 Premium-Kunden mit 1.200 Euro Jahresbeitrag entstuende ein ARR von knapp 1,5 Millionen Euro allein im Zielmarkt Bayern, bei minimalen operativen Kosten fuer die Datenpflege der restlichen kostenfreien Profile.
+Eine fruehere Szenarioannahme ging bei 80 Prozent Profil-Abdeckung in Bayern (ca. 40.000 bis 48.000 Profile) und 3 Prozent zahlenden Kunden von 1.200 Premium-Kunden mit 1.200 Euro Jahresbeitrag aus. Das ist eine historische Hypothese, kein aktuelles Angebot und kein verbindliches Finanzmodell. Eine neue Umsatzplanung darf erst nach der fachlichen Verkaufsfreigabe des verifizierten Startprofils erstellt werden.
 
 ### Serviceable Obtainable Market (SOM): Proof-of-Market Rosenheim/Chiemgau
 
@@ -303,7 +335,7 @@ Zu validierende KPIs:
 - Liquiditaet und Marktabdeckung: wahrgenommene Marktabdeckung von ueber 80 Prozent bei Architekten der Region.
 - Planer-Retention: wiederkehrende Nutzung pro Monat.
 - Claim-Rate: Anteil passiver Profile, die aktiv uebernommen und angereichert werden.
-- Paid-Signal: Konvertierung einer Minderheit, beispielsweise 2 bis 3 Prozent der geclaimten Profile, in ein bezahltes Modell.
+- Paid-Signal: Ein bezahltes Nutzensignal darf erst nach fachlicher Verkaufsfreigabe des verifizierten Startprofils getestet werden.
 
 ### Die Nachfrageseite: Das Planer- und Architekten-Oekosystem
 
@@ -344,28 +376,52 @@ Fuer GewerkeListe.com bedeutet das: kein aggressives Scraping, keine Telefon-Kal
 
 ## Geschaeftsmodell und Monetarisierung
 
-Die Plattform monetarisiert Vertrauen und belegbare Sichtbarkeit, keine Hoffnungen. Grundsichtbarkeit bleibt kostenlos. Geld wird erst verlangt, wenn der Mehrwert sichtbar und belegbar ist.
+Die Plattform monetarisiert Vertrauen und belegbare Sichtbarkeit, keine Hoffnungen. Grundsichtbarkeit bleibt
+kostenlos. Geld wird erst verlangt, wenn der Mehrwert sichtbar und belegbar ist und die zugesagten Funktionen
+stabil verfügbar, getestet und fachlich abgenommen sind.
 
-| Stufe | Preisannahme | Zielgruppe | Kaufgrund | Startlogik |
-| --- | --- | --- | --- | --- |
-| Basis | 0 EUR | alle Betriebe | Gefunden werden, Profil pruefen, Daten korrigieren. | dauerhaft kostenlos |
-| Verified/Supporter | 99-149 EUR/Jahr | vertrauensorientierte Betriebe | Datenbestaetigung, Supporter-Badge, bessere Pflege. | erster Zahlungsanker |
-| Pro-Profil | 29-49 EUR/Monat | Betriebe mit Sichtbarkeitsbedarf | Referenzen, Projektgalerie, Logo, Custom-URL, Sichtbarkeitsreport. | erst nach Views aktiv verkaufen |
-| Premium | 79-149 EUR/Monat | Wachstumsbetriebe | Verfuegbarkeit, Recruiting, Netzwerk, Auswertungen. | spaeter |
-| Enterprise Planer/GU/Kommune | 199-2.000 EUR/Monat | professionelle Nachfrager | Pro-Suche, Merklisten, Exporte, Datenmodule, API. | nach Datenvolumen |
-| Partner/Lieferanten | zu validieren | Baustoffhandel, Hersteller, Fachgrosshandel | Partnerprofile, Reports, Events, Co-Branding. | spaeterer Upside |
+### Verbindliches aktuelles Modell
+
+| Angebot | Preis | Status | Verbindliche Grenze |
+| --- | --- | --- | --- |
+| Basisprofil | 0 EUR | aktuell freigegeben | Dauerhaft kostenlos; keine künstlichen Limits für tatsächliche Gewerke, Leistungen oder Spezialisierungen. |
+| Verifiziertes Startprofil | 490 EUR netto / 12 Monate | Preisentscheidung freigegeben, Verkauf gesperrt | Aktiver Verkauf erst nach stabiler, getesteter und fachlich abgenommener Funktionsreife. |
+
+Es gibt aktuell kein freigegebenes Supporter-, Pro-, Premium-, Enterprise- oder Partnerpreisangebot.
+
+### Historische Hypothesen und verworfene Annahmen
+
+Die folgenden Preisstufen sind historische Hypothesen, verworfene Annahmen und nicht freigegebene
+Zukunftsideen. Sie sind keine aktuellen Angebote und kein verbindliches Finanzmodell. Neue Produkt- oder
+Finanzentscheidungen dürfen sie nicht als aktuellen Preisanker verwenden:
+
+| Historische Hypothese | Alte Annahme | Frühere Zielrichtung |
+| --- | --- | --- |
+| Verified/Supporter | 99–149 EUR/Jahr | Datenbestätigung und Supporter-Badge |
+| Pro-Profil | 29–49 EUR/Monat | Referenzen, Projektgalerie, Custom-URL, Sichtbarkeitsreport |
+| Premium | 79–149 EUR/Monat | Verfügbarkeit, Recruiting, Netzwerk, Auswertungen |
+| Enterprise Planer/GU/Kommune | 199–2.000 EUR/Monat | Pro-Suche, Merklisten, Exporte, Datenmodule, API |
+
+Diese Historie bleibt nur zur Nachvollziehbarkeit früherer Modellannahmen erhalten.
 
 ### Differenzierung: Website-Baukaesten versus B2B-Plattformoekonomie
 
 Ein Anbieter wie Wix stellt Software bereit, um eine isolierte Website zu bauen. Diese Homepage erzeugt von sich aus keine qualifizierte Reichweite. GewerkeListe.com bringt den Betrieb in eine fachliche, regionale Suchlogik, in der professionelle Planer und Architekten nach Gewerk, Ort, Spezialisierung und Einsatzgebiet filtern.
 
-Die Plattform bietet nicht nur Webspace, sondern Vertrauenskontext und gezielte Distribution. Zudem kostet ein Monat im Pro-Profil weniger als viele einzelne B2C-Leadkosten auf etablierten Portalen.
+Die Plattform bietet nicht nur Webspace, sondern Vertrauenskontext und fachlich gezielte Distribution. Ein
+frueherer Pro-Profil-Vergleich mit B2C-Leadkosten ist eine verworfene historische Hypothese und kein
+aktueller Preis- oder Verkaufsvergleich.
 
 ## Regionale Break-even-Logik
 
 Der Business Case wird skalierbar, weil nicht jeder Betrieb zahlen muss. Eine Region traegt sich selbst, wenn die laufenden Kosten marginalisiert werden und eine kleine Minderheit bezahlt.
 
-### Kostendeckungstabelle nach Umsatzkanaelen
+### Historische Break-even-Hypothesen (nicht verbindliches Finanzmodell)
+
+Die folgenden Tabellen rechnen ausschließlich mit den verworfenen Supporter-/Pro-Annahmen. Sie bleiben
+historische Szenarien und dürfen nicht als aktuelles Angebot oder verbindliches Finanzmodell verwendet werden.
+
+### Kostendeckungstabelle nach historischen Umsatzkanaelen
 
 | Jaehrliche regionale Kosten | Supporter à 99 EUR/Jahr noetig | Pro à 29 EUR/Monat noetig | Pro à 49 EUR/Monat noetig | Einordnung bei 2.500 Profilen |
 | ---: | ---: | ---: | ---: | --- |
@@ -387,7 +443,7 @@ Bei 2.500 Profilen im SOM Rosenheim/Chiemgau belaufen sich System- und Betriebsk
 | Phase | Region/Ziel | Kernaktionen | Go/No-Go |
 | --- | --- | --- | --- |
 | 0 | Rosenheim als MVP- und Vertrauenspilot | Datenmodell, Suche, Wirkungskreis, Profile, Claim, Views, persoenliche Gespraeche. | 100 gepruefte Profile, 20 echte Kontakte, erste Claims. |
-| 1 | Chiemgau/Rosenheim/Traunstein/Kufstein | Regionale Dichte, Planer-Testnutzer, lokale Netzwerke, erste Supporter, SEO. | 500-1.000 Profile, 20 Planer, messbare Suchsessions. |
+| 1 | Chiemgau/Rosenheim/Traunstein/Kufstein | Regionale Dichte, Planer-Testnutzer, lokale Netzwerke, erstes bezahltes Nutzensignal erst nach Freigabe, SEO. | 500-1.000 Profile, 20 Planer, messbare Suchsessions. |
 | 2 | Muenchen-Salzburg-Innsbruck | Clusterlogik, grenznahe Nachfrage, Oesterreich-Rechtscheck, Veranstaltungen. | Wiederholbarer Claim-/Kosten-/Nutzungsprozess. |
 | 3 | Regionenweise DE/AT/CH | Bayern, weitere Bundeslaender, Tirol-Cluster, Schweiz nur mit Rechts-/Marktpruefung. | Keine DACH-Skalierung ohne replizierbares Regional-Playbook. |
 | 4 | DACH-Skalierung | Regionale Knoten, Messen, Netzwerke, Partnerkanaele, SEO, Team. | Datenqualitaet und CAC stabil. |
