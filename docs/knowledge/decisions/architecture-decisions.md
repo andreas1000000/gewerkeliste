@@ -198,3 +198,38 @@ Auswirkung: Die Roadmap ordnet zunaechst den minimalen Admin-/Rollen-Slice, Serv
 Dependency-Risiken sowie Backup/Migration/Release/Rollback. Danach folgen Profile, Claim/Review,
 Suche, Taxonomie, Provenienz und fachlich reduzierte Admin-Prozesse; jedes Paket benoetigt eigene
 Akzeptanz- und Exit-Kriterien.
+
+## ADR-013: Gemeindebasierte Tätigkeitsgebiete als kanonische Pilotlogik
+
+Status: active
+Datum: 2026-07-12
+
+Entscheidung: Im ersten Pilotcluster werden Tätigkeitsgebiete fachlich anhand amtlicher Gemeinden
+abgebildet. Der achtstellige AGS ist die stabile technische ID. Der Betrieb wählt Gemeinden
+ausdrücklich über eine lokale Karte und eine vollständige Alternativliste. Die Auswahl wird
+serverseitig gegen den versionierten VG250-Allowlist-Katalog geprüft und zunächst als ungeprüfte
+Submission gespeichert. Erst eine spätere Review-Freigabe darf öffentliche Suchwirkung erzeugen.
+
+Quelle und Transformation: Verwendet wird der jeweils aktuelle auf der BKG-Produktseite belegte
+VG250-Datenstand, derzeit 01.01.2025. Für den Pilotcluster werden die sieben Kreis-Allowlist-Codes
+`09163`, `09175`, `09182`, `09183`, `09184`, `09187` und `09189` gefiltert. Die Geometrien werden
+und auf die amtlichen `BEZ`-Typen `Gemeinde` und `Stadt` beschränkt. Die Geometrien werden von UTM32s
+nach WGS84 projiziert und mit einer lokalen, topologieschonenden weighted-Visvalingam-
+Vereinfachung für die Webdarstellung erzeugt. Es gibt keine Kartenkacheln, externe Karten- oder
+Geocoding-API und keinen Laufzeit-API-Key.
+
+Grund: Betriebssitz, Radius, PLZ-Nähe oder freie Regionsangaben sind keine belastbare Aussage dafür,
+dass ein Betrieb in einer bestimmten Gemeinde tätig werden möchte. Ein exakter Gemeindefilter darf
+nur ausdrücklich und öffentlich freigegebene Betrieb-Gemeinde-Zuordnungen berücksichtigen.
+
+Auswirkung: Bestehende Radius-, Regions- und PLZ-Felder werden nicht gelöscht und bleiben vorläufig
+für Rückwärtskompatibilität erhalten. Sie dürfen keinen exakten Gemeindetreffer vortäuschen. Die
+amtliche Datenquelle, die lokale Geometrie und die Datenbank-IDs werden aus einem gemeinsamen
+Manifest erzeugt. Die Datenbankmigration ist additiv, RLS bleibt service-role-only und es erfolgt
+keine Production-Migration in diesem Arbeitspaket.
+
+Scope-Slices: Slice 1 umfasst Katalog, lokale Karte, barrierearme Liste, Submission-Speicherung und
+Allowlist-Validierung. Slice 2 umfasst Review-/Freigabeansicht, exakte Gemeindesuche und öffentliche
+Profilanzeige. Slice 3 umfasst öffentliche regionale Verfügbarkeit und den Erweiterungsworkflow.
+Der österreichische Bezirk Kufstein bleibt eine dokumentierte spätere Erweiterung. Keine dieser
+Entscheidungen verändert organisches Ranking; Zahlung oder Profilplan erhalten keinen Suchvorteil.

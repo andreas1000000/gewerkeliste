@@ -4,16 +4,26 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useActionState } from "react";
 import { PremiumSubmissionFields } from "@/components/premium-submission-fields";
+import { MunicipalityServiceAreaPicker } from "@/components/municipality-service-area-picker";
 import { SocialLinksFields } from "@/components/social-links-fields";
 import { TradeCheckboxGroups } from "@/components/trade-checkbox-groups";
 import { serviceNamesForTrades, TradeServiceSelection } from "@/components/trade-service-selection";
 import { submitBusinessEntry } from "@/lib/actions/business-entry";
 import type { CompanyFormState } from "@/lib/types";
 import type { TaxonomyTrade } from "@/lib/trade-taxonomy";
+import type { PilotCounty, PilotMunicipality } from "@/lib/municipality-catalog";
 
 const initialState: CompanyFormState = { ok: false, message: "" };
 
-export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
+export function BusinessEntryForm({
+  counties,
+  municipalities,
+  trades,
+}: {
+  counties: PilotCounty[];
+  municipalities: PilotMunicipality[];
+  trades: TaxonomyTrade[];
+}) {
   const [state, formAction, pending] = useActionState(submitBusinessEntry, initialState);
   const [primaryTrade, setPrimaryTrade] = useState("");
   const [selectedTrades, setSelectedTrades] = useState<string[]>([]);
@@ -221,6 +231,12 @@ export function BusinessEntryForm({ trades }: { trades: TaxonomyTrade[] }) {
         title="Region und Wirkungskreis"
         help="Der Wirkungskreis hilft Auftraggebern einzuschätzen, in welchen Orten und Regionen Ihr Betrieb tätig werden möchte."
       >
+        <MunicipalityServiceAreaPicker
+          counties={counties}
+          error={errors.municipalityCodes}
+          municipalities={municipalities}
+          selectedCodes={arrayValue(values, "municipalityCodes")}
+        />
         <div className="grid gap-4 md:grid-cols-2">
           <Field label="Einsatzradius in km" error={errors.serviceRadiusKm} required>
             <input className={inputClass} name="serviceRadiusKm" type="number" min="1" max="500" defaultValue={textValue(values, "serviceRadiusKm", "50")} required />
