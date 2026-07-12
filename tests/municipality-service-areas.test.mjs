@@ -88,6 +88,10 @@ test("migration models pending and approved municipality assignments without pub
   );
   assert.doesNotMatch(migration, /alter\s+default\s+privileges/i);
   assert.match(migration, /grant\s+select,\s*insert,\s*update,\s*delete\s+on[\s\S]+to\s+service_role;/i);
+  assert.equal((migration.match(/\brevoke\s+all\b/gi) || []).length, 2);
+  const explicitGrantStatements = migration.match(/\bgrant\b[\s\S]*?;/gi) || [];
+  assert.equal(explicitGrantStatements.length, 1);
+  assert.match(explicitGrantStatements[0], /\bto\s+service_role\s*;/i);
   assert.match(seedMigration, /insert into municipalities/);
   assert.equal((seedMigration.match(/\('[0-9]{8}',/g) || []).length, pilotMunicipalities.length);
   assert.match(seedMigration, /Source SHA256: [a-f0-9]{64}/);
