@@ -74,3 +74,20 @@ Auswirkung: Der Gate liest nur Git-Diff und PR-Evidenz, nutzt keine Secrets, kei
 und keine externe Aktion. Für reine Governance-/CI-PRs bleibt die Einordnung `NOT APPLICABLE – keine
 ausgelieferte Anwendung geändert`; bei Anwendungscode, Daten-, Auth-, SEO- oder Konfigurationsänderungen
 ist Preview-QA verpflichtend.
+
+## ADR-007: Geschützte interne Pfade fail-closed härten
+
+Status: active
+
+Entscheidung: Die bestehende Basic-Auth-Grenze für Admin- und interne Pfade erkennt Pfade segmentgenau,
+behandelt ungültige Authorization-Header als nicht autorisiert, vergleicht das Secret über gleich lange
+SHA-256-Digests byteweise und versieht Auth-Fehler mit `no-store` sowie `noindex, nofollow`.
+
+Grund: Ein fehlerhafter Basic-Header darf keine ungefangene Middleware-Ausnahme verursachen. Der
+Secret-Vergleich soll keine direkte String-Gleichheit als zusätzliche Timing-Signatur verwenden.
+
+Auswirkung: Es gibt keine Änderung an Secrets, Environment-Werten, Service-Role-Rechten, Datenbank,
+RLS oder Nutzerrollen. Die Schutzgrenze bleibt Basic Auth; weitergehende Authentifizierung und
+feingranulare RLS bleiben separate P0-Arbeit. Wenn eine Preview-Umgebung vor der Anwendung durch
+Vercel-SSO geschützt wird, wird diese Einschränkung in der Preview-Abnahme offengelegt und nicht
+durch einen Bypass umgangen; die Middleware-Antwort bleibt durch direkte Tests abzusichern.
