@@ -351,6 +351,7 @@ export type CompanySubmission = {
   service_regions: string[];
   postal_codes: string[];
   service_countries: string[];
+  municipality_codes: string[];
   short_description: string;
   description: string | null;
   references_text: string | null;

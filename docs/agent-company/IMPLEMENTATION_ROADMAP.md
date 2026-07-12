@@ -79,6 +79,10 @@ Roadmap-Backlog entsteht nicht.
 - [~] Admin-Prozesse auf fachliche Entscheidungen reduzieren.
   - Exit-Kriterien: Jeder Admin-Schritt ist einer fachlichen Entscheidung, einem Status, einer Begruendung und einer Audit-Spur zugeordnet.
   - Exit-Kriterien: Technische Routine wird automatisiert; offene Produkt-, Rechts-, Secret-, Live-Daten- und irreversible Entscheidungen bleiben beim Product Owner.
+- [~] Gemeindebasierte Tätigkeitsgebiete im Rosenheimer Pilotcluster (Slice 1: amtlicher Katalog, lokale Karte und Submission-Speicherung; Slice 2: Review, exakte Gemeindesuche und Profil; Slice 3: öffentliche regionale Verfügbarkeit und Erweiterungsworkflow).
+  - Exit-Kriterien Slice 1: Die freigegebene Pilot-Allowlist stammt reproduzierbar aus VG250, ist AGS-basiert, lokal visualisiert und serverseitig validiert.
+  - Exit-Kriterien Slice 2: Nur freigegebene Betrieb-Gemeinde-Zuordnungen wirken auf exakte Suche und öffentliche Profile; Sitz, Radius und PLZ reichen nicht.
+  - Exit-Kriterien Slice 3: Regionale Verfügbarkeit und spätere Kreis-Erweiterungen werden aus demselben Manifest transparent und ohne Vollständigkeitsbehauptung abgeleitet.
 
 ## P2 - Datenqualitaet und Marktabdeckung
 

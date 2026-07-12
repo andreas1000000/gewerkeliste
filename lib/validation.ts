@@ -1,5 +1,6 @@
 import { z } from "zod";
 import type { ClaimStatus, CompanyFormState, CompanyPremiumSubmissionPayload } from "@/lib/types";
+import { validatePilotMunicipalityCodes } from "@/lib/municipality-catalog";
 import { normalizeSocialLink } from "@/lib/social-links";
 import { canonicalTradeSlug, publicTradeTaxonomy } from "@/lib/trade-taxonomy";
 
@@ -117,6 +118,7 @@ export const businessSubmissionSchema = z
     serviceRegions: z.array(z.string()),
     postalCodes: z.array(z.string()),
     serviceCountries: z.array(z.string()),
+    municipalityCodes: z.array(z.string()),
     shortDescription: z.string().trim().min(30, "Kurzbeschreibung braucht mindestens 30 Zeichen.").max(500, "Kurzbeschreibung ist zu lang."),
     description: optionalString,
     referencesText: optionalString,
@@ -153,6 +155,15 @@ export const businessSubmissionSchema = z
         code: "custom",
         message: "Bitte Betrag angeben.",
         path: ["supportCustomAmount"],
+      });
+    }
+
+    const municipalityValidation = validatePilotMunicipalityCodes(value.municipalityCodes);
+    if (!municipalityValidation.valid) {
+      ctx.addIssue({
+        code: "custom",
+        message: "Mindestens eine ausgewählte Gemeinde ist im aktuellen Pilotkatalog nicht freigegeben.",
+        path: ["municipalityCodes"],
       });
     }
   });
@@ -228,6 +239,7 @@ export function parseBusinessSubmissionForm(formData: FormData) {
     serviceRegions: splitList(getString(formData, "serviceRegions")),
     postalCodes: splitList(getString(formData, "postalCodes")),
     serviceCountries: splitList(getString(formData, "serviceCountries")),
+    municipalityCodes: getStringArray(formData, "municipalityCodes"),
     shortDescription: getString(formData, "shortDescription"),
     description: getString(formData, "description"),
     referencesText: getString(formData, "referencesText"),
@@ -256,7 +268,13 @@ export function parseBusinessSubmissionForm(formData: FormData) {
     };
   }
 
-  return { data: { ...result.data, premiumSubmissionPayload: parsePremiumSubmissionPayload(formData) } };
+  return {
+    data: {
+      ...result.data,
+      municipalityCodes: validatePilotMunicipalityCodes(result.data.municipalityCodes).validCodes,
+      premiumSubmissionPayload: parsePremiumSubmissionPayload(formData),
+    },
+  };
 }
 
 export function parsePremiumSubmissionPayload(formData: FormData): CompanyPremiumSubmissionPayload {
@@ -422,6 +440,7 @@ function getBusinessSubmissionValues(formData: FormData) {
     serviceRegions: getString(formData, "serviceRegions"),
     postalCodes: getString(formData, "postalCodes"),
     serviceCountries: getString(formData, "serviceCountries") || "Deutschland",
+    municipalityCodes: getStringArray(formData, "municipalityCodes"),
     shortDescription: getString(formData, "shortDescription"),
     description: getString(formData, "description"),
     referencesText: getString(formData, "referencesText"),
