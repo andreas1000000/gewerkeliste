@@ -198,3 +198,31 @@ Auswirkung: Die Roadmap ordnet zunaechst den minimalen Admin-/Rollen-Slice, Serv
 Dependency-Risiken sowie Backup/Migration/Release/Rollback. Danach folgen Profile, Claim/Review,
 Suche, Taxonomie, Provenienz und fachlich reduzierte Admin-Prozesse; jedes Paket benoetigt eigene
 Akzeptanz- und Exit-Kriterien.
+
+## ADR-013: Footer und Service-Seiten als Vertrauens- und Informationsarchitektur
+
+Status: active
+Datum: 2026-07-12
+
+Entscheidung: Der Footer von GewerkeListe.com wird als Vertrauens-, Orientierungs- und
+Informationsarchitektur geführt. Verlinkt werden ausschließlich reale, freigegebene und betreute
+Seiten. Die verbindliche Zielmatrix mit `NOW`, `NEXT`, `CONDITIONAL`, `LATER` und `NOT_PLANNED`
+steht in `docs/knowledge/product/footer-service-pages.md`.
+
+Grund: Suchende und Betriebe brauchen klare Wege zu Suche, Datenkorrektur, Hilfe, Sicherheit und
+rechtlichen Informationen. Ein größerer Footer ohne echte Zielseiten würde Vertrauen zerstören,
+leere Routen erzeugen und die fachliche Orientierung verschlechtern.
+
+Leitplanken: Rechtliche oder technisch bedingte Seiten werden erst bei tatsächlicher Anwendbarkeit
+veröffentlicht. Preise benötigen ein vollständig lieferbares Angebot und eine ausdrückliche
+Product-Owner-Verkaufsfreigabe. Sicherheitsmeldungen benötigen einen betreuten Eingang und einen
+definierten Prozess. Social-Media-Links dürfen nur auf aktive offizielle GewerkeListe-Kanäle zeigen.
+
+Abgrenzung: Der Aufbau kopiert weder Footer noch Wortlaut, `PRO`-Produktlogik, Bewertungsfunktionen,
+Pay-to-rank oder aggressive Werbeangebote anderer Plattformen. Eigene Bezeichnungen wie Für
+Betriebe, Preise, Verifiziertes Startprofil, Für Planer und Auftraggeber und Partnerschaften bleiben
+maßgeblich.
+
+Auswirkung: Die spätere Umsetzung erfolgt in kleinen, jeweils eigenen Branches und PRs. Dieses ADR
+ist keine zweite operative Roadmap. Es verändert in diesem Dokumentations-Slice weder Footer,
+Navigation, Sitemap, öffentliche Seiten, Datenbank noch Laufzeitlogik.

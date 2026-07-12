@@ -79,6 +79,14 @@ Roadmap-Backlog entsteht nicht.
 - [~] Admin-Prozesse auf fachliche Entscheidungen reduzieren.
   - Exit-Kriterien: Jeder Admin-Schritt ist einer fachlichen Entscheidung, einem Status, einer Begruendung und einer Audit-Spur zugeordnet.
   - Exit-Kriterien: Technische Routine wird automatisiert; offene Produkt-, Rechts-, Secret-, Live-Daten- und irreversible Entscheidungen bleiben beim Product Owner.
+- [ ] Footer-, Hilfe-, Sicherheits- und Service-Informationsarchitektur schrittweise umsetzen (Referenz: `docs/knowledge/product/footer-service-pages.md`).
+  - Slice 1: vorhandene Navigation und tote Links bereinigen.
+  - Slice 2: Hilfe/FAQ und Datenkorrektur.
+  - Slice 3: Sicherheit und Inhalte melden.
+  - Slice 4: Nutzungsbedingungen und rechtliche Bedarfspruefung.
+  - Slice 5: Orte-, Regionen- und Firmenuebersichten.
+  - Slice 6: Presse und Sicherheitskontakt.
+  - Slice 7: Magazin, Karriere und Partnerschaften.
 
 ## P2 - Datenqualitaet und Marktabdeckung
 
