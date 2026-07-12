@@ -44,3 +44,15 @@ Status: active
 Entscheidung: Gewerke, Leistungen und Spezialisierungen duerfen nicht kuenstlich begrenzt oder hinter eine Paywall gelegt werden.
 
 Grund: Transparenz ist Kernnutzen der Plattform.
+
+## ADR-005: Kanonische operative Roadmap und autonome Delivery-Skills
+
+Status: active
+
+Entscheidung: `docs/agent-company/IMPLEMENTATION_ROADMAP.md` ist die einzige operative Roadmap. Die
+Repository-Skills `run-product-roadmap`, `deliver-product-change` und `release-approved-change` bilden
+Auswahl, Lieferung und Release-Nachkontrolle als getrennte Schritte ab.
+
+Grund: Andreas Moser soll technische Einzelschritte nicht orchestrieren muessen. Gleichzeitig bleiben
+Arbeitspakete einzeln, Reviews unabhaengig, Production-Freigaben menschlich und Releases ueber den
+geschuetzten Pull-Request-Prozess nachvollziehbar.
