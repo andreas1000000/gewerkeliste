@@ -83,6 +83,14 @@ Roadmap-Backlog entsteht nicht.
   - Exit-Kriterien Slice 1: Die freigegebene Pilot-Allowlist stammt reproduzierbar aus VG250, ist AGS-basiert, lokal visualisiert und serverseitig validiert.
   - Exit-Kriterien Slice 2: Nur freigegebene Betrieb-Gemeinde-Zuordnungen wirken auf exakte Suche und öffentliche Profile; Sitz, Radius und PLZ reichen nicht.
   - Exit-Kriterien Slice 3: Regionale Verfügbarkeit und spätere Kreis-Erweiterungen werden aus demselben Manifest transparent und ohne Vollständigkeitsbehauptung abgeleitet.
+- [ ] Footer-, Hilfe-, Sicherheits- und Service-Informationsarchitektur schrittweise umsetzen (Referenz: `docs/knowledge/product/footer-service-pages.md`).
+  - Slice 1: vorhandene Navigation und tote Links bereinigen.
+  - Slice 2: Hilfe/FAQ und Datenkorrektur.
+  - Slice 3: Sicherheit und Inhalte melden.
+  - Slice 4: Nutzungsbedingungen und rechtliche Bedarfspruefung.
+  - Slice 5: Orte-, Regionen- und Firmenuebersichten.
+  - Slice 6: Presse und Sicherheitskontakt.
+  - Slice 7: Magazin, Karriere und Partnerschaften.
 
 ## P2 - Datenqualitaet und Marktabdeckung
 
