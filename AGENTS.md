@@ -19,6 +19,11 @@ Strategische Leitplanken:
 
 Bei Produkt-, Monetarisierungs-, Go-to-Market-, Agenten-, Discovery-, Enrichment-, Outreach-, Datenqualitaets- oder Skalierungsentscheidungen ist `BUSINESSPLAN_GEWERKELISTE_V2.md` zusammen mit `GEWERKELISTE_PRODUCT_DOCTRINE.md` als verbindliche strategische Quelle zu beruecksichtigen.
 
+Die verbindliche Hierarchie lautet: Sicherheits-, Datenschutz- und Compliance-Regeln, Grundsatz und
+Product Doctrine, neueste ausdrücklich dokumentierte Product-Owner-Entscheidungen im Entscheidungsregister,
+Businessplan, operative Roadmap, einzelne Featurewünsche und Hypothesen, technische Bequemlichkeit.
+Neuere Product-Owner-Entscheidungen ersetzen ausdrücklich ältere Businessplan-Annahmen.
+
 ## Technische Architektur
 
 Stack:
