@@ -102,6 +102,18 @@ Roadmap-Backlog entsteht nicht.
 - [ ] Die derzeitige Preisgrundlage von 490 EUR netto fuer 12 Monate bleibt dokumentiert und wird ohne neue Freigabe nicht live veraendert.
 - [ ] Zahlung, Rechnung, Verlaengerung und Kuendigung erst nach gesonderter Security-, Rechts- und Product-Owner-Freigabe aktivieren.
 
+### Verbindliche Preis-/Entitlement-Slices
+
+- [~] Slice 1: Preis- und Entitlement-Vertrag als zentrale Grundlage (dieser Draft-PR).
+  - Exit-Kriterien: Zentrale Konfiguration definiert Basisprofil, verifiziertes Startprofil, 490 EUR netto Gesamtpreis, zwölf Monate, einmalige Zahlung, keine automatische Verlängerung, kein Monatsabo, keine monatliche Kündigung, keine Leadgebühr, keine Provision sowie keine Änderung von Suchrelevanz oder Ranking durch Zahlung.
+  - Exit-Kriterien: Basis-/Verified-Feature-Matrix und nicht-destruktive Bestandsschutzregeln sind zentral testbar dokumentiert.
+  - Exit-Kriterien: Verkaufsfreigabe bleibt NEIN; es gibt keine Bestellung, Zahlung, Rechnung oder Aktivierung eines kostenpflichtigen Zeitraums.
+- [ ] Slice 2: Datenmodell und Bestandsschutz mit eigener Security-/Datenprüfung und sicherer, wiederholbarer Migration.
+- [ ] Slice 3: Formular, Validierung und Speicherung für Basis-Kontakt und verifizierte Unternehmenskanäle.
+- [ ] Slice 4: Serverseitige Entitlements und öffentliche Profile einschließlich HTML, Accessibility, JSON-LD, OpenGraph und Twitter Cards.
+- [ ] Slice 5: Preisseite und öffentliche Kommunikation erst nach belegter Funktionsreife.
+- [ ] Slice 6: Laufzeit, Ablauf und sichere Reaktivierung ohne Datenlöschung.
+
 ## Delivery-Status und Entscheidungsregister
 
 Der aktuelle Status steht in diesem Dokument. Architektur- und Produktentscheidungen werden in
