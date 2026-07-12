@@ -78,8 +78,16 @@ test("migration models pending and approved municipality assignments without pub
   assert.match(migration, /status in \('submitted', 'in_review', 'approved', 'rejected'\)/g);
   assert.match(migration, /jsonb_array_elements_text\(new\.municipality_codes\)/);
   assert.match(migration, /enable row level security/);
-  assert.doesNotMatch(migration, /to anon/);
-  assert.doesNotMatch(migration, /to authenticated/);
+  assert.match(
+    migration,
+    /revoke\s+all\s+on\s+table\s+municipalities,\s+company_submission_service_areas,\s+company_service_areas\s+from\s+public,\s+anon,\s+authenticated;/i,
+  );
+  assert.match(
+    migration,
+    /revoke\s+all\s+on\s+function\s+sync_company_submission_service_areas\(\)\s+from\s+public,\s+anon,\s+authenticated;/i,
+  );
+  assert.doesNotMatch(migration, /alter\s+default\s+privileges/i);
+  assert.match(migration, /grant\s+select,\s*insert,\s*update,\s*delete\s+on[\s\S]+to\s+service_role;/i);
   assert.match(seedMigration, /insert into municipalities/);
   assert.equal((seedMigration.match(/\('[0-9]{8}',/g) || []).length, pilotMunicipalities.length);
   assert.match(seedMigration, /Source SHA256: [a-f0-9]{64}/);

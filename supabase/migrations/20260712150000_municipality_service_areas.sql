@@ -119,6 +119,15 @@ to service_role
 using (true)
 with check (true);
 
+revoke all on table
+  municipalities,
+  company_submission_service_areas,
+  company_service_areas
+from public, anon, authenticated;
+
+revoke all on function sync_company_submission_service_areas()
+from public, anon, authenticated;
+
 grant select, insert, update, delete on
   municipalities,
   company_submission_service_areas,
