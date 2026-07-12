@@ -52,6 +52,23 @@ Abnahmeschritte:
 
 Erwartetes sichtbares Ergebnis:
 
+## Delivery-Gate-Nachweise
+
+Laufzeitklassifizierung: <ein exakter Wert aus der folgenden Liste>
+
+- `PREVIEW-QA: REQUIRED`
+- `PREVIEW-QA: NOT APPLICABLE – keine ausgelieferte Anwendung geändert`
+
+Vollständige Diff-Einordnung:
+
+## Unabhängiges Review
+
+Reviewer:
+
+Ergebnis:
+
+Offene P0/P1-Findings:
+
 ## Risiken und Rollback
 
 Bekannte Restrisiken:

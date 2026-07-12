@@ -66,3 +66,27 @@ jobs:
 
       - name: Audit dependencies
         run: npm audit --audit-level=critical
+
+  delivery-gate:
+    name: Delivery gate
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Validate PR delivery evidence
+        run: >-
+          node scripts/delivery-gate.mjs
+          --base-sha "${{ github.event.pull_request.base.sha }}"
+          --head-sha "${{ github.event.pull_request.head.sha }}"
+          --event-path "$GITHUB_EVENT_PATH"
