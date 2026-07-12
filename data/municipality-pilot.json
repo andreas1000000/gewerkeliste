@@ -1,0 +1,2957 @@
+{
+  "schemaVersion": 1,
+  "dataAsOf": "2025-01-01",
+  "generatedBy": "scripts/import-vg250.mjs",
+  "source": {
+    "dataset": "Verwaltungsgebiete 1:250 000 (VG250), Stand 01.01.",
+    "url": "https://daten.gdz.bkg.bund.de/produkte/vg/vg250_ebenen_0101/aktuell/vg250_01-01.utm32s.shape.ebenen.zip",
+    "sourceFileSha256": "b16b97d8f2ae0ce59ae6139617b60bb550f652f4b6db1a0c74417b2105bab33e",
+    "license": "Datenlizenz Deutschland – Namensnennung 2.0",
+    "licenseUrl": "https://www.govdata.de/dl-de/by-2-0",
+    "dataSourcesUrl": "https://sgx.geodatenzentrum.de/web_public/gdz/datenquellen/datenquellen_vg_nuts.pdf",
+    "attribution": "© BKG (2025) dl-de/by-2-0 (Daten verändert), Datenquellen: https://sgx.geodatenzentrum.de/web_public/gdz/datenquellen/datenquellen_vg_nuts.pdf",
+    "transformation": "VG250_GEM aus UTM32s nach WGS84 projiziert, auf die Pilot-Kreis-Allowlist und BEZ Gemeinde/Stadt gefiltert und mit mapshaper 0.7.45 weighted Visvalingam 10% keep-shapes topologieschonend vereinfacht; Attribute auf die Anwendungsschnittstelle reduziert."
+  },
+  "toolchain": {
+    "mapshaper": "0.7.45"
+  },
+  "pilotCounties": [
+    {
+      "code": "09175",
+      "name": "Ebersberg",
+      "kind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern"
+    },
+    {
+      "code": "09182",
+      "name": "Miesbach",
+      "kind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern"
+    },
+    {
+      "code": "09183",
+      "name": "Mühldorf a.Inn",
+      "kind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern"
+    },
+    {
+      "code": "09184",
+      "name": "München",
+      "kind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern"
+    },
+    {
+      "code": "09163",
+      "name": "Rosenheim",
+      "kind": "Kreisfreie Stadt",
+      "stateCode": "09",
+      "stateName": "Bayern"
+    },
+    {
+      "code": "09187",
+      "name": "Rosenheim",
+      "kind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern"
+    },
+    {
+      "code": "09189",
+      "name": "Traunstein",
+      "kind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern"
+    }
+  ],
+  "municipalities": [
+    {
+      "ags": "09175111",
+      "name": "Anzing",
+      "slug": "anzing-09175111",
+      "countyCode": "09175",
+      "countyName": "Ebersberg",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09175111",
+      "selectionEnabled": true,
+      "center": [
+        11.855172,
+        48.156318
+      ]
+    },
+    {
+      "ags": "09175112",
+      "name": "Aßling",
+      "slug": "assling-09175112",
+      "countyCode": "09175",
+      "countyName": "Ebersberg",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09175112",
+      "selectionEnabled": true,
+      "center": [
+        11.98104,
+        47.990658
+      ]
+    },
+    {
+      "ags": "09175113",
+      "name": "Baiern",
+      "slug": "baiern-09175113",
+      "countyCode": "09175",
+      "countyName": "Ebersberg",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09175113",
+      "selectionEnabled": true,
+      "center": [
+        11.913954,
+        47.967214
+      ]
+    },
+    {
+      "ags": "09175114",
+      "name": "Bruck",
+      "slug": "bruck-09175114",
+      "countyCode": "09175",
+      "countyName": "Ebersberg",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09175114",
+      "selectionEnabled": true,
+      "center": [
+        11.915915,
+        48.028236
+      ]
+    },
+    {
+      "ags": "09175115",
+      "name": "Ebersberg",
+      "slug": "ebersberg-09175115",
+      "countyCode": "09175",
+      "countyName": "Ebersberg",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09175115",
+      "selectionEnabled": true,
+      "center": [
+        11.98246,
+        48.08614
+      ]
+    },
+    {
+      "ags": "09175116",
+      "name": "Egmating",
+      "slug": "egmating-09175116",
+      "countyCode": "09175",
+      "countyName": "Ebersberg",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09175116",
+      "selectionEnabled": true,
+      "center": [
+        11.804026,
+        47.992332
+      ]
+    },
+    {
+      "ags": "09175136",
+      "name": "Emmering",
+      "slug": "emmering-09175136",
+      "countyCode": "09175",
+      "countyName": "Ebersberg",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09175136",
+      "selectionEnabled": true,
+      "center": [
+        12.062992,
+        47.994104
+      ]
+    },
+    {
+      "ags": "09175118",
+      "name": "Forstinning",
+      "slug": "forstinning-09175118",
+      "countyCode": "09175",
+      "countyName": "Ebersberg",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09175118",
+      "selectionEnabled": true,
+      "center": [
+        11.913783,
+        48.177764
+      ]
+    },
+    {
+      "ags": "09175119",
+      "name": "Frauenneuharting",
+      "slug": "frauenneuharting-09175119",
+      "countyCode": "09175",
+      "countyName": "Ebersberg",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09175119",
+      "selectionEnabled": true,
+      "center": [
+        12.039258,
+        48.03294
+      ]
+    },
+    {
+      "ags": "09175121",
+      "name": "Glonn",
+      "slug": "glonn-09175121",
+      "countyCode": "09175",
+      "countyName": "Ebersberg",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09175121",
+      "selectionEnabled": true,
+      "center": [
+        11.863068,
+        47.983175
+      ]
+    },
+    {
+      "ags": "09175122",
+      "name": "Grafing b.München",
+      "slug": "grafing-bmuenchen-09175122",
+      "countyCode": "09175",
+      "countyName": "Ebersberg",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09175122",
+      "selectionEnabled": true,
+      "center": [
+        11.977317,
+        48.037489
+      ]
+    },
+    {
+      "ags": "09175123",
+      "name": "Hohenlinden",
+      "slug": "hohenlinden-09175123",
+      "countyCode": "09175",
+      "countyName": "Ebersberg",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09175123",
+      "selectionEnabled": true,
+      "center": [
+        11.996562,
+        48.145539
+      ]
+    },
+    {
+      "ags": "09175124",
+      "name": "Kirchseeon",
+      "slug": "kirchseeon-09175124",
+      "countyCode": "09175",
+      "countyName": "Ebersberg",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09175124",
+      "selectionEnabled": true,
+      "center": [
+        11.881567,
+        48.067252
+      ]
+    },
+    {
+      "ags": "09175127",
+      "name": "Markt Schwaben",
+      "slug": "markt-schwaben-09175127",
+      "countyCode": "09175",
+      "countyName": "Ebersberg",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09175127",
+      "selectionEnabled": true,
+      "center": [
+        11.860786,
+        48.190961
+      ]
+    },
+    {
+      "ags": "09175128",
+      "name": "Moosach",
+      "slug": "moosach-09175128",
+      "countyCode": "09175",
+      "countyName": "Ebersberg",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09175128",
+      "selectionEnabled": true,
+      "center": [
+        11.874042,
+        48.034258
+      ]
+    },
+    {
+      "ags": "09175131",
+      "name": "Oberpframmern",
+      "slug": "oberpframmern-09175131",
+      "countyCode": "09175",
+      "countyName": "Ebersberg",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09175131",
+      "selectionEnabled": true,
+      "center": [
+        11.815846,
+        48.031239
+      ]
+    },
+    {
+      "ags": "09175133",
+      "name": "Pliening",
+      "slug": "pliening-09175133",
+      "countyCode": "09175",
+      "countyName": "Ebersberg",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09175133",
+      "selectionEnabled": true,
+      "center": [
+        11.801744,
+        48.198109
+      ]
+    },
+    {
+      "ags": "09175135",
+      "name": "Poing",
+      "slug": "poing-09175135",
+      "countyCode": "09175",
+      "countyName": "Ebersberg",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09175135",
+      "selectionEnabled": true,
+      "center": [
+        11.80478,
+        48.16889
+      ]
+    },
+    {
+      "ags": "09175137",
+      "name": "Steinhöring",
+      "slug": "steinhoering-09175137",
+      "countyCode": "09175",
+      "countyName": "Ebersberg",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09175137",
+      "selectionEnabled": true,
+      "center": [
+        12.040118,
+        48.094576
+      ]
+    },
+    {
+      "ags": "09175132",
+      "name": "Vaterstetten",
+      "slug": "vaterstetten-09175132",
+      "countyCode": "09175",
+      "countyName": "Ebersberg",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09175132",
+      "selectionEnabled": true,
+      "center": [
+        11.796226,
+        48.12378
+      ]
+    },
+    {
+      "ags": "09175139",
+      "name": "Zorneding",
+      "slug": "zorneding-09175139",
+      "countyCode": "09175",
+      "countyName": "Ebersberg",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09175139",
+      "selectionEnabled": true,
+      "center": [
+        11.817081,
+        48.081878
+      ]
+    },
+    {
+      "ags": "09182111",
+      "name": "Bad Wiessee",
+      "slug": "bad-wiessee-09182111",
+      "countyCode": "09182",
+      "countyName": "Miesbach",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09182111",
+      "selectionEnabled": true,
+      "center": [
+        11.692032,
+        47.704437
+      ]
+    },
+    {
+      "ags": "09182112",
+      "name": "Bayrischzell",
+      "slug": "bayrischzell-09182112",
+      "countyCode": "09182",
+      "countyName": "Miesbach",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09182112",
+      "selectionEnabled": true,
+      "center": [
+        11.991292,
+        47.659496
+      ]
+    },
+    {
+      "ags": "09182114",
+      "name": "Fischbachau",
+      "slug": "fischbachau-09182114",
+      "countyCode": "09182",
+      "countyName": "Miesbach",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09182114",
+      "selectionEnabled": true,
+      "center": [
+        11.955219,
+        47.729505
+      ]
+    },
+    {
+      "ags": "09182116",
+      "name": "Gmund a.Tegernsee",
+      "slug": "gmund-ategernsee-09182116",
+      "countyCode": "09182",
+      "countyName": "Miesbach",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09182116",
+      "selectionEnabled": true,
+      "center": [
+        11.73781,
+        47.754234
+      ]
+    },
+    {
+      "ags": "09182119",
+      "name": "Hausham",
+      "slug": "hausham-09182119",
+      "countyCode": "09182",
+      "countyName": "Miesbach",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09182119",
+      "selectionEnabled": true,
+      "center": [
+        11.839827,
+        47.753179
+      ]
+    },
+    {
+      "ags": "09182120",
+      "name": "Holzkirchen",
+      "slug": "holzkirchen-09182120",
+      "countyCode": "09182",
+      "countyName": "Miesbach",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09182120",
+      "selectionEnabled": true,
+      "center": [
+        11.673656,
+        47.87013
+      ]
+    },
+    {
+      "ags": "09182123",
+      "name": "Irschenberg",
+      "slug": "irschenberg-09182123",
+      "countyCode": "09182",
+      "countyName": "Miesbach",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09182123",
+      "selectionEnabled": true,
+      "center": [
+        11.894523,
+        47.81918
+      ]
+    },
+    {
+      "ags": "09182124",
+      "name": "Kreuth",
+      "slug": "kreuth-09182124",
+      "countyCode": "09182",
+      "countyName": "Miesbach",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09182124",
+      "selectionEnabled": true,
+      "center": [
+        11.72644,
+        47.640502
+      ]
+    },
+    {
+      "ags": "09182125",
+      "name": "Miesbach",
+      "slug": "miesbach-09182125",
+      "countyCode": "09182",
+      "countyName": "Miesbach",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09182125",
+      "selectionEnabled": true,
+      "center": [
+        11.839571,
+        47.79089
+      ]
+    },
+    {
+      "ags": "09182127",
+      "name": "Otterfing",
+      "slug": "otterfing-09182127",
+      "countyCode": "09182",
+      "countyName": "Miesbach",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09182127",
+      "selectionEnabled": true,
+      "center": [
+        11.670078,
+        47.913159
+      ]
+    },
+    {
+      "ags": "09182129",
+      "name": "Rottach-Egern",
+      "slug": "rottach-egern-09182129",
+      "countyCode": "09182",
+      "countyName": "Miesbach",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09182129",
+      "selectionEnabled": true,
+      "center": [
+        11.816542,
+        47.651924
+      ]
+    },
+    {
+      "ags": "09182131",
+      "name": "Schliersee",
+      "slug": "schliersee-09182131",
+      "countyCode": "09182",
+      "countyName": "Miesbach",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09182131",
+      "selectionEnabled": true,
+      "center": [
+        11.869266,
+        47.680902
+      ]
+    },
+    {
+      "ags": "09182132",
+      "name": "Tegernsee",
+      "slug": "tegernsee-09182132",
+      "countyCode": "09182",
+      "countyName": "Miesbach",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09182132",
+      "selectionEnabled": true,
+      "center": [
+        11.765281,
+        47.718788
+      ]
+    },
+    {
+      "ags": "09182133",
+      "name": "Valley",
+      "slug": "valley-09182133",
+      "countyCode": "09182",
+      "countyName": "Miesbach",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09182133",
+      "selectionEnabled": true,
+      "center": [
+        11.762981,
+        47.888833
+      ]
+    },
+    {
+      "ags": "09182134",
+      "name": "Waakirchen",
+      "slug": "waakirchen-09182134",
+      "countyCode": "09182",
+      "countyName": "Miesbach",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09182134",
+      "selectionEnabled": true,
+      "center": [
+        11.67382,
+        47.769171
+      ]
+    },
+    {
+      "ags": "09182136",
+      "name": "Warngau",
+      "slug": "warngau-09182136",
+      "countyCode": "09182",
+      "countyName": "Miesbach",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09182136",
+      "selectionEnabled": true,
+      "center": [
+        11.73912,
+        47.819196
+      ]
+    },
+    {
+      "ags": "09182137",
+      "name": "Weyarn",
+      "slug": "weyarn-09182137",
+      "countyCode": "09182",
+      "countyName": "Miesbach",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09182137",
+      "selectionEnabled": true,
+      "center": [
+        11.823,
+        47.865453
+      ]
+    },
+    {
+      "ags": "09183112",
+      "name": "Ampfing",
+      "slug": "ampfing-09183112",
+      "countyCode": "09183",
+      "countyName": "Mühldorf a.Inn",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09183112",
+      "selectionEnabled": true,
+      "center": [
+        12.388437,
+        48.260263
+      ]
+    },
+    {
+      "ags": "09183113",
+      "name": "Aschau a.Inn",
+      "slug": "aschau-ainn-09183113",
+      "countyCode": "09183",
+      "countyName": "Mühldorf a.Inn",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09183113",
+      "selectionEnabled": true,
+      "center": [
+        12.348911,
+        48.19673
+      ]
+    },
+    {
+      "ags": "09183114",
+      "name": "Buchbach",
+      "slug": "buchbach-09183114",
+      "countyCode": "09183",
+      "countyName": "Mühldorf a.Inn",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09183114",
+      "selectionEnabled": true,
+      "center": [
+        12.30982,
+        48.307388
+      ]
+    },
+    {
+      "ags": "09183115",
+      "name": "Egglkofen",
+      "slug": "egglkofen-09183115",
+      "countyCode": "09183",
+      "countyName": "Mühldorf a.Inn",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09183115",
+      "selectionEnabled": true,
+      "center": [
+        12.452532,
+        48.389376
+      ]
+    },
+    {
+      "ags": "09183116",
+      "name": "Erharting",
+      "slug": "erharting-09183116",
+      "countyCode": "09183",
+      "countyName": "Mühldorf a.Inn",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09183116",
+      "selectionEnabled": true,
+      "center": [
+        12.568957,
+        48.277901
+      ]
+    },
+    {
+      "ags": "09183118",
+      "name": "Gars a.Inn",
+      "slug": "gars-ainn-09183118",
+      "countyCode": "09183",
+      "countyName": "Mühldorf a.Inn",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09183118",
+      "selectionEnabled": true,
+      "center": [
+        12.278703,
+        48.159582
+      ]
+    },
+    {
+      "ags": "09183119",
+      "name": "Haag i.OB",
+      "slug": "haag-iob-09183119",
+      "countyCode": "09183",
+      "countyName": "Mühldorf a.Inn",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09183119",
+      "selectionEnabled": true,
+      "center": [
+        12.15616,
+        48.158348
+      ]
+    },
+    {
+      "ags": "09183120",
+      "name": "Heldenstein",
+      "slug": "heldenstein-09183120",
+      "countyCode": "09183",
+      "countyName": "Mühldorf a.Inn",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09183120",
+      "selectionEnabled": true,
+      "center": [
+        12.363233,
+        48.239176
+      ]
+    },
+    {
+      "ags": "09183122",
+      "name": "Jettenbach",
+      "slug": "jettenbach-09183122",
+      "countyCode": "09183",
+      "countyName": "Mühldorf a.Inn",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09183122",
+      "selectionEnabled": true,
+      "center": [
+        12.375564,
+        48.162868
+      ]
+    },
+    {
+      "ags": "09183123",
+      "name": "Kirchdorf",
+      "slug": "kirchdorf-09183123",
+      "countyCode": "09183",
+      "countyName": "Mühldorf a.Inn",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09183123",
+      "selectionEnabled": true,
+      "center": [
+        12.175763,
+        48.191346
+      ]
+    },
+    {
+      "ags": "09183124",
+      "name": "Kraiburg a.Inn",
+      "slug": "kraiburg-ainn-09183124",
+      "countyCode": "09183",
+      "countyName": "Mühldorf a.Inn",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09183124",
+      "selectionEnabled": true,
+      "center": [
+        12.444513,
+        48.177459
+      ]
+    },
+    {
+      "ags": "09183125",
+      "name": "Lohkirchen",
+      "slug": "lohkirchen-09183125",
+      "countyCode": "09183",
+      "countyName": "Mühldorf a.Inn",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09183125",
+      "selectionEnabled": true,
+      "center": [
+        12.450454,
+        48.312747
+      ]
+    },
+    {
+      "ags": "09183126",
+      "name": "Maitenbeth",
+      "slug": "maitenbeth-09183126",
+      "countyCode": "09183",
+      "countyName": "Mühldorf a.Inn",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09183126",
+      "selectionEnabled": true,
+      "center": [
+        12.093187,
+        48.148206
+      ]
+    },
+    {
+      "ags": "09183127",
+      "name": "Mettenheim",
+      "slug": "mettenheim-09183127",
+      "countyCode": "09183",
+      "countyName": "Mühldorf a.Inn",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09183127",
+      "selectionEnabled": true,
+      "center": [
+        12.471453,
+        48.271527
+      ]
+    },
+    {
+      "ags": "09183128",
+      "name": "Mühldorf a.Inn",
+      "slug": "muehldorf-ainn-09183128",
+      "countyCode": "09183",
+      "countyName": "Mühldorf a.Inn",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09183128",
+      "selectionEnabled": true,
+      "center": [
+        12.508653,
+        48.248742
+      ]
+    },
+    {
+      "ags": "09183129",
+      "name": "Neumarkt-Sankt Veit",
+      "slug": "neumarkt-sankt-veit-09183129",
+      "countyCode": "09183",
+      "countyName": "Mühldorf a.Inn",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09183129",
+      "selectionEnabled": true,
+      "center": [
+        12.511841,
+        48.379067
+      ]
+    },
+    {
+      "ags": "09183130",
+      "name": "Niederbergkirchen",
+      "slug": "niederbergkirchen-09183130",
+      "countyCode": "09183",
+      "countyName": "Mühldorf a.Inn",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09183130",
+      "selectionEnabled": true,
+      "center": [
+        12.523229,
+        48.312568
+      ]
+    },
+    {
+      "ags": "09183131",
+      "name": "Niedertaufkirchen",
+      "slug": "niedertaufkirchen-09183131",
+      "countyCode": "09183",
+      "countyName": "Mühldorf a.Inn",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09183131",
+      "selectionEnabled": true,
+      "center": [
+        12.560184,
+        48.347345
+      ]
+    },
+    {
+      "ags": "09183132",
+      "name": "Oberbergkirchen",
+      "slug": "oberbergkirchen-09183132",
+      "countyCode": "09183",
+      "countyName": "Mühldorf a.Inn",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09183132",
+      "selectionEnabled": true,
+      "center": [
+        12.374341,
+        48.311829
+      ]
+    },
+    {
+      "ags": "09183134",
+      "name": "Oberneukirchen",
+      "slug": "oberneukirchen-09183134",
+      "countyCode": "09183",
+      "countyName": "Mühldorf a.Inn",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09183134",
+      "selectionEnabled": true,
+      "center": [
+        12.516505,
+        48.167446
+      ]
+    },
+    {
+      "ags": "09183135",
+      "name": "Obertaufkirchen",
+      "slug": "obertaufkirchen-09183135",
+      "countyCode": "09183",
+      "countyName": "Mühldorf a.Inn",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09183135",
+      "selectionEnabled": true,
+      "center": [
+        12.262697,
+        48.235088
+      ]
+    },
+    {
+      "ags": "09183136",
+      "name": "Polling",
+      "slug": "polling-09183136",
+      "countyCode": "09183",
+      "countyName": "Mühldorf a.Inn",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09183136",
+      "selectionEnabled": true,
+      "center": [
+        12.535345,
+        48.200667
+      ]
+    },
+    {
+      "ags": "09183138",
+      "name": "Rattenkirchen",
+      "slug": "rattenkirchen-09183138",
+      "countyCode": "09183",
+      "countyName": "Mühldorf a.Inn",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09183138",
+      "selectionEnabled": true,
+      "center": [
+        12.317386,
+        48.237263
+      ]
+    },
+    {
+      "ags": "09183139",
+      "name": "Rechtmehring",
+      "slug": "rechtmehring-09183139",
+      "countyCode": "09183",
+      "countyName": "Mühldorf a.Inn",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09183139",
+      "selectionEnabled": true,
+      "center": [
+        12.168377,
+        48.118816
+      ]
+    },
+    {
+      "ags": "09183140",
+      "name": "Reichertsheim",
+      "slug": "reichertsheim-09183140",
+      "countyCode": "09183",
+      "countyName": "Mühldorf a.Inn",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09183140",
+      "selectionEnabled": true,
+      "center": [
+        12.263729,
+        48.186044
+      ]
+    },
+    {
+      "ags": "09183143",
+      "name": "Schönberg",
+      "slug": "schoenberg-09183143",
+      "countyCode": "09183",
+      "countyName": "Mühldorf a.Inn",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09183143",
+      "selectionEnabled": true,
+      "center": [
+        12.422979,
+        48.345139
+      ]
+    },
+    {
+      "ags": "09183144",
+      "name": "Schwindegg",
+      "slug": "schwindegg-09183144",
+      "countyCode": "09183",
+      "countyName": "Mühldorf a.Inn",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09183144",
+      "selectionEnabled": true,
+      "center": [
+        12.273911,
+        48.26854
+      ]
+    },
+    {
+      "ags": "09183145",
+      "name": "Taufkirchen",
+      "slug": "taufkirchen-09183145",
+      "countyCode": "09183",
+      "countyName": "Mühldorf a.Inn",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09183145",
+      "selectionEnabled": true,
+      "center": [
+        12.446545,
+        48.141981
+      ]
+    },
+    {
+      "ags": "09183147",
+      "name": "Unterreit",
+      "slug": "unterreit-09183147",
+      "countyCode": "09183",
+      "countyName": "Mühldorf a.Inn",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09183147",
+      "selectionEnabled": true,
+      "center": [
+        12.335003,
+        48.129296
+      ]
+    },
+    {
+      "ags": "09183148",
+      "name": "Waldkraiburg",
+      "slug": "waldkraiburg-09183148",
+      "countyCode": "09183",
+      "countyName": "Mühldorf a.Inn",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09183148",
+      "selectionEnabled": true,
+      "center": [
+        12.434325,
+        48.197512
+      ]
+    },
+    {
+      "ags": "09183151",
+      "name": "Zangberg",
+      "slug": "zangberg-09183151",
+      "countyCode": "09183",
+      "countyName": "Mühldorf a.Inn",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09183151",
+      "selectionEnabled": true,
+      "center": [
+        12.432076,
+        48.281055
+      ]
+    },
+    {
+      "ags": "09184112",
+      "name": "Aschheim",
+      "slug": "aschheim-09184112",
+      "countyCode": "09184",
+      "countyName": "München",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09184112",
+      "selectionEnabled": true,
+      "center": [
+        11.715201,
+        48.192442
+      ]
+    },
+    {
+      "ags": "09184137",
+      "name": "Aying",
+      "slug": "aying-09184137",
+      "countyCode": "09184",
+      "countyName": "München",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09184137",
+      "selectionEnabled": true,
+      "center": [
+        11.77957,
+        47.960182
+      ]
+    },
+    {
+      "ags": "09184113",
+      "name": "Baierbrunn",
+      "slug": "baierbrunn-09184113",
+      "countyCode": "09184",
+      "countyName": "München",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09184113",
+      "selectionEnabled": true,
+      "center": [
+        11.484851,
+        48.011676
+      ]
+    },
+    {
+      "ags": "09184114",
+      "name": "Brunnthal",
+      "slug": "brunnthal-09184114",
+      "countyCode": "09184",
+      "countyName": "München",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09184114",
+      "selectionEnabled": true,
+      "center": [
+        11.684051,
+        47.99077
+      ]
+    },
+    {
+      "ags": "09184118",
+      "name": "Feldkirchen",
+      "slug": "feldkirchen-09184118",
+      "countyCode": "09184",
+      "countyName": "München",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09184118",
+      "selectionEnabled": true,
+      "center": [
+        11.733477,
+        48.145073
+      ]
+    },
+    {
+      "ags": "09184119",
+      "name": "Garching b.München",
+      "slug": "garching-bmuenchen-09184119",
+      "countyCode": "09184",
+      "countyName": "München",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09184119",
+      "selectionEnabled": true,
+      "center": [
+        11.641905,
+        48.244938
+      ]
+    },
+    {
+      "ags": "09184120",
+      "name": "Gräfelfing",
+      "slug": "graefelfing-09184120",
+      "countyCode": "09184",
+      "countyName": "München",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09184120",
+      "selectionEnabled": true,
+      "center": [
+        11.432463,
+        48.122207
+      ]
+    },
+    {
+      "ags": "09184121",
+      "name": "Grasbrunn",
+      "slug": "grasbrunn-09184121",
+      "countyCode": "09184",
+      "countyName": "München",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09184121",
+      "selectionEnabled": true,
+      "center": [
+        11.763864,
+        48.071411
+      ]
+    },
+    {
+      "ags": "09184122",
+      "name": "Grünwald",
+      "slug": "gruenwald-09184122",
+      "countyCode": "09184",
+      "countyName": "München",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09184122",
+      "selectionEnabled": true,
+      "center": [
+        11.534632,
+        48.04824
+      ]
+    },
+    {
+      "ags": "09184123",
+      "name": "Haar",
+      "slug": "haar-09184123",
+      "countyCode": "09184",
+      "countyName": "München",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09184123",
+      "selectionEnabled": true,
+      "center": [
+        11.728265,
+        48.117539
+      ]
+    },
+    {
+      "ags": "09184129",
+      "name": "Hohenbrunn",
+      "slug": "hohenbrunn-09184129",
+      "countyCode": "09184",
+      "countyName": "München",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09184129",
+      "selectionEnabled": true,
+      "center": [
+        11.712615,
+        48.048792
+      ]
+    },
+    {
+      "ags": "09184127",
+      "name": "Höhenkirchen-Siegertsbrunn",
+      "slug": "hoehenkirchen-siegertsbrunn-09184127",
+      "countyCode": "09184",
+      "countyName": "München",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09184127",
+      "selectionEnabled": true,
+      "center": [
+        11.741283,
+        48.019204
+      ]
+    },
+    {
+      "ags": "09184130",
+      "name": "Ismaning",
+      "slug": "ismaning-09184130",
+      "countyCode": "09184",
+      "countyName": "München",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09184130",
+      "selectionEnabled": true,
+      "center": [
+        11.702251,
+        48.240282
+      ]
+    },
+    {
+      "ags": "09184131",
+      "name": "Kirchheim b.München",
+      "slug": "kirchheim-bmuenchen-09184131",
+      "countyCode": "09184",
+      "countyName": "München",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09184131",
+      "selectionEnabled": true,
+      "center": [
+        11.752526,
+        48.185321
+      ]
+    },
+    {
+      "ags": "09184146",
+      "name": "Neubiberg",
+      "slug": "neubiberg-09184146",
+      "countyCode": "09184",
+      "countyName": "München",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09184146",
+      "selectionEnabled": true,
+      "center": [
+        11.648907,
+        48.078541
+      ]
+    },
+    {
+      "ags": "09184132",
+      "name": "Neuried",
+      "slug": "neuried-09184132",
+      "countyCode": "09184",
+      "countyName": "München",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09184132",
+      "selectionEnabled": true,
+      "center": [
+        11.438139,
+        48.078902
+      ]
+    },
+    {
+      "ags": "09184134",
+      "name": "Oberhaching",
+      "slug": "oberhaching-09184134",
+      "countyCode": "09184",
+      "countyName": "München",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09184134",
+      "selectionEnabled": true,
+      "center": [
+        11.583122,
+        48.0025
+      ]
+    },
+    {
+      "ags": "09184135",
+      "name": "Oberschleißheim",
+      "slug": "oberschleissheim-09184135",
+      "countyCode": "09184",
+      "countyName": "München",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09184135",
+      "selectionEnabled": true,
+      "center": [
+        11.557423,
+        48.247147
+      ]
+    },
+    {
+      "ags": "09184136",
+      "name": "Ottobrunn",
+      "slug": "ottobrunn-09184136",
+      "countyCode": "09184",
+      "countyName": "München",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09184136",
+      "selectionEnabled": true,
+      "center": [
+        11.670074,
+        48.063055
+      ]
+    },
+    {
+      "ags": "09184138",
+      "name": "Planegg",
+      "slug": "planegg-09184138",
+      "countyCode": "09184",
+      "countyName": "München",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09184138",
+      "selectionEnabled": true,
+      "center": [
+        11.424255,
+        48.099233
+      ]
+    },
+    {
+      "ags": "09184139",
+      "name": "Pullach i.Isartal",
+      "slug": "pullach-iisartal-09184139",
+      "countyCode": "09184",
+      "countyName": "München",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09184139",
+      "selectionEnabled": true,
+      "center": [
+        11.515585,
+        48.056913
+      ]
+    },
+    {
+      "ags": "09184140",
+      "name": "Putzbrunn",
+      "slug": "putzbrunn-09184140",
+      "countyCode": "09184",
+      "countyName": "München",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09184140",
+      "selectionEnabled": true,
+      "center": [
+        11.707175,
+        48.085217
+      ]
+    },
+    {
+      "ags": "09184141",
+      "name": "Sauerlach",
+      "slug": "sauerlach-09184141",
+      "countyCode": "09184",
+      "countyName": "München",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09184141",
+      "selectionEnabled": true,
+      "center": [
+        11.632723,
+        47.963016
+      ]
+    },
+    {
+      "ags": "09184142",
+      "name": "Schäftlarn",
+      "slug": "schaeftlarn-09184142",
+      "countyCode": "09184",
+      "countyName": "München",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09184142",
+      "selectionEnabled": true,
+      "center": [
+        11.439398,
+        47.984542
+      ]
+    },
+    {
+      "ags": "09184144",
+      "name": "Straßlach-Dingharting",
+      "slug": "strasslach-dingharting-09184144",
+      "countyCode": "09184",
+      "countyName": "München",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09184144",
+      "selectionEnabled": true,
+      "center": [
+        11.520052,
+        47.981091
+      ]
+    },
+    {
+      "ags": "09184145",
+      "name": "Taufkirchen",
+      "slug": "taufkirchen-09184145",
+      "countyCode": "09184",
+      "countyName": "München",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09184145",
+      "selectionEnabled": true,
+      "center": [
+        11.630271,
+        48.029437
+      ]
+    },
+    {
+      "ags": "09184147",
+      "name": "Unterföhring",
+      "slug": "unterfoehring-09184147",
+      "countyCode": "09184",
+      "countyName": "München",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09184147",
+      "selectionEnabled": true,
+      "center": [
+        11.662515,
+        48.191192
+      ]
+    },
+    {
+      "ags": "09184148",
+      "name": "Unterhaching",
+      "slug": "unterhaching-09184148",
+      "countyCode": "09184",
+      "countyName": "München",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09184148",
+      "selectionEnabled": true,
+      "center": [
+        11.619569,
+        48.070396
+      ]
+    },
+    {
+      "ags": "09184149",
+      "name": "Unterschleißheim",
+      "slug": "unterschleissheim-09184149",
+      "countyCode": "09184",
+      "countyName": "München",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09184149",
+      "selectionEnabled": true,
+      "center": [
+        11.555159,
+        48.277325
+      ]
+    },
+    {
+      "ags": "09187186",
+      "name": "Albaching",
+      "slug": "albaching-09187186",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187186",
+      "selectionEnabled": true,
+      "center": [
+        12.111716,
+        48.10675
+      ]
+    },
+    {
+      "ags": "09187113",
+      "name": "Amerang",
+      "slug": "amerang-09187113",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187113",
+      "selectionEnabled": true,
+      "center": [
+        12.309221,
+        48.0111
+      ]
+    },
+    {
+      "ags": "09187114",
+      "name": "Aschau i.Chiemgau",
+      "slug": "aschau-ichiemgau-09187114",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187114",
+      "selectionEnabled": true,
+      "center": [
+        12.311159,
+        47.742923
+      ]
+    },
+    {
+      "ags": "09187116",
+      "name": "Babensham",
+      "slug": "babensham-09187116",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187116",
+      "selectionEnabled": true,
+      "center": [
+        12.302702,
+        48.086579
+      ]
+    },
+    {
+      "ags": "09187117",
+      "name": "Bad Aibling",
+      "slug": "bad-aibling-09187117",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187117",
+      "selectionEnabled": true,
+      "center": [
+        12.000289,
+        47.865328
+      ]
+    },
+    {
+      "ags": "09187128",
+      "name": "Bad Endorf",
+      "slug": "bad-endorf-09187128",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187128",
+      "selectionEnabled": true,
+      "center": [
+        12.296725,
+        47.901251
+      ]
+    },
+    {
+      "ags": "09187129",
+      "name": "Bad Feilnbach",
+      "slug": "bad-feilnbach-09187129",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187129",
+      "selectionEnabled": true,
+      "center": [
+        11.993139,
+        47.784731
+      ]
+    },
+    {
+      "ags": "09187118",
+      "name": "Bernau a.Chiemsee",
+      "slug": "bernau-achiemsee-09187118",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187118",
+      "selectionEnabled": true,
+      "center": [
+        12.37338,
+        47.808281
+      ]
+    },
+    {
+      "ags": "09187120",
+      "name": "Brannenburg",
+      "slug": "brannenburg-09187120",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187120",
+      "selectionEnabled": true,
+      "center": [
+        12.070139,
+        47.72938
+      ]
+    },
+    {
+      "ags": "09187121",
+      "name": "Breitbrunn a.Chiemsee",
+      "slug": "breitbrunn-achiemsee-09187121",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187121",
+      "selectionEnabled": true,
+      "center": [
+        12.382618,
+        47.889904
+      ]
+    },
+    {
+      "ags": "09187122",
+      "name": "Bruckmühl",
+      "slug": "bruckmuehl-09187122",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187122",
+      "selectionEnabled": true,
+      "center": [
+        11.929475,
+        47.892973
+      ]
+    },
+    {
+      "ags": "09187123",
+      "name": "Chiemsee",
+      "slug": "chiemsee-09187123",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187123",
+      "selectionEnabled": true,
+      "center": [
+        12.39728,
+        47.862313
+      ]
+    },
+    {
+      "ags": "09187124",
+      "name": "Edling",
+      "slug": "edling-09187124",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187124",
+      "selectionEnabled": true,
+      "center": [
+        12.138733,
+        48.05459
+      ]
+    },
+    {
+      "ags": "09187125",
+      "name": "Eggstätt",
+      "slug": "eggstaett-09187125",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187125",
+      "selectionEnabled": true,
+      "center": [
+        12.389411,
+        47.931442
+      ]
+    },
+    {
+      "ags": "09187126",
+      "name": "Eiselfing",
+      "slug": "eiselfing-09187126",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187126",
+      "selectionEnabled": true,
+      "center": [
+        12.25139,
+        48.02944
+      ]
+    },
+    {
+      "ags": "09187130",
+      "name": "Feldkirchen-Westerham",
+      "slug": "feldkirchen-westerham-09187130",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187130",
+      "selectionEnabled": true,
+      "center": [
+        11.863577,
+        47.906878
+      ]
+    },
+    {
+      "ags": "09187131",
+      "name": "Flintsbach a.Inn",
+      "slug": "flintsbach-ainn-09187131",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187131",
+      "selectionEnabled": true,
+      "center": [
+        12.104614,
+        47.711678
+      ]
+    },
+    {
+      "ags": "09187132",
+      "name": "Frasdorf",
+      "slug": "frasdorf-09187132",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187132",
+      "selectionEnabled": true,
+      "center": [
+        12.288426,
+        47.79227
+      ]
+    },
+    {
+      "ags": "09187134",
+      "name": "Griesstätt",
+      "slug": "griesstaett-09187134",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187134",
+      "selectionEnabled": true,
+      "center": [
+        12.196599,
+        47.993147
+      ]
+    },
+    {
+      "ags": "09187137",
+      "name": "Großkarolinenfeld",
+      "slug": "grosskarolinenfeld-09187137",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187137",
+      "selectionEnabled": true,
+      "center": [
+        12.065366,
+        47.900949
+      ]
+    },
+    {
+      "ags": "09187138",
+      "name": "Gstadt a.Chiemsee",
+      "slug": "gstadt-achiemsee-09187138",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187138",
+      "selectionEnabled": true,
+      "center": [
+        12.419174,
+        47.900772
+      ]
+    },
+    {
+      "ags": "09187139",
+      "name": "Halfing",
+      "slug": "halfing-09187139",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187139",
+      "selectionEnabled": true,
+      "center": [
+        12.264977,
+        47.950513
+      ]
+    },
+    {
+      "ags": "09187145",
+      "name": "Höslwang",
+      "slug": "hoeslwang-09187145",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187145",
+      "selectionEnabled": true,
+      "center": [
+        12.321073,
+        47.946674
+      ]
+    },
+    {
+      "ags": "09187148",
+      "name": "Kiefersfelden",
+      "slug": "kiefersfelden-09187148",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187148",
+      "selectionEnabled": true,
+      "center": [
+        12.118722,
+        47.629892
+      ]
+    },
+    {
+      "ags": "09187150",
+      "name": "Kolbermoor",
+      "slug": "kolbermoor-09187150",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187150",
+      "selectionEnabled": true,
+      "center": [
+        12.043139,
+        47.844086
+      ]
+    },
+    {
+      "ags": "09187154",
+      "name": "Neubeuern",
+      "slug": "neubeuern-09187154",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187154",
+      "selectionEnabled": true,
+      "center": [
+        12.155859,
+        47.781316
+      ]
+    },
+    {
+      "ags": "09187156",
+      "name": "Nußdorf a.Inn",
+      "slug": "nussdorf-ainn-09187156",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187156",
+      "selectionEnabled": true,
+      "center": [
+        12.18086,
+        47.729301
+      ]
+    },
+    {
+      "ags": "09187157",
+      "name": "Oberaudorf",
+      "slug": "oberaudorf-09187157",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187157",
+      "selectionEnabled": true,
+      "center": [
+        12.111022,
+        47.663354
+      ]
+    },
+    {
+      "ags": "09187159",
+      "name": "Pfaffing",
+      "slug": "pfaffing-09187159",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187159",
+      "selectionEnabled": true,
+      "center": [
+        12.10623,
+        48.055418
+      ]
+    },
+    {
+      "ags": "09187162",
+      "name": "Prien a.Chiemsee",
+      "slug": "prien-achiemsee-09187162",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187162",
+      "selectionEnabled": true,
+      "center": [
+        12.32843,
+        47.849478
+      ]
+    },
+    {
+      "ags": "09187163",
+      "name": "Prutting",
+      "slug": "prutting-09187163",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187163",
+      "selectionEnabled": true,
+      "center": [
+        12.189246,
+        47.88974
+      ]
+    },
+    {
+      "ags": "09187164",
+      "name": "Ramerberg",
+      "slug": "ramerberg-09187164",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187164",
+      "selectionEnabled": true,
+      "center": [
+        12.148718,
+        48.016077
+      ]
+    },
+    {
+      "ags": "09187165",
+      "name": "Raubling",
+      "slug": "raubling-09187165",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187165",
+      "selectionEnabled": true,
+      "center": [
+        12.083843,
+        47.779776
+      ]
+    },
+    {
+      "ags": "09187167",
+      "name": "Riedering",
+      "slug": "riedering-09187167",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187167",
+      "selectionEnabled": true,
+      "center": [
+        12.230456,
+        47.842268
+      ]
+    },
+    {
+      "ags": "09187168",
+      "name": "Rimsting",
+      "slug": "rimsting-09187168",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187168",
+      "selectionEnabled": true,
+      "center": [
+        12.32657,
+        47.87594
+      ]
+    },
+    {
+      "ags": "09187169",
+      "name": "Rohrdorf",
+      "slug": "rohrdorf-09187169",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187169",
+      "selectionEnabled": true,
+      "center": [
+        12.190348,
+        47.809427
+      ]
+    },
+    {
+      "ags": "09163000",
+      "name": "Rosenheim",
+      "slug": "rosenheim-09163000",
+      "countyCode": "09163",
+      "countyName": "Rosenheim",
+      "countyKind": "Kreisfreie Stadt",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09163000",
+      "selectionEnabled": true,
+      "center": [
+        12.103259,
+        47.848605
+      ]
+    },
+    {
+      "ags": "09187170",
+      "name": "Rott a.Inn",
+      "slug": "rott-ainn-09187170",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187170",
+      "selectionEnabled": true,
+      "center": [
+        12.128697,
+        47.987945
+      ]
+    },
+    {
+      "ags": "09187172",
+      "name": "Samerberg",
+      "slug": "samerberg-09187172",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187172",
+      "selectionEnabled": true,
+      "center": [
+        12.202624,
+        47.754872
+      ]
+    },
+    {
+      "ags": "09187142",
+      "name": "Schechen",
+      "slug": "schechen-09187142",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187142",
+      "selectionEnabled": true,
+      "center": [
+        12.119285,
+        47.925932
+      ]
+    },
+    {
+      "ags": "09187173",
+      "name": "Schonstett",
+      "slug": "schonstett-09187173",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187173",
+      "selectionEnabled": true,
+      "center": [
+        12.248801,
+        47.989066
+      ]
+    },
+    {
+      "ags": "09187174",
+      "name": "Söchtenau",
+      "slug": "soechtenau-09187174",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187174",
+      "selectionEnabled": true,
+      "center": [
+        12.229617,
+        47.919875
+      ]
+    },
+    {
+      "ags": "09187176",
+      "name": "Soyen",
+      "slug": "soyen-09187176",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187176",
+      "selectionEnabled": true,
+      "center": [
+        12.217544,
+        48.105219
+      ]
+    },
+    {
+      "ags": "09187177",
+      "name": "Stephanskirchen",
+      "slug": "stephanskirchen-09187177",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187177",
+      "selectionEnabled": true,
+      "center": [
+        12.191172,
+        47.866298
+      ]
+    },
+    {
+      "ags": "09187179",
+      "name": "Tuntenhausen",
+      "slug": "tuntenhausen-09187179",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187179",
+      "selectionEnabled": true,
+      "center": [
+        12.008529,
+        47.942075
+      ]
+    },
+    {
+      "ags": "09187181",
+      "name": "Vogtareuth",
+      "slug": "vogtareuth-09187181",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187181",
+      "selectionEnabled": true,
+      "center": [
+        12.181358,
+        47.93367
+      ]
+    },
+    {
+      "ags": "09187182",
+      "name": "Wasserburg a.Inn",
+      "slug": "wasserburg-ainn-09187182",
+      "countyCode": "09187",
+      "countyName": "Rosenheim",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09187182",
+      "selectionEnabled": true,
+      "center": [
+        12.210035,
+        48.049304
+      ]
+    },
+    {
+      "ags": "09189111",
+      "name": "Altenmarkt a.d.Alz",
+      "slug": "altenmarkt-adalz-09189111",
+      "countyCode": "09189",
+      "countyName": "Traunstein",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09189111",
+      "selectionEnabled": true,
+      "center": [
+        12.498544,
+        47.998726
+      ]
+    },
+    {
+      "ags": "09189113",
+      "name": "Bergen",
+      "slug": "bergen-09189113",
+      "countyCode": "09189",
+      "countyName": "Traunstein",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09189113",
+      "selectionEnabled": true,
+      "center": [
+        12.573923,
+        47.794648
+      ]
+    },
+    {
+      "ags": "09189114",
+      "name": "Chieming",
+      "slug": "chieming-09189114",
+      "countyCode": "09189",
+      "countyName": "Traunstein",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09189114",
+      "selectionEnabled": true,
+      "center": [
+        12.537379,
+        47.908705
+      ]
+    },
+    {
+      "ags": "09189115",
+      "name": "Engelsberg",
+      "slug": "engelsberg-09189115",
+      "countyCode": "09189",
+      "countyName": "Traunstein",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09189115",
+      "selectionEnabled": true,
+      "center": [
+        12.52055,
+        48.12996
+      ]
+    },
+    {
+      "ags": "09189118",
+      "name": "Fridolfing",
+      "slug": "fridolfing-09189118",
+      "countyCode": "09189",
+      "countyName": "Traunstein",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09189118",
+      "selectionEnabled": true,
+      "center": [
+        12.825603,
+        47.995924
+      ]
+    },
+    {
+      "ags": "09189119",
+      "name": "Grabenstätt",
+      "slug": "grabenstaett-09189119",
+      "countyCode": "09189",
+      "countyName": "Traunstein",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09189119",
+      "selectionEnabled": true,
+      "center": [
+        12.555143,
+        47.846178
+      ]
+    },
+    {
+      "ags": "09189120",
+      "name": "Grassau",
+      "slug": "grassau-09189120",
+      "countyCode": "09189",
+      "countyName": "Traunstein",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09189120",
+      "selectionEnabled": true,
+      "center": [
+        12.432663,
+        47.785517
+      ]
+    },
+    {
+      "ags": "09189124",
+      "name": "Inzell",
+      "slug": "inzell-09189124",
+      "countyCode": "09189",
+      "countyName": "Traunstein",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09189124",
+      "selectionEnabled": true,
+      "center": [
+        12.77984,
+        47.771562
+      ]
+    },
+    {
+      "ags": "09189126",
+      "name": "Kienberg",
+      "slug": "kienberg-09189126",
+      "countyCode": "09189",
+      "countyName": "Traunstein",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09189126",
+      "selectionEnabled": true,
+      "center": [
+        12.464208,
+        48.039834
+      ]
+    },
+    {
+      "ags": "09189127",
+      "name": "Kirchanschöring",
+      "slug": "kirchanschoering-09189127",
+      "countyCode": "09189",
+      "countyName": "Traunstein",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09189127",
+      "selectionEnabled": true,
+      "center": [
+        12.814695,
+        47.948274
+      ]
+    },
+    {
+      "ags": "09189129",
+      "name": "Marquartstein",
+      "slug": "marquartstein-09189129",
+      "countyCode": "09189",
+      "countyName": "Traunstein",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09189129",
+      "selectionEnabled": true,
+      "center": [
+        12.451144,
+        47.756808
+      ]
+    },
+    {
+      "ags": "09189130",
+      "name": "Nußdorf",
+      "slug": "nussdorf-09189130",
+      "countyCode": "09189",
+      "countyName": "Traunstein",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09189130",
+      "selectionEnabled": true,
+      "center": [
+        12.588654,
+        47.912724
+      ]
+    },
+    {
+      "ags": "09189133",
+      "name": "Obing",
+      "slug": "obing-09189133",
+      "countyCode": "09189",
+      "countyName": "Traunstein",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09189133",
+      "selectionEnabled": true,
+      "center": [
+        12.400302,
+        48.013587
+      ]
+    },
+    {
+      "ags": "09189134",
+      "name": "Palling",
+      "slug": "palling-09189134",
+      "countyCode": "09189",
+      "countyName": "Traunstein",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09189134",
+      "selectionEnabled": true,
+      "center": [
+        12.649159,
+        48.00225
+      ]
+    },
+    {
+      "ags": "09189135",
+      "name": "Petting",
+      "slug": "petting-09189135",
+      "countyCode": "09189",
+      "countyName": "Traunstein",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09189135",
+      "selectionEnabled": true,
+      "center": [
+        12.823619,
+        47.907959
+      ]
+    },
+    {
+      "ags": "09189137",
+      "name": "Pittenhart",
+      "slug": "pittenhart-09189137",
+      "countyCode": "09189",
+      "countyName": "Traunstein",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09189137",
+      "selectionEnabled": true,
+      "center": [
+        12.377873,
+        47.974198
+      ]
+    },
+    {
+      "ags": "09189139",
+      "name": "Reit im Winkl",
+      "slug": "reit-im-winkl-09189139",
+      "countyCode": "09189",
+      "countyName": "Traunstein",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09189139",
+      "selectionEnabled": true,
+      "center": [
+        12.521781,
+        47.667232
+      ]
+    },
+    {
+      "ags": "09189140",
+      "name": "Ruhpolding",
+      "slug": "ruhpolding-09189140",
+      "countyCode": "09189",
+      "countyName": "Traunstein",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09189140",
+      "selectionEnabled": true,
+      "center": [
+        12.619107,
+        47.732883
+      ]
+    },
+    {
+      "ags": "09189141",
+      "name": "Schleching",
+      "slug": "schleching-09189141",
+      "countyCode": "09189",
+      "countyName": "Traunstein",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09189141",
+      "selectionEnabled": true,
+      "center": [
+        12.390924,
+        47.719266
+      ]
+    },
+    {
+      "ags": "09189142",
+      "name": "Schnaitsee",
+      "slug": "schnaitsee-09189142",
+      "countyCode": "09189",
+      "countyName": "Traunstein",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09189142",
+      "selectionEnabled": true,
+      "center": [
+        12.387135,
+        48.08259
+      ]
+    },
+    {
+      "ags": "09189143",
+      "name": "Seeon-Seebruck",
+      "slug": "seeon-seebruck-09189143",
+      "countyCode": "09189",
+      "countyName": "Traunstein",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09189143",
+      "selectionEnabled": true,
+      "center": [
+        12.468657,
+        47.957689
+      ]
+    },
+    {
+      "ags": "09189145",
+      "name": "Siegsdorf",
+      "slug": "siegsdorf-09189145",
+      "countyCode": "09189",
+      "countyName": "Traunstein",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09189145",
+      "selectionEnabled": true,
+      "center": [
+        12.671929,
+        47.80737
+      ]
+    },
+    {
+      "ags": "09189146",
+      "name": "Staudach-Egerndach",
+      "slug": "staudach-egerndach-09189146",
+      "countyCode": "09189",
+      "countyName": "Traunstein",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09189146",
+      "selectionEnabled": true,
+      "center": [
+        12.506947,
+        47.778046
+      ]
+    },
+    {
+      "ags": "09189148",
+      "name": "Surberg",
+      "slug": "surberg-09189148",
+      "countyCode": "09189",
+      "countyName": "Traunstein",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09189148",
+      "selectionEnabled": true,
+      "center": [
+        12.697673,
+        47.868027
+      ]
+    },
+    {
+      "ags": "09189149",
+      "name": "Tacherting",
+      "slug": "tacherting-09189149",
+      "countyCode": "09189",
+      "countyName": "Traunstein",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09189149",
+      "selectionEnabled": true,
+      "center": [
+        12.511871,
+        48.083668
+      ]
+    },
+    {
+      "ags": "09189150",
+      "name": "Taching a.See",
+      "slug": "taching-asee-09189150",
+      "countyCode": "09189",
+      "countyName": "Traunstein",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09189150",
+      "selectionEnabled": true,
+      "center": [
+        12.72111,
+        47.981292
+      ]
+    },
+    {
+      "ags": "09189152",
+      "name": "Tittmoning",
+      "slug": "tittmoning-09189152",
+      "countyCode": "09189",
+      "countyName": "Traunstein",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09189152",
+      "selectionEnabled": true,
+      "center": [
+        12.745041,
+        48.049853
+      ]
+    },
+    {
+      "ags": "09189154",
+      "name": "Traunreut",
+      "slug": "traunreut-09189154",
+      "countyCode": "09189",
+      "countyName": "Traunstein",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09189154",
+      "selectionEnabled": true,
+      "center": [
+        12.59564,
+        47.958348
+      ]
+    },
+    {
+      "ags": "09189155",
+      "name": "Traunstein",
+      "slug": "traunstein-09189155",
+      "countyCode": "09189",
+      "countyName": "Traunstein",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09189155",
+      "selectionEnabled": true,
+      "center": [
+        12.639714,
+        47.885486
+      ]
+    },
+    {
+      "ags": "09189157",
+      "name": "Trostberg",
+      "slug": "trostberg-09189157",
+      "countyCode": "09189",
+      "countyName": "Traunstein",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09189157",
+      "selectionEnabled": true,
+      "center": [
+        12.55777,
+        48.028224
+      ]
+    },
+    {
+      "ags": "09189159",
+      "name": "Übersee",
+      "slug": "uebersee-09189159",
+      "countyCode": "09189",
+      "countyName": "Traunstein",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09189159",
+      "selectionEnabled": true,
+      "center": [
+        12.471012,
+        47.827926
+      ]
+    },
+    {
+      "ags": "09189160",
+      "name": "Unterwössen",
+      "slug": "unterwoessen-09189160",
+      "countyCode": "09189",
+      "countyName": "Traunstein",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09189160",
+      "selectionEnabled": true,
+      "center": [
+        12.46954,
+        47.72065
+      ]
+    },
+    {
+      "ags": "09189161",
+      "name": "Vachendorf",
+      "slug": "vachendorf-09189161",
+      "countyCode": "09189",
+      "countyName": "Traunstein",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09189161",
+      "selectionEnabled": true,
+      "center": [
+        12.601842,
+        47.842819
+      ]
+    },
+    {
+      "ags": "09189162",
+      "name": "Waging a.See",
+      "slug": "waging-asee-09189162",
+      "countyCode": "09189",
+      "countyName": "Traunstein",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09189162",
+      "selectionEnabled": true,
+      "center": [
+        12.720296,
+        47.932903
+      ]
+    },
+    {
+      "ags": "09189165",
+      "name": "Wonneberg",
+      "slug": "wonneberg-09189165",
+      "countyCode": "09189",
+      "countyName": "Traunstein",
+      "countyKind": "Landkreis",
+      "stateCode": "09",
+      "stateName": "Bayern",
+      "geometryRef": "09189165",
+      "selectionEnabled": true,
+      "center": [
+        12.710943,
+        47.900986
+      ]
+    }
+  ],
+  "geometry": {
+    "path": "/geo/municipality-pilot.geojson",
+    "sha256": "58fb5c73d0046c8dd4014bcd075a9244d5e639a8c005c64a2f679a406bbd9036",
+    "projection": "EPSG:4326 / WGS84",
+    "simplification": "weighted Visvalingam 10% keep-shapes"
+  }
+}

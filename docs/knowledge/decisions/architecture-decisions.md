@@ -199,7 +199,71 @@ Dependency-Risiken sowie Backup/Migration/Release/Rollback. Danach folgen Profil
 Suche, Taxonomie, Provenienz und fachlich reduzierte Admin-Prozesse; jedes Paket benoetigt eigene
 Akzeptanz- und Exit-Kriterien.
 
-## ADR-013: Footer und Service-Seiten als Vertrauens- und Informationsarchitektur
+## ADR-013: Zentraler Preis-/Entitlement-Vertrag vor öffentlicher Kommunikation
+
+Status: active
+Datum: 2026-07-12
+
+Entscheidung: Das dauerhaft kostenlose Basisprofil umfasst vollständige fachliche Auffindbarkeit,
+bestätigte Gewerke und Leistungen, Spezialisierungen, Einsatzregionen, direkte Kontaktaufnahme,
+Firmenlogo sowie einen Hauptansprechpartner mit Name und Funktion. Das verifizierte Startprofil ist
+das einzige kostenpflichtige Profil: 490 EUR netto Gesamtpreis für zwölf Monate, einmalige Zahlung,
+keine automatische Verlängerung, kein Monatsabo und keine monatliche Kündigung. Der rechnerische
+Monatswert von 40,83 EUR netto ist ausschließlich eine Einordnung. Zahlung, Rechnung, Bestellung und
+Aktivierung bleiben bis zur vollständigen fachlichen Abnahme gesperrt; Verkaufsfreigabe bleibt NEIN.
+Eine Zahlung verändert weder Suchrelevanz noch Ranking.
+
+Grund: Eine zentrale, testbare Vertragsdefinition verhindert abweichende Preisstrings, ein versehentliches
+Abomodell und eine Vermischung von kostenloser Leistungswahrheit mit kostenpflichtiger erweiterter
+Darstellung. Sie schafft eine sichere Grundlage für die folgenden getrennten Daten-, Formular-,
+Entitlement-, Kommunikations- und Laufzeit-Slices.
+
+Ersetzte ältere Annahmen: Ersetzt frühere Supporter-, Pro-, Premium-, Monats- und automatische
+Verlängerungsannahmen als Produktvertrag. Bestehende interne `premium`-Bezeichner dürfen bis zur
+separaten Umbenennung aus Migrationsgründen bestehen bleiben.
+
+Auswirkung: Die zentrale Feature-Matrix definiert Basis- und verifizierte Funktionen sowie den
+Bestandsschutz für bereits freigegebene Social Links und Ansprechpartnerbilder. Neue Ansprechpartnerbilder
+und Unternehmenskanäle gehören nicht zum regulären Basisprofil; WhatsApp bleibt Basiskontakt. Zahlung,
+öffentliche Preisseite, Formulare, Migrationen, öffentliche Entitlements und Laufzeitverhalten werden
+in separaten Slices umgesetzt und jeweils unabhängig geprüft.
+
+## ADR-014: Gemeindebasierte Tätigkeitsgebiete als kanonische Pilotlogik
+
+Status: active
+Datum: 2026-07-12
+
+Entscheidung: Im ersten Pilotcluster werden Tätigkeitsgebiete fachlich anhand amtlicher Gemeinden
+abgebildet. Der achtstellige AGS ist die stabile technische ID. Der Betrieb wählt Gemeinden
+ausdrücklich über eine lokale Karte und eine vollständige Alternativliste. Die Auswahl wird
+serverseitig gegen den versionierten VG250-Allowlist-Katalog geprüft und zunächst als ungeprüfte
+Submission gespeichert. Erst eine spätere Review-Freigabe darf öffentliche Suchwirkung erzeugen.
+
+Quelle und Transformation: Verwendet wird der jeweils aktuelle auf der BKG-Produktseite belegte
+VG250-Datenstand, derzeit 01.01.2025. Für den Pilotcluster werden die sieben Kreis-Allowlist-Codes
+`09163`, `09175`, `09182`, `09183`, `09184`, `09187` und `09189` gefiltert. Die Geometrien werden
+auf die amtlichen `BEZ`-Typen `Gemeinde` und `Stadt` beschränkt. Die Geometrien werden von UTM32s
+nach WGS84 projiziert und mit einer lokalen, topologieschonenden weighted-Visvalingam-
+Vereinfachung für die Webdarstellung erzeugt. Es gibt keine Kartenkacheln, externe Karten- oder
+Geocoding-API und keinen Laufzeit-API-Key.
+
+Grund: Betriebssitz, Radius, PLZ-Nähe oder freie Regionsangaben sind keine belastbare Aussage dafür,
+dass ein Betrieb in einer bestimmten Gemeinde tätig werden möchte. Ein exakter Gemeindefilter darf
+nur ausdrücklich und öffentlich freigegebene Betrieb-Gemeinde-Zuordnungen berücksichtigen.
+
+Auswirkung: Bestehende Radius-, Regions- und PLZ-Felder werden nicht gelöscht und bleiben vorläufig
+für Rückwärtskompatibilität erhalten. Sie dürfen keinen exakten Gemeindetreffer vortäuschen. Die
+amtliche Datenquelle, die lokale Geometrie und die Datenbank-IDs werden aus einem gemeinsamen
+Manifest erzeugt. Die Datenbankmigration ist additiv, RLS bleibt service-role-only und es erfolgt
+keine Production-Migration in diesem Arbeitspaket.
+
+Scope-Slices: Slice 1 umfasst Katalog, lokale Karte, barrierearme Liste, Submission-Speicherung und
+Allowlist-Validierung. Slice 2 umfasst Review-/Freigabeansicht, exakte Gemeindesuche und öffentliche
+Profilanzeige. Slice 3 umfasst öffentliche regionale Verfügbarkeit und den Erweiterungsworkflow.
+Der österreichische Bezirk Kufstein bleibt eine dokumentierte spätere Erweiterung. Keine dieser
+Entscheidungen verändert organisches Ranking; Zahlung oder Profilplan erhalten keinen Suchvorteil.
+
+## ADR-015: Footer und Service-Seiten als Vertrauens- und Informationsarchitektur
 
 Status: active
 Datum: 2026-07-12

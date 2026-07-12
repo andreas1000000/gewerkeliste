@@ -77,6 +77,7 @@ export async function submitBusinessEntry(
       service_regions: input.serviceRegions,
       postal_codes: input.postalCodes,
       service_countries: input.serviceCountries,
+      municipality_codes: input.municipalityCodes,
       short_description: input.shortDescription,
       description: input.description,
       references_text: input.referencesText,
@@ -103,11 +104,17 @@ export async function submitBusinessEntry(
 
   if (error) {
     const missingTable = error.code === "42P01" || error.message.toLowerCase().includes("company_submissions");
+    const missingMunicipalitySchema =
+      error.code === "42703" ||
+      error.code === "23503" ||
+      error.message.toLowerCase().includes("municipalit");
     return {
       ok: false,
       message: missingTable
         ? "Die Einreichungstabelle ist noch nicht in Supabase angelegt. Die Migration liegt im Projekt bereit."
-        : error.message,
+        : missingMunicipalitySchema
+          ? "Der amtliche Gemeindekatalog ist noch nicht in Supabase angelegt. Die Migration liegt im Projekt bereit."
+          : "Die Einreichung konnte gerade nicht gespeichert werden. Bitte versuche es später erneut.",
     };
   }
 
