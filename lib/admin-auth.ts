@@ -1,8 +1,4 @@
-const PROTECTED_PATH_PREFIXES = ["/admin", "/planner", "/companies", "/trades"] as const;
-
-export function isProtectedPath(pathname: string) {
-  return PROTECTED_PATH_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
-}
+export { isProtectedPath } from "./internal-access-policy.ts";
 
 export function parseBasicCredentials(authorization: string | null) {
   if (!authorization) return null;

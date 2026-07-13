@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server.js";
-import { isAuthorized, isProtectedPath } from "./lib/admin-auth.ts";
+import { isAuthorized } from "./lib/admin-auth.ts";
+import { canAccessRequiredRole, getRequiredRole } from "./lib/internal-access-policy.ts";
 
 const PRIVATE_RESPONSE_HEADERS = {
   "Cache-Control": "no-store",
@@ -7,21 +8,21 @@ const PRIVATE_RESPONSE_HEADERS = {
 };
 
 export async function middleware(request: NextRequest) {
-  const isProtected = isProtectedPath(request.nextUrl.pathname);
+  const requiredRole = getRequiredRole(request.nextUrl.pathname);
 
-  if (!isProtected) {
+  if (requiredRole === null) {
     return NextResponse.next();
   }
 
   const adminSecret = process.env.ADMIN_SECRET;
   if (!adminSecret) {
-    return new NextResponse("Internal authentication configuration error", {
+    return new NextResponse("Internal server error", {
       status: 500,
       headers: PRIVATE_RESPONSE_HEADERS,
     });
   }
 
-  if (await isAuthorized(request.headers.get("authorization"), adminSecret)) {
+  if (canAccessRequiredRole("admin", requiredRole) && (await isAuthorized(request.headers.get("authorization"), adminSecret))) {
     return NextResponse.next();
   }
 

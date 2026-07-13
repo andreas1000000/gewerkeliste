@@ -290,3 +290,42 @@ maßgeblich.
 Auswirkung: Die spätere Umsetzung erfolgt in kleinen, jeweils eigenen Branches und PRs. Dieses ADR
 ist keine zweite operative Roadmap. Es verändert in diesem Dokumentations-Slice weder Footer,
 Navigation, Sitemap, öffentliche Seiten, Datenbank noch Laufzeitlogik.
+
+## ADR-016: Minimaler Rollenvertrag für interne Pfade
+
+Status: active
+Datum: 2026-07-12
+
+Entscheidung: Die Rollen `admin`, `internal_editor`, `business_user` und `public_user` bilden den
+verbindlichen Minimalvertrag für spätere Benutzer- und Berechtigungsarbeit. Aktuell ist nur
+`admin` für die internen Pfade `/admin`, `/planner`, `/companies` und `/trades` aktiv. Dieser
+Zugriff wird weiterhin ausschließlich über das vorhandene `ADMIN_SECRET` in der Basic-Auth-
+Middleware nachgewiesen. `internal_editor` und `business_user` bleiben geplant und erhalten bis
+zu einer separaten Identitäts-, Scope- und RLS-Entscheidung keinen Zugriff. `public_user` darf nur
+öffentliche, freigegebene Verzeichnisdaten lesen.
+
+Rollenmatrix:
+
+| Rolle | Status | Zugriff | Authentifizierung |
+| --- | --- | --- | --- |
+| `admin` | aktiv | Alle aktuell geschützten internen Pfade und Freigabeentscheidungen | Basic Auth mit `ADMIN_SECRET` |
+| `internal_editor` | geplant | Interne Bearbeitung ohne finale Freigabe | Explizite Benutzeridentität und Berechtigung erforderlich |
+| `business_user` | geplant | Eigene Betriebsdaten nach einem freigegebenen Claim-Prozess | Explizite Benutzeridentität, Besitzbezug und Scope-Prüfung erforderlich |
+| `public_user` | geplant | Öffentliche, freigegebene Verzeichnisdaten bleiben anonym erreichbar; keine aktive Benutzerrolle | Keine Anmeldung erforderlich |
+
+Threat Model und Gegenmaßnahmen:
+
+| Bedrohung | Gegenmaßnahme | Verbleibende Lücke |
+| --- | --- | --- |
+| Unauthentifizierter Zugriff auf interne Pfade | Segmentgenaue Middleware-Policy und fail-closed Basic Auth | Keine individuelle Benutzeridentität |
+| Ähnlicher Pfad wie `/administer` wird versehentlich geschützt | Exakte Segmentgrenzen in einer zentralen Policy | Neue Pfade müssen bewusst in die Policy aufgenommen werden |
+| Fehlerhafter oder manipulierter Authorization-Header | Parser verwirft ungültige Header; Middleware antwortet reproduzierbar mit 401 | Basic Auth bleibt ein gemeinsames Secret |
+| Fehlende Laufzeitkonfiguration | Middleware verweigert den Request mit privater 500-Antwort | Secret-Rotation und Monitoring sind noch nicht modelliert |
+| Gestohlenes Secret oder fehlende Trennung von Verantwortlichkeiten | Keine Aktivierung weiterer Rollen ohne separate Auth-/RLS-Arbeit | Session-, Nutzer-, Scope- und Audit-Modell fehlen noch |
+
+Auswirkung: Die Rollenmatrix ist zentral im Code testbar, ohne Benutzerkonten, Claims, Migrationen,
+RLS-Policies, Service-Role-Rechte oder Nutzerdaten zu verändern. Aktuell ist ausschließlich `admin`
+als interne Rolle aktiv; öffentliche Routen bleiben anonym erreichbar, ohne `public_user` als aktive
+Benutzerrolle zu aktivieren. Die Policy ist ein enger Architekturbaustein, kein Ersatz für eine
+spätere echte Benutzer- und Rollenarchitektur. Basic Auth bleibt ausdrücklich eine Übergangslösung
+und ist keine vollständige Benutzerarchitektur.
