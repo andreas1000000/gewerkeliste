@@ -13,9 +13,7 @@ import {
   updatePlannerProfile as updatePlannerProfileAction,
 } from "@/lib/actions/planner";
 import {
-  approveClaim as approveClaimAction,
   approveResearchCandidate as approveResearchCandidateAction,
-  approveSubmission as approveSubmissionAction,
   createCompany as createCompanyAction,
   deleteCompany as deleteCompanyAction,
   deletePlannerContact as deletePlannerContactAction,
@@ -28,7 +26,17 @@ import {
   updateCompany as updateCompanyAction,
 } from "@/lib/actions/approval-required";
 import { submitBusinessEntry as submitBusinessEntryAction } from "@/lib/actions/business-entry";
+import {
+  approveClaim as approveClaimOwnershipAction,
+  decideClaim,
+  revokeMembership,
+} from "@/lib/actions/claim-admin";
 import { submitClaim as submitClaimAction } from "@/lib/actions/claims";
+import {
+  approveOwnerSubmission as approveOwnerSubmissionAction,
+  approveSubmission as approveSubmissionActionFromData,
+  decideOwnerSubmission as decideOwnerSubmissionAction,
+} from "@/lib/actions/submissions";
 import { parseTradeName } from "@/lib/validation";
 
 export async function importPlannerContacts(
@@ -95,22 +103,15 @@ export async function submitBusinessEntry(
 }
 
 export async function approveClaim(formData: FormData) {
-  return approveClaimAction(formData);
+  return approveClaimOwnershipAction(formData);
 }
 
 export async function rejectClaim(formData: FormData) {
-  const claimId = String(formData.get("claim_id") || "");
-  if (!claimId) return;
-
-  const supabase = getSupabaseAdmin();
-  const { error } = await supabase
-    .from("company_claims")
-    .update({ status: "rejected", decided_at: new Date().toISOString() })
-    .eq("id", claimId);
-  if (error) throw error;
-
-  revalidatePath("/admin/claims");
+  formData.set("status", "rejected");
+  return decideClaim(formData);
 }
+
+export { decideClaim, revokeMembership };
 
 export async function setSubmissionStatus(formData: FormData) {
   const id = String(formData.get("id") || "");
@@ -119,6 +120,19 @@ export async function setSubmissionStatus(formData: FormData) {
   if (!id || !["submitted", "in_review", "needs_info", "approved", "rejected"].includes(status)) return;
 
   const supabase = getSupabaseAdmin();
+  const { data: existingSubmission } = await supabase.from("company_submissions").select("source").eq("id", id).maybeSingle();
+  if (existingSubmission?.source?.startsWith("owner-profile-update:") && ["needs_info", "rejected"].includes(status)) {
+    const { error: decisionError } = await supabase.rpc("decide_company_profile_submission", {
+      p_submission_id: id,
+      p_status: status,
+      p_reason: adminNotes || null,
+      p_admin_actor: "basic-auth-admin",
+    });
+    if (decisionError) throw decisionError;
+    revalidatePath("/admin/submissions");
+    revalidatePath(`/admin/submissions/${id}`);
+    return;
+  }
   const update: Record<string, unknown> = { status };
   if (adminNotes) update.admin_notes = adminNotes;
   const { error } = await supabase.from("company_submissions").update(update).eq("id", id);
@@ -168,9 +182,11 @@ export async function updateSubmission(formData: FormData) {
   revalidatePath(`/admin/submissions/${id}`);
 }
 
-export async function approveSubmission(formData: FormData) {
-  return approveSubmissionAction(formData);
-}
+export async function approveSubmission(formData: FormData) { return approveSubmissionActionFromData(formData); }
+
+export async function approveOwnerSubmission(formData: FormData) { return approveOwnerSubmissionAction(formData); }
+
+export async function decideOwnerSubmission(formData: FormData) { return decideOwnerSubmissionAction(formData); }
 
 export async function setResearchCandidateStatus(formData: FormData) {
   const id = String(formData.get("id") || "");

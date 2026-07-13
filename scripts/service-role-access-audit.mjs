@@ -9,6 +9,7 @@ const ADMIN_CLIENT_PATTERN = /\bgetSupabaseAdmin\s*\(/;
 const NEXT_PUBLIC_SECRET_PATTERN = /NEXT_PUBLIC_[A-Z0-9_]*(?:SERVICE_ROLE|SUPABASE_KEY)/i;
 const LOGGED_SECRET_PATTERN = /console\.(?:debug|info|log|warn|error)\s*\([^\n]*(?:SERVICE_ROLE_KEY|SUPABASE_KEY|process\.env)/i;
 const ALLOWED_DIRECT_APP_CALL_SITES = new Set(["app/admin/submissions/[id]/page.tsx"]);
+const SERVER_SUPABASE_IMPORT_PATTERN = /@\/lib\/supabase(?:["'/)]|$)/;
 
 function normalizePath(file) {
   return file.replaceAll("\\", "/");
@@ -57,6 +58,7 @@ export async function collectServiceRoleMigrationObjects(root = process.cwd()) {
     }
 
     for (const match of source.matchAll(/(?:grant|revoke)\s+(?:all(?:\s+privileges)?|(?:select|insert|update|delete|usage|truncate|references|trigger|maintain)(?:\s*,\s*(?:select|insert|update|delete|usage|truncate|references|trigger|maintain))*)\s+on\s+(?:table\s+)?([\s\S]*?)\s+(?:to|from)\s+service_role\b/gi)) {
+      if (/\bon\s+function\b/i.test(match[0])) continue;
       for (const candidate of match[1].split(",")) {
        const object = candidate.trim().replace(/\s+/g, " ");
         if ((/^schema\s+[a-z_][a-z0-9_]*$/i.test(object) || /^[a-z_][a-z0-9_]*(?:\.[a-z_][a-z0-9_]*)?$/i.test(object)) && !new Set(["select", "insert", "update", "delete", "public", "anon", "authenticated", "service_role"]).has(object.toLowerCase())) {
@@ -98,7 +100,7 @@ export function analyzeSourceFiles(entries) {
     if (hasSecretReference || hasAdminClientReference || hasClientFactory) serviceRoleFiles.push(file);
     adminClientCallCount += (source.match(/\bgetSupabaseAdmin\s*\(/g) || []).length;
 
-    if (clientComponent && (hasSecretReference || hasAdminClientReference || hasClientFactory || /@\/lib\/supabase/.test(source))) {
+    if (clientComponent && (hasSecretReference || hasAdminClientReference || hasClientFactory || SERVER_SUPABASE_IMPORT_PATTERN.test(source))) {
       addViolation(violations, file, "Client Component darf keine Service-Role-Quelle oder Supabase-Clientfabrik importieren.");
     }
 

@@ -31,6 +31,7 @@
     "supabase:apply-sql": "node scripts/apply-supabase-sql.mjs"
   },
   "dependencies": {
+    "@supabase/ssr": "^0.12.1",
     "@supabase/supabase-js": "^2.49.4",
     "next": "^15.3.2",
     "react": "^19.0.0",

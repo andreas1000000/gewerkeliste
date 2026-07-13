@@ -2,9 +2,10 @@ import type { Metadata } from "next";
 import type { Route } from "next";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
-import { ClaimAssistant } from "@/components/claim-assistant";
+import { ClaimRequestForm } from "@/components/claim-request-form";
 import { SiteHeader } from "@/components/site-header";
 import { canonicalPublicCompanySlug, canonicalPublicCompanySlugFromSlug, getCompanyBySlug } from "@/lib/data/public-directory";
+import { getSupabaseUser } from "@/lib/supabase-server";
 
 type PageProps = {
   params: Promise<{ slug: string }>;
@@ -42,7 +43,7 @@ export default async function CompanyClaimWizardPage({ params }: PageProps) {
     permanentRedirect(`/betriebe/${canonicalSlug}/claim`);
   }
 
-  const initialTrades = getInitialTrades(company);
+  const user = await getSupabaseUser();
 
   return (
     <main className="min-h-screen bg-[#f7f8fb] text-ink">
@@ -83,7 +84,24 @@ export default async function CompanyClaimWizardPage({ params }: PageProps) {
         </section>
 
         <div className="mt-6">
-          <ClaimAssistant company={company} initialTrades={initialTrades} />
+          {user?.email ? (
+            <ClaimRequestForm companyId={company.id} companySlug={company.slug} email={user.email} />
+          ) : (
+            <section className="rounded-lg border border-line bg-white p-6 shadow-soft sm:p-8">
+              <p className="text-sm font-semibold uppercase tracking-normal text-brand">Vor dem Antrag anmelden</p>
+              <h2 className="mt-3 text-2xl font-semibold text-brand">Sicher per E-Mail anmelden</h2>
+              <p className="mt-4 text-sm leading-6 text-muted">
+                Für eine Übernahme benötigen wir einen authentifizierten Zugang. Der einmalige Anmeldelink wird an Ihre
+                E-Mail-Adresse gesendet; danach können Sie genau diesen Antrag einreichen.
+              </p>
+              <Link
+                className="mt-5 inline-flex rounded-md bg-action px-4 py-3 text-sm font-semibold text-white hover:bg-brand"
+                href={`/anmelden?next=${encodeURIComponent(`/betriebe/${company.slug}/claim`)}` as Route}
+              >
+                Per E-Mail anmelden
+              </Link>
+            </section>
+          )}
         </div>
       </div>
     </main>
@@ -96,21 +114,6 @@ async function getClaimCompany(slug: string) {
   } catch {
     return null;
   }
-}
-
-function getInitialTrades(company: Awaited<ReturnType<typeof getClaimCompany>>) {
-  if (!company) return [];
-
-  const confirmedCompanyTrades = (company.company_trades || [])
-    .filter((match) => match.status !== "rejected" && match.visibility_level !== "internal" && Boolean(match.trades?.slug))
-    .sort((a, b) => (b.confidence_score || 0) - (a.confidence_score || 0))
-    .map((match) => match.trades?.slug);
-
-  return [company.trades?.slug, ...confirmedCompanyTrades].filter(uniqueString);
-}
-
-function uniqueString(value: string | null | undefined, index: number, values: Array<string | null | undefined>): value is string {
-  return Boolean(value) && values.indexOf(value) === index;
 }
 
 function Benefit({ children }: { children: React.ReactNode }) {
