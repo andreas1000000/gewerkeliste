@@ -910,7 +910,7 @@ async function getLatestApprovedSubmissionForCompany(
 ): Promise<Partial<CompanySubmission> | null> {
   const supabase = getSupabaseAdmin();
   const companyId = company.id;
-  const sources = [`profile-update:${companyId}`, `claim:${companyId}`];
+  const sources = [`profile-update:${companyId}`, `claim:${companyId}`, `owner-profile-update:${companyId}`];
   const { data: sourceMatch, error: sourceError } = await supabase
     .from("company_submissions")
     .select(selectColumns)

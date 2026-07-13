@@ -121,6 +121,9 @@ export async function setSubmissionStatus(formData: FormData) {
 
   const supabase = getSupabaseAdmin();
   const { data: existingSubmission } = await supabase.from("company_submissions").select("source").eq("id", id).maybeSingle();
+  if (existingSubmission?.source?.startsWith("owner-profile-update:") && status === "approved") {
+    return approveOwnerSubmissionAction(formData);
+  }
   if (existingSubmission?.source?.startsWith("owner-profile-update:") && ["needs_info", "rejected"].includes(status)) {
     const { error: decisionError } = await supabase.rpc("decide_company_profile_submission", {
       p_submission_id: id,

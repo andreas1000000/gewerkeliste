@@ -23,8 +23,11 @@ test("only the intended authenticated and service-role database paths are grante
   assert.match(migration, /revoke all on table public\.company_memberships, public\.company_claims, public\.company_submissions\s+from public, anon, authenticated, service_role/);
   assert.match(migration, /grant select on table public\.company_memberships, public\.company_claims, public\.company_submissions\s+to authenticated/);
   assert.match(migration, /grant select, insert, update, delete on table public\.company_memberships, public\.company_claims, public\.company_submissions\s+to service_role/);
-  assert.match(migration, /grant execute on function public\.submit_company_claim\(uuid, text, text, text, text\) to authenticated/);
+  assert.match(migration, /grant execute on function public\.submit_company_claim\(uuid, text, text, text, text, boolean, boolean\) to authenticated/);
   assert.match(migration, /grant execute on function public\.submit_company_profile_change\(uuid, jsonb\) to authenticated/);
+  assert.match(migration, /email_confirmed_at/);
+  assert.match(migration, /consent_required/);
+  assert.match(migration, /company_submissions_one_pending_owner_update_idx/);
   for (const functionName of [
     "approve_company_claim",
     "decide_company_claim",
@@ -44,6 +47,15 @@ test("claim route requires an authenticated user and the old service-role action
   assert.doesNotMatch(claimRoute, /ClaimAssistant/);
   assert.doesNotMatch(legacyClaimAction, /getSupabaseAdmin|\.from\("company_claims"\)|\.from\("company_submissions"\)/);
   assert.match(legacyClaimAction, /alter.*deaktiviert|deaktiviert/i);
+});
+
+test("owner profile decisions use the transactional approval RPC", async () => {
+  const actions = await readFile(new URL("../lib/actions.ts", import.meta.url), "utf8");
+  const ownerActions = await readFile(new URL("../lib/actions/owner-profile.ts", import.meta.url), "utf8");
+  assert.match(actions, /owner-profile-update.*status === "approved"/s);
+  assert.match(actions, /return approveOwnerSubmissionAction\(formData\)/);
+  assert.match(ownerActions, /consent_authorized/);
+  assert.match(ownerActions, /consent_privacy/);
 });
 
 test("browser auth boundary cannot contain a service-role key", () => {

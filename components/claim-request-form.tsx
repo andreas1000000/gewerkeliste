@@ -47,6 +47,11 @@ export function ClaimRequestForm({ companyId, companySlug, email }: { companyId:
         Ich bin berechtigt, diesen Betrieb zu vertreten.
       </label>
       {errors.is_authorized ? <p className="-mt-3 text-xs font-semibold text-[#a4442b]">{errors.is_authorized}</p> : null}
+      <label className="flex items-start gap-3 text-sm leading-6 text-ink">
+        <input className="mt-1 h-4 w-4 accent-action" name="consent_privacy" required type="checkbox" />
+        Ich habe die <a className="underline" href="/datenschutz">Datenschutzhinweise</a> gelesen und stimme der Prüfung dieses Übernahmeantrags zu.
+      </label>
+      {errors.consent_privacy ? <p className="-mt-3 text-xs font-semibold text-[#a4442b]">{errors.consent_privacy}</p> : null}
       <p className="text-xs leading-5 text-muted">
         Wir prüfen die Angaben manuell. Eine passende E-Mail-Domain ist nur ein Hinweis und führt nicht automatisch zur Freigabe.
       </p>

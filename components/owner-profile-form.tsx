@@ -76,6 +76,16 @@ export function OwnerProfileForm({ company }: { company: OwnerCompany }) {
         <Field label="Herstellerzertifikate"><textarea className={`${inputClass} min-h-20`} defaultValue={(company.manufacturer_certificates || []).join("\n")} name="manufacturer_certificates" /></Field>
         <Field label="Hinweis an die Prüfung"><textarea className={`${inputClass} min-h-20`} name="notes" /></Field>
       </Section>
+      <label className="flex items-start gap-3 text-sm leading-6 text-ink">
+        <input className="mt-1 h-4 w-4 accent-action" name="consent_authorized" required type="checkbox" />
+        Ich bestätige, dass ich zur Bearbeitung dieses Betriebs berechtigt bin.
+      </label>
+      {errors.consent_authorized ? <p className="-mt-3 text-xs font-semibold text-[#a4442b]">{errors.consent_authorized}</p> : null}
+      <label className="flex items-start gap-3 text-sm leading-6 text-ink">
+        <input className="mt-1 h-4 w-4 accent-action" name="consent_privacy" required type="checkbox" />
+        Ich habe die <a className="underline" href="/datenschutz">Datenschutzhinweise</a> gelesen und stimme der Prüfung zu.
+      </label>
+      {errors.consent_privacy ? <p className="-mt-3 text-xs font-semibold text-[#a4442b]">{errors.consent_privacy}</p> : null}
       <button className="rounded-md bg-action px-4 py-3 text-sm font-semibold text-white disabled:opacity-60" disabled={pending} type="submit">
         {pending ? "Änderung wird eingereicht …" : "Änderung zur Prüfung einreichen"}
       </button>

@@ -32,6 +32,7 @@ export async function submitClaimRequest(
   if (role.length < 2) fieldErrors.role = "Bitte geben Sie Ihre Funktion im Betrieb an.";
   if (authorizationNotes.length < 10) fieldErrors.authorization_notes = "Bitte beschreiben Sie kurz, wie die Vertretungsberechtigung geprüft werden kann.";
   if (formData.get("is_authorized") !== "on") fieldErrors.is_authorized = "Die Vertretungsberechtigung muss bestätigt werden.";
+  if (formData.get("consent_privacy") !== "on") fieldErrors.consent_privacy = "Bitte bestätigen Sie die Datenschutzhinweise.";
   if (!isUuid(companyId)) fieldErrors.company_id = "Der Betriebseintrag ist ungültig.";
 
   if (Object.keys(fieldErrors).length) {
@@ -44,6 +45,8 @@ export async function submitClaimRequest(
     p_phone: phone || null,
     p_role: role,
     p_authorization_notes: authorizationNotes,
+    p_consent_authorized: true,
+    p_consent_privacy: true,
   });
 
   if (error) {
@@ -70,6 +73,7 @@ function claimErrorMessage(message: string) {
   if (message.includes("company_already_claimed")) return "Dieser Betrieb ist bereits übernommen. Bitte wenden Sie sich an den manuellen Support; Informationen über den bisherigen Zugang werden nicht angezeigt.";
   if (message.includes("company_not_found")) return "Der Betriebseintrag wurde nicht gefunden.";
   if (message.includes("authenticated_email_required")) return "Bitte bestätigen Sie zuerst Ihre E-Mail-Anmeldung.";
+  if (message.includes("consent_required")) return "Bitte bestätigen Sie die erforderlichen Zustimmungen.";
   if (message.includes("claim_user_missing")) return "Der Übernahmeantrag konnte keinem Zugang zugeordnet werden.";
   return "Der Übernahmeantrag konnte nicht gespeichert werden. Bitte versuchen Sie es erneut.";
 }

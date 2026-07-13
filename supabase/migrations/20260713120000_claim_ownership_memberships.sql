@@ -61,6 +61,11 @@ create index if not exists company_memberships_user_idx
 create index if not exists company_memberships_company_idx
   on public.company_memberships(company_id, status);
 
+create unique index if not exists company_submissions_one_pending_owner_update_idx
+  on public.company_submissions(company_id, auth_user_id)
+  where source like 'owner-profile-update:%'
+    and status in ('submitted', 'in_review', 'needs_info');
+
 drop trigger if exists company_memberships_updated_at on public.company_memberships;
 create trigger company_memberships_updated_at
 before update on public.company_memberships
@@ -116,12 +121,16 @@ to authenticated;
 grant select, insert, update, delete on table public.company_memberships, public.company_claims, public.company_submissions
 to service_role;
 
+drop function if exists public.submit_company_claim(uuid, text, text, text, text);
+
 create or replace function public.submit_company_claim(
   p_company_id uuid,
   p_name text,
   p_phone text default null,
   p_role text default null,
-  p_authorization_notes text default null
+  p_authorization_notes text default null,
+  p_consent_authorized boolean default false,
+  p_consent_privacy boolean default false
 )
 returns uuid
 language plpgsql
@@ -130,7 +139,9 @@ set search_path = public, auth
 as $$
 declare
   v_user_id uuid := auth.uid();
-  v_email text := nullif(trim(coalesce(auth.jwt() ->> 'email', '')), '');
+  v_auth_email text;
+  v_email_confirmed_at timestamptz;
+  v_email text;
   v_existing_claim_id uuid;
   v_claim_id uuid;
   v_submission_id uuid;
@@ -142,8 +153,17 @@ declare
     ''
   );
 begin
-  if v_user_id is null or v_email is null then
+  select email, email_confirmed_at
+    into v_auth_email, v_email_confirmed_at
+    from auth.users
+   where id = v_user_id;
+  v_email := nullif(trim(coalesce(v_auth_email, auth.jwt() ->> 'email', '')), '');
+
+  if v_user_id is null or v_email is null or v_email_confirmed_at is null then
     raise exception 'authenticated_email_required';
+  end if;
+  if not p_consent_authorized or not p_consent_privacy then
+    raise exception 'consent_required';
   end if;
 
   select *
@@ -203,7 +223,7 @@ begin
     coalesce(v_message, 'Keine weiteren Angaben.'),
     'pending',
     v_user_id,
-    case when auth.jwt() ->> 'email_confirmed_at' is not null then now() else null end,
+    v_email_confirmed_at,
     'supabase_magic_link',
     v_verification_notes
   )
@@ -282,9 +302,9 @@ begin
     false,
     false,
     false,
-    true,
+    p_consent_authorized,
     false,
-    true,
+    p_consent_privacy,
     concat('claim:', p_company_id::text),
     v_user_id,
     p_company_id
@@ -316,6 +336,7 @@ set search_path = public, auth
 as $$
 declare
   v_claim public.company_claims%rowtype;
+  v_company public.companies%rowtype;
   v_membership_id uuid;
   v_existing_membership public.company_memberships%rowtype;
 begin
@@ -326,6 +347,12 @@ begin
   select * into v_claim from public.company_claims where id = p_claim_id for update;
   if not found then raise exception 'claim_not_found'; end if;
   if v_claim.auth_user_id is null then raise exception 'claim_user_missing'; end if;
+
+  select * into v_company
+    from public.companies
+   where id = v_claim.company_id
+   for update;
+  if not found then raise exception 'company_not_found'; end if;
 
   select * into v_existing_membership
     from public.company_memberships
@@ -422,6 +449,7 @@ begin
          rejection_reason = nullif(trim(coalesce(p_reason, '')), '')
    where id = (select submission_id from public.company_claims where id = p_claim_id)
      and status in ('submitted', 'in_review', 'needs_info');
+
 end;
 $$;
 
@@ -442,13 +470,19 @@ begin
     raise exception 'service_role_required';
   end if;
 
-  update public.company_memberships
-     set status = 'revoked', updated_at = now()
+  select company_id into v_company_id
+    from public.company_memberships
    where id = p_membership_id
      and status = 'active'
-  returning company_id into v_company_id;
-
+   for update;
   if not found then raise exception 'membership_not_active'; end if;
+
+  perform 1 from public.companies where id = v_company_id for update;
+  if not found then raise exception 'company_not_found'; end if;
+
+  update public.company_memberships
+     set status = 'revoked', updated_at = now()
+   where id = p_membership_id;
 
   if not exists (
     select 1 from public.company_memberships
@@ -475,10 +509,25 @@ declare
   v_company public.companies%rowtype;
   v_primary_trade text;
   v_submission_id uuid;
-  v_email text := nullif(trim(coalesce(auth.jwt() ->> 'email', '')), '');
+  v_auth_email text;
+  v_email_confirmed_at timestamptz;
+  v_email text;
   v_payload jsonb := coalesce(p_payload, '{}'::jsonb);
 begin
-  if v_user_id is null or v_email is null then raise exception 'authenticated_email_required'; end if;
+  select email, email_confirmed_at
+    into v_auth_email, v_email_confirmed_at
+    from auth.users
+   where id = v_user_id;
+  v_email := nullif(trim(coalesce(v_auth_email, auth.jwt() ->> 'email', '')), '');
+
+  if v_user_id is null or v_email is null or v_email_confirmed_at is null then raise exception 'authenticated_email_required'; end if;
+  if coalesce(v_payload ->> 'consent_authorized', 'false') <> 'true'
+     or coalesce(v_payload ->> 'consent_privacy', 'false') <> 'true' then
+    raise exception 'consent_required';
+  end if;
+
+  select * into v_company from public.companies where id = p_company_id for update;
+  if not found then raise exception 'company_not_found'; end if;
 
   if not exists (
     select 1 from public.company_memberships
@@ -499,9 +548,6 @@ begin
   ) then
     raise exception 'profile_change_already_pending';
   end if;
-
-  select * into v_company from public.companies where id = p_company_id;
-  if not found then raise exception 'company_not_found'; end if;
 
   select slug into v_primary_trade from public.trades where id = v_company.trade_id;
   if v_primary_trade is null then raise exception 'company_trade_not_found'; end if;
@@ -535,23 +581,25 @@ begin
     coalesce(nullif(trim(v_payload ->> 'city'), ''), v_company.city),
     'Deutschland',
     v_primary_trade,
-    case when jsonb_typeof(v_payload -> 'secondary_trades') = 'array' then v_payload -> 'secondary_trades' else '[]'::jsonb end,
-    case when jsonb_typeof(v_payload -> 'selected_services') = 'array' then v_payload -> 'selected_services' else '[]'::jsonb end,
-    case when jsonb_typeof(v_payload -> 'specializations') = 'array' then v_payload -> 'specializations' else '[]'::jsonb end,
+    case when jsonb_typeof(v_payload -> 'secondary_trades') = 'array' and jsonb_array_length(v_payload -> 'secondary_trades') > 0 then v_payload -> 'secondary_trades' else '[]'::jsonb end,
+    case when jsonb_typeof(v_payload -> 'selected_services') = 'array' and jsonb_array_length(v_payload -> 'selected_services') > 0 then v_payload -> 'selected_services' else '[]'::jsonb end,
+    case when jsonb_typeof(v_payload -> 'specializations') = 'array' and jsonb_array_length(v_payload -> 'specializations') > 0 then v_payload -> 'specializations' else '[]'::jsonb end,
     greatest(0, coalesce((v_payload ->> 'service_radius_km')::integer, v_company.service_radius_km, 50)),
-    case when jsonb_typeof(v_payload -> 'service_regions') = 'array' then v_payload -> 'service_regions' else '[]'::jsonb end,
-    case when jsonb_typeof(v_payload -> 'postal_codes') = 'array' then v_payload -> 'postal_codes' else '[]'::jsonb end,
-    case when jsonb_typeof(v_payload -> 'service_countries') = 'array' then v_payload -> 'service_countries' else '["Deutschland"]'::jsonb end,
+    case when jsonb_typeof(v_payload -> 'service_regions') = 'array' and jsonb_array_length(v_payload -> 'service_regions') > 0 then v_payload -> 'service_regions' else coalesce(to_jsonb(v_company.service_regions), '[]'::jsonb) end,
+    case when jsonb_typeof(v_payload -> 'postal_codes') = 'array' and jsonb_array_length(v_payload -> 'postal_codes') > 0 then v_payload -> 'postal_codes' else coalesce(to_jsonb(v_company.service_postal_codes), '[]'::jsonb) end,
+    case when jsonb_typeof(v_payload -> 'service_countries') = 'array' and jsonb_array_length(v_payload -> 'service_countries') > 0 then v_payload -> 'service_countries' else coalesce(to_jsonb(v_company.service_countries), '["Deutschland"]'::jsonb) end,
     left(coalesce(nullif(trim(v_payload ->> 'short_description'), ''), v_company.description), 240),
     nullif(trim(v_payload ->> 'description'), ''),
     nullif(trim(v_payload ->> 'references_text'), ''),
-    case when jsonb_typeof(v_payload -> 'memberships') = 'array' then v_payload -> 'memberships' else '[]'::jsonb end,
-    case when jsonb_typeof(v_payload -> 'certificates') = 'array' then v_payload -> 'certificates' else '[]'::jsonb end,
-    case when jsonb_typeof(v_payload -> 'manufacturer_certificates') = 'array' then v_payload -> 'manufacturer_certificates' else '[]'::jsonb end,
-    false, false, false, true, false, true,
+    case when jsonb_typeof(v_payload -> 'memberships') = 'array' and jsonb_array_length(v_payload -> 'memberships') > 0 then v_payload -> 'memberships' else coalesce(to_jsonb(v_company.memberships), '[]'::jsonb) end,
+    case when jsonb_typeof(v_payload -> 'certificates') = 'array' and jsonb_array_length(v_payload -> 'certificates') > 0 then v_payload -> 'certificates' else coalesce(to_jsonb(v_company.certificates), '[]'::jsonb) end,
+    case when jsonb_typeof(v_payload -> 'manufacturer_certificates') = 'array' and jsonb_array_length(v_payload -> 'manufacturer_certificates') > 0 then v_payload -> 'manufacturer_certificates' else coalesce(to_jsonb(v_company.manufacturer_certificates), '[]'::jsonb) end,
+    false, false, false,
+    coalesce((v_payload ->> 'consent_authorized')::boolean, false), false,
+    coalesce((v_payload ->> 'consent_privacy')::boolean, false),
     concat('owner-profile-update:', p_company_id::text),
     jsonb_build_object(
-      'social_links', case when jsonb_typeof(v_payload -> 'social_links') = 'array' then v_payload -> 'social_links' else '[]'::jsonb end,
+      'social_links', case when jsonb_typeof(v_payload -> 'social_links') = 'array' and jsonb_array_length(v_payload -> 'social_links') > 0 then v_payload -> 'social_links' else null end,
       'notes', nullif(trim(v_payload ->> 'notes'), '')
     ),
     v_user_id,
@@ -601,9 +649,15 @@ begin
   if v_submission.status = 'approved' then
     return v_submission.company_id;
   end if;
+  if v_submission.status not in ('submitted', 'in_review', 'needs_info') then
+    raise exception 'owner_submission_not_approvable';
+  end if;
   if v_submission.company_id is null or v_submission.auth_user_id is null then
     raise exception 'owner_submission_identity_missing';
   end if;
+
+  select * into v_company from public.companies where id = v_submission.company_id for update;
+  if not found then raise exception 'company_not_found'; end if;
 
   if not exists (
     select 1 from public.company_memberships
@@ -614,9 +668,6 @@ begin
   ) then
     raise exception 'active_membership_required';
   end if;
-
-  select * into v_company from public.companies where id = v_submission.company_id for update;
-  if not found then raise exception 'company_not_found'; end if;
 
   select id into v_primary_trade_id from public.trades where slug = v_submission.primary_trade;
   if v_primary_trade_id is null then raise exception 'company_trade_not_found'; end if;
@@ -676,7 +727,7 @@ begin
     end loop;
   end if;
 
-  v_social := coalesce(v_submission.premium_submission_payload -> 'social_links', '[]'::jsonb);
+  v_social := v_submission.premium_submission_payload -> 'social_links';
   if jsonb_typeof(v_social) = 'array' then
     delete from public.company_social_links where company_id = v_company.id;
     for v_social in select value from jsonb_array_elements(v_social) loop
@@ -743,8 +794,8 @@ begin
 end;
 $$;
 
-revoke all on function public.submit_company_claim(uuid, text, text, text, text) from public, anon;
-grant execute on function public.submit_company_claim(uuid, text, text, text, text) to authenticated;
+revoke all on function public.submit_company_claim(uuid, text, text, text, text, boolean, boolean) from public, anon;
+grant execute on function public.submit_company_claim(uuid, text, text, text, text, boolean, boolean) to authenticated;
 
 revoke all on function public.submit_company_profile_change(uuid, jsonb) from public, anon;
 grant execute on function public.submit_company_profile_change(uuid, jsonb) to authenticated;

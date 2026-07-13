@@ -39,6 +39,8 @@ export async function submitOwnerProfileChange(
   if (!payload.city) fieldErrors.city = "Bitte geben Sie den Ort an.";
   if (payload.public_email && !/^\S+@\S+\.\S+$/.test(payload.public_email)) fieldErrors.public_email = "Bitte prüfen Sie die öffentliche E-Mail-Adresse.";
   if (payload.service_radius_km < 0 || payload.service_radius_km > 1000) fieldErrors.service_radius_km = "Der Radius muss zwischen 0 und 1000 km liegen.";
+  if (!payload.consent_authorized) fieldErrors.consent_authorized = "Bitte bestätigen Sie Ihre Berechtigung zur Bearbeitung dieses Betriebs.";
+  if (!payload.consent_privacy) fieldErrors.consent_privacy = "Bitte bestätigen Sie die Datenschutzhinweise.";
   if (Object.keys(fieldErrors).length) return { ok: false, message: "Bitte prüfen Sie die markierten Angaben.", fieldErrors };
 
   const { data: submissionId, error } = await supabase.rpc("submit_company_profile_change", {
@@ -48,6 +50,7 @@ export async function submitOwnerProfileChange(
   if (error) {
     if (error.message.includes("profile_change_already_pending")) return { ok: false, message: "Es liegt bereits eine offene Profiländerung zur Prüfung vor." };
     if (error.message.includes("active_membership_required")) return { ok: false, message: "Der Owner-Zugang ist nicht mehr aktiv." };
+    if (error.message.includes("consent_required")) return { ok: false, message: "Bitte bestätigen Sie die erforderlichen Zustimmungen." };
     return { ok: false, message: "Die Profiländerung konnte nicht eingereicht werden." };
   }
 
@@ -91,6 +94,8 @@ function readPayload(formData: FormData) {
     references_text: value(formData, "references_text"),
     social_links: parseSocialLinks(value(formData, "social_links")),
     notes: value(formData, "notes"),
+    consent_authorized: formData.get("consent_authorized") === "on",
+    consent_privacy: formData.get("consent_privacy") === "on",
   };
 }
 
@@ -100,12 +105,14 @@ function value(formData: FormData, key: string) {
 }
 
 function list(formData: FormData, key: string) {
-  return value(formData, key).split(/[\n,;]+/).map((item) => item.trim()).filter(Boolean).slice(0, 100);
+  const values = value(formData, key).split(/[\n,;]+/).map((item) => item.trim()).filter(Boolean).slice(0, 100);
+  return values.length ? values : null;
 }
 
 function parseSocialLinks(raw: string) {
-  return raw.split("\n").map((line) => line.trim()).filter(Boolean).slice(0, 20).map((line) => {
+  const lines = raw.split("\n").map((line) => line.trim()).filter(Boolean).slice(0, 20);
+  return lines.length ? lines.map((line) => {
     const [platform, url, label] = line.split("|").map((item) => item.trim());
     return { platform: platform || "", url: url || "", label: label || null, sort_order: 0 };
-  });
+  }) : null;
 }
