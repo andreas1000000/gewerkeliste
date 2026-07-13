@@ -15,7 +15,9 @@ const NON_RUNTIME_FILE_PATTERNS = [
   /^GEWERKELISTE_PRODUCT_DOCTRINE\.md$/,
   /^docs\/.+$/,
   /^scripts\/delivery-gate\.mjs$/,
+  /^scripts\/service-role-access-audit\.mjs$/,
   /^tests\/delivery-gate\.test\.mjs$/,
+  /^tests\/service-role-access\.test\.mjs$/,
 ];
 
 const REQUIRED_SECTIONS = [

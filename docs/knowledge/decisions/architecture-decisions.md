@@ -329,3 +329,26 @@ als interne Rolle aktiv; öffentliche Routen bleiben anonym erreichbar, ohne `pu
 Benutzerrolle zu aktivieren. Die Policy ist ein enger Architekturbaustein, kein Ersatz für eine
 spätere echte Benutzer- und Rollenarchitektur. Basic Auth bleibt ausdrücklich eine Übergangslösung
 und ist keine vollständige Benutzerarchitektur.
+
+## ADR-017: Service-Role-Boundary vor Rechteverkleinerung
+
+Status: active
+Datum: 2026-07-13
+
+Entscheidung: Service-Role-Zugriffe bleiben bis zu einer separat geprüften Rechteverkleinerung
+serverseitig zentralisiert und werden durch eine reproduzierbare statische Grenze überwacht. Die
+Inventur ordnet alle aktuellen Aufrufstellen, Skriptpfade, Datenpfade und bestehenden
+Rechtegruppen einem Zweck zu. Client Components, öffentliche Browser-Grenzen, `NEXT_PUBLIC_*` und
+Logging dürfen keinen Service-Role-Key oder gleichbedeutenden Alias berühren.
+
+Grund: Der Service-Role-Key umgeht RLS. Ein versehentlicher Import in Client-Code wäre deshalb ein
+existentielles Geheimnis- und Datenrisiko. Eine vorgezogene, rein lokale Boundary-Prüfung schließt
+diesen Leak-Pfad, ohne die Production-Datenbank durch eine unzureichend getestete Rechteänderung zu
+gefährden.
+
+Auswirkung: `scripts/service-role-access-audit.mjs` und die zugehörigen Tests bilden ein
+reproduzierbares CI-Sicherheitsgate. Die aktuelle Rechteinventur bleibt in
+`docs/knowledge/security/service-role-access-inventory.md` verankert. Breite CRUD-Rechte,
+Capability-Aufteilung, Datenbankrollen und Migrationen bleiben ein eigenes Security-/Daten-
+Arbeitspaket mit nicht-produktiver Validierung. Dieser ADR aktiviert keine neue Rolle, keinen
+Secret-Wert, keine RLS-Policy und keine Production-Änderung.
