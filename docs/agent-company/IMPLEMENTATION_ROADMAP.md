@@ -45,6 +45,7 @@ Roadmap-Backlog entsteht nicht.
   - Exit-Kriterien: Ein minimaler, getesteter Slice ist implementiert; keine Live-RLS- oder Datenbankmigration ohne separates Arbeitspaket und ausdrueckliche Freigabe.
   - Exit-Kriterien: Unautorisierte, autorisierte und fehlerhafte Pfade sind mit reproduzierbaren Tests belegt.
 - [ ] Service-Role-Nutzung auf Least Privilege reduzieren.
+  - [x] Service-Role-Aufrufstellen, serverseitige Datenpfade und bestehende Rechtegruppen sind im Sicherheitsinventar erfasst; eine statische Client-/Secret-Grenze ist als CI-Guard reproduzierbar testbar.
   - Exit-Kriterien: Alle Service-Role-Aufrufstellen, Berechtigungen und Datenpfade sind inventarisiert und einem Zweck zugeordnet.
   - Exit-Kriterien: Nicht benoetigte Rechte oder Aufrufstellen sind entfernt; kein Service-Role-Secret gelangt in Client-Code oder Logs.
   - Exit-Kriterien: Oeffentliche und administrative Pfade haben Negativtests fuer unberechtigten Zugriff und bestehen den unabhaengigen Security-Review.
