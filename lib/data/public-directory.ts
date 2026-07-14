@@ -12,6 +12,7 @@ import {
   publicReferenceClientName,
 } from "@/lib/public-profile-rules";
 import { serviceTermsByTradeSlug, serviceTaxonomy } from "@/lib/service-taxonomy";
+import { resolvePilotMunicipalitySearch } from "@/lib/municipality-catalog";
 import { companySlug } from "@/lib/slug";
 import { normalizeSocialLink } from "@/lib/social-links";
 import type {
@@ -82,6 +83,15 @@ export async function getPublicCompanies(params?: {
   location?: string;
   radiusKm?: string;
 }) {
+  const municipality = resolvePilotMunicipalitySearch(params?.location);
+  if (municipality) {
+    const municipalityResults = await getPublicCompaniesByMunicipality(municipality.ags, {
+      query: params?.query,
+      tradeSlug: params?.tradeSlug,
+    });
+    if (municipalityResults !== null) return municipalityResults;
+  }
+
   if (params?.tradeSlug) {
     return getPublicCompaniesByTrade(params.tradeSlug, { query: params.query, location: params.location });
   }
@@ -109,6 +119,103 @@ export async function getPublicCompanies(params?: {
   const { data, error } = await query;
   if (error) return getPublicCompaniesFallback(params);
   return dedupePublicCompanies(excludeLocalFixtureCompanies(await resolveCompanyMedia(data as PublicCompanyWithTrade[])));
+}
+
+type MunicipalityDirectorySearch = {
+  query?: string;
+  tradeSlug?: string;
+};
+
+async function getPublicCompaniesByMunicipality(ags: string, params: MunicipalityDirectorySearch) {
+  const supabase = getSupabaseAdmin();
+  const { data: municipality, error: municipalityError } = await supabase
+    .from("municipalities")
+    .select("ags, selection_enabled")
+    .eq("ags", ags)
+    .eq("selection_enabled", true)
+    .maybeSingle();
+
+  if (municipalityError) {
+    if (isMissingPublicProfileSchemaError(municipalityError)) return null;
+    throw municipalityError;
+  }
+  if (!municipality) return [];
+
+  const { data: assignments, error: assignmentError } = await supabase
+    .from("company_service_areas")
+    .select("company_id")
+    .eq("municipality_ags", ags)
+    .eq("status", "approved");
+
+  if (assignmentError) {
+    if (isMissingPublicProfileSchemaError(assignmentError)) return null;
+    throw assignmentError;
+  }
+
+  const companyIds = Array.from(
+    new Set(
+      (assignments || [])
+        .map((assignment) => (typeof assignment.company_id === "string" ? assignment.company_id : ""))
+        .filter(Boolean),
+    ),
+  );
+  if (!companyIds.length) return [];
+
+  const { data, error } = await supabase
+    .from("companies")
+    .select(
+      "*, trades!inner(id, name, slug), company_trades(confidence_score, source, evidence, status, visibility_level, trades(id, name, slug))",
+    )
+    .eq("public_visible", true)
+    .in("id", companyIds);
+
+  if (error) {
+    if (isMissingPublicProfileSchemaError(error)) return null;
+    throw error;
+  }
+
+  let companies = excludeLocalFixtureCompanies(await resolveCompanyMedia(data as PublicCompanyWithTrade[]));
+  if (params.tradeSlug) {
+    const normalizedTradeSlug = normalizeForDirectorySearch(params.tradeSlug);
+    companies = companies.filter((company) => publicCompanyTradeSlugSet(company).has(normalizedTradeSlug));
+  }
+
+  const search = params.query?.trim();
+  if (search) {
+    companies = companies
+      .filter(
+        (company) =>
+          scoreBusinessDirectoryMatch(company, {
+            query: search,
+            tradeSlugs: params.tradeSlug ? [params.tradeSlug] : [],
+          }) > 0,
+      );
+  }
+  companies.sort((a, b) => sortMunicipalityCompanies(a, b, params.tradeSlug));
+
+  return dedupePublicCompanies(companies);
+}
+
+function sortMunicipalityCompanies(a: PublicCompanyWithTrade, b: PublicCompanyWithTrade, tradeSlug?: string) {
+  if (a.verified !== b.verified) return a.verified ? -1 : 1;
+
+  if (tradeSlug) {
+    const normalizedTradeSlug = normalizeForDirectorySearch(tradeSlug);
+    const confidence = (company: PublicCompanyWithTrade) =>
+      Math.max(
+        ...((company.company_trades || [])
+          .filter((match) => match.status !== "rejected" && match.visibility_level !== "internal")
+          .filter((match) => normalizeForDirectorySearch(match.trades?.slug || "") === normalizedTradeSlug)
+          .map((match) => match.confidence_score || 0)),
+        0,
+      );
+    const confidenceDifference = confidence(b) - confidence(a);
+    if (confidenceDifference !== 0) return confidenceDifference;
+  }
+
+  const claimedDifference = Number(b.claim_status === "claimed") - Number(a.claim_status === "claimed");
+  if (claimedDifference !== 0) return claimedDifference;
+  return a.name.localeCompare(b.name, "de");
 }
 
 export async function getBusinessDirectoryCompanies(params?: {
@@ -211,6 +318,15 @@ export async function getPublicCompaniesByTrade(
     location?: string;
   },
 ) {
+  const municipality = resolvePilotMunicipalitySearch(params?.location);
+  if (municipality) {
+    const municipalityResults = await getPublicCompaniesByMunicipality(municipality.ags, {
+      query: params?.query,
+      tradeSlug,
+    });
+    if (municipalityResults !== null) return municipalityResults;
+  }
+
   const supabase = getSupabaseAdmin();
   const { data: trade, error: tradeError } = await supabase.from("trades").select("id, name, slug").eq("slug", tradeSlug).single();
 

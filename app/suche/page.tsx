@@ -5,6 +5,7 @@ import { SiteHeader } from "@/components/site-header";
 import { ClaimBadge } from "@/components/status-badge";
 import { publicResultDescription, publicResultImage } from "@/lib/company-display";
 import { getPublicCompanies } from "@/lib/data/public-directory";
+import { resolvePilotMunicipalitySearch } from "@/lib/municipality-catalog";
 import { createTradeSearchEntry, normalizeSearchTerm, rankTradeEntries } from "@/lib/trade-search";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { canonicalTradeSlug, publicTradeTaxonomy } from "@/lib/trade-taxonomy";
@@ -26,6 +27,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
   const trade = stringParam(params.gewerk);
   const selectedTrades = stringArrayParam(params.trades).map(canonicalTradeSlug);
   const location = stringParam(params.ort);
+  const selectedMunicipality = resolvePilotMunicipalitySearch(location);
   const radiusKm = stringParam(params.umkreis) || "50";
   const tradeOptions = publicTradeTaxonomy()
     .filter((item) => item.isActive !== false)
@@ -116,8 +118,9 @@ export default async function SearchPage({ searchParams }: PageProps) {
           </div>
         ) : null}
         <p className="mt-3 text-sm leading-6 text-muted">
-          Die Umkreisauswahl wird für Betriebseinträge mit hinterlegtem Tätigkeitsgebiet berücksichtigt. Ohne
-          hinterlegte Radiusdaten werden passende Treffer nach Gewerk, Ort und PLZ angezeigt.
+          {selectedMunicipality
+            ? `Exakte Gemeindesuche für ${selectedMunicipality.name}: Es erscheinen ausschließlich freigegebene Tätigkeitsgebiete dieser Gemeinde. Die Umkreisauswahl erweitert diese Suche nicht.`
+            : "Die Umkreisauswahl wird für Betriebseinträge mit hinterlegtem Tätigkeitsgebiet berücksichtigt. Ohne hinterlegte Radiusdaten werden passende Treffer nach Gewerk, Ort und PLZ angezeigt."}
         </p>
 
         {queryTradeSlugs.length ? (

@@ -65,6 +65,34 @@ export function getPilotMunicipalityBySlug(slug: string) {
   return municipalityBySlug.get(slug) || null;
 }
 
+export function normalizeMunicipalitySearchTerm(value: unknown) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/ä/g, "ae")
+    .replace(/ö/g, "oe")
+    .replace(/ü/g, "ue")
+    .replace(/ß/g, "ss")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+export function resolvePilotMunicipalitySearch(value: unknown) {
+  const normalized = normalizeMunicipalitySearchTerm(value);
+  if (!normalized) return null;
+
+  const compact = normalized.replace(/\s+/g, "");
+  return (
+    pilotMunicipalities.find(
+      (municipality) =>
+        municipality.ags === compact ||
+        normalizeMunicipalitySearchTerm(municipality.name) === normalized ||
+        normalizeMunicipalitySearchTerm(municipality.slug) === normalized,
+    ) || null
+  );
+}
+
 export function normalizeMunicipalityCodes(values: readonly unknown[]) {
   return Array.from(
     new Set(
