@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { requireAdminAction } from "@/lib/admin-action-auth";
 import { redirect } from "next/navigation";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import type { CompanyFormState, ImportReport } from "@/lib/types";
@@ -13,9 +14,7 @@ import {
   updatePlannerProfile as updatePlannerProfileAction,
 } from "@/lib/actions/planner";
 import {
-  approveClaim as approveClaimAction,
   approveResearchCandidate as approveResearchCandidateAction,
-  approveSubmission as approveSubmissionAction,
   createCompany as createCompanyAction,
   deleteCompany as deleteCompanyAction,
   deletePlannerContact as deletePlannerContactAction,
@@ -28,49 +27,69 @@ import {
   updateCompany as updateCompanyAction,
 } from "@/lib/actions/approval-required";
 import { submitBusinessEntry as submitBusinessEntryAction } from "@/lib/actions/business-entry";
+import {
+  approveClaim as approveClaimOwnershipAction,
+  decideClaim,
+  revokeMembership,
+} from "@/lib/actions/claim-admin";
 import { submitClaim as submitClaimAction } from "@/lib/actions/claims";
+import {
+  approveOwnerSubmission as approveOwnerSubmissionAction,
+  approveSubmission as approveSubmissionActionFromData,
+  decideOwnerSubmission as decideOwnerSubmissionAction,
+} from "@/lib/actions/submissions";
 import { parseTradeName } from "@/lib/validation";
 
 export async function importPlannerContacts(
   prevState: PlannerImportState,
   formData: FormData,
 ): Promise<PlannerImportState> {
+  await requireAdminAction();
   return importPlannerContactsAction(prevState, formData);
 }
 
 export async function markPlannerContactPrivate(formData: FormData) {
+  await requireAdminAction();
   return markPlannerContactPrivateAction(formData);
 }
 
 export async function suggestPlannerContact(formData: FormData) {
+  await requireAdminAction();
   return suggestPlannerContactAction(formData);
 }
 
 export async function updatePlannerProfile(formData: FormData) {
+  await requireAdminAction();
   return updatePlannerProfileAction(formData);
 }
 
 export async function deletePlannerContact(formData: FormData) {
+  await requireAdminAction();
   return deletePlannerContactAction(formData);
 }
 
 export async function preparePlannerInvitation(formData: FormData) {
+  await requireAdminAction();
   return preparePlannerInvitationAction(formData);
 }
 
 export async function sendPlannerInvitationDryRun(formData: FormData) {
+  await requireAdminAction();
   return sendPlannerInvitationDryRunAction(formData);
 }
 
 export async function publishClaimSuggestion(formData: FormData) {
+  await requireAdminAction();
   return publishClaimSuggestionAction(formData);
 }
 
 export async function rejectClaimSuggestion(formData: FormData) {
+  await requireAdminAction();
   return rejectClaimSuggestionAction(formData);
 }
 
 export async function createCompany(_prevState: CompanyFormState, formData: FormData): Promise<CompanyFormState> {
+  await requireAdminAction();
   return createCompanyAction(formData);
 }
 
@@ -79,6 +98,7 @@ export async function updateCompany(
   _prevState: CompanyFormState,
   formData: FormData,
 ): Promise<CompanyFormState> {
+  await requireAdminAction();
   formData.set("id", id);
   return updateCompanyAction(formData);
 }
@@ -95,46 +115,72 @@ export async function submitBusinessEntry(
 }
 
 export async function approveClaim(formData: FormData) {
-  return approveClaimAction(formData);
+  await requireAdminAction();
+  return approveClaimOwnershipAction(formData);
 }
 
 export async function rejectClaim(formData: FormData) {
-  const claimId = String(formData.get("claim_id") || "");
-  if (!claimId) return;
-
-  const supabase = getSupabaseAdmin();
-  const { error } = await supabase
-    .from("company_claims")
-    .update({ status: "rejected", decided_at: new Date().toISOString() })
-    .eq("id", claimId);
-  if (error) throw error;
-
-  revalidatePath("/admin/claims");
+  await requireAdminAction();
+  formData.set("status", "rejected");
+  return decideClaim(formData);
 }
 
+export { decideClaim, revokeMembership };
+
 export async function setSubmissionStatus(formData: FormData) {
+  await requireAdminAction();
   const id = String(formData.get("id") || "");
   const status = String(formData.get("status") || "");
   const adminNotes = String(formData.get("admin_notes") || "").trim();
-  if (!id || !["submitted", "in_review", "needs_info", "approved", "rejected"].includes(status)) return;
+  if (!id || !["submitted", "in_review", "needs_info", "rejected"].includes(status)) return;
 
   const supabase = getSupabaseAdmin();
-  const update: Record<string, unknown> = { status };
-  if (adminNotes) update.admin_notes = adminNotes;
-  const { error } = await supabase.from("company_submissions").update(update).eq("id", id);
+  const { data: existingSubmission } = await supabase.from("company_submissions").select("source").eq("id", id).maybeSingle();
+  if (existingSubmission?.source?.startsWith("claim:")) {
+    const { data: claim, error: claimLookupError } = await supabase
+      .from("company_claims")
+      .select("id")
+      .eq("submission_id", id)
+      .maybeSingle();
+    if (claimLookupError || !claim) throw claimLookupError || new Error("claim_not_found");
 
-  if (error && "admin_notes" in update) {
-    const { error: fallbackError } = await supabase.from("company_submissions").update({ status }).eq("id", id);
-    if (fallbackError) throw fallbackError;
-  } else if (error) {
-    throw error;
+    const claimFormData = new FormData();
+    claimFormData.set("claim_id", claim.id);
+    claimFormData.set("status", status);
+    claimFormData.set("reason", adminNotes);
+    if (status === "approved") return approveClaimOwnershipAction(claimFormData);
+    if (["needs_info", "rejected"].includes(status)) return decideClaim(claimFormData);
+    throw new Error("Claims werden nur über den transaktionalen Claim-Entscheidungspfad geändert.");
   }
+  if (existingSubmission?.source?.startsWith("owner-profile-update:") && status === "approved") {
+    return approveOwnerSubmissionAction(formData);
+  }
+  if (existingSubmission?.source?.startsWith("owner-profile-update:") && ["needs_info", "rejected"].includes(status)) {
+    const { error: decisionError } = await supabase.rpc("decide_company_profile_submission", {
+      p_submission_id: id,
+      p_status: status,
+      p_reason: adminNotes || null,
+      p_admin_actor: "basic-auth-admin",
+    });
+    if (decisionError) throw decisionError;
+    revalidatePath("/admin/submissions");
+    revalidatePath(`/admin/submissions/${id}`);
+    return;
+  }
+  const { error } = await supabase.rpc("set_company_submission_review_status", {
+    p_submission_id: id,
+    p_status: status,
+    p_admin_notes: adminNotes || null,
+    p_admin_actor: "basic-auth-admin",
+  });
+  if (error) throw error;
 
   revalidatePath("/admin/submissions");
   revalidatePath(`/admin/submissions/${id}`);
 }
 
 export async function updateSubmission(formData: FormData) {
+  await requireAdminAction();
   const id = String(formData.get("id") || "");
   if (!id) return;
 
@@ -168,11 +214,14 @@ export async function updateSubmission(formData: FormData) {
   revalidatePath(`/admin/submissions/${id}`);
 }
 
-export async function approveSubmission(formData: FormData) {
-  return approveSubmissionAction(formData);
-}
+export async function approveSubmission(formData: FormData) { await requireAdminAction(); return approveSubmissionActionFromData(formData); }
+
+export async function approveOwnerSubmission(formData: FormData) { await requireAdminAction(); return approveOwnerSubmissionAction(formData); }
+
+export async function decideOwnerSubmission(formData: FormData) { await requireAdminAction(); return decideOwnerSubmissionAction(formData); }
 
 export async function setResearchCandidateStatus(formData: FormData) {
+  await requireAdminAction();
   const id = String(formData.get("id") || "");
   const status = String(formData.get("status") || "");
   const adminNotes = nullableFormString(formData, "admin_notes");
@@ -196,18 +245,22 @@ export async function setResearchCandidateStatus(formData: FormData) {
 }
 
 export async function approveResearchCandidate(formData: FormData) {
+  await requireAdminAction();
   return approveResearchCandidateAction(formData);
 }
 
 export async function importCompanies(_prevState: ImportReport, formData: FormData): Promise<ImportReport> {
+  await requireAdminAction();
   return importCompaniesAction(formData);
 }
 
 export async function deleteCompany(formData: FormData) {
+  await requireAdminAction();
   return deleteCompanyAction(formData);
 }
 
 export async function createTrade(formData: FormData) {
+  await requireAdminAction();
   const parsed = parseTradeName(formData);
   if (parsed.error || !parsed.name) {
     redirect(`/trades?error=${encodeURIComponent(parsed.error || "Ungueltiger Name")}`);
@@ -228,6 +281,7 @@ export async function createTrade(formData: FormData) {
 }
 
 export async function deleteTrade(formData: FormData) {
+  await requireAdminAction();
   return deleteTradeAction(formData);
 }
 

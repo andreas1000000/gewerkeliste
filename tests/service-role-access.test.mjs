@@ -15,7 +15,7 @@ test("current repository keeps Service-Role access outside client boundaries", a
   assert.equal(result.ok, true, result.violations.join("\n"));
   assert.ok(result.serviceRoleFiles.includes("lib/supabase.ts"));
   assert.ok(result.serviceRoleFiles.includes("app/admin/submissions/[id]/page.tsx"));
-  assert.equal(result.clientComponentCount, 11);
+  assert.equal(result.clientComponentCount, 16);
   assert.ok(result.adminClientCallCount > 0);
 });
 

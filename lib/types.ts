@@ -302,14 +302,33 @@ export type CompanyClaim = {
   email: string;
   phone: string | null;
   message: string;
-  status: "pending" | "approved" | "rejected";
+  status: "pending" | "needs_info" | "approved" | "rejected";
   decided_at: string | null;
+  decided_by?: string | null;
+  rejection_reason?: string | null;
+  auth_user_id?: string | null;
+  email_verified_at?: string | null;
+  verification_method?: string | null;
+  verification_notes?: string | null;
+  submission_id?: string | null;
   created_at: string;
   updated_at: string;
 };
 
 export type CompanyClaimWithCompany = CompanyClaim & {
   companies: Pick<Company, "id" | "name" | "slug" | "city" | "postal_code" | "claim_status"> | null;
+};
+
+export type CompanyMembership = {
+  id: string;
+  company_id: string;
+  user_id: string;
+  role: "owner";
+  status: "active" | "revoked";
+  approved_claim_id: string;
+  approved_at: string;
+  created_at: string;
+  updated_at: string;
 };
 
 export type SubmissionStatus = "submitted" | "in_review" | "needs_info" | "approved" | "rejected";
@@ -369,6 +388,11 @@ export type CompanySubmission = {
   source: string;
   user_agent: string | null;
   admin_notes?: string | null;
+  auth_user_id?: string | null;
+  company_id?: string | null;
+  decided_at?: string | null;
+  decided_by?: string | null;
+  rejection_reason?: string | null;
 };
 
 export type SubmissionDuplicate = Pick<Company, "id" | "name" | "slug" | "city" | "postal_code" | "email" | "website_url"> & {

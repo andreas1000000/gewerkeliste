@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { requireAdminAction } from "@/lib/admin-action-auth";
 import { redirect } from "next/navigation";
 import { normalizeSocialLink } from "@/lib/social-links";
 import { getSupabaseAdmin } from "@/lib/supabase";
@@ -8,6 +9,7 @@ import { getSupabaseAdmin } from "@/lib/supabase";
 const REVIEW_STATUSES = new Set(["pending", "approved", "rejected", "internal"]);
 
 export async function updateCompanyPremiumProfile(formData: FormData) {
+  await requireAdminAction();
   const companyId = formString(formData, "company_id");
   const companySlug = formString(formData, "company_slug");
   if (!companyId) return;

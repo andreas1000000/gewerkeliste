@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { requireAdminAction } from "@/lib/admin-action-auth";
 import {
   persistCompanyDiscoveryDryRun,
   persistRegionalCoverageDryRun,
@@ -15,18 +16,21 @@ import { runRegionalCoverageDryRun } from "@/lib/agents/regional-coverage";
 const defaultAgentRegionSlug = "stephanskirchen";
 
 export async function persistDefaultCoverageDryRun() {
+  await requireAdminAction();
   const result = await runRegionalCoverageDryRun({ regionSlug: defaultAgentRegionSlug });
   await persistRegionalCoverageDryRun(result);
   revalidatePath("/admin/agents");
 }
 
 export async function persistDefaultDiscoveryDryRun() {
+  await requireAdminAction();
   const result = await runCompanyDiscoveryDryRun({ regionSlug: defaultAgentRegionSlug });
   await persistCompanyDiscoveryDryRun(result);
   revalidatePath("/admin/agents");
 }
 
 export async function setAgentApprovalStatus(formData: FormData) {
+  await requireAdminAction();
   const id = String(formData.get("id") || "");
   const status = String(formData.get("status") || "");
   if (!id || (status !== "approved" && status !== "rejected" && status !== "expired")) return;
@@ -35,6 +39,7 @@ export async function setAgentApprovalStatus(formData: FormData) {
 }
 
 export async function setAgentReviewStatus(formData: FormData) {
+  await requireAdminAction();
   const id = String(formData.get("id") || "");
   const status = String(formData.get("status") || "");
   if (!id || (status !== "in_review" && status !== "resolved" && status !== "rejected")) return;
@@ -43,6 +48,7 @@ export async function setAgentReviewStatus(formData: FormData) {
 }
 
 export async function setAgentOutboxStatus(formData: FormData) {
+  await requireAdminAction();
   const id = String(formData.get("id") || "");
   const status = String(formData.get("status") || "");
   if (!id || (status !== "cancelled" && status !== "failed")) return;
@@ -51,6 +57,7 @@ export async function setAgentOutboxStatus(formData: FormData) {
 }
 
 export async function setAgentTaskStatus(formData: FormData) {
+  await requireAdminAction();
   const id = String(formData.get("id") || "");
   const status = String(formData.get("status") || "");
   if (!id || (status !== "in_progress" && status !== "completed" && status !== "cancelled")) return;

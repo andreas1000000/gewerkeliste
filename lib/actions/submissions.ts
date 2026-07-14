@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { requireAdminAction } from "@/lib/admin-action-auth";
 import { getCompanySubmission, getUniqueCompanySlug } from "@/lib/data";
 import { companySlug } from "@/lib/slug";
 import { normalizeSocialLink } from "@/lib/social-links";
@@ -29,6 +30,7 @@ type ExistingCompanyMatch = ApprovedCompany & {
 };
 
 export async function approveSubmission(formData: FormData) {
+  await requireAdminAction();
   const id = String(formData.get("id") || "");
   if (!id) redirect("/admin/submissions?error=missing-submission-id");
 
@@ -40,6 +42,12 @@ export async function approveSubmission(formData: FormData) {
     const submission = await getCompanySubmission(id);
     if (submission.status === "approved") {
       throw new Error("Diese Einreichung wurde bereits freigegeben.");
+    }
+    if (submission.source.startsWith("claim:")) {
+      throw new Error("Claims werden ausschließlich in der Claim-Detailprüfung freigegeben.");
+    }
+    if (submission.source.startsWith("owner-profile-update:")) {
+      throw new Error("Owner-Profiländerungen werden ausschließlich über die geschützte Owner-Prüfung freigegeben.");
     }
 
     const company = await promoteSubmissionToCompany(submission, { publicVisible, verified, verifiedStartProfile });
@@ -56,6 +64,45 @@ export async function approveSubmission(formData: FormData) {
     const message = readableApprovalError(error);
     redirect(`/admin/submissions/${id}?error=${encodeURIComponent(message)}`);
   }
+}
+
+export async function approveOwnerSubmission(formData: FormData) {
+  await requireAdminAction();
+  const id = String(formData.get("id") || "");
+  if (!id) redirect("/admin/submissions?error=missing-submission-id");
+
+  const supabase = getSupabaseAdmin();
+  const { data: companyId, error } = await supabase.rpc("approve_company_profile_submission", {
+    p_submission_id: id,
+    p_admin_actor: "basic-auth-admin",
+  });
+  if (error) redirect(`/admin/submissions/${id}?error=${encodeURIComponent(ownerSubmissionError(error.message))}`);
+
+  revalidatePath("/admin/submissions");
+  revalidatePath(`/admin/submissions/${id}`);
+  revalidatePath("/mein-betrieb");
+  if (companyId) revalidatePath(`/mein-betrieb/${companyId}`);
+  redirect(`/admin/submissions/${id}?owner_approved=1`);
+}
+
+export async function decideOwnerSubmission(formData: FormData) {
+  await requireAdminAction();
+  const id = String(formData.get("id") || "");
+  const status = String(formData.get("status") || "");
+  if (!id || !["needs_info", "rejected"].includes(status)) redirect(`/admin/submissions/${id}?error=unsupported-owner-decision`);
+
+  const supabase = getSupabaseAdmin();
+  const { error } = await supabase.rpc("decide_company_profile_submission", {
+    p_submission_id: id,
+    p_status: status,
+    p_reason: String(formData.get("reason") || "").trim() || null,
+    p_admin_actor: "basic-auth-admin",
+  });
+  if (error) redirect(`/admin/submissions/${id}?error=${encodeURIComponent(ownerSubmissionError(error.message))}`);
+
+  revalidatePath("/admin/submissions");
+  revalidatePath(`/admin/submissions/${id}`);
+  redirect(`/admin/submissions/${id}?owner_decided=${status}`);
 }
 
 async function promoteSubmissionToCompany(
@@ -116,7 +163,7 @@ function companyPayload(
     postal_code: submission.postal_code,
     latitude: 0,
     longitude: 0,
-    claim_status: "claimed",
+    claim_status: "unclaimed",
     verified: options.verified,
     profile_package: profilePackage,
     profile_status: options.verified ? "verified" : "claimed",
@@ -158,7 +205,7 @@ async function updateClaimedCompany(
   const updatePayload = {
     ...payload,
     name: payload.name || existing.name,
-    claim_status: existing.claim_status === "claimed" && !payload.verified ? "claimed" : payload.claim_status,
+    claim_status: existing.claim_status === "claimed" ? "claimed" : "unclaimed",
     verified: payload.verified || Boolean(existing.verified),
     profile_package: payload.profile_package === "verified_start" ? "verified_start" : existing.profile_package || payload.profile_package,
     profile_status: payload.verified ? "verified" : existing.profile_status || payload.profile_status,
@@ -573,4 +620,10 @@ function isRedirectError(error: unknown) {
   const digest = typeof candidate?.digest === "string" ? candidate.digest : "";
   const message = typeof candidate?.message === "string" ? candidate.message : "";
   return digest.startsWith("NEXT_REDIRECT") || message.includes("NEXT_REDIRECT");
+}
+
+function ownerSubmissionError(message: string) {
+  if (message.includes("active_membership_required")) return "Der Owner-Zugang ist nicht mehr aktiv.";
+  if (message.includes("owner_submission_not_found")) return "Diese Einreichung ist keine Owner-Profiländerung.";
+  return "Die Owner-Einreichung konnte nicht sicher entschieden werden.";
 }

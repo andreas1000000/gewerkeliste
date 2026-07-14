@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Route } from "next";
+import { ConfirmSubmitButton } from "@/components/confirm-submit-button";
 import { Shell } from "@/components/shell";
 import { approveClaim, rejectClaim } from "@/lib/actions";
 import { getCompanyClaims } from "@/lib/data";
@@ -54,19 +55,27 @@ export default async function AdminClaimsPage() {
                 <td className="px-4 py-4">
                   {claim.status === "pending" && claim.companies ? (
                     <div className="flex justify-end gap-2">
+                      <Link className="rounded-md border border-line px-3 py-2 text-xs font-semibold text-ink hover:bg-panel" href={`/admin/claims/${claim.id}` as Route}>
+                        Prüfen
+                      </Link>
                       <form action={approveClaim}>
                         <input name="claim_id" type="hidden" value={claim.id} />
-                        <input name="company_id" type="hidden" value={claim.company_id} />
-                        <button className="rounded-md bg-brand px-3 py-2 text-xs font-semibold text-white">Freigeben</button>
+                        <ConfirmSubmitButton className="rounded-md bg-brand px-3 py-2 text-xs font-semibold text-white" confirmation="Übernahme freigeben? Dadurch wird genau eine aktive Owner-Mitgliedschaft angelegt und der Betrieb als übernommen markiert.">
+                          Freigeben
+                        </ConfirmSubmitButton>
                       </form>
                       <form action={rejectClaim}>
                         <input name="claim_id" type="hidden" value={claim.id} />
-                        <button className="rounded-md border border-[#da9a8a] px-3 py-2 text-xs font-semibold text-[#8e2f1f] hover:bg-[#fff0ed]">
+                        <ConfirmSubmitButton className="rounded-md border border-[#da9a8a] px-3 py-2 text-xs font-semibold text-[#8e2f1f] hover:bg-[#fff0ed]" confirmation="Übernahmeantrag ablehnen?">
                           Ablehnen
-                        </button>
+                        </ConfirmSubmitButton>
                       </form>
                     </div>
-                  ) : null}
+                  ) : (
+                    <Link className="text-sm font-semibold text-brand hover:underline" href={`/admin/claims/${claim.id}` as Route}>
+                      Details öffnen
+                    </Link>
+                  )}
                 </td>
               </tr>
             ))}

@@ -12,24 +12,27 @@ date: 2026-07-13
 ## Zweck und Scope
 
 Dieses Dokument ist die technische Inventur des Service-Role-Slices auf `origin/main` mit Stand
-`5b7efe7effa98f2a7cba2e259bb5d66ebdc5e0c0`. Es beschreibt, wo der Service-Role-Client verwendet
-wird, welche Datenpfade und Migrationen ihn voraussetzen und welche Rechteverkleinerung noch ein
-separates Datenbank-Arbeitspaket benötigt.
+`7905e5a495fe1c4f3140f81780254da1eaa33b0b`. Der aktuelle Claim-/Membership-Slice erweitert die
+Inventur um die neuen Auth-, Owner- und Admin-Entscheidungspfade. Die Dokumentation beschreibt,
+wo der Service-Role-Client verwendet wird, welche Datenpfade und Migrationen ihn voraussetzen und
+welche Rechteverkleinerung noch ein separates Datenbank-Arbeitspaket benötigt.
 
 Der zugehörige Guard liegt in `scripts/service-role-access-audit.mjs`. Er liest ausschließlich
 lokale Quelltexte. Er verbindet sich nicht mit Supabase, liest keine Environment-Werte und schreibt
 keine Daten. Der Guard wird durch `tests/service-role-access.test.mjs` reproduzierbar geprüft.
 
-Dieses Arbeitspaket verändert keine Anwendungslaufzeit, keine Migration, keine RLS-Policy, keine
-Service-Role-Rechte, kein Secret und kein Environment. Die sichtbare Produktfunktion bleibt
-unverändert.
+Der Claim-/Membership-Slice ergänzt Anwendungslaufzeit, eine additive lokale Migration und
+eng begrenzte RLS-/RPC-Regeln. Er wird in diesem PR nur lokal validiert; Production-Supabase,
+Auth-Konfiguration, Service-Role-Rechte, Secrets und Environment-Werte werden nicht verändert.
 
 ## Verbindliche Client-Grenze
 
 - `SUPABASE_SERVICE_ROLE_KEY` und der historische Alias `SUPABASE_KEY` dürfen nicht in `app/` oder
   `components/` vorkommen.
 - Client Components dürfen weder `getSupabaseAdmin`, `createClient(...)` noch `@/lib/supabase`
-  importieren.
+  importieren. Der separate `@/lib/supabase-browser`-Client ist ausschließlich mit der öffentlichen
+  `NEXT_PUBLIC_SUPABASE_URL` und dem öffentlichen Anon-Key zulässig; er darf keine Service-Role-
+  Quelle oder serverseitige Fabrik referenzieren.
 - Die zentrale Client-Fabrik bleibt `lib/supabase.ts`.
 - Isolierte CLI-/Agent-Skripte unter `scripts/` dürfen den Service-Role-Key für ihren ausdrücklich
   serverseitigen Datenlauf lesen; sie dürfen den Wert nicht ausgeben.
@@ -53,7 +56,9 @@ verwenden ausschließlich diese Fabrik:
   `lib/actions/business-entry.ts`, `lib/actions/claims.ts`,
   `lib/actions/company-premium.ts`, `lib/actions/coverage.ts`,
   `lib/actions/coverage-approvals.ts`, `lib/actions/planner.ts`,
-  `lib/actions/submissions.ts`.
+  `lib/actions/submissions.ts` und `lib/actions/claim-admin.ts`. Die neue Owner-Einreichung
+  verwendet dagegen den serverseitigen Anon-Session-Client und die authenticated RPC; die
+  Admin-Freigabe bleibt Service-Role-only.
 - Agentenpersistenz und regionale Verarbeitung: `lib/agents/company-discovery.ts`,
   `lib/agents/persistence.ts`, `lib/agents/regional-coverage.ts`.
 - Upload- und Medienpfade: `lib/company-media-upload.ts`,
@@ -90,6 +95,7 @@ Aufzählung ist eine Inventur, keine neue Ausführungsanweisung:
 | `company_social_links`, `company_profile_sections` | `SELECT, INSERT, UPDATE, DELETE` | Freigegebene Profilpräsentation |
 | `trades`, `companies`, `company_trades`, `company_services`, `service_families`, `services`, `company_contacts`, `company_team_members`, `company_references`, `company_reference_media`, `company_certificates`, `company_social_links`, `company_profile_sections` | `SELECT, INSERT, UPDATE, DELETE` nach der Kompatibilitätsmigration | Serverlesepfade und bestehende Profilkompatibilität |
 | `municipalities`, `company_submission_service_areas`, `company_service_areas` | `SELECT, INSERT, UPDATE, DELETE`; kein `TRUNCATE`, `REFERENCES`, `TRIGGER` oder `MAINTAIN` durch den Rechte-Hotfix | Gemeinde-Katalog, Einreichungs- und freigegebene Tätigkeitsgebiete |
+| `public.company_claims`, `public.company_submissions`, `public.company_memberships` | `SELECT, INSERT, UPDATE, DELETE` für `service_role`; `authenticated` nur `SELECT` nach eigener Identität; `anon` ohne Tabellenrechte | Authentifizierter Claim, aktive Owner-Mitgliedschaft, moderierte Owner-Profiländerung und Admin-Entscheidung |
 
 Zusätzlich existieren Service-Role-Policies für Objekte, die in den historischen Migrationen nicht
 alle eine eigene Grant-Zeile erhalten: `trade_synonyms`, `company_sources`, `company_trade_reviews`,
@@ -112,7 +118,7 @@ vom automatischen Inventurtest wie ein eigenes Grant-Objekt als `schema public` 
 
 Der Guard bestätigt in diesem Slice:
 
-1. Service-Role-Referenzen liegen außerhalb von Client Components und Browser-Grenzen.
+1. Service-Role-Referenzen liegen außerhalb von Client Components und Browser-Grenzen; der neue Browser-Client nutzt ausschließlich den öffentlichen Anon-Key.
 2. Die zentrale Fabrik bleibt in `lib/supabase.ts`.
 3. Es gibt keine `NEXT_PUBLIC_*`-Service-Role-Variable und keinen statischen Logpfad für den Key.
 4. Der direkte `app/`-Aufruf ist auf den dokumentierten serverseitigen Admin-Sonderpfad begrenzt.

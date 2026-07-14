@@ -352,3 +352,48 @@ reproduzierbares CI-Sicherheitsgate. Die aktuelle Rechteinventur bleibt in
 Capability-Aufteilung, Datenbankrollen und Migrationen bleiben ein eigenes Security-/Daten-
 Arbeitspaket mit nicht-produktiver Validierung. Dieser ADR aktiviert keine neue Rolle, keinen
 Secret-Wert, keine RLS-Policy und keine Production-Änderung.
+
+## ADR-018: Authentifizierte Betriebsübernahme und moderierte Owner-Änderungen
+
+Status: active
+Datum: 2026-07-13
+
+Entscheidung: Die Übernahme eines bestehenden Betriebseintrags beginnt mit einer authentifizierten
+Supabase-Auth-E-Mail-Anmeldung über einen einmaligen Magic Link. Die kanonische Identität ist die
+UUID aus `auth.users.id`; ein E-Mail-Feld allein begründet keinen Zugriff. Ein Antrag bleibt bis zur
+manuellen Admin-Entscheidung `pending`, `needs_info` oder `rejected` und erzeugt weder eine
+Betriebsmitgliedschaft noch eine öffentliche Bearbeitungsberechtigung.
+
+Die Freigabe erfolgt ausschließlich über einen serverseitig geschützten Admin-Pfad und eine
+transaktionale Datenbankfunktion. Sie legt höchstens eine aktive Owner-Mitgliedschaft pro Betrieb
+und Nutzer an, markiert den Claim als `approved` und setzt den Betrieb auf `claimed`; das bestehende
+`verified`-Flag wird dabei unverändert erhalten. Eine aktive Mitgliedschaft ist die notwendige
+Voraussetzung für `/mein-betrieb` und für Profiländerungen.
+
+Owner-Änderungen werden als `company_submissions` mit eigener Quelle gespeichert. Sie sind für die
+Öffentlichkeit unsichtbar, bis ein Admin sie als `approved` freigibt. Die Freigabe aktualisiert die
+zugelassenen Profildaten transaktional, protokolliert die Entscheidung und verändert weder
+Ranking-Signale noch Preis-/Entitlement-Zustände. Claims, Mitgliedschaften und die zugehörigen
+Einreichungen bleiben für anonyme und nicht zugehörige Nutzer unsichtbar; `service_role` ist der
+einzige technische Schreibpfad für Admin-Entscheidungen.
+
+Rollen- und Bedrohungsmodell:
+
+| Rolle | Aktiver Zugriff | Nicht erlaubt |
+| --- | --- | --- |
+| `admin` | Bestehende Basic-Auth-Grenze und manuelle Claim-/Owner-Entscheidungen | Keine ungeprüfte Veröffentlichung oder Änderung von `verified` durch diesen Slice |
+| `business_user` | Eigene aktive Membership, eigener Claim-Status und eigener moderierter Änderungsantrag | Andere Betriebe, direkte Firmenupdates, Selbstfreigabe |
+| `internal_editor` | In diesem Slice nicht aktiviert | Claims freigeben, Memberships anlegen, Owner-Daten veröffentlichen |
+| `public_user` / anonym | Öffentliche, freigegebene Verzeichnisdaten | Claims, Memberships, Einreichungen und private Betriebsdaten |
+
+Gegenmaßnahmen sind die Magic-Link-Identität, serverseitige Session-Prüfung, segmentgenauer
+geschützter Betriebsbereich, aktive Membership-Prüfung, RLS mit expliziten Eigenzugriffsregeln,
+service-role-only Admin-RPCs, eindeutige aktive Owner-Indizes und idempotente Freigabefunktionen.
+Die bisherige unauthentifizierte Service-Role-Claim-Action ist deaktiviert. Authentifizierte
+Schreibvorgänge laufen ausschließlich über die eng begrenzten RPCs.
+
+Auswirkung: Die Migration ist additiv und muss vor einem späteren Application-Release in einer
+nicht-produktiven Supabase-Umgebung geprüft werden. Dieser Slice führt keine Production-Migration,
+keine realen Nutzer, keine E-Mail-Kommunikation und keine Änderung an Supabase-Produktionsdaten aus.
+Die bestehende Basic Auth bleibt nur die Admin-Grenze; sie ist ausdrücklich keine vollständige
+Benutzer- oder Rollenarchitektur.

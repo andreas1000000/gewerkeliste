@@ -1,10 +1,12 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { requireAdminAction } from "@/lib/admin-action-auth";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { canonicalTradeSlug } from "@/lib/trade-taxonomy";
 
 export async function updateRegionalCandidate(formData: FormData) {
+  await requireAdminAction();
   const id = getFormString(formData, "id");
   if (!id) return;
 
@@ -33,6 +35,7 @@ export async function updateRegionalCandidate(formData: FormData) {
 }
 
 export async function rejectRegionalCandidate(formData: FormData) {
+  await requireAdminAction();
   const id = getFormString(formData, "id");
   if (!id) return;
 

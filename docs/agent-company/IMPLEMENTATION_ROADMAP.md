@@ -64,10 +64,11 @@ Roadmap-Backlog entsteht nicht.
   - Exit-Kriterien: Fuer fehlende, ungueltige und freigegebene Angaben existieren sichtbare Zustaende und Tests; die fachliche Abnahme wird anhand eines kleinen Referenzdatensatzes dokumentiert.
   - Exit-Kriterien: Ansprechpartner, Team, Referenzen, Bilder und Nachweise sind in Profil, Suche und Review konsistent; unfreigegebene oder unvollstaendige Inhalte bleiben intern.
   - Exit-Kriterien: Upload-, Einwilligungs-, Loesch- und Sichtbarkeitsregeln sind getestet, ohne Secrets oder unnoetige personenbezogene Daten preiszugeben.
-- [~] Claim-, Bearbeitungs-, Pruefungs- und Verifizierungsprozess fertigstellen (Submission-, Claim- und Admin-Review-Bausteine existieren; vollstaendiger Rollenfluss offen).
+- [~] Claim-, Bearbeitungs-, Pruefungs- und Verifizierungsprozess fertigstellen (authentifizierte Übernahme, Membership, Owner-Bearbeitung und Admin-Review als Slice umgesetzt; fachliche Abnahme und weitere Verifizierungsbausteine offen).
   - Exit-Kriterien: Claim, Bearbeitung, Review, Ablehnung und erneute Einreichung sind fuer berechtigte Rollen end-to-end abbildbar und auditiert.
   - Exit-Kriterien: `Verifiziert` ist sichtbar semantisch auf bestaetigte/beanspruchte Unternehmensdaten begrenzt und wird nicht als Qualitaetsgarantie dargestellt.
   - Exit-Kriterien: Unberechtigte Bearbeitung, unfreigegebene Inhalte und Statusspruenge sind durch Negativtests ausgeschlossen.
+  - Slice-Nachweis: Magic-Link-Identität, aktive Owner-Membership, transaktionale Admin-Entscheidung und moderierte Profiländerung sind implementiert; Production-Migration und Production-Auth bleiben ausdrücklich separat freizugeben.
 - [~] Suche fuer Teilbegriffe, Synonyme, Schreibvarianten, Orte und konkrete Leistungen verbessern (Term-/Ort-Suche und Taxonomie sind vorhanden; Abdeckung offen).
   - Exit-Kriterien: Reproduzierbare Akzeptanzfaelle decken Teilbegriffe, Synonyme, Schreibvarianten, Orte, konkrete Leistungen und leere Treffer ab.
   - Exit-Kriterien: Ranking bleibt nach fachlicher Passung, Region, Datenqualitaet, Vertrauensniveau und Nutzerrelevanz nachvollziehbar und nicht zahlungsgetrieben.

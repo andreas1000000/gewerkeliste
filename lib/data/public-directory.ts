@@ -72,6 +72,48 @@ const APPROVED_SUBMISSION_PUBLIC_SELECT = [
   "source",
   "user_agent",
 ].join(", ");
+const PUBLIC_COMPANY_SELECT = [
+  "id",
+  "trade_id",
+  "name",
+  "slug",
+  "description",
+  "contact_name",
+  "email",
+  "phone",
+  "website_url",
+  "street",
+  "city",
+  "postal_code",
+  "latitude",
+  "longitude",
+  "public_visible",
+  "claim_status",
+  "verified",
+  "created_at",
+  "updated_at",
+  "logo_url",
+  "profile_image_url",
+  "profile_image_alt",
+  "contact_person_name",
+  "contact_person_role",
+  "is_free_founding_member",
+  "trust_badge",
+  "voluntary_support_status",
+  "profile_status",
+  "verification_date",
+  "service_radius_km",
+  "service_regions",
+  "service_postal_codes",
+  "references_text",
+  "memberships",
+  "certificates",
+  "manufacturer_certificates",
+  "profile_package",
+  "premium_started_at",
+  "premium_expires_at",
+  "service_countries",
+].join(", ");
 const PUBLIC_COMPANY_SLUG_ALIASES: Record<string, string> = {
   "wagner-und-spielvogel-gdbr-83083-riedering": "wagner-und-spielvogel-gbr-83083-riedering",
 };
@@ -90,7 +132,7 @@ export async function getPublicCompanies(params?: {
   let query = supabase
     .from("companies")
     .select(
-      "*, trades!inner(id, name, slug), company_trades(confidence_score, source, evidence, status, trades(id, name, slug))",
+      `${PUBLIC_COMPANY_SELECT}, trades!inner(id, name, slug), company_trades(confidence_score, source, evidence, status, visibility_level, trades(id, name, slug))`,
     )
     .eq("public_visible", true)
     .order("verified", { ascending: false })
@@ -108,7 +150,7 @@ export async function getPublicCompanies(params?: {
 
   const { data, error } = await query;
   if (error) return getPublicCompaniesFallback(params);
-  return dedupePublicCompanies(excludeLocalFixtureCompanies(await resolveCompanyMedia(data as PublicCompanyWithTrade[])));
+  return dedupePublicCompanies(excludeLocalFixtureCompanies(await resolveCompanyMedia(data as unknown as PublicCompanyWithTrade[])));
 }
 
 export async function getBusinessDirectoryCompanies(params?: {
@@ -127,7 +169,7 @@ export async function getBusinessDirectoryCompanies(params?: {
   const { data, error } = await supabase
     .from("companies")
     .select(
-      "*, trades(id, name, slug), company_trades(confidence_score, source, evidence, status, trades(id, name, slug))",
+      `${PUBLIC_COMPANY_SELECT}, trades(id, name, slug), company_trades(confidence_score, source, evidence, status, visibility_level, trades(id, name, slug))`,
     )
     .eq("public_visible", true)
     .order("created_at", { ascending: false })
@@ -137,7 +179,7 @@ export async function getBusinessDirectoryCompanies(params?: {
     return getBusinessDirectoryCompaniesFallback(params);
   }
 
-  const companies = dedupePublicCompanies(excludeLocalFixtureCompanies(await resolveCompanyMedia(data as PublicCompanyWithTrade[])));
+  const companies = dedupePublicCompanies(excludeLocalFixtureCompanies(await resolveCompanyMedia(data as unknown as PublicCompanyWithTrade[])));
   if (!hasFilter) return companies.slice(0, params?.limit || 40);
 
   return companies
@@ -168,7 +210,7 @@ export async function getServiceDirectoryCompanies(params: {
   const { data, error } = await supabase
     .from("company_services")
     .select(
-      "confidence_score, services!inner(slug), companies!inner(*, trades(id, name, slug), company_trades(confidence_score, source, evidence, status, trades(id, name, slug)))",
+      `confidence_score, services!inner(slug), companies!inner(${PUBLIC_COMPANY_SELECT}, trades(id, name, slug), company_trades(confidence_score, source, evidence, status, visibility_level, trades(id, name, slug)))`,
     )
     .eq("status", "confirmed")
     .eq("services.slug", service.slug)
@@ -218,7 +260,7 @@ export async function getPublicCompaniesByTrade(
 
   let query = supabase
     .from("company_trades")
-    .select("id, confidence_score, source, evidence, status, companies!inner(*, trades(id, name, slug)), trades(id, name, slug)")
+    .select(`id, confidence_score, source, evidence, status, visibility_level, companies!inner(${PUBLIC_COMPANY_SELECT}, trades(id, name, slug)), trades(id, name, slug)`)
     .eq("trade_id", trade.id)
     .eq("companies.public_visible", true)
     .order("confidence_score", { ascending: false });
@@ -259,7 +301,7 @@ export async function getPublicCompanyTradeCounts() {
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("company_trades")
-    .select("status, trades(slug), companies!inner(public_visible, trust_badge, voluntary_support_status, email, description)")
+    .select("status, visibility_level, trades(slug), companies!inner(public_visible, trust_badge, voluntary_support_status, email, description)")
     .eq("companies.public_visible", true);
 
   if (error) {
@@ -319,8 +361,10 @@ export async function getPublicTradeLocationSitemapEntries(limit = 500) {
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("company_trades")
-    .select("trades(slug), companies!inner(city, public_visible, trust_badge, voluntary_support_status, email, description)")
+    .select("status, visibility_level, trades(slug), companies!inner(city, public_visible, trust_badge, voluntary_support_status, email, description)")
     .eq("companies.public_visible", true)
+    .neq("status", "rejected")
+    .neq("visibility_level", "internal")
     .limit(limit * 4);
 
   if (error) return getPublicTradeLocationSitemapEntriesFallback(limit);
@@ -406,7 +450,7 @@ export async function getCompanyBySlug(slug: string) {
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("companies")
-    .select("*, trades(id, name, slug), company_trades(confidence_score, source, evidence, status, trades(id, name, slug))")
+    .select(`${PUBLIC_COMPANY_SELECT}, trades(id, name, slug), company_trades(confidence_score, source, evidence, status, visibility_level, trades(id, name, slug))`)
     .eq("slug", slug)
     .eq("public_visible", true)
     .single();
@@ -416,7 +460,7 @@ export async function getCompanyBySlug(slug: string) {
     if (isMissingPublicProfileSchemaError(error)) return getCompanyBySlugFallback(slug);
     throw error;
   }
-  const withServices = await attachConfirmedCompanyServices(data as PublicCompanyWithTrade);
+  const withServices = await attachConfirmedCompanyServices(data as unknown as PublicCompanyWithTrade);
   const company = await applyApprovedSubmissionPublicDetails(normalizePublicCompanyServices(withServices));
   if (isLocalFixtureCompanyRecord(company)) return null;
   const resolvedCompany = await resolveSingleCompanyMedia(company);
@@ -427,13 +471,13 @@ export async function getCompanyBySlugForMetadata(slug: string): Promise<PublicC
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("companies")
-    .select("*, trades(name)")
+    .select(`${PUBLIC_COMPANY_SELECT}, trades(name)`)
     .eq("slug", slug)
     .eq("public_visible", true)
     .single();
 
   if (error || !data) return null;
-  const raw = await applyApprovedSubmissionPublicDetails(data as PublicCompanyWithTrade);
+  const raw = await applyApprovedSubmissionPublicDetails(data as unknown as PublicCompanyWithTrade);
   if (isLocalFixtureCompanyRecord(raw)) return null;
   const trade = Array.isArray(raw.trades) ? raw.trades[0] || null : raw.trades;
 
@@ -459,7 +503,7 @@ async function getPublicCompaniesByPrimaryTradeFallback(
   const supabase = getSupabaseAdmin();
   let query = supabase
     .from("companies")
-    .select("*, trades!inner(id, name, slug)")
+    .select(`${PUBLIC_COMPANY_SELECT}, trades!inner(id, name, slug)`)
     .eq("public_visible", true)
     .eq("trades.slug", tradeSlug)
     .order("verified", { ascending: false })
@@ -477,7 +521,7 @@ async function getPublicCompaniesByPrimaryTradeFallback(
 
   const { data, error } = await query;
   if (error) throw error;
-  return dedupePublicCompanies(excludeLocalFixtureCompanies(await resolveCompanyMedia(data as PublicCompanyWithTrade[])));
+  return dedupePublicCompanies(excludeLocalFixtureCompanies(await resolveCompanyMedia(data as unknown as PublicCompanyWithTrade[])));
 }
 
 async function getPublicCompaniesFallback(params?: {
@@ -487,7 +531,7 @@ async function getPublicCompaniesFallback(params?: {
   const supabase = getSupabaseAdmin();
   let query = supabase
     .from("companies")
-    .select("*, trades!inner(id, name, slug)")
+    .select(`${PUBLIC_COMPANY_SELECT}, trades!inner(id, name, slug)`)
     .eq("public_visible", true)
     .order("verified", { ascending: false })
     .order("name", { ascending: true });
@@ -504,7 +548,7 @@ async function getPublicCompaniesFallback(params?: {
 
   const { data, error } = await query;
   if (error) throw error;
-  return resolveCompanyMedia(excludeLocalFixtureCompanies(data as PublicCompanyWithTrade[]));
+  return resolveCompanyMedia(excludeLocalFixtureCompanies(data as unknown as PublicCompanyWithTrade[]));
 }
 
 async function getBusinessDirectoryCompaniesFallback(params?: {
@@ -522,14 +566,14 @@ async function getBusinessDirectoryCompaniesFallback(params?: {
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("companies")
-    .select("*, trades(id, name, slug)")
+    .select(`${PUBLIC_COMPANY_SELECT}, trades(id, name, slug)`)
     .eq("public_visible", true)
     .order("created_at", { ascending: false })
     .limit(hasFilter ? 700 : params?.limit || 40);
 
   if (error) throw error;
 
-  const companies = dedupePublicCompanies(excludeLocalFixtureCompanies(await resolveCompanyMedia(data as PublicCompanyWithTrade[])));
+  const companies = dedupePublicCompanies(excludeLocalFixtureCompanies(await resolveCompanyMedia(data as unknown as PublicCompanyWithTrade[])));
   if (!hasFilter) return companies.slice(0, params?.limit || 40);
 
   return companies
@@ -606,7 +650,7 @@ async function getCompanyBySlugFallback(slug: string) {
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("companies")
-    .select("*, trades(id, name, slug)")
+    .select(`${PUBLIC_COMPANY_SELECT}, trades(id, name, slug)`)
     .eq("slug", slug)
     .eq("public_visible", true)
     .single();
@@ -615,7 +659,7 @@ async function getCompanyBySlugFallback(slug: string) {
     if (isPublicCompanyNotFoundError(error)) return null;
     throw error;
   }
-  const withServices = await attachConfirmedCompanyServices(data as PublicCompanyWithTrade);
+  const withServices = await attachConfirmedCompanyServices(data as unknown as PublicCompanyWithTrade);
   const company = await applyApprovedSubmissionPublicDetails(normalizePublicCompanyServices(withServices));
   if (isLocalFixtureCompanyRecord(company)) return null;
   const resolvedCompany = await resolveSingleCompanyMedia(company);
@@ -899,8 +943,11 @@ async function getApprovedSubmissionPremiumProfile(company: PublicCompanyWithTra
 }
 
 async function getApprovedSubmissionPremiumPayload(company: PublicCompanyWithTrade): Promise<CompanyPremiumSubmissionPayload | null> {
-  const submission = await getLatestApprovedSubmissionForCompany(company, "premium_submission_payload");
+  const submission = await getLatestApprovedSubmissionForCompany(company, "premium_submission_payload, source");
   const payload = normalizeSubmissionPremiumPayload(submission?.premium_submission_payload);
+  if (payload && typeof submission?.source === "string" && submission.source.startsWith("owner-profile-update:")) {
+    payload.notes = null;
+  }
   return payload && hasSubmissionProfileContent(payload) ? payload : null;
 }
 
@@ -910,11 +957,12 @@ async function getLatestApprovedSubmissionForCompany(
 ): Promise<Partial<CompanySubmission> | null> {
   const supabase = getSupabaseAdmin();
   const companyId = company.id;
-  const sources = [`profile-update:${companyId}`, `claim:${companyId}`];
+  const sources = [`profile-update:${companyId}`, `owner-profile-update:${companyId}`];
   const { data: sourceMatch, error: sourceError } = await supabase
     .from("company_submissions")
     .select(selectColumns)
     .in("source", sources)
+    .eq("company_id", companyId)
     .eq("status", "approved")
     .order("updated_at", { ascending: false })
     .limit(1)
@@ -927,9 +975,11 @@ async function getLatestApprovedSubmissionForCompany(
     : await supabase
         .from("company_submissions")
         .select(selectColumns)
+        .eq("company_id", companyId)
         .eq("company_name", companyNameWithoutLegalForm(company.name, company.legal_form))
         .eq("postal_code", company.postal_code)
         .eq("city", company.city)
+        .not("source", "like", "claim:%")
         .eq("status", "approved")
         .order("updated_at", { ascending: false })
         .limit(1)
@@ -963,6 +1013,7 @@ function isLocalFixtureSubmissionRecord(submission: Partial<CompanySubmission> |
 function normalizeSubmissionPremiumPayload(payload: unknown): CompanyPremiumSubmissionPayload | null {
   if (!payload || typeof payload !== "object") return null;
   const candidate = payload as Partial<CompanyPremiumSubmissionPayload>;
+
   return {
     requested: Boolean(candidate.requested),
     request_label: typeof candidate.request_label === "string" ? candidate.request_label : null,
@@ -1239,6 +1290,11 @@ async function applyApprovedSubmissionPublicDetails<T extends PublicCompanyWithT
     company.contact_person_name ||
     company.contact_name ||
     null;
+  const ownerSubmission = typeof submission.source === "string" && submission.source.startsWith("owner-profile-update:");
+  const publicSubmissionEmail = ownerSubmission ? cleanString(submission.contact_email) : cleanString(submission.email);
+  const publicContactEmail = ownerSubmission
+    ? cleanString(submission.contact_email)
+    : cleanString(submission.contact_person_email) || cleanString(submission.contact_email);
 
   return {
     ...company,
@@ -1247,7 +1303,7 @@ async function applyApprovedSubmissionPublicDetails<T extends PublicCompanyWithT
     description: description || company.description,
     website_url: normalizeSubmissionWebsite(submission.website) || company.website_url,
     phone: cleanString(submission.phone) || company.phone,
-    email: cleanString(submission.email) || company.email,
+    email: publicSubmissionEmail || company.email,
     logo_url: cleanString(submission.logo_url) || company.logo_url || null,
     profile_image_url: submission.image_consent_given ? cleanString(submission.profile_image_url) || company.profile_image_url || null : company.profile_image_url,
     profile_image_alt: submission.image_consent_given
@@ -1255,7 +1311,7 @@ async function applyApprovedSubmissionPublicDetails<T extends PublicCompanyWithT
       : company.profile_image_alt,
     contact_person_name: contactName,
     contact_person_role: cleanString(submission.contact_person_role) || cleanString(submission.contact_role) || company.contact_person_role || null,
-    contact_person_email: cleanString(submission.contact_person_email) || cleanString(submission.contact_email) || company.contact_person_email || null,
+    contact_person_email: publicContactEmail || company.contact_person_email || null,
     contact_person_phone: cleanString(submission.contact_person_phone) || company.contact_person_phone || null,
     service_radius_km: submission.service_radius_km || company.service_radius_km || null,
     service_regions: nonEmptyList(submission.service_regions).length ? nonEmptyList(submission.service_regions) : company.service_regions || [],

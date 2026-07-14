@@ -1,6 +1,7 @@
 import { getSupabaseAdmin } from "@/lib/supabase";
 import type {
   CompanyClaimWithCompany,
+  CompanyMembership,
   CompanyPremiumProfile,
   CompanyTradeMatch,
   CompanySubmission,
@@ -279,6 +280,20 @@ export async function getCompany(id: string) {
   return data as CompanyWithTrade;
 }
 
+export async function getCompanyForOwnerProfile(id: string) {
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("companies")
+    .select(
+      "id, name, description, email, phone, website_url, street, city, postal_code, logo_url, profile_image_url, profile_image_alt, contact_person_name, contact_person_role, service_radius_km, service_regions, service_postal_codes, service_countries, memberships, certificates, manufacturer_certificates, references_text",
+    )
+    .eq("id", id)
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
 export async function getCompanyBySlug(slug: string) {
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
@@ -329,6 +344,31 @@ export async function getCompanyClaims() {
 
   if (error) throw error;
   return data as CompanyClaimWithCompany[];
+}
+
+export async function getCompanyClaimDetail(id: string) {
+  const supabase = getSupabaseAdmin();
+  const { data: claim, error: claimError } = await supabase.from("company_claims").select("*").eq("id", id).single();
+  if (claimError || !claim) throw claimError || new Error("Übernahmeantrag nicht gefunden.");
+
+  const [company, membershipResult, submissionResult, relatedClaimsResult] = await Promise.all([
+    getCompany(claim.company_id),
+    supabase.from("company_memberships").select("*").eq("company_id", claim.company_id).order("created_at", { ascending: false }),
+    claim.submission_id ? supabase.from("company_submissions").select("*").eq("id", claim.submission_id).maybeSingle() : Promise.resolve({ data: null, error: null }),
+    supabase.from("company_claims").select("id, name, email, status, created_at, decided_at, rejection_reason").eq("company_id", claim.company_id).neq("id", id).order("created_at", { ascending: false }),
+  ]);
+
+  if (membershipResult.error) throw membershipResult.error;
+  if (submissionResult.error) throw submissionResult.error;
+  if (relatedClaimsResult.error) throw relatedClaimsResult.error;
+
+  return {
+    claim: claim as CompanyClaimWithCompany,
+    company,
+    memberships: (membershipResult.data || []) as CompanyMembership[],
+    submission: submissionResult.data ? normalizeSubmission(submissionResult.data) : null,
+    relatedClaims: relatedClaimsResult.data || [],
+  };
 }
 
 export async function getCompanySubmissions(params?: {
