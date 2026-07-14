@@ -14,6 +14,8 @@ test("municipality search resolves exact names, slugs, AGS codes, and German inp
   assert.equal(resolvePilotMunicipalitySearch("Riedering")?.ags, "09187167");
   assert.equal(resolvePilotMunicipalitySearch("riedering-09187167")?.name, "Riedering");
   assert.equal(resolvePilotMunicipalitySearch("09187167")?.slug, "riedering-09187167");
+  assert.equal(resolvePilotMunicipalitySearch("Taufkirchen"), null);
+  assert.equal(resolvePilotMunicipalitySearch("09183145")?.name, "Taufkirchen");
   assert.equal(resolvePilotMunicipalitySearch("München")?.ags, undefined);
   assert.equal(resolvePilotMunicipalitySearch("Riedering West"), null);
   assert.equal(getPilotMunicipalityByAgs("09187167")?.selectionEnabled, true);

@@ -56,6 +56,17 @@ export const municipalityDataAsOfLabel = municipalityManifest.dataAsOf.split("-"
 
 const municipalityByAgs = new Map(pilotMunicipalities.map((municipality) => [municipality.ags, municipality]));
 const municipalityBySlug = new Map(pilotMunicipalities.map((municipality) => [municipality.slug, municipality]));
+const municipalityByNormalizedSlug = new Map(
+  pilotMunicipalities.map((municipality) => [normalizeMunicipalitySearchTerm(municipality.slug), municipality]),
+);
+const municipalitiesByName = new Map<string, PilotMunicipality[]>();
+
+for (const municipality of pilotMunicipalities) {
+  const normalizedName = normalizeMunicipalitySearchTerm(municipality.name);
+  const matches = municipalitiesByName.get(normalizedName) || [];
+  matches.push(municipality);
+  municipalitiesByName.set(normalizedName, matches);
+}
 
 export function getPilotMunicipalityByAgs(ags: string) {
   return municipalityByAgs.get(ags) || null;
@@ -83,14 +94,14 @@ export function resolvePilotMunicipalitySearch(value: unknown) {
   if (!normalized) return null;
 
   const compact = normalized.replace(/\s+/g, "");
-  return (
-    pilotMunicipalities.find(
-      (municipality) =>
-        municipality.ags === compact ||
-        normalizeMunicipalitySearchTerm(municipality.name) === normalized ||
-        normalizeMunicipalitySearchTerm(municipality.slug) === normalized,
-    ) || null
-  );
+  const byAgs = municipalityByAgs.get(compact);
+  if (byAgs) return byAgs;
+
+  const bySlug = municipalityBySlug.get(normalized) || municipalityByNormalizedSlug.get(normalized);
+  if (bySlug) return bySlug;
+
+  const nameMatches = municipalitiesByName.get(normalized) || [];
+  return nameMatches.length === 1 ? nameMatches[0] : null;
 }
 
 export function normalizeMunicipalityCodes(values: readonly unknown[]) {
