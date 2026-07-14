@@ -2,10 +2,10 @@ import Link from "next/link";
 import type { Route } from "next";
 import { notFound } from "next/navigation";
 import { Shell } from "@/components/shell";
+import { SubmissionMediaPreview, SubmissionPayloadFilePreview, SubmissionSocialLinkReview } from "@/components/admin/submission-review-media";
 import { approveSubmission, setSubmissionStatus, updateSubmission } from "@/lib/actions";
 import { getCompanySubmission, getSubmissionDuplicates } from "@/lib/data";
-import { socialPlatformLabel } from "@/lib/social-links";
-import { normalizeSubmissionReviewPayload, submissionMediaReference, type SubmissionMediaReference } from "@/lib/submission-review";
+import { normalizeSubmissionReviewPayload, submissionMediaReference } from "@/lib/submission-review";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { tradeTaxonomy } from "@/lib/trade-taxonomy";
 import type { CompanyPremiumSubmissionPayload, CompanySubmission, SubmissionUploadedFile } from "@/lib/types";
@@ -107,14 +107,14 @@ export default async function SubmissionDetailPage({ params, searchParams }: Pag
 
             <ReadSection title="Medien zur Prüfung">
               <div className="grid gap-4 md:grid-cols-2">
-                <MediaPreview
+                <SubmissionMediaPreview
                   alt={`${submission.company_name} Firmenlogo`}
                   emptyText="Kein Firmenlogo hochgeladen."
                   label="Firmenlogo"
                   note="Logo kann nach fachlicher Prüfung in den öffentlichen Betriebseintrag übernommen werden."
                   media={media.logo}
                 />
-                <MediaPreview
+                <SubmissionMediaPreview
                   alt={submission.profile_image_alt || `${submission.company_name} Ansprechpartnerbild`}
                   emptyText="Kein Ansprechpartnerbild hochgeladen."
                   label="Ansprechpartnerbild / Kontaktbild"
@@ -331,27 +331,14 @@ async function PremiumSubmissionReview({ payload }: { payload: CompanyPremiumSub
           Startprofil. Alle Angaben werden erst nach Prüfung in öffentliche Profilmodule übernommen.
         </p>
       </div>
-      <PremiumList title="Social Media & weitere Kontaktwege" items={payload.social_links} render={(item) => (
-        <>
-          <Data label="Plattform" value={socialPlatformLabel(item.platform)} />
-          <div className="grid gap-1 border-b border-line pb-3 last:border-b-0 last:pb-0">
-            <dt className="text-xs font-semibold uppercase tracking-normal text-muted">URL</dt>
-            <dd className="text-sm text-ink">
-              <a className="break-all text-action underline hover:text-brand" href={item.url} rel="noreferrer noopener" target="_blank">
-                {item.url}
-              </a>
-            </dd>
-          </div>
-          <Data label="Label" value={item.label} />
-        </>
-      )} />
+      <PremiumList title="Social Media & weitere Kontaktwege" items={payload.social_links} render={(item) => <SubmissionSocialLinkReview link={item} />} />
       <PremiumList title="Ansprechpartner" items={contacts} render={({ item, image }) => (
         <>
           <Data label="Name" value={item.name} />
           <Data label="Rolle" value={item.role} />
           <Data label="Telefon" value={item.phone} />
           <Data label="E-Mail" value={item.email} />
-          <PayloadFilePreview file={item.image_file || null} label="Bilddatei" resolved={image} />
+          <SubmissionPayloadFilePreview file={item.image_file || null} label="Bilddatei" resolved={image} />
           <Data label="Bildhinweis" value={item.image_note} multiline />
         </>
       )} />
@@ -360,7 +347,7 @@ async function PremiumSubmissionReview({ payload }: { payload: CompanyPremiumSub
           <Data label="Name" value={item.name} />
           <Data label="Rolle" value={item.role} />
           <Data label="Beschreibung" value={item.description} multiline />
-          <PayloadFilePreview file={item.image_file || null} label="Bilddatei" resolved={image} />
+          <SubmissionPayloadFilePreview file={item.image_file || null} label="Bilddatei" resolved={image} />
           <Data label="Bildhinweis" value={item.image_note} multiline />
         </>
       )} />
@@ -381,7 +368,7 @@ async function PremiumSubmissionReview({ payload }: { payload: CompanyPremiumSub
       <PremiumList title="Referenzbilder" items={referenceMedia} render={({ item, file }) => (
         <>
           <Data label="Referenz" value={item.reference_title} />
-          <PayloadFilePreview file={item.file || null} label="Bilddatei" resolved={file} />
+          <SubmissionPayloadFilePreview file={item.file || null} label="Bilddatei" resolved={file} />
           <Data label="Dateihinweis" value={item.file_note} multiline />
           <Data label="Bildtitel / Beschreibung" value={item.caption} multiline />
           <Data label="Alt-Text" value={item.alt_text} />
@@ -393,7 +380,7 @@ async function PremiumSubmissionReview({ payload }: { payload: CompanyPremiumSub
           <Data label="Aussteller" value={item.issuer} />
           <Data label="Gültig bis" value={item.valid_until} />
           <Data label="Beschreibung" value={item.description} multiline />
-          <PayloadFilePreview file={item.file || null} label="Datei" resolved={file} />
+          <SubmissionPayloadFilePreview file={item.file || null} label="Datei" resolved={file} />
           <Data label="Dateihinweis" value={item.file_note} multiline />
         </>
       )} />
@@ -417,100 +404,6 @@ function PremiumList<T>({ items, render, title }: { items: T[]; render: (item: T
       ) : (
         <p className="mt-2 text-sm text-muted">Nicht angegeben</p>
       )}
-    </div>
-  );
-}
-
-function MediaPreview({
-  alt,
-  emptyText,
-  label,
-  media,
-  note,
-}: {
-  alt: string;
-  emptyText: string;
-  label: string;
-  media: Awaited<ReturnType<typeof resolveSubmissionMedia>>;
-  note: string;
-}) {
-  const status = mediaStatusLabel(media.status, "Vorschau verfügbar");
-
-  return (
-    <div className="rounded-md border border-line bg-[#fbfcff] p-4">
-      <div className="flex items-center justify-between gap-3">
-        <div className="text-sm font-semibold text-ink">{label}</div>
-        <span className="rounded-full border border-line bg-white px-2 py-1 text-xs font-semibold text-muted">{status}</span>
-      </div>
-      {media.previewUrl ? (
-        <>
-          <a className="mt-3 block overflow-hidden rounded-md border border-line bg-white" href={media.previewUrl} rel="noreferrer noopener" target="_blank">
-            <img alt={alt} className="h-44 w-full object-contain p-3" src={media.previewUrl} />
-          </a>
-          <div className="mt-2 grid gap-1 text-xs text-muted">
-            <span>Datei: {media.fileName || "unbekannter Dateiname"}</span>
-            <span>Medientyp: {media.mimeType || "unbekannter Medientyp"}</span>
-          </div>
-        </>
-      ) : media.status === "missing" ? (
-        <div className="mt-3 rounded-md border border-dashed border-line bg-white px-4 py-8 text-center text-sm text-muted">
-          Nicht eingereicht. {emptyText}
-        </div>
-      ) : (
-        <div className="mt-3 rounded-md border border-[#f1d08a] bg-[#fff8e8] px-4 py-6 text-sm leading-6 text-[#6d4a00]">
-          Eingereicht, aber die Datei ist aktuell nicht abrufbar. Bitte Storage-Referenz und Bucket-Zugriff intern prüfen.
-          <div className="mt-2 grid gap-1 text-xs">
-            <span>Datei: {media.fileName || "unbekannter Dateiname"}</span>
-            <span>Medientyp: {media.mimeType || "unbekannter Medientyp"}</span>
-          </div>
-        </div>
-      )}
-      <p className="mt-3 text-xs leading-5 text-muted">{note}</p>
-    </div>
-  );
-}
-
-function PayloadFilePreview({
-  file,
-  label,
-  resolved,
-}: {
-  file: SubmissionUploadedFile | null;
-  label: string;
-  resolved: Awaited<ReturnType<typeof resolvePayloadFile>>;
-}) {
-  if (!file) {
-    return <Data label={label} value={null} />;
-  }
-
-  const isImage = file.mime_type.startsWith("image/");
-
-  return (
-    <div className="grid gap-2 border-b border-line pb-3 last:border-b-0 last:pb-0">
-      <dt className="text-xs font-semibold uppercase tracking-normal text-muted">{label}</dt>
-      <dd className="grid gap-2 text-sm text-ink">
-        <div className="flex flex-wrap gap-2 text-xs text-muted">
-          <span className="rounded-full border border-line bg-white px-2 py-1 font-semibold">{file.review_status}</span>
-          <span>{file.original_filename}</span>
-          <span>{file.mime_type}</span>
-          <span>{formatBytes(file.file_size)}</span>
-        </div>
-        {resolved.previewUrl ? (
-          isImage ? (
-            <a className="block overflow-hidden rounded-md border border-line bg-white" href={resolved.previewUrl} rel="noreferrer noopener" target="_blank">
-              <img alt={file.original_filename} className="h-44 w-full object-contain p-3" src={resolved.previewUrl} />
-            </a>
-          ) : (
-            <a className="inline-flex w-fit rounded-md border border-line bg-white px-3 py-2 text-sm font-semibold text-action hover:border-action" href={resolved.previewUrl} rel="noreferrer noopener" target="_blank">
-              Datei zur Prüfung öffnen
-            </a>
-          )
-        ) : (
-          <div className="rounded-md border border-[#f1d08a] bg-[#fff8e8] px-4 py-3 text-sm leading-6 text-[#6d4a00]">
-            Datei eingereicht, aber aktuell nicht abrufbar. Status: {mediaStatusLabel(resolved.status, "Vorschau verfügbar")}.
-          </div>
-        )}
-      </dd>
     </div>
   );
 }
@@ -542,13 +435,6 @@ async function resolveSubmissionMedia(value: string | null) {
 
 async function resolvePayloadFile(file: SubmissionUploadedFile | null) {
   return resolveSubmissionMedia(file?.storage_path || null);
-}
-
-function mediaStatusLabel(status: SubmissionMediaReference["status"], availableLabel: string) {
-  if (status === "available") return availableLabel;
-  if (status === "invalid") return "Ungültige Referenz";
-  if (status === "unavailable") return "Eingereicht, nicht abrufbar";
-  return "Nicht eingereicht";
 }
 
 function InfoCard({ title, value }: { title: string; value: string }) {
@@ -593,13 +479,6 @@ function tradeLabel(slug: string) {
 function supportLabel(submission: CompanySubmission) {
   if (!submission.wants_support_contribution) return "nein";
   return submission.support_contribution_amount ? `${submission.support_contribution_amount} EUR` : "ja";
-}
-
-function formatBytes(value: number) {
-  if (!Number.isFinite(value)) return "unbekannte Größe";
-  if (value < 1024) return `${value} B`;
-  if (value < 1024 * 1024) return `${Math.round(value / 1024)} KB`;
-  return `${(value / 1024 / 1024).toFixed(1)} MB`;
 }
 
 function statusLabel(status: string) {

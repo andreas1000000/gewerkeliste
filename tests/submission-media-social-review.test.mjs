@@ -8,6 +8,7 @@ import {
 } from "../lib/submission-review.ts";
 
 const adminSource = await readFile(new URL("../app/admin/submissions/[id]/page.tsx", import.meta.url), "utf8");
+const sharedMediaSource = await readFile(new URL("../components/admin/submission-review-media.tsx", import.meta.url), "utf8");
 
 test("legacy and serialized submission payloads keep multiple social links and uploaded media", () => {
   const payload = normalizeSubmissionReviewPayload(JSON.stringify({
@@ -61,8 +62,8 @@ test("media references distinguish missing, invalid, external and stored paths",
 
 test("admin review resolves private media server-side and uses safe external link behavior", () => {
   assert.match(adminSource, /createSignedUrl\(reference\.path/);
-  assert.match(adminSource, /rel="noreferrer noopener" target="_blank"/);
-  assert.match(adminSource, /Eingereicht, aber die Datei ist aktuell nicht abrufbar/);
+  assert.match(sharedMediaSource, /rel="noreferrer noopener" target="_blank"/);
+  assert.match(sharedMediaSource, /Eingereicht, aber die Datei ist aktuell nicht abrufbar/);
   assert.doesNotMatch(adminSource, /<div className="break-all text-xs text-muted">\{storedValue \|\| src\}<\/div>/);
   assert.doesNotMatch(adminSource, /<div className="break-all text-xs text-muted">\{file\.storage_path\}<\/div>/);
 });
