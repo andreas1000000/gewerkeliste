@@ -5,6 +5,7 @@ import { Shell } from "@/components/shell";
 import { approveSubmission, setSubmissionStatus, updateSubmission } from "@/lib/actions";
 import { getCompanySubmission, getSubmissionDuplicates } from "@/lib/data";
 import { socialPlatformLabel } from "@/lib/social-links";
+import { normalizeSubmissionReviewPayload, submissionMediaReference, type SubmissionMediaReference } from "@/lib/submission-review";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { tradeTaxonomy } from "@/lib/trade-taxonomy";
 import type { CompanyPremiumSubmissionPayload, CompanySubmission, SubmissionUploadedFile } from "@/lib/types";
@@ -111,18 +112,14 @@ export default async function SubmissionDetailPage({ params, searchParams }: Pag
                   emptyText="Kein Firmenlogo hochgeladen."
                   label="Firmenlogo"
                   note="Logo kann nach fachlicher Prüfung in den öffentlichen Betriebseintrag übernommen werden."
-                  src={media.logo.previewUrl}
-                  storedValue={submission.logo_url}
-                  status={mediaStatusLabel(media.logo.status, "Neu hochgeladen")}
+                  media={media.logo}
                 />
                 <MediaPreview
                   alt={submission.profile_image_alt || `${submission.company_name} Ansprechpartnerbild`}
                   emptyText="Kein Ansprechpartnerbild hochgeladen."
                   label="Ansprechpartnerbild / Kontaktbild"
                   note="Personenbild nur veröffentlichen, wenn Berechtigung und Zustimmung plausibel sind. Nicht automatisch bei unbestätigten Basisprofilen anzeigen."
-                  src={media.profileImage.previewUrl}
-                  storedValue={submission.profile_image_url}
-                  status={mediaStatusLabel(media.profileImage.status, "Zur Prüfung")}
+                  media={media.profileImage}
                 />
               </div>
               <div className="grid gap-3 rounded-md border border-line bg-white p-4">
@@ -315,7 +312,10 @@ function TagList({ label, items }: { label: string; items: string[] }) {
 }
 
 async function PremiumSubmissionReview({ payload }: { payload: CompanyPremiumSubmissionPayload | null }) {
-  if (!payload || (!payload.requested && !payload.social_links.length)) return null;
+  const normalizedPayload = normalizeSubmissionReviewPayload(payload);
+  if (!normalizedPayload || (!normalizedPayload.requested && !normalizedPayload.social_links.length)) return null;
+
+  payload = normalizedPayload;
 
   const contacts = await Promise.all(payload.contacts.map(async (item) => ({ item, image: await resolvePayloadFile(item.image_file || null) })));
   const teamMembers = await Promise.all(payload.team_members.map(async (item) => ({ item, image: await resolvePayloadFile(item.image_file || null) })));
@@ -334,7 +334,14 @@ async function PremiumSubmissionReview({ payload }: { payload: CompanyPremiumSub
       <PremiumList title="Social Media & weitere Kontaktwege" items={payload.social_links} render={(item) => (
         <>
           <Data label="Plattform" value={socialPlatformLabel(item.platform)} />
-          <Data label="URL" value={item.url} />
+          <div className="grid gap-1 border-b border-line pb-3 last:border-b-0 last:pb-0">
+            <dt className="text-xs font-semibold uppercase tracking-normal text-muted">URL</dt>
+            <dd className="text-sm text-ink">
+              <a className="break-all text-action underline hover:text-brand" href={item.url} rel="noreferrer noopener" target="_blank">
+                {item.url}
+              </a>
+            </dd>
+          </div>
           <Data label="Label" value={item.label} />
         </>
       )} />
@@ -418,40 +425,44 @@ function MediaPreview({
   alt,
   emptyText,
   label,
+  media,
   note,
-  src,
-  storedValue,
-  status,
 }: {
   alt: string;
   emptyText: string;
   label: string;
+  media: Awaited<ReturnType<typeof resolveSubmissionMedia>>;
   note: string;
-  src?: string | null;
-  storedValue?: string | null;
-  status: string;
 }) {
+  const status = mediaStatusLabel(media.status, "Vorschau verfügbar");
+
   return (
     <div className="rounded-md border border-line bg-[#fbfcff] p-4">
       <div className="flex items-center justify-between gap-3">
         <div className="text-sm font-semibold text-ink">{label}</div>
         <span className="rounded-full border border-line bg-white px-2 py-1 text-xs font-semibold text-muted">{status}</span>
       </div>
-      {src ? (
+      {media.previewUrl ? (
         <>
-          <a className="mt-3 block overflow-hidden rounded-md border border-line bg-white" href={src} rel="noreferrer" target="_blank">
-            <img alt={alt} className="h-44 w-full object-contain p-3" src={src} />
+          <a className="mt-3 block overflow-hidden rounded-md border border-line bg-white" href={media.previewUrl} rel="noreferrer noopener" target="_blank">
+            <img alt={alt} className="h-44 w-full object-contain p-3" src={media.previewUrl} />
           </a>
-          <div className="mt-2 break-all text-xs text-muted">{storedValue || src}</div>
+          <div className="mt-2 grid gap-1 text-xs text-muted">
+            <span>Datei: {media.fileName || "unbekannter Dateiname"}</span>
+            <span>Medientyp: {media.mimeType || "unbekannter Medientyp"}</span>
+          </div>
         </>
-      ) : storedValue ? (
-        <div className="mt-3 rounded-md border border-[#f1d08a] bg-[#fff8e8] px-4 py-6 text-sm leading-6 text-[#6d4a00]">
-          Upload-Pfad gespeichert, aber Datei aktuell nicht abrufbar.
-          <div className="mt-2 break-all text-xs">{storedValue}</div>
+      ) : media.status === "missing" ? (
+        <div className="mt-3 rounded-md border border-dashed border-line bg-white px-4 py-8 text-center text-sm text-muted">
+          Nicht eingereicht. {emptyText}
         </div>
       ) : (
-        <div className="mt-3 rounded-md border border-dashed border-line bg-white px-4 py-8 text-center text-sm text-muted">
-          Kein Upload gespeichert. {emptyText}
+        <div className="mt-3 rounded-md border border-[#f1d08a] bg-[#fff8e8] px-4 py-6 text-sm leading-6 text-[#6d4a00]">
+          Eingereicht, aber die Datei ist aktuell nicht abrufbar. Bitte Storage-Referenz und Bucket-Zugriff intern prüfen.
+          <div className="mt-2 grid gap-1 text-xs">
+            <span>Datei: {media.fileName || "unbekannter Dateiname"}</span>
+            <span>Medientyp: {media.mimeType || "unbekannter Medientyp"}</span>
+          </div>
         </div>
       )}
       <p className="mt-3 text-xs leading-5 text-muted">{note}</p>
@@ -486,20 +497,19 @@ function PayloadFilePreview({
         </div>
         {resolved.previewUrl ? (
           isImage ? (
-            <a className="block overflow-hidden rounded-md border border-line bg-white" href={resolved.previewUrl} rel="noreferrer" target="_blank">
+            <a className="block overflow-hidden rounded-md border border-line bg-white" href={resolved.previewUrl} rel="noreferrer noopener" target="_blank">
               <img alt={file.original_filename} className="h-44 w-full object-contain p-3" src={resolved.previewUrl} />
             </a>
           ) : (
-            <a className="inline-flex w-fit rounded-md border border-line bg-white px-3 py-2 text-sm font-semibold text-action hover:border-action" href={resolved.previewUrl} rel="noreferrer" target="_blank">
+            <a className="inline-flex w-fit rounded-md border border-line bg-white px-3 py-2 text-sm font-semibold text-action hover:border-action" href={resolved.previewUrl} rel="noreferrer noopener" target="_blank">
               Datei zur Prüfung öffnen
             </a>
           )
         ) : (
           <div className="rounded-md border border-[#f1d08a] bg-[#fff8e8] px-4 py-3 text-sm leading-6 text-[#6d4a00]">
-            Upload-Pfad gespeichert, aber Datei aktuell nicht abrufbar.
+            Datei eingereicht, aber aktuell nicht abrufbar. Status: {mediaStatusLabel(resolved.status, "Vorschau verfügbar")}.
           </div>
         )}
-        <div className="break-all text-xs text-muted">{file.storage_path}</div>
       </dd>
     </div>
   );
@@ -515,25 +525,30 @@ async function getSubmissionMedia(submission: CompanySubmission) {
 }
 
 async function resolveSubmissionMedia(value: string | null) {
-  if (!value) return { previewUrl: null as string | null, status: "missing" as const };
-  if (/^https?:\/\//i.test(value)) return { previewUrl: value, status: "available" as const };
+  const reference = submissionMediaReference(value);
+  if (reference.status === "missing" || reference.status === "invalid") {
+    return { ...reference, previewUrl: null as string | null };
+  }
+  if (reference.externalUrl) {
+    return { ...reference, previewUrl: reference.externalUrl, status: "available" as const };
+  }
 
   const supabase = getSupabaseAdmin();
-  const path = value.replace(/^company-media\//, "");
-  const { data, error } = await supabase.storage.from("company-media").createSignedUrl(path, 60 * 60);
-  if (error || !data?.signedUrl) return { previewUrl: null as string | null, status: "unavailable" as const };
+  const { data, error } = await supabase.storage.from("company-media").createSignedUrl(reference.path as string, 60 * 60);
+  if (error || !data?.signedUrl) return { ...reference, previewUrl: null as string | null, status: "unavailable" as const };
 
-  return { previewUrl: data.signedUrl, status: "available" as const };
+  return { ...reference, previewUrl: data.signedUrl, status: "available" as const };
 }
 
 async function resolvePayloadFile(file: SubmissionUploadedFile | null) {
   return resolveSubmissionMedia(file?.storage_path || null);
 }
 
-function mediaStatusLabel(status: "missing" | "available" | "unavailable", availableLabel: string) {
+function mediaStatusLabel(status: SubmissionMediaReference["status"], availableLabel: string) {
   if (status === "available") return availableLabel;
-  if (status === "unavailable") return "Pfad vorhanden, nicht abrufbar";
-  return "Nicht vorhanden";
+  if (status === "invalid") return "Ungültige Referenz";
+  if (status === "unavailable") return "Eingereicht, nicht abrufbar";
+  return "Nicht eingereicht";
 }
 
 function InfoCard({ title, value }: { title: string; value: string }) {

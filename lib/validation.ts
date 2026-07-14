@@ -1,7 +1,7 @@
 import { z } from "zod";
 import type { ClaimStatus, CompanyFormState, CompanyPremiumSubmissionPayload } from "@/lib/types";
 import { validatePilotMunicipalityCodes } from "@/lib/municipality-catalog";
-import { normalizeSocialLink } from "@/lib/social-links";
+import { normalizeSubmissionSocialLinkRows } from "@/lib/submission-review";
 import { canonicalTradeSlug, publicTradeTaxonomy } from "@/lib/trade-taxonomy";
 
 export type CompanyInput = {
@@ -279,21 +279,14 @@ export function parseBusinessSubmissionForm(formData: FormData) {
 
 export function parsePremiumSubmissionPayload(formData: FormData): CompanyPremiumSubmissionPayload {
   const requested = formData.get("premiumStartProfileRequested") === "on";
-  const socialLinks = rowsFromFormData(formData, ["socialPlatform", "socialUrl"]).map((_, index) => {
-    const normalized = normalizeSocialLink(
-      getStringAt(formData, "socialPlatform", index),
-      getStringAt(formData, "socialUrl", index),
-      getStringAt(formData, "socialLabel", index),
-    );
-    return normalized
-      ? {
-          platform: normalized.platform,
-          url: normalized.url,
-          label: normalized.label,
-          sort_order: index + 1,
-        }
-      : null;
-  }).filter((item): item is NonNullable<typeof item> => Boolean(item));
+  const socialLinks = normalizeSubmissionSocialLinkRows(
+    rowsFromFormData(formData, ["socialPlatform", "socialUrl"]).map((_, index) => ({
+      platform: getStringAt(formData, "socialPlatform", index),
+      url: getStringAt(formData, "socialUrl", index),
+      label: getStringAt(formData, "socialLabel", index),
+      sort_order: index + 1,
+    })),
+  );
 
   const payload: CompanyPremiumSubmissionPayload = {
     requested,
