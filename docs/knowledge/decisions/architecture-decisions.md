@@ -352,3 +352,31 @@ reproduzierbares CI-Sicherheitsgate. Die aktuelle Rechteinventur bleibt in
 Capability-Aufteilung, Datenbankrollen und Migrationen bleiben ein eigenes Security-/Daten-
 Arbeitspaket mit nicht-produktiver Validierung. Dieser ADR aktiviert keine neue Rolle, keinen
 Secret-Wert, keine RLS-Policy und keine Production-Änderung.
+
+## ADR-018: Exakte Gemeindesuche nur über freigegebene Tätigkeitsgebiete
+
+Status: active
+Datum: 2026-07-14
+
+Entscheidung: Erkennt die öffentliche Suche einen Ortseingang als eine aktivierte Gemeinde des
+Pilotkatalogs, werden ausschließlich `company_service_areas` mit Status `approved` für diese
+Gemeinde berücksichtigt. Der Betriebssitz, Radius, PLZ und allgemeine Ortsfelder ersetzen keine
+freigegebene Gemeinde-Zuordnung. Die öffentliche Abfrage liest nur `selection_enabled`,
+`municipality_ags` und `company_id`; Firmendaten werden erst danach mit der bestehenden
+`public_visible`-Grenze geladen.
+
+Grund: Suchende sollen eine Gemeinde nicht mit einer unbelegten Reichweiten- oder Sitzannahme
+verwechseln. Die Entscheidung setzt den kommunalen Katalog aus ADR-014 in der öffentlichen Suche
+präzise um und verhindert, dass ungeprüfte Einreichungsdaten sichtbar werden.
+
+Leitplanken: Nicht-Gemeinde-Eingaben behalten den bisherigen Suchpfad. Fehlt das neue Schema in
+einer älteren Umgebung, fällt der Code kontrolliert auf diesen bisherigen Pfad zurück. Die
+Ergebnisreihenfolge bleibt innerhalb der gefilterten Menge bei den bestehenden Signalen
+Verifizierung, Tätigkeitszuordnung, Claim-Status und Name; Zahlung oder Profilpaket beeinflussen
+die Reihenfolge nicht.
+
+Auswirkung: Dieser Slice verändert keine Migration, RLS-Policy, Rechte, Einreichung und kein
+Production-Datum. Die bestehende serverseitige Service-Role-Fabrik bleibt die einzige Datenquelle;
+die anon-/Browser-Grenze erhält weder Gemeinde- noch interne Ownership-Daten. Die nachgelagerte
+öffentliche Profilanzeige und ein Review-/Freigabefluss für Gemeinde-Zuordnungen bleiben separate
+Arbeitspakete.

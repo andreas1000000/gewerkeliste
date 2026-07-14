@@ -82,6 +82,7 @@ Roadmap-Backlog entsteht nicht.
   - Exit-Kriterien: Technische Routine wird automatisiert; offene Produkt-, Rechts-, Secret-, Live-Daten- und irreversible Entscheidungen bleiben beim Product Owner.
 - [~] Gemeindebasierte Tätigkeitsgebiete im Rosenheimer Pilotcluster (Slice 1: amtlicher Katalog, lokale Karte und Submission-Speicherung; Slice 2: Review, exakte Gemeindesuche und Profil; Slice 3: öffentliche regionale Verfügbarkeit und Erweiterungsworkflow).
   - Exit-Kriterien Slice 1: Die freigegebene Pilot-Allowlist stammt reproduzierbar aus VG250, ist AGS-basiert, lokal visualisiert und serverseitig validiert.
+  - Slice 2a: Exakte öffentliche Gemeindesuche berücksichtigt nur aktivierte Gemeinden und freigegebene `company_service_areas`; öffentliche Profile und der Review-/Freigabefluss bleiben offen.
   - Exit-Kriterien Slice 2: Nur freigegebene Betrieb-Gemeinde-Zuordnungen wirken auf exakte Suche und öffentliche Profile; Sitz, Radius und PLZ reichen nicht.
   - Exit-Kriterien Slice 3: Regionale Verfügbarkeit und spätere Kreis-Erweiterungen werden aus demselben Manifest transparent und ohne Vollständigkeitsbehauptung abgeleitet.
 - [ ] Footer-, Hilfe-, Sicherheits- und Service-Informationsarchitektur schrittweise umsetzen (Referenz: `docs/knowledge/product/footer-service-pages.md`).
