@@ -23,12 +23,7 @@ export async function submitOwnerProfileChange(
   if (userError || !user) return { ok: false, message: "Bitte melden Sie sich erneut an." };
 
   const { data: membership, error: membershipError } = await supabase
-    .from("company_memberships")
-    .select("id")
-    .eq("company_id", companyId)
-    .eq("user_id", user.id)
-    .eq("role", "owner")
-    .eq("status", "active")
+    .rpc("get_my_active_memberships", { p_company_id: companyId })
     .maybeSingle();
   if (membershipError || !membership) return { ok: false, message: "Für diesen Betrieb besteht kein aktiver Owner-Zugang." };
 

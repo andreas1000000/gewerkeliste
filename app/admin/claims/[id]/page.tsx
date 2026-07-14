@@ -83,7 +83,7 @@ export default async function AdminClaimDetailPage({ params, searchParams }: Pag
           <section className="rounded-lg border border-line bg-white p-5 shadow-soft">
             <h2 className="text-lg font-semibold text-ink">Menschliche Entscheidung</h2>
             <p className="mt-3 text-sm leading-6 text-muted">Die Freigabe legt genau eine aktive Owner-Mitgliedschaft an. `verified` bleibt unverändert.</p>
-            {detail.claim.status === "pending" || detail.claim.status === "needs_info" ? (
+            {detail.claim.status === "pending" ? (
               <div className="mt-4 grid gap-3">
                 <form action={approveClaim}>
                   <input name="claim_id" type="hidden" value={detail.claim.id} />

@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 import { submitClaimRequest, type ClaimRequestState, initialClaimRequestState } from "@/lib/actions/claim-ownership";
 
-export function ClaimRequestForm({ companyId, companySlug, email }: { companyId: string; companySlug: string; email: string }) {
+export function ClaimRequestForm({ companyId, companySlug }: { companyId: string; companySlug: string }) {
   const action = submitClaimRequest.bind(null, companyId);
   const [state, formAction, pending] = useActionState<ClaimRequestState, FormData>(action, initialClaimRequestState);
   const errors = state.fieldErrors || {};
@@ -27,8 +27,8 @@ export function ClaimRequestForm({ companyId, companySlug, email }: { companyId:
       <input name="company_slug" type="hidden" value={companySlug} />
       {state.message ? <p className="rounded-md border border-[#e1b0a5] bg-[#fff5f2] px-4 py-3 text-sm text-[#8e2f1f]">{state.message}</p> : null}
       <div className="rounded-md border border-line bg-panel px-4 py-3 text-sm leading-6 text-muted">
-        Angemeldet als <span className="font-semibold text-ink">{email}</span>. Die geschäftliche E-Mail stammt aus Ihrer
-        bestätigten Sitzung und kann im Antrag nicht ersetzt werden.
+        Ihr Zugang ist per bestätigter E-Mail angemeldet. Die geschäftliche E-Mail stammt aus der sicheren Sitzung und
+        kann im Antrag nicht ersetzt werden.
       </div>
       <Field error={errors.name} label="Ihr Name">
         <input className={inputClass} name="name" required />

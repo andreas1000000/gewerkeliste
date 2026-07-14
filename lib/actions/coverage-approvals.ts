@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { requireAdminAction } from "@/lib/admin-action-auth";
 import { getSupabaseAdmin } from "@/lib/supabase";
 
 type CoverageApprovalAction = "accept_regional_candidate" | "delete_regional_candidate";
@@ -29,10 +30,12 @@ const actionConfig: Record<
 };
 
 export async function requestAcceptRegionalCandidateApproval(formData: FormData) {
+  await requireAdminAction();
   await requestRegionalCandidateApproval(formData, "accept_regional_candidate");
 }
 
 export async function requestDeleteRegionalCandidateApproval(formData: FormData) {
+  await requireAdminAction();
   await requestRegionalCandidateApproval(formData, "delete_regional_candidate");
 }
 

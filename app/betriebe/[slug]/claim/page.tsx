@@ -85,7 +85,7 @@ export default async function CompanyClaimWizardPage({ params }: PageProps) {
 
         <div className="mt-6">
           {user?.email ? (
-            <ClaimRequestForm companyId={company.id} companySlug={company.slug} email={user.email} />
+            <ClaimRequestForm companyId={company.id} companySlug={company.slug} />
           ) : (
             <section className="rounded-lg border border-line bg-white p-6 shadow-soft sm:p-8">
               <p className="text-sm font-semibold uppercase tracking-normal text-brand">Vor dem Antrag anmelden</p>

@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { requireAdminAction } from "@/lib/admin-action-auth";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import type { PlannerImportState, PlannerProfile } from "@/lib/types/planner";
 
@@ -25,6 +26,7 @@ export async function importPlannerContacts(
   _prevState: PlannerImportState,
   formData: FormData,
 ): Promise<PlannerImportState> {
+  await requireAdminAction();
   const rowsJson = getFormString(formData, "rows_json");
   const filename = getFormString(formData, "filename") || "gewerkeliste-import.csv";
   if (!rowsJson) return { ok: false, message: "Keine Importdaten gefunden." };
@@ -129,6 +131,7 @@ export async function importPlannerContacts(
 }
 
 export async function markPlannerContactPrivate(formData: FormData) {
+  await requireAdminAction();
   const id = getFormString(formData, "id");
   if (!id) return;
   const supabase = getSupabaseAdmin();
@@ -137,6 +140,7 @@ export async function markPlannerContactPrivate(formData: FormData) {
 }
 
 export async function suggestPlannerContact(formData: FormData) {
+  await requireAdminAction();
   const id = getFormString(formData, "id");
   if (!id) return;
   const supabase = getSupabaseAdmin();
@@ -149,6 +153,7 @@ export async function suggestPlannerContact(formData: FormData) {
 }
 
 export async function updatePlannerProfile(formData: FormData) {
+  await requireAdminAction();
   const planner = await getOrCreateDefaultPlanner();
   const supabase = getSupabaseAdmin();
   const projectName = getFormString(formData, "project_name");

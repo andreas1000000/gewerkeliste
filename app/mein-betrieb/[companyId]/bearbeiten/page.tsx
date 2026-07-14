@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { OwnerProfileForm } from "@/components/owner-profile-form";
 import { SiteHeader } from "@/components/site-header";
-import { getCompany } from "@/lib/data";
+import { getCompanyForOwnerProfile } from "@/lib/data";
 import { getSupabaseServerClient } from "@/lib/supabase-server";
 
 export const metadata: Metadata = { title: "Betriebsprofil bearbeiten | GewerkeListe.com", robots: { index: false, follow: false } };
@@ -17,16 +17,11 @@ export default async function EditMyCompanyPage({ params }: PageProps) {
   if (userError || !userData.user) redirect(`/anmelden?next=${encodeURIComponent(`/mein-betrieb/${companyId}/bearbeiten`)}`);
 
   const { data: membership, error: membershipError } = await supabase
-    .from("company_memberships")
-    .select("id")
-    .eq("company_id", companyId)
-    .eq("user_id", userData.user.id)
-    .eq("role", "owner")
-    .eq("status", "active")
+    .rpc("get_my_active_memberships", { p_company_id: companyId })
     .maybeSingle();
   if (membershipError || !membership) notFound();
 
-  const company = await getCompany(companyId);
+  const company = await getCompanyForOwnerProfile(companyId);
   return (
     <main className="min-h-screen bg-[#f7f8fb] text-ink">
       <SiteHeader />

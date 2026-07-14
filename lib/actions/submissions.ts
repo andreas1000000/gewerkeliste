@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { requireAdminAction } from "@/lib/admin-action-auth";
 import { getCompanySubmission, getUniqueCompanySlug } from "@/lib/data";
 import { companySlug } from "@/lib/slug";
 import { normalizeSocialLink } from "@/lib/social-links";
@@ -29,6 +30,7 @@ type ExistingCompanyMatch = ApprovedCompany & {
 };
 
 export async function approveSubmission(formData: FormData) {
+  await requireAdminAction();
   const id = String(formData.get("id") || "");
   if (!id) redirect("/admin/submissions?error=missing-submission-id");
 
@@ -65,6 +67,7 @@ export async function approveSubmission(formData: FormData) {
 }
 
 export async function approveOwnerSubmission(formData: FormData) {
+  await requireAdminAction();
   const id = String(formData.get("id") || "");
   if (!id) redirect("/admin/submissions?error=missing-submission-id");
 
@@ -83,6 +86,7 @@ export async function approveOwnerSubmission(formData: FormData) {
 }
 
 export async function decideOwnerSubmission(formData: FormData) {
+  await requireAdminAction();
   const id = String(formData.get("id") || "");
   const status = String(formData.get("status") || "");
   if (!id || !["needs_info", "rejected"].includes(status)) redirect(`/admin/submissions/${id}?error=unsupported-owner-decision`);
@@ -159,7 +163,7 @@ function companyPayload(
     postal_code: submission.postal_code,
     latitude: 0,
     longitude: 0,
-    claim_status: "claimed",
+    claim_status: "unclaimed",
     verified: options.verified,
     profile_package: profilePackage,
     profile_status: options.verified ? "verified" : "claimed",
@@ -201,7 +205,7 @@ async function updateClaimedCompany(
   const updatePayload = {
     ...payload,
     name: payload.name || existing.name,
-    claim_status: existing.claim_status === "claimed" && !payload.verified ? "claimed" : payload.claim_status,
+    claim_status: existing.claim_status === "claimed" ? "claimed" : "unclaimed",
     verified: payload.verified || Boolean(existing.verified),
     profile_package: payload.profile_package === "verified_start" ? "verified_start" : existing.profile_package || payload.profile_package,
     profile_status: payload.verified ? "verified" : existing.profile_status || payload.profile_status,

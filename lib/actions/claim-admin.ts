@@ -2,9 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { requireAdminAction } from "@/lib/admin-action-auth";
 import { getSupabaseAdmin } from "@/lib/supabase";
 
 export async function approveClaim(formData: FormData) {
+  await requireAdminAction();
   const claimId = requiredUuid(formData, "claim_id");
   const supabase = getSupabaseAdmin();
   const { error } = await supabase.rpc("approve_company_claim", {
@@ -19,6 +21,7 @@ export async function approveClaim(formData: FormData) {
 }
 
 export async function decideClaim(formData: FormData) {
+  await requireAdminAction();
   const claimId = requiredUuid(formData, "claim_id");
   const status = stringValue(formData, "status");
   const reason = stringValue(formData, "reason");
@@ -40,6 +43,7 @@ export async function decideClaim(formData: FormData) {
 }
 
 export async function revokeMembership(formData: FormData) {
+  await requireAdminAction();
   const membershipId = requiredUuid(formData, "membership_id");
   const supabase = getSupabaseAdmin();
   const { error } = await supabase.rpc("revoke_company_membership", {

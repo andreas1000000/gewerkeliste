@@ -224,12 +224,16 @@ export default async function SubmissionDetailPage({ params, searchParams }: Pag
               {submission.source.startsWith("owner-profile-update:") ? (
                 <div className="mt-4 grid gap-3">
                   <p className="rounded-md border border-line bg-panel px-3 py-3 text-sm leading-6 text-muted">Diese Freigabe aktualisiert ausschließlich den zugeordneten Betrieb. `verified`, Claim-Status und öffentliche Sichtbarkeit bleiben erhalten; die Änderung stammt aus einem aktiven Owner-Zugang.</p>
-                  <form action={approveOwnerSubmission}>
-                    <input name="id" type="hidden" value={submission.id} />
-                    <ConfirmSubmitButton className="w-full rounded-md bg-brand px-4 py-2 text-sm font-semibold text-white disabled:opacity-50" confirmation="Geprüfte Owner-Profiländerung veröffentlichen? Die Änderung wird transaktional angewendet.">
-                      Geprüfte Änderung veröffentlichen
-                    </ConfirmSubmitButton>
-                  </form>
+                  {submission.status === "submitted" || submission.status === "in_review" ? (
+                    <form action={approveOwnerSubmission}>
+                      <input name="id" type="hidden" value={submission.id} />
+                      <ConfirmSubmitButton className="w-full rounded-md bg-brand px-4 py-2 text-sm font-semibold text-white disabled:opacity-50" confirmation="Geprüfte Owner-Profiländerung veröffentlichen? Die Änderung wird transaktional angewendet.">
+                        Geprüfte Änderung veröffentlichen
+                      </ConfirmSubmitButton>
+                    </form>
+                  ) : (
+                    <p className="rounded-md border border-line bg-panel px-3 py-3 text-sm leading-6 text-muted">Diese Einreichung wartet auf eine neue Antwort des Owners und kann in diesem Status nicht veröffentlicht werden.</p>
+                  )}
                   <form action={decideOwnerSubmission} className="grid gap-2">
                     <input name="id" type="hidden" value={submission.id} />
                     <input name="status" type="hidden" value="needs_info" />

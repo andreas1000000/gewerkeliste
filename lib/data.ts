@@ -280,6 +280,20 @@ export async function getCompany(id: string) {
   return data as CompanyWithTrade;
 }
 
+export async function getCompanyForOwnerProfile(id: string) {
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("companies")
+    .select(
+      "id, name, description, email, phone, website_url, street, city, postal_code, logo_url, profile_image_url, profile_image_alt, contact_person_name, contact_person_role, service_radius_km, service_regions, service_postal_codes, service_countries, memberships, certificates, manufacturer_certificates, references_text",
+    )
+    .eq("id", id)
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
 export async function getCompanyBySlug(slug: string) {
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase

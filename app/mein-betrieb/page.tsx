@@ -19,12 +19,13 @@ export default async function MyCompanyPage() {
   if (userError || !userData.user) redirect("/anmelden?next=/mein-betrieb");
 
   const [membershipResult, claimsResult] = await Promise.all([
-    supabase.from("company_memberships").select("*").eq("status", "active").eq("role", "owner").order("created_at", { ascending: false }),
-    supabase.from("company_claims").select("id, company_id, status, created_at, decided_at, rejection_reason").order("created_at", { ascending: false }),
+    supabase.rpc("get_my_active_memberships"),
+    supabase.rpc("get_my_claims"),
   ]);
   if (membershipResult.error || claimsResult.error) throw membershipResult.error || claimsResult.error;
 
-  const memberships = membershipResult.data || [];
+  const memberships = (membershipResult.data || []) as Array<{ id: string; company_id: string; role: string }>;
+  const claims = (claimsResult.data || []) as Array<{ id: string; company_id: string; status: string; created_at: string; decided_at: string | null }>;
   const companies = await Promise.all(memberships.map(async (membership) => ({ membership, company: await getCompany(membership.company_id) })));
 
   return (
@@ -35,7 +36,7 @@ export default async function MyCompanyPage() {
           <div>
             <p className="text-sm font-semibold uppercase tracking-normal text-brand">Persönlicher Bereich</p>
             <h1 className="mt-2 text-3xl font-semibold text-[#07173d]">Mein Betrieb</h1>
-            <p className="mt-3 text-sm leading-6 text-muted">Angemeldet als {userData.user.email}. Sie sehen nur Betriebe, denen Ihr Zugang aktiv zugeordnet ist.</p>
+            <p className="mt-3 text-sm leading-6 text-muted">Sie sind sicher angemeldet. Sie sehen nur Betriebe, denen Ihr Zugang aktiv zugeordnet ist.</p>
           </div>
           <SignOutButton />
         </div>
@@ -61,7 +62,7 @@ export default async function MyCompanyPage() {
 
         <section className="mt-10 grid gap-4">
           <h2 className="text-xl font-semibold text-ink">Meine Übernahmeanträge</h2>
-          {(claimsResult.data || []).length ? (claimsResult.data || []).map((claim) => (
+          {claims.length ? claims.map((claim) => (
             <div className="rounded-lg border border-line bg-white p-5" key={claim.id}>
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <span className="font-semibold text-ink">Betrieb {claim.company_id}</span>

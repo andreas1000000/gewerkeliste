@@ -15,23 +15,16 @@ export default async function MyCompanyDetailPage({ params }: PageProps) {
   if (userError || !userData.user) redirect(`/anmelden?next=${encodeURIComponent(`/mein-betrieb/${companyId}`)}`);
 
   const { data: membership, error: membershipError } = await supabase
-    .from("company_memberships")
-    .select("*")
-    .eq("company_id", companyId)
-    .eq("user_id", userData.user.id)
-    .eq("role", "owner")
-    .eq("status", "active")
+    .rpc("get_my_active_memberships", { p_company_id: companyId })
     .maybeSingle();
   if (membershipError || !membership) notFound();
 
   const company = await getCompany(companyId);
-  const { data: submissions, error: submissionsError } = await supabase
-    .from("company_submissions")
-    .select("id, status, created_at, decided_at, rejection_reason, source")
-    .eq("company_id", companyId)
-    .order("created_at", { ascending: false })
-    .limit(5);
+  const { data: submissionsData, error: submissionsError } = await supabase.rpc("get_my_owner_submissions", {
+    p_company_id: companyId,
+  });
   if (submissionsError) throw submissionsError;
+  const submissions = (submissionsData || []) as Array<{ id: string; status: string; created_at: string; decided_at: string | null }>;
 
   return (
     <main className="min-h-screen bg-[#f7f8fb] text-ink">
