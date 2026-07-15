@@ -1,4 +1,5 @@
 import { getSupabaseAdmin } from "@/lib/supabase";
+import { normalizeSubmissionReviewPayload } from "@/lib/submission-review";
 import type {
   CompanyClaimWithCompany,
   CompanyPremiumProfile,
@@ -518,6 +519,7 @@ function normalizeSubmission(item: unknown) {
     memberships: arrayField(raw.memberships),
     certificates: arrayField(raw.certificates),
     manufacturer_certificates: arrayField(raw.manufacturer_certificates),
+    premium_submission_payload: normalizeSubmissionReviewPayload(raw.premium_submission_payload),
   } as CompanySubmission;
 }
 
