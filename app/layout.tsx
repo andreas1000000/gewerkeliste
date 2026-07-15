@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import { LegalFooter } from "@/components/legal-footer";
 import "./globals.css";
 
@@ -18,6 +19,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       <body>
         {children}
         <LegalFooter />
+        <Analytics />
       </body>
     </html>
   );
