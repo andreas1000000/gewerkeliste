@@ -130,7 +130,7 @@ async function getPublicCompaniesByMunicipality(ags: string, params: Municipalit
   const supabase = getSupabaseAdmin();
   const { data: municipality, error: municipalityError } = await supabase
     .from("municipalities")
-    .select("ags, selection_enabled")
+    .select("ags, name, selection_enabled")
     .eq("ags", ags)
     .eq("selection_enabled", true)
     .maybeSingle();
@@ -159,7 +159,9 @@ async function getPublicCompaniesByMunicipality(ags: string, params: Municipalit
         .filter(Boolean),
     ),
   );
-  if (!companyIds.length) return [];
+  if (!companyIds.length) {
+    return getPublicCompaniesByMunicipalityFallback(municipality.name, params);
+  }
 
   const { data, error } = await supabase
     .from("companies")
@@ -174,15 +176,39 @@ async function getPublicCompaniesByMunicipality(ags: string, params: Municipalit
     throw error;
   }
 
-  let companies = excludeLocalFixtureCompanies(await resolveCompanyMedia(data as PublicCompanyWithTrade[]));
+  const companies = excludeLocalFixtureCompanies(await resolveCompanyMedia(data as PublicCompanyWithTrade[]));
+  return filterAndSortMunicipalityCompanies(companies, params);
+}
+
+async function getPublicCompaniesByMunicipalityFallback(city: string, params: MunicipalityDirectorySearch) {
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase
+    .from("companies")
+    .select(
+      "*, trades!inner(id, name, slug), company_trades(confidence_score, source, evidence, status, visibility_level, trades(id, name, slug))",
+    )
+    .eq("public_visible", true)
+    .ilike("city", `%${city}%`);
+
+  if (error) {
+    if (isMissingPublicProfileSchemaError(error)) return null;
+    throw error;
+  }
+
+  const companies = excludeLocalFixtureCompanies(await resolveCompanyMedia(data as PublicCompanyWithTrade[]));
+  return filterAndSortMunicipalityCompanies(companies, params);
+}
+
+function filterAndSortMunicipalityCompanies(companies: PublicCompanyWithTrade[], params: MunicipalityDirectorySearch) {
+  let filteredCompanies = companies;
   if (params.tradeSlug) {
     const normalizedTradeSlug = normalizeForDirectorySearch(params.tradeSlug);
-    companies = companies.filter((company) => publicCompanyTradeSlugSet(company).has(normalizedTradeSlug));
+    filteredCompanies = filteredCompanies.filter((company) => publicCompanyTradeSlugSet(company).has(normalizedTradeSlug));
   }
 
   const search = params.query?.trim();
   if (search) {
-    companies = companies
+    filteredCompanies = filteredCompanies
       .filter(
         (company) =>
           scoreBusinessDirectoryMatch(company, {
@@ -191,9 +217,9 @@ async function getPublicCompaniesByMunicipality(ags: string, params: Municipalit
           }) > 0,
       );
   }
-  companies.sort((a, b) => sortMunicipalityCompanies(a, b, params.tradeSlug));
+  filteredCompanies.sort((a, b) => sortMunicipalityCompanies(a, b, params.tradeSlug));
 
-  return dedupePublicCompanies(companies);
+  return dedupePublicCompanies(filteredCompanies);
 }
 
 function sortMunicipalityCompanies(a: PublicCompanyWithTrade, b: PublicCompanyWithTrade, tradeSlug?: string) {

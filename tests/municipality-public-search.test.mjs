@@ -24,11 +24,14 @@ test("municipality search resolves exact names, slugs, AGS codes, and German inp
 test("public municipality search uses only enabled municipalities and approved public assignments", () => {
   assert.match(publicDirectorySource, /resolvePilotMunicipalitySearch\(params\?\.location\)/);
   assert.match(publicDirectorySource, /\.from\("municipalities"\)/);
+  assert.match(publicDirectorySource, /\.select\("ags, name, selection_enabled"\)/);
   assert.match(publicDirectorySource, /\.eq\("selection_enabled", true\)/);
   assert.match(publicDirectorySource, /\.from\("company_service_areas"\)/);
   assert.match(publicDirectorySource, /\.eq\("status", "approved"\)/);
   assert.match(publicDirectorySource, /\.select\("company_id"\)/);
   assert.match(publicDirectorySource, /\.eq\("public_visible", true\)/);
+  assert.match(publicDirectorySource, /getPublicCompaniesByMunicipalityFallback\(municipality\.name, params\)/);
+  assert.match(publicDirectorySource, /\.ilike\("city", `%\$\{city\}%`\)/);
   assert.match(publicDirectorySource, /return null/);
 });
 
