@@ -119,7 +119,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
         ) : null}
         <p className="mt-3 text-sm leading-6 text-muted">
           {selectedMunicipality
-            ? `Exakte Gemeindesuche für ${selectedMunicipality.name}: Es erscheinen ausschließlich freigegebene Tätigkeitsgebiete dieser Gemeinde. Die Umkreisauswahl erweitert diese Suche nicht.`
+            ? `Exakte Gemeindesuche für ${selectedMunicipality.name}: Freigegebene Tätigkeitsgebiete dieser Gemeinde sind maßgeblich. Solange dort noch keine Zuordnungen gepflegt sind, erscheinen öffentliche Betriebe mit Sitz in ${selectedMunicipality.name}. Die Umkreisauswahl erweitert diese Suche nicht.`
             : "Die Umkreisauswahl wird für Betriebseinträge mit hinterlegtem Tätigkeitsgebiet berücksichtigt. Ohne hinterlegte Radiusdaten werden passende Treffer nach Gewerk, Ort und PLZ angezeigt."}
         </p>
 

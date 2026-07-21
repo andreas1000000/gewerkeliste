@@ -39,5 +39,6 @@ test("public municipality search uses only enabled municipalities and approved p
 
 test("search UI explains that exact municipality mode does not widen by radius", () => {
   assert.match(searchPageSource, /Exakte Gemeindesuche für/);
+  assert.match(searchPageSource, /öffentliche Betriebe mit Sitz in/);
   assert.match(searchPageSource, /Die Umkreisauswahl erweitert diese Suche nicht/);
 });
