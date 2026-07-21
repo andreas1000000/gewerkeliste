@@ -85,7 +85,7 @@ export async function getPublicCompanies(params?: {
 }) {
   const municipality = resolvePilotMunicipalitySearch(params?.location);
   if (municipality) {
-    const municipalityResults = await getPublicCompaniesByMunicipality(municipality.ags, {
+    const municipalityResults = await getPublicCompaniesByMunicipality(municipality.ags, municipality.name, {
       query: params?.query,
       tradeSlug: params?.tradeSlug,
     });
@@ -126,7 +126,7 @@ type MunicipalityDirectorySearch = {
   tradeSlug?: string;
 };
 
-async function getPublicCompaniesByMunicipality(ags: string, params: MunicipalityDirectorySearch) {
+async function getPublicCompaniesByMunicipality(ags: string, municipalityName: string, params: MunicipalityDirectorySearch) {
   const supabase = getSupabaseAdmin();
   const { data: municipality, error: municipalityError } = await supabase
     .from("municipalities")
@@ -139,7 +139,7 @@ async function getPublicCompaniesByMunicipality(ags: string, params: Municipalit
     if (isMissingPublicProfileSchemaError(municipalityError)) return null;
     throw municipalityError;
   }
-  if (!municipality) return [];
+  if (!municipality) return getPublicCompaniesByMunicipalityFallback(municipalityName, params);
 
   const { data: assignments, error: assignmentError } = await supabase
     .from("company_service_areas")
@@ -177,6 +177,7 @@ async function getPublicCompaniesByMunicipality(ags: string, params: Municipalit
   }
 
   const companies = excludeLocalFixtureCompanies(await resolveCompanyMedia(data as PublicCompanyWithTrade[]));
+  if (!companies.length) return getPublicCompaniesByMunicipalityFallback(municipality.name, params);
   return filterAndSortMunicipalityCompanies(companies, params);
 }
 
@@ -184,9 +185,7 @@ async function getPublicCompaniesByMunicipalityFallback(city: string, params: Mu
   const supabase = getSupabaseAdmin();
   const { data, error } = await supabase
     .from("companies")
-    .select(
-      "*, trades!inner(id, name, slug), company_trades(confidence_score, source, evidence, status, visibility_level, trades(id, name, slug))",
-    )
+    .select("*, trades(id, name, slug)")
     .eq("public_visible", true)
     .ilike("city", `%${city}%`);
 
@@ -346,7 +345,7 @@ export async function getPublicCompaniesByTrade(
 ) {
   const municipality = resolvePilotMunicipalitySearch(params?.location);
   if (municipality) {
-    const municipalityResults = await getPublicCompaniesByMunicipality(municipality.ags, {
+    const municipalityResults = await getPublicCompaniesByMunicipality(municipality.ags, municipality.name, {
       query: params?.query,
       tradeSlug,
     });

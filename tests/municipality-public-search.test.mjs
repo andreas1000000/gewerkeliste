@@ -30,7 +30,9 @@ test("public municipality search uses only enabled municipalities and approved p
   assert.match(publicDirectorySource, /\.eq\("status", "approved"\)/);
   assert.match(publicDirectorySource, /\.select\("company_id"\)/);
   assert.match(publicDirectorySource, /\.eq\("public_visible", true\)/);
+  assert.match(publicDirectorySource, /if \(!municipality\) return getPublicCompaniesByMunicipalityFallback\(municipalityName, params\)/);
   assert.match(publicDirectorySource, /getPublicCompaniesByMunicipalityFallback\(municipality\.name, params\)/);
+  assert.match(publicDirectorySource, /\.select\("\*, trades\(id, name, slug\)"\)/);
   assert.match(publicDirectorySource, /\.ilike\("city", `%\$\{city\}%`\)/);
   assert.match(publicDirectorySource, /return null/);
 });
