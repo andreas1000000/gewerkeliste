@@ -96,7 +96,7 @@ Roadmap-Backlog entsteht nicht.
 
 ## P2 - Datenqualitaet und Marktabdeckung
 
-- [~] Regional Coverage Agent kontrolliert als Dry-Run einsetzen (Dry-Run, Guardrails und Tests vorhanden; ein Supabase-verbundener Pilotlauf mit persistiertem Review bleibt offen).
+- [x] Regional Coverage Agent kontrolliert als Dry-Run einsetzen (Dry-Run, Guardrails, Tests sowie lokaler und produktiver Supabase-Pilotlauf abgeschlossen; Produktionslauf `fc9f2db9-72df-4963-b0e3-b662d89576f6` mit 32 Findings und 20 Aufgaben).
 - [ ] Company-Enrichment-Agent mit offiziellen Unternehmensquellen priorisieren.
 - [ ] Dublettenpruefung, Confidence, Quellenherkunft und Review Queue durchgaengig machen.
 - [ ] Dry-Run-, Approval- und Freigabeprozesse fuer Datenlaeufe nachweisen.
