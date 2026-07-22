@@ -8,12 +8,13 @@ const sitemapSource = await readFile(new URL("../app/sitemap.ts", import.meta.ur
 
 test("keeps the public header navigation in the product-owner order", () => {
   const items = [...headerSource.matchAll(/\{ label: "([^"]+)", href: "([^"]+)"(?:, primary: true)? \}/g)].map((match) => [match[1], match[2]]);
+  const pricingNavigationItem = ["Preise", "/preise"];
 
   const expectedPublicHeaderItems = [
     ["Suche", "/suche"],
     ["Gewerke", "/gewerke"],
     ["Betriebe", "/fuer-betriebe"],
-    ["Preise", "/preise"],
+    pricingNavigationItem,
     ["Über uns", "/ueber-gewerkeliste"],
   ];
 
