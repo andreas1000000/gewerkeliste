@@ -15,6 +15,7 @@ test("keeps the public header navigation in the product-owner order", () => {
     ["Preise", "/preise"],
     ["Über uns", "/ueber-gewerkeliste"],
   ]);
+  assert.match(headerSource, /\{ label: "Preise", href: "\/preise" \}/, "Preise muss dauerhaft im Hauptmenü bleiben.");
   assert.match(headerSource, /href="\/eintrag-beanspruchen"[\s\S]*?Eintrag beanspruchen/);
   assert.match(headerSource, /aria-current=\{active \? "page" : undefined\}/);
   assert.doesNotMatch(headerSource, /label: "Für Betriebe"/);
