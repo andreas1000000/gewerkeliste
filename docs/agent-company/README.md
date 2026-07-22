@@ -60,3 +60,5 @@ und Aufgaben und schreibt nichts in Firmen-, Kandidaten- oder öffentliche Tabel
 `BRAVE_SEARCH_API_KEY` wird keine externe Suche ausgeführt; fehlende Quellen werden als Risiko
 ausgewiesen statt durch erfundene Kandidaten ersetzt. Ein echter Lauf bleibt durch das separate
 `--live`- und Bestätigungs-Gate geschützt.
+
+Der Stand dieses Runbooks wurde mit dem vollständigen Projektcheck und 119 bestandenen Tests verifiziert.
