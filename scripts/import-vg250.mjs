@@ -33,7 +33,9 @@ const seedMigrationPath = resolve(
 );
 
 if (!source) {
-  throw new Error("Verwendung: node scripts/import-vg250.mjs --source /path/to/vg250.zip [--out-dir repository]");
+  throw new Error(
+    "Verwendung: node scripts/import-vg250.mjs --source /path/to/vg250.zip [--out-dir repository]; für Offline-Import zusätzlich MAPSHAPER_BIN setzen.",
+  );
 }
 
 const sourceHash = sha256File(source);
