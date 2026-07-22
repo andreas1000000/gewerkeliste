@@ -35,6 +35,9 @@ test("pilot catalog contains only the seven official target counties", () => {
   assert.equal(municipalityManifest.source.sourceFileSha256, "b16b97d8f2ae0ce59ae6139617b60bb550f652f4b6db1a0c74417b2105bab33e");
   assert.equal(municipalityManifest.geometry.sha256, geoJsonSha256);
   assert.match(municipalityManifest.source.transformation, /mapshaper 0\.7\.45 weighted Visvalingam/);
+  assert.match(importerSource, /const MAPSHAPER_VERSION = "0\.7\.47"/);
+  assert.match(importerSource, /MAPSHAPER_BIN/);
+  assert.match(importerSource, /mapshaper@\$\{MAPSHAPER_VERSION\}/);
   assert.match(importerSource, /"weighted"/);
   assert.doesNotMatch(importerSource, /method=visvalingam/);
 });

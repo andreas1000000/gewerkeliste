@@ -10,7 +10,9 @@ const DATA_AS_OF = "2025-01-01";
 const EXPECTED_SOURCE_SHA256 = "b16b97d8f2ae0ce59ae6139617b60bb550f652f4b6db1a0c74417b2105bab33e";
 const LICENSE_URL = "https://www.govdata.de/dl-de/by-2-0";
 const DATA_SOURCES_URL = "https://sgx.geodatenzentrum.de/web_public/gdz/datenquellen/datenquellen_vg_nuts.pdf";
-const MAPSHAPER_VERSION = "0.7.45";
+// Mapshaper is an import-only tool and intentionally stays outside the app install tree.
+// Set MAPSHAPER_BIN to a locally reviewed binary when running the importer offline.
+const MAPSHAPER_VERSION = "0.7.47";
 const PILOT_COUNTIES = [
   { code: "09163", name: "Rosenheim", kind: "Kreisfreie Stadt" },
   { code: "09175", name: "Ebersberg", kind: "Landkreis" },
@@ -31,7 +33,9 @@ const seedMigrationPath = resolve(
 );
 
 if (!source) {
-  throw new Error("Verwendung: node scripts/import-vg250.mjs --source /path/to/vg250.zip [--out-dir repository]");
+  throw new Error(
+    "Verwendung: node scripts/import-vg250.mjs --source /path/to/vg250.zip [--out-dir repository]; für Offline-Import zusätzlich MAPSHAPER_BIN setzen.",
+  );
 }
 
 const sourceHash = sha256File(source);
@@ -157,12 +161,15 @@ function walkFiles(rootPath) {
 }
 
 function runMapshaper(sourcePath, outputPath) {
-  const mapshaper = resolve("node_modules/.bin/mapshaper");
+  const configuredMapshaper = process.env.MAPSHAPER_BIN;
+  const mapshaper = configuredMapshaper ? resolve(configuredMapshaper) : "npx";
+  const mapshaperPrefixArgs = configuredMapshaper ? [] : ["--yes", `mapshaper@${MAPSHAPER_VERSION}`];
   const countyCodes = JSON.stringify(PILOT_COUNTIES.map((county) => county.code));
   const municipalityKinds = JSON.stringify(["Gemeinde", "Stadt"]);
   execFileSync(
     mapshaper,
     [
+      ...mapshaperPrefixArgs,
       sourcePath,
       "-filter",
       `${countyCodes}.indexOf(ARS.substr(0, 5)) >= 0 && ${municipalityKinds}.indexOf(BEZ) >= 0`,
