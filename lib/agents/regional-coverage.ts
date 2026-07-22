@@ -1,5 +1,5 @@
-import { tradeTaxonomy } from "@/lib/trade-taxonomy";
-import { getSupabaseAdmin } from "@/lib/supabase";
+import { tradeTaxonomy } from "../trade-taxonomy.ts";
+import { getSupabaseAdmin } from "../supabase.ts";
 import type { AgentTaskPriority, RegionalCoverageDryRunInput, RegionalCoverageDryRunResult } from "./types";
 
 type DbRegion = {

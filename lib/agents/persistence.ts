@@ -1,5 +1,5 @@
-import { getAgentDefinition } from "@/lib/agents/agent-registry";
-import { getSupabaseAdmin } from "@/lib/supabase";
+import { getAgentDefinition } from "./agent-registry.ts";
+import { getSupabaseAdmin } from "../supabase.ts";
 import type { AgentTaskStatus, CompanyDiscoveryDryRunResult, RegionalCoverageDryRunResult } from "./types";
 
 export type AgentRunRecord = {
