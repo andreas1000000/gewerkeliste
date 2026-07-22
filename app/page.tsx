@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { Route } from "next";
 import Link from "next/link";
 import { ServiceAreaPreview } from "@/components/map/service-area-preview";
+import { RocketInsiderHighlight } from "@/components/rocketinsider-highlight";
 import { SiteHeader } from "@/components/site-header";
 import { getPublicCompanies } from "@/lib/data/public-directory";
 import type { ServiceAreaGeoJson } from "@/lib/geo/types";
@@ -196,6 +197,8 @@ export default async function HomePage() {
           ))}
         </div>
       </section>
+
+      <RocketInsiderHighlight />
 
       <section className="mx-auto grid max-w-7xl gap-5 px-4 py-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_420px] lg:px-8">
         <Card>

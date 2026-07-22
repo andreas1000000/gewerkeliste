@@ -53,6 +53,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: "monthly",
       priority: 0.6,
     },
+    {
+      url: `${baseUrl}/aktuelles/gewerkeliste-im-rocketinsider`,
+      changeFrequency: "monthly",
+      priority: 0.6,
+    },
     ...slugs.map((slug) => ({
       url: `${baseUrl}/firma/${slug}`,
       changeFrequency: "weekly" as const,
