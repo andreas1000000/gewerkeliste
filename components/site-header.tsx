@@ -29,7 +29,7 @@ export function SiteHeader() {
           </span>
         </Link>
 
-        <form action="/suche" className="order-3 w-full lg:order-none">
+        <form action="/suche" role="search" className="order-3 w-full lg:order-none">
           <label className="sr-only" htmlFor="site-search">
             Suche
           </label>
