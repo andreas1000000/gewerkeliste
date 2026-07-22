@@ -1,4 +1,4 @@
-import { agentRegistry, getAgentDefinition } from "@/lib/agents/agent-registry";
+import { getAgentDefinition } from "@/lib/agents/agent-registry";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import type { AgentTaskStatus, CompanyDiscoveryDryRunResult, RegionalCoverageDryRunResult } from "./types";
 
