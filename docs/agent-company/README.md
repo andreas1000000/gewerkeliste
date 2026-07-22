@@ -45,7 +45,8 @@ Der erste Slice ist der Regional Coverage Agent im Dry-Run:
 - `app/admin/agents`: Founder-Cockpit fuer Agentenstatus, Reviews und Dry-Run-Ergebnisse.
 - `supabase/migrations/20260618001000_agent_operating_system.sql`: migrationsfaehiges Datenmodell fuer Runs, Schritte, Tool Calls, Tasks, Approvals, Reviews, Outbox, Lessons und Kosten.
 
-Die Migration ist bewusst vorbereitet, aber nicht automatisch angewendet.
+Die Migration ist bewusst nicht Teil eines automatischen Deployments. Sie wurde am 22.07.2026
+kontrolliert im Produktionsprojekt angewendet und anschließend mit aktivem RLS verifiziert.
 
 ## Kontrollierter Dry Run
 
@@ -79,3 +80,15 @@ npm run agent:coverage:dry-run -- --region riedering --persist \\
 Firmen-, Kandidaten- und öffentliche Verzeichnisdaten bleiben unverändert. Das Kommando
 verweigert sich ohne die explizite Bestätigung und ohne die für die Umgebung passenden
 Supabase-Sicherheitsvariablen; der Produktionszugang wird dadurch nicht automatisch aktiviert.
+
+## Produktionspilot am 22.07.2026
+
+Die Agent-OS-Migration wurde im Produktionsprojekt angewendet: Die Tabellen für Runs, Schritte,
+Tool-Calls, Aufgaben, Approvals, Reviews, Outbox, Lessons und Kosten sind vorhanden und RLS ist
+aktiv. Danach wurde ein begrenzter Riedering-Coverage-Pilot mit den deterministischen Regeln des
+Coverage-Agents durchgeführt. Der Run `fc9f2db9-72df-4963-b0e3-b662d89576f6` ist abgeschlossen und
+enthält 32 Findings, 20 Aufgaben, 3 Schritte, 2 Tool-Calls und 1 Kostenereignis.
+
+Der Pilot hat ausschließlich Agent-OS-Auditdaten geschrieben. Firmen-, Kandidaten- und Regionsdaten
+blieben unverändert; es wurden keine externen oder kostenpflichtigen APIs genutzt und keine E-Mails
+versendet.
