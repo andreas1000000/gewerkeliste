@@ -3,6 +3,7 @@ import type { Route } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { SiteHeader } from "@/components/site-header";
+import { getPublishedPageContent } from "@/lib/data/site-pages";
 
 export const metadata: Metadata = {
   title: "Warum GewerkeListe.com entsteht | Über uns",
@@ -63,7 +64,9 @@ const monetizationExamples = [
   "professionelle Werkzeuge für Planer und Auftraggeber",
 ];
 
-export default function AboutGewerkeListePage() {
+export default async function AboutGewerkeListePage() {
+  const pageContent = await getPublishedPageContent("about");
+
   return (
     <main className="min-h-screen bg-[#f7f8fb] text-ink">
       <SiteHeader />
@@ -81,13 +84,12 @@ export default function AboutGewerkeListePage() {
       <section className="bg-white">
         <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[minmax(0,1fr)_420px] lg:px-8 lg:py-16">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-normal text-brand">Warum GewerkeListe.com entsteht</p>
+            <p className="text-sm font-semibold uppercase tracking-normal text-brand">{pageContent.eyebrow}</p>
             <h1 className="mt-4 max-w-4xl text-4xl font-semibold tracking-normal text-brand sm:text-5xl">
-              Warum GewerkeListe.com entsteht.
+              {pageContent.title}
             </h1>
             <p className="mt-6 max-w-3xl text-lg leading-8 text-ink">
-              Weil die Suche nach passenden Bau- und Handwerksbetrieben heute noch viel zu oft über Zufall, alte
-              Kontakte und persönliche Netzwerke läuft.
+              {pageContent.intro}
             </p>
             <div className="mt-6 max-w-3xl space-y-4 text-base leading-7 text-ink">
               <p>
@@ -101,8 +103,8 @@ export default function AboutGewerkeListePage() {
               <p>Genau aus dieser Frage heraus entsteht GewerkeListe.com.</p>
             </div>
             <div className="mt-8 flex flex-wrap gap-3">
-              <BlueLink href="/betrieb-eintragen">Betrieb kostenlos eintragen</BlueLink>
-              <OutlineLink href="/betrieb-eintragen">Fehlenden Betrieb vorschlagen</OutlineLink>
+              <BlueLink href={pageContent.primaryHref as Route}>{pageContent.primaryLabel}</BlueLink>
+              <OutlineLink href={pageContent.secondaryHref as Route}>{pageContent.secondaryLabel}</OutlineLink>
             </div>
           </div>
 
