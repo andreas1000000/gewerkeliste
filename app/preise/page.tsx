@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { Route } from "next";
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
 import { getPublishedPageContent } from "@/lib/data/site-pages";
@@ -57,7 +58,7 @@ export default async function PricingPage() {
           <div className="mt-8">
             <Link
               className="inline-flex min-h-11 items-center justify-center rounded-md bg-action px-5 text-sm font-semibold text-white hover:bg-brand"
-              href="/betrieb-eintragen"
+              href={pageContent.primaryHref as Route}
             >
               {pageContent.primaryLabel}
             </Link>
