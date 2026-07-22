@@ -49,7 +49,7 @@ Roadmap-Backlog entsteht nicht.
   - Exit-Kriterien: Alle Service-Role-Aufrufstellen, Berechtigungen und Datenpfade sind inventarisiert und einem Zweck zugeordnet.
   - Exit-Kriterien: Nicht benoetigte Rechte oder Aufrufstellen sind entfernt; kein Service-Role-Secret gelangt in Client-Code oder Logs.
   - Exit-Kriterien: Oeffentliche und administrative Pfade haben Negativtests fuer unberechtigten Zugriff und bestehen den unabhaengigen Security-Review.
-- [ ] Dependency-Risiken kontrolliert beheben.
+- [x] Dependency-Risiken kontrolliert beheben (Audit auf `main` meldet 0 Schwachstellen; PR #18 dokumentiert die Upgrade- und Lockfile-Entscheidungen).
   - Exit-Kriterien: Dependency-Audit ist ausgewertet, Risiken sind nach Schwere und Exploitierbarkeit triagiert und kritische Blocker sind beseitigt.
   - Exit-Kriterien: Akzeptierte Restrisiken, Upgrade-Entscheidungen und Lockfile-Aenderungen sind im PR dokumentiert und reproduzierbar durch CI.
 - [ ] Backup-, Migration-, Release- und Rollback-Prozesse belastbar nachweisen.
@@ -96,7 +96,7 @@ Roadmap-Backlog entsteht nicht.
 
 ## P2 - Datenqualitaet und Marktabdeckung
 
-- [ ] Regional Coverage Agent produktiv als kontrollierten Dry-Run einsetzen.
+- [~] Regional Coverage Agent kontrolliert als Dry-Run einsetzen (Dry-Run, Guardrails und Tests vorhanden; ein Supabase-verbundener Pilotlauf mit persistiertem Review bleibt offen).
 - [ ] Company-Enrichment-Agent mit offiziellen Unternehmensquellen priorisieren.
 - [ ] Dublettenpruefung, Confidence, Quellenherkunft und Review Queue durchgaengig machen.
 - [ ] Dry-Run-, Approval- und Freigabeprozesse fuer Datenlaeufe nachweisen.

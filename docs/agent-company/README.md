@@ -46,3 +46,17 @@ Der erste Slice ist der Regional Coverage Agent im Dry-Run:
 - `supabase/migrations/20260618001000_agent_operating_system.sql`: migrationsfaehiges Datenmodell fuer Runs, Schritte, Tool Calls, Tasks, Approvals, Reviews, Outbox, Lessons und Kosten.
 
 Die Migration ist bewusst vorbereitet, aber nicht automatisch angewendet.
+
+## Kontrollierter Dry Run
+
+Der Coverage-Agent kann ohne Live-Schreibzugriff ausgeführt werden:
+
+```bash
+npm run research:discover:region -- --region riedering
+```
+
+Der Lauf liest – sofern eine Supabase-Umgebung gesetzt ist – regionale Daten, erzeugt Coverage-Findings
+und Aufgaben und schreibt nichts in Firmen-, Kandidaten- oder öffentliche Tabellen. Ohne
+`BRAVE_SEARCH_API_KEY` wird keine externe Suche ausgeführt; fehlende Quellen werden als Risiko
+ausgewiesen statt durch erfundene Kandidaten ersetzt. Ein echter Lauf bleibt durch das separate
+`--live`- und Bestätigungs-Gate geschützt.
