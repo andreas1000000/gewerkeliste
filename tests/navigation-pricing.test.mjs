@@ -9,13 +9,15 @@ const sitemapSource = await readFile(new URL("../app/sitemap.ts", import.meta.ur
 test("keeps the public header navigation in the product-owner order", () => {
   const items = [...headerSource.matchAll(/\{ label: "([^"]+)", href: "([^"]+)"(?:, primary: true)? \}/g)].map((match) => [match[1], match[2]]);
 
-  assert.deepEqual(items, [
+  const expectedPublicHeaderItems = [
     ["Suche", "/suche"],
     ["Gewerke", "/gewerke"],
     ["Betriebe", "/fuer-betriebe"],
     ["Preise", "/preise"],
     ["Über uns", "/ueber-gewerkeliste"],
-  ]);
+  ];
+
+  assert.deepEqual(items, expectedPublicHeaderItems);
   assert.match(headerSource, /\{ label: "Preise", href: "\/preise" \}/, "Preise muss dauerhaft im Hauptmenü bleiben.");
   assert.match(headerSource, /href="\/eintrag-beanspruchen"[\s\S]*?Eintrag beanspruchen/);
   assert.match(headerSource, /aria-current=\{active \? "page" : undefined\}/);
