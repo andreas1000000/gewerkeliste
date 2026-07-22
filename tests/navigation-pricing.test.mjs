@@ -11,18 +11,17 @@ test("keeps the public header navigation in the product-owner order", () => {
   const pricingNavigationItem = ["Preise", "/preise"];
 
   const expectedPublicHeaderItems = [
-    ["Suche", "/suche"],
-    ["Gewerke", "/gewerke"],
     ["Betriebe", "/fuer-betriebe"],
+    ["Gewerke", "/gewerke"],
     pricingNavigationItem,
     ["Über uns", "/ueber-gewerkeliste"],
   ];
 
-  assert.deepEqual(items, expectedPublicHeaderItems);
+  assert.deepEqual(items, [["Suchende", "/suche"], ...expectedPublicHeaderItems]);
   assert.match(headerSource, /\{ label: "Preise", href: "\/preise" \}/, "Preise muss dauerhaft im Hauptmenü bleiben.");
+  assert.match(headerSource, /href="\/betrieb-eintragen"[\s\S]*?Betrieb eintragen/);
   assert.match(headerSource, /href="\/eintrag-beanspruchen"[\s\S]*?Eintrag beanspruchen/);
   assert.match(headerSource, /aria-current=\{active \? "page" : undefined\}/);
-  assert.doesNotMatch(headerSource, /label: "Für Betriebe"/);
 });
 
 test("publishes a real prices page based on the central profile contract", () => {

@@ -106,85 +106,73 @@ export default async function HomePage() {
     <main className="min-h-screen bg-[#f7f8fb] text-ink">
       <SiteHeader />
 
-      <section className="relative overflow-hidden border-b border-line bg-white">
-        <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(18,58,111,0.05),rgba(47,143,91,0.04)_42%,rgba(255,255,255,0)_70%)]" />
-
-        <div className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
-          <div className="max-w-5xl">
-            <p className="text-sm font-semibold uppercase tracking-normal text-brand">Die digitale Infrastruktur der Bauwirtschaft</p>
-            <h1 className="mt-4 text-4xl font-semibold tracking-normal text-brand sm:text-5xl">
-              Die GewerkeListe: Fachbetriebe nach Gewerk, Leistung und Region finden.
+      <section className="relative isolate min-h-[620px] overflow-hidden border-b border-line bg-[#07173d]">
+        <video
+          className="absolute inset-0 h-full w-full object-cover opacity-70"
+          autoPlay
+          muted
+          playsInline
+          preload="metadata"
+          aria-label="Baugewerke und Baustellensituation als Hintergrundvideo"
+        >
+          <source src="/videos/gewerkeliste-homepage-background.mp4" type="video/mp4" />
+        </video>
+        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(7,23,61,0.9),rgba(7,23,61,0.6)_48%,rgba(7,23,61,0.42))]" />
+        <div className="relative mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8 lg:py-20">
+          <div className="max-w-4xl">
+            <p className="text-sm font-semibold uppercase tracking-wider text-emerald-200">Die GewerkeListe</p>
+            <h1 className="mt-4 max-w-3xl text-4xl font-semibold tracking-normal text-white sm:text-5xl">
+              Fachbetriebe finden, die zu Ihrem Projekt passen.
             </h1>
-            <p className="mt-6 text-lg leading-8 text-ink">
-              Finden Sie passende Bau- und Handwerksbetriebe nach Gewerk, Leistung, Spezialisierung und Region –
-              ohne Leadportal, ohne Preisdruck, mit strukturierter Datenbasis.
+            <p className="mt-5 max-w-2xl text-lg leading-8 text-blue-50">
+              Suchen Sie nach Gewerk, Leistung und Region – mit strukturierten Betriebsdaten statt zufälliger Treffer.
             </p>
 
-            <div className="mt-6 flex flex-wrap gap-4 text-sm font-semibold text-brand">
-              <TrustItem text="Strukturierte Betriebsdaten" />
-              <TrustItem text="Regionale Suche" />
-              <TrustItem text="Direkte Kontaktaufnahme" />
-            </div>
-            <p className="mt-4 max-w-3xl text-sm leading-6 text-muted">
-              GewerkeListe.com ersetzt keine persönlichen Empfehlungen. Die Plattform macht den Markt davor besser
-              sichtbar: strukturierte Betriebsdaten, nachvollziehbare Quellen, Claim-Prozess und später Wirkungskreis,
-              Kapazitätsbezug und Sichtbarkeitsreport.
-            </p>
-
-            <form action="/suche" className="mt-8 rounded-lg border border-[#183b7a] bg-[#07173d] p-5 shadow-soft sm:p-6">
-              <div className="mb-4">
-                <p className="text-xs font-semibold uppercase tracking-wider text-blue-100">Der direkte Einstieg</p>
-                <h2 className="mt-1 text-2xl font-semibold text-white">Fachbetriebe suchen</h2>
-                <p className="mt-2 text-sm leading-6 text-blue-100">Gewerk, Leistung und Ort eingeben – dann passende Betriebe direkt finden.</p>
+            <form id="directory-search" action="/suche" role="search" aria-label="Fachbetriebssuche" className="mt-8 max-w-5xl overflow-hidden rounded-2xl bg-white p-5 text-ink shadow-2xl sm:p-7">
+              <div className="flex flex-wrap gap-2 border-b border-line pb-4 text-sm font-semibold">
+                <span className="rounded-full bg-[#e8f3ef] px-4 py-2 text-brand">Fachbetrieb suchen</span>
+                <Link className="rounded-full px-4 py-2 text-muted hover:bg-[#f1f5f9] hover:text-brand" href="/betrieb-eintragen">
+                  Betrieb sichtbar machen
+                </Link>
               </div>
-              <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
-                <label className="grid gap-1.5 text-xs font-semibold text-blue-50">
-                  Was suchen Sie?
+              <div className="mt-5 grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
+                <label className="grid gap-1.5 text-xs font-semibold text-muted">
+                  Gewerk oder Leistung
                   <input
                     name="q"
-                    className="h-12 rounded-md border border-line bg-white px-3 text-sm font-normal text-ink outline-none focus:border-action"
+                    className="h-12 rounded-lg border border-line bg-white px-3 text-sm font-normal text-ink outline-none focus:border-action"
                     placeholder="z. B. Pflasterbau, Abdichtung, Metallbau"
                   />
                 </label>
-                <label className="grid gap-1.5 text-xs font-semibold text-blue-50">
-                  Wo suchen Sie?
+                <label className="grid gap-1.5 text-xs font-semibold text-muted">
+                  Ort oder PLZ
                   <input
                     name="ort"
-                    className="h-12 rounded-md border border-line bg-white px-3 text-sm font-normal text-ink outline-none focus:border-action"
-                    placeholder="Ort oder PLZ"
+                    className="h-12 rounded-lg border border-line bg-white px-3 text-sm font-normal text-ink outline-none focus:border-action"
+                    placeholder="z. B. Rosenheim oder 83022"
                   />
                 </label>
-                <button className="mt-auto h-12 rounded-md bg-[#2f8f5b] px-6 text-sm font-semibold text-white hover:bg-[#26784b]">
-                  Fachbetrieb suchen
+                <button className="mt-auto h-12 rounded-lg bg-[#2f8f5b] px-7 text-sm font-semibold text-white hover:bg-[#26784b]">
+                  Suchen
                 </button>
               </div>
-              <div className="mt-4 flex flex-wrap gap-2 text-xs font-medium text-blue-100">
+              <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2 text-xs font-medium text-muted">
                 <span>Strukturierte Betriebsdaten</span>
-                <span>·</span>
+                <span aria-hidden="true">·</span>
                 <span>Leistungen</span>
-                <span>·</span>
+                <span aria-hidden="true">·</span>
                 <span>Einsatzgebiet</span>
-                <span>·</span>
-                <span>Datenbestätigung</span>
-              </div>
-              <div className="mt-4 flex flex-wrap gap-3">
-                <OutlineLink href="/betrieb-eintragen">Betrieb eintragen</OutlineLink>
-                <OutlineLink href="/eintrag-beanspruchen">Eintrag beanspruchen</OutlineLink>
+                <span aria-hidden="true">·</span>
+                <Link className="font-semibold text-action hover:underline" href="/gewerke">
+                  Gewerke entdecken
+                </Link>
               </div>
             </form>
 
-            <div className="relative mt-10 overflow-hidden rounded-lg border border-line bg-[#07173d] shadow-soft">
-              <video
-                className="aspect-[16/7] w-full object-cover opacity-95"
-                autoPlay
-                muted
-                playsInline
-                preload="metadata"
-                aria-label="Baugewerke und Baustellensituation als Hintergrundvideo"
-              >
-                <source src="/videos/gewerkeliste-homepage-background.mp4" type="video/mp4" />
-              </video>
-              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,23,61,0)_48%,rgba(7,23,61,0.68))]" />
+            <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 text-sm font-semibold text-white">
+              <TrustItem text="Für Planer und Auftraggeber" />
+              <TrustItem text="Direkte Kontaktaufnahme" />
+              <TrustItem text="Kein Preiskampf" />
             </div>
           </div>
         </div>
