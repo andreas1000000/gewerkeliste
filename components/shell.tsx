@@ -28,6 +28,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
             <Link className="rounded-md px-3 py-2 font-medium text-muted hover:bg-panel hover:text-ink" href="/admin/claims">
               Claims
             </Link>
+            <Link className="rounded-md bg-action px-3 py-2 font-semibold text-white hover:bg-brand" href="/admin/site-editor">
+              Seiteneditor
+            </Link>
             <Link className="rounded-md px-3 py-2 font-medium text-muted hover:bg-panel hover:text-ink" href="/trades">
               Gewerke
             </Link>

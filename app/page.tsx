@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ServiceAreaPreview } from "@/components/map/service-area-preview";
 import { SiteHeader } from "@/components/site-header";
 import { getPublicCompanies } from "@/lib/data/public-directory";
+import { getPublishedPageContent } from "@/lib/data/site-pages";
 import type { ServiceAreaGeoJson } from "@/lib/geo/types";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { tradeTaxonomy } from "@/lib/trade-taxonomy";
@@ -80,6 +81,7 @@ const exampleServiceArea: ServiceAreaGeoJson = {
 
 export default async function HomePage() {
   const companies = isSupabaseConfigured() ? await getPublicCompanies() : [];
+  const pageContent = await getPublishedPageContent("home");
   const preferredTradeSlugs = [
     "pflasterbau",
     "bauwerksabdichtung",
@@ -111,13 +113,12 @@ export default async function HomePage() {
 
         <div className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
           <div className="max-w-5xl">
-            <p className="text-sm font-semibold uppercase tracking-normal text-brand">Die digitale Infrastruktur der Bauwirtschaft</p>
+            <p className="text-sm font-semibold uppercase tracking-normal text-brand">{pageContent.eyebrow}</p>
             <h1 className="mt-4 text-4xl font-semibold tracking-normal text-brand sm:text-5xl">
-              Die GewerkeListe: Fachbetriebe nach Gewerk, Leistung und Region finden.
+              {pageContent.title}
             </h1>
             <p className="mt-6 text-lg leading-8 text-ink">
-              Finden Sie passende Bau- und Handwerksbetriebe nach Gewerk, Leistung, Spezialisierung und Region –
-              ohne Leadportal, ohne Preisdruck, mit strukturierter Datenbasis.
+              {pageContent.intro}
             </p>
 
             <div className="mt-6 flex flex-wrap gap-4 text-sm font-semibold text-brand">
@@ -168,8 +169,8 @@ export default async function HomePage() {
                 <span>Datenbestätigung</span>
               </div>
               <div className="mt-4 flex flex-wrap gap-3">
-                <OutlineLink href="/betrieb-eintragen">Betrieb eintragen</OutlineLink>
-                <OutlineLink href="/eintrag-beanspruchen">Eintrag beanspruchen</OutlineLink>
+                <OutlineLink href={pageContent.primaryHref as Route}>{pageContent.primaryLabel}</OutlineLink>
+                <OutlineLink href={pageContent.secondaryHref as Route}>{pageContent.secondaryLabel}</OutlineLink>
               </div>
             </form>
 

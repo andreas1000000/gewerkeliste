@@ -9,6 +9,7 @@ const appRoot = join(repositoryRoot, "app");
 const footerSource = await readFile(join(repositoryRoot, "components", "legal-footer.tsx"), "utf8");
 const headerSource = await readFile(join(repositoryRoot, "components", "site-header.tsx"), "utf8");
 const homeSource = await readFile(join(repositoryRoot, "app", "page.tsx"), "utf8");
+const siteContentSource = await readFile(join(repositoryRoot, "lib", "site-page-content.ts"), "utf8");
 const sitemapSource = await readFile(join(repositoryRoot, "app", "sitemap.ts"), "utf8");
 const footerLinks = [...footerSource.matchAll(/href="(\/[^\"]+)"/g)].map((match) => match[1]);
 const appRoutes = new Set(await collectPageRoutes(appRoot));
@@ -51,6 +52,10 @@ test("homepage presents the directory search before the supporting video", () =>
   assert.ok(searchIndex >= 0, "Homepage needs a prominent directory search entry.");
   assert.ok(videoIndex >= 0, "Homepage should keep the supporting Baupraxis video.");
   assert.ok(searchIndex < videoIndex, "Directory search must appear before the supporting video.");
+  assert.match(homeSource, /getPublishedPageContent\("home"\)/);
+  assert.match(siteContentSource, /Fachbetriebe finden, die zu Ihrem Projekt passen\./);
+  assert.match(homeSource, /<video[\s\S]*gewerkeliste-homepage-background\.mp4/);
+  assert.match(homeSource, /<form action="\/suche"/);
 });
 
 async function collectPageRoutes(directory) {
