@@ -110,24 +110,10 @@ export default async function HomePage() {
         <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(18,58,111,0.05),rgba(47,143,91,0.04)_42%,rgba(255,255,255,0)_70%)]" />
 
         <div className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
-          <div className="relative mb-10 overflow-hidden rounded-lg border border-line bg-[#07173d] shadow-soft">
-            <video
-              className="aspect-[16/7] w-full object-cover opacity-95"
-              autoPlay
-              muted
-              playsInline
-              preload="metadata"
-              aria-label="Baugewerke und Baustellensituation als Hintergrundvideo"
-            >
-              <source src="/videos/gewerkeliste-homepage-background.mp4" type="video/mp4" />
-            </video>
-            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,23,61,0)_48%,rgba(7,23,61,0.68))]" />
-          </div>
-
           <div className="max-w-5xl">
             <p className="text-sm font-semibold uppercase tracking-normal text-brand">Die digitale Infrastruktur der Bauwirtschaft</p>
             <h1 className="mt-4 text-4xl font-semibold tracking-normal text-brand sm:text-5xl">
-              Bau- und Handwerksbetriebe nach Gewerk, Leistung und Region finden.
+              Die GewerkeListe: Fachbetriebe nach Gewerk, Leistung und Region finden.
             </h1>
             <p className="mt-6 text-lg leading-8 text-ink">
               Finden Sie passende Bau- und Handwerksbetriebe nach Gewerk, Leistung, Spezialisierung und Region –
@@ -145,29 +131,34 @@ export default async function HomePage() {
               Kapazitätsbezug und Sichtbarkeitsreport.
             </p>
 
-            <form action="/suche" className="mt-8 rounded-lg border border-line bg-white p-4 shadow-soft">
+            <form action="/suche" className="mt-8 rounded-lg border border-[#183b7a] bg-[#07173d] p-5 shadow-soft sm:p-6">
+              <div className="mb-4">
+                <p className="text-xs font-semibold uppercase tracking-wider text-blue-100">Der direkte Einstieg</p>
+                <h2 className="mt-1 text-2xl font-semibold text-white">Fachbetriebe suchen</h2>
+                <p className="mt-2 text-sm leading-6 text-blue-100">Gewerk, Leistung und Ort eingeben – dann passende Betriebe direkt finden.</p>
+              </div>
               <div className="grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
-                <label className="grid gap-1.5 text-xs font-semibold text-brand">
+                <label className="grid gap-1.5 text-xs font-semibold text-blue-50">
                   Was suchen Sie?
                   <input
                     name="q"
-                    className="h-12 rounded-md border border-line px-3 text-sm font-normal outline-none focus:border-action"
+                    className="h-12 rounded-md border border-line bg-white px-3 text-sm font-normal text-ink outline-none focus:border-action"
                     placeholder="z. B. Pflasterbau, Abdichtung, Metallbau"
                   />
                 </label>
-                <label className="grid gap-1.5 text-xs font-semibold text-brand">
+                <label className="grid gap-1.5 text-xs font-semibold text-blue-50">
                   Wo suchen Sie?
                   <input
                     name="ort"
-                    className="h-12 rounded-md border border-line px-3 text-sm font-normal outline-none focus:border-action"
+                    className="h-12 rounded-md border border-line bg-white px-3 text-sm font-normal text-ink outline-none focus:border-action"
                     placeholder="Ort oder PLZ"
                   />
                 </label>
-                <button className="mt-auto h-12 rounded-md bg-action px-6 text-sm font-semibold text-white hover:bg-brand">
+                <button className="mt-auto h-12 rounded-md bg-[#2f8f5b] px-6 text-sm font-semibold text-white hover:bg-[#26784b]">
                   Fachbetrieb suchen
                 </button>
               </div>
-              <div className="mt-4 flex flex-wrap gap-2 text-xs font-medium text-muted">
+              <div className="mt-4 flex flex-wrap gap-2 text-xs font-medium text-blue-100">
                 <span>Strukturierte Betriebsdaten</span>
                 <span>·</span>
                 <span>Leistungen</span>
@@ -181,6 +172,20 @@ export default async function HomePage() {
                 <OutlineLink href="/eintrag-beanspruchen">Eintrag beanspruchen</OutlineLink>
               </div>
             </form>
+
+            <div className="relative mt-10 overflow-hidden rounded-lg border border-line bg-[#07173d] shadow-soft">
+              <video
+                className="aspect-[16/7] w-full object-cover opacity-95"
+                autoPlay
+                muted
+                playsInline
+                preload="metadata"
+                aria-label="Baugewerke und Baustellensituation als Hintergrundvideo"
+              >
+                <source src="/videos/gewerkeliste-homepage-background.mp4" type="video/mp4" />
+              </video>
+              <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,23,61,0)_48%,rgba(7,23,61,0.68))]" />
+            </div>
           </div>
         </div>
       </section>

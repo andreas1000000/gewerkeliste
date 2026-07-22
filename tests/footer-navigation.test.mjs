@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 const repositoryRoot = dirname(dirname(fileURLToPath(import.meta.url)));
 const appRoot = join(repositoryRoot, "app");
 const footerSource = await readFile(join(repositoryRoot, "components", "legal-footer.tsx"), "utf8");
+const headerSource = await readFile(join(repositoryRoot, "components", "site-header.tsx"), "utf8");
 const sitemapSource = await readFile(join(repositoryRoot, "app", "sitemap.ts"), "utf8");
 const footerLinks = [...footerSource.matchAll(/href="(\/[^\"]+)"/g)].map((match) => match[1]);
 const appRoutes = new Set(await collectPageRoutes(appRoot));
@@ -34,6 +35,10 @@ test("footer exposes only existing internal routes", () => {
 test("help and correction routes are included in the public sitemap", () => {
   assert.match(sitemapSource, /\$\{baseUrl\}\/hilfe/);
   assert.match(sitemapSource, /\$\{baseUrl\}\/daten-korrigieren/);
+});
+
+test("public header makes the directory search the primary navigation", () => {
+  assert.match(headerSource, /\{ label: "Suche", href: "\/suche", primary: true \}/);
 });
 
 async function collectPageRoutes(directory) {
