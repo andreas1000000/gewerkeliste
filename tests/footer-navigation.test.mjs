@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 const repositoryRoot = dirname(dirname(fileURLToPath(import.meta.url)));
 const appRoot = join(repositoryRoot, "app");
 const footerSource = await readFile(join(repositoryRoot, "components", "legal-footer.tsx"), "utf8");
+const sitemapSource = await readFile(join(repositoryRoot, "app", "sitemap.ts"), "utf8");
 const footerLinks = [...footerSource.matchAll(/href="(\/[^\"]+)"/g)].map((match) => match[1]);
 const appRoutes = new Set(await collectPageRoutes(appRoot));
 
@@ -28,6 +29,11 @@ test("footer exposes only existing internal routes", () => {
   for (const href of footerLinks) {
     assert.equal(appRoutes.has(href), true, `Footer-Ziel ${href} hat keine vorhandene page.tsx-Route.`);
   }
+});
+
+test("help and correction routes are included in the public sitemap", () => {
+  assert.match(sitemapSource, /\$\{baseUrl\}\/hilfe/);
+  assert.match(sitemapSource, /\$\{baseUrl\}\/daten-korrigieren/);
 });
 
 async function collectPageRoutes(directory) {
