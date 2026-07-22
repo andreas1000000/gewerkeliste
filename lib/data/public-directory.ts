@@ -282,7 +282,11 @@ export async function getBusinessDirectoryCompanies(params?: {
         location,
       }),
     }))
-    .filter((entry) => entry.score > 0)
+    .filter((entry) => {
+      const tradeMatches = !tradeSlugs.length || tradeSlugs.some((slug) => publicCompanyTradeSlugSet(entry.company).has(slug));
+      const locationMatches = !location || companyMatchesDirectoryLocation(entry.company, location);
+      return entry.score > 0 && tradeMatches && locationMatches;
+    })
     .sort((a, b) => b.score - a.score || newestFirst(a.company, b.company))
     .map((entry) => entry.company)
     .slice(0, params?.limit || 50);
@@ -1554,7 +1558,15 @@ function companyDirectorySearchBlob(company: PublicCompanyWithTrade) {
       company.description,
       company.email,
       company.phone,
+      company.selected_services,
+      company.specializations,
+      company.service_regions,
+      company.service_postal_codes,
+      company.references_text,
       tradeNames.join(" "),
+      ...(company.company_services || [])
+        .filter((match) => match.status === "confirmed")
+        .flatMap((match) => [match.services?.name, match.services?.slug]),
       ...(company.company_trades || [])
         .filter((match) => match.status !== "rejected" && match.visibility_level !== "internal")
         .map((match) => match.evidence || ""),
@@ -1608,6 +1620,10 @@ function scoreBusinessDirectoryMatch(
     [company.city, 70],
     [company.postal_code, 60],
     [company.description, 55],
+    [company.selected_services?.join(" "), 70],
+    [company.specializations?.join(" "), 65],
+    [company.service_regions?.join(" "), 55],
+    [company.service_postal_codes?.join(" "), 55],
     [company.email, 45],
     [company.phone, 35],
     [tradeNames.join(" "), 75],

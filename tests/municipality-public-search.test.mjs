@@ -10,6 +10,16 @@ import {
 const publicDirectorySource = await readFile(new URL("../lib/data/public-directory.ts", import.meta.url), "utf8");
 const searchPageSource = await readFile(new URL("../app/suche/page.tsx", import.meta.url), "utf8");
 
+test("public search includes approved profile services and keeps filters strict", () => {
+  assert.match(searchPageSource, /getBusinessDirectoryCompanies/);
+  assert.match(searchPageSource, /exactMunicipality: Boolean\(selectedMunicipality\)/);
+  assert.match(publicDirectorySource, /company\.selected_services/);
+  assert.match(publicDirectorySource, /company\.specializations/);
+  assert.match(publicDirectorySource, /company\.company_services/);
+  assert.match(publicDirectorySource, /tradeMatches/);
+  assert.match(publicDirectorySource, /locationMatches/);
+});
+
 test("municipality search resolves exact names, slugs, AGS codes, and German input", () => {
   assert.equal(resolvePilotMunicipalitySearch("Riedering")?.ags, "09187167");
   assert.equal(resolvePilotMunicipalitySearch("riedering-09187167")?.name, "Riedering");

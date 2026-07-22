@@ -103,11 +103,39 @@ export async function rejectClaim(formData: FormData) {
   if (!claimId) return;
 
   const supabase = getSupabaseAdmin();
+  const { data: claim, error: claimLookupError } = await supabase
+    .from("company_claims")
+    .select("id, company_id, status")
+    .eq("id", claimId)
+    .maybeSingle();
+  if (claimLookupError) throw claimLookupError;
+  if (!claim) return;
+
   const { error } = await supabase
     .from("company_claims")
     .update({ status: "rejected", decided_at: new Date().toISOString() })
     .eq("id", claimId);
   if (error) throw error;
+
+  if (claim.status === "pending") {
+    const { data: otherPendingClaims, error: pendingLookupError } = await supabase
+      .from("company_claims")
+      .select("id")
+      .eq("company_id", claim.company_id)
+      .eq("status", "pending")
+      .neq("id", claimId)
+      .limit(1);
+    if (pendingLookupError) throw pendingLookupError;
+
+    if (!otherPendingClaims?.length) {
+      const { error: companyUpdateError } = await supabase
+        .from("companies")
+        .update({ claim_status: "rejected" })
+        .eq("id", claim.company_id)
+        .eq("claim_status", "pending");
+      if (companyUpdateError) throw companyUpdateError;
+    }
+  }
 
   revalidatePath("/admin/claims");
 }
