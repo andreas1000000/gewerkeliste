@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const navItems = [
+const navItems: Array<{ label: string; href: string; primary?: boolean }> = [
+  { label: "Suche", href: "/suche", primary: true },
   { label: "Gewerke", href: "/gewerke" },
   { label: "Betriebe", href: "/fuer-betriebe" },
   { label: "Preise", href: "/preise" },
@@ -28,7 +29,7 @@ export function SiteHeader() {
           </span>
         </Link>
 
-        <form action="/suche" className="order-3 w-full lg:order-none">
+        <form action="/suche" role="search" className="order-3 w-full lg:order-none">
           <label className="sr-only" htmlFor="site-search">
             Suche
           </label>
@@ -46,8 +47,17 @@ export function SiteHeader() {
             return (
               <Link
                 key={item.href}
-                className={active ? "text-action" : "hover:text-action"}
+                className={
+                  item.primary
+                    ? active
+                      ? "inline-flex min-h-10 items-center justify-center rounded-md bg-brand px-4 py-2 text-white"
+                      : "inline-flex min-h-10 items-center justify-center rounded-md bg-action px-4 py-2 text-white hover:bg-brand"
+                    : active
+                      ? "text-action"
+                      : "hover:text-action"
+                }
                 href={item.href}
+                aria-label={item.primary ? "GewerkeListe durchsuchen" : undefined}
                 aria-current={active ? "page" : undefined}
               >
                 {item.label}
