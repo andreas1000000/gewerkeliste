@@ -62,3 +62,20 @@ ausgewiesen statt durch erfundene Kandidaten ersetzt. Ein echter Lauf bleibt dur
 `--live`- und Bestätigungs-Gate geschützt.
 
 Der Stand dieses Runbooks wurde mit dem vollständigen Projektcheck und 119 bestandenen Tests verifiziert.
+
+## Persistierter lokaler Pilotlauf
+
+Für die technische Abnahme kann derselbe Coverage-Lauf lokal in die Agent-OS-Audit-Tabellen
+geschrieben werden:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321 \\
+SUPABASE_SERVICE_ROLE_KEY=<lokaler-service-role-key> \\
+npm run agent:coverage:dry-run -- --region riedering --persist \\
+  --confirm-live persist-agent-dry-run
+```
+
+`--persist` schreibt ausschließlich Run-, Task-, Schritt-, Tool-Call- und Kosten-Auditdaten.
+Firmen-, Kandidaten- und öffentliche Verzeichnisdaten bleiben unverändert. Das Kommando
+verweigert sich ohne die explizite Bestätigung und ohne die für die Umgebung passenden
+Supabase-Sicherheitsvariablen; der Produktionszugang wird dadurch nicht automatisch aktiviert.

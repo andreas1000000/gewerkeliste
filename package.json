@@ -19,6 +19,7 @@
     "research:open2c": "node scripts/open2c-directory-agent.mjs",
     "research:sources": "node scripts/research-source-runner.mjs",
     "research:quality": "node scripts/research-quality-audit.mjs",
+    "agent:coverage:dry-run": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON --experimental-strip-types scripts/agent-coverage-dry-run.mjs",
     "research:enrich:web": "node scripts/website-enrichment-agent.mjs",
     "research:enrich:company": "node scripts/enrich-company.mjs",
     "enrich:company": "node scripts/enrich-company.mjs",
