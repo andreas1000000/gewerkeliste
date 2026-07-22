@@ -42,6 +42,12 @@ export function LegalFooter() {
             <Link className="hover:text-white" href="/eintrag-beanspruchen">
               Eintrag beanspruchen
             </Link>
+            <Link className="hover:text-white" href="/hilfe">
+              Hilfe
+            </Link>
+            <Link className="hover:text-white" href="/daten-korrigieren">
+              Daten korrigieren
+            </Link>
             <Link className="hover:text-white" href="/ueber-gewerkeliste">
               Über uns
             </Link>

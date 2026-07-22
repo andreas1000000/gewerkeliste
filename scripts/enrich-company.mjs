@@ -111,6 +111,11 @@ report.generated_queries = queries;
 
 const searchResults = await collectSearchResults(queries);
 const existingSources = await loadCompanySources(selected.id);
+const existingSourceUrls = new Set(
+  existingSources
+    .map((source) => normalizeUrl(source.source_url))
+    .filter(Boolean),
+);
 const sourceCandidates = [
   ...officialWebsiteSeeds().map((url) => ({
     url,
@@ -186,7 +191,14 @@ const proposedUpdates = proposeCompanyUpdates(selected, websiteSource, analyzedS
 report.proposed_updates = proposedUpdates;
 report.proposed_trades = proposeTrades(selected, analyzedSources).auto;
 report.review_trades = proposeTrades(selected, analyzedSources).review;
-report.live_write_plan = buildLiveWritePlan(selected, proposedUpdates, report.proposed_trades, report.review_trades, analyzedSources);
+report.live_write_plan = buildLiveWritePlan(
+  selected,
+  proposedUpdates,
+  report.proposed_trades,
+  report.review_trades,
+  analyzedSources,
+  existingSourceUrls,
+);
 
 if (live) {
   report.live_result = await applyLiveChanges(selected, report.live_write_plan, analyzedSources);
@@ -617,12 +629,15 @@ function isContextuallyAllowedTrade(slug, { hasElectricalIdentity, hasStrongCons
   return false;
 }
 
-function buildLiveWritePlan(company, updates, autoTrades, reviewTrades, sources) {
+function buildLiveWritePlan(company, updates, autoTrades, reviewTrades, sources, existingSourceUrls = new Set()) {
   const plan = [];
   for (const [field, proposal] of Object.entries(updates)) {
     plan.push({ action: "update_company_field", company_id: company.id, field, ...proposal });
   }
-  for (const source of sources.filter(shouldPersistSource).slice(0, 10)) {
+  for (const source of sources
+    .filter(shouldPersistSource)
+    .filter((source) => !existingSourceUrls.has(normalizeUrl(source.url)))
+    .slice(0, 10)) {
     plan.push({
       action: "insert_company_source",
       company_id: company.id,
@@ -662,7 +677,12 @@ async function applyLiveChanges(company, plan, sources) {
     else result.updated_fields = Object.keys(fieldUpdates);
   }
 
-  for (const source of sources.filter((item) => item.ok).slice(0, 10)) {
+  const sourceUrlsToInsert = new Set(
+    plan
+      .filter((item) => item.action === "insert_company_source" && item.source_url)
+      .map((item) => normalizeUrl(item.source_url)),
+  );
+  for (const source of sources.filter((item) => item.ok && sourceUrlsToInsert.has(normalizeUrl(item.url)))) {
     const { error } = await supabase.from("company_sources").insert({
       company_id: company.id,
       source_type: source.source_type,

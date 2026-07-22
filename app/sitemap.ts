@@ -49,6 +49,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.5,
     },
     {
+      url: `${baseUrl}/hilfe`,
+      changeFrequency: "monthly",
+      priority: 0.45,
+    },
+    {
+      url: `${baseUrl}/daten-korrigieren`,
+      changeFrequency: "monthly",
+      priority: 0.45,
+    },
+    {
       url: `${baseUrl}/ueber-gewerkeliste`,
       changeFrequency: "monthly",
       priority: 0.6,

@@ -329,8 +329,18 @@ export function ClaimAssistant({
           Das bestehende öffentliche Profil bleibt bis dahin unverändert. Eine spätere Datenbestätigung ist keine
           Qualitätsbewertung und keine Empfehlung.
         </p>
+        <label className="mt-5 flex items-start gap-3 text-sm font-medium leading-6 text-ink">
+          <input className="mt-1 h-4 w-4 accent-action" name="consent_privacy" required type="checkbox" />
+          <span>
+            Ich habe die <a className="text-action hover:underline" href="/datenschutz">Datenschutzerklärung</a> gelesen und
+            stimme der Verarbeitung meiner Angaben zur Bearbeitung dieser Anfrage zu.
+          </span>
+        </label>
+        {errors.consent_privacy ? <p className="mt-2 text-xs font-semibold text-[#a4442b]">{errors.consent_privacy}</p> : null}
         {state.message ? (
           <div
+            aria-live="polite"
+            role={state.ok ? "status" : "alert"}
             className={`mt-5 rounded-md border px-4 py-3 text-sm font-medium ${
               state.ok ? "border-[#8ab9aa] bg-[#e8f3ef] text-[#25584c]" : "border-[#da9a8a] bg-[#fff0ed] text-[#8e2f1f]"
             }`}

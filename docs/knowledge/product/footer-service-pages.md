@@ -115,7 +115,7 @@ Ziel-Footer aufgenommen werden, sobald sie in der Matrix als vorhanden und freig
 
 #### Hilfe und FAQ
 
-- **Route / Stand:** Zielroute `/hilfe`; fehlt. `/faq` wird nicht parallel eingeführt.
+- **Route / Stand:** `/hilfe`; vorhanden, kanonische Hilfeseite. `/faq` wird nicht parallel eingeführt.
 - **Zweck / Zielgruppe:** Praktische Antworten für Suchende und Betriebe zu Suche, Profilen,
   Übernahme, Korrekturen, Verifizierungsbedeutung und Kontaktwegen.
 - **Fachlicher Owner:** Product Owner / Support.
@@ -126,7 +126,7 @@ Ziel-Footer aufgenommen werden, sobald sie in der Matrix als vorhanden und freig
 - **SEO / Indexierung:** `index, follow` für die kanonische Hilfeseite; erst nach vollständigem
   Inhalt in die Sitemap aufnehmen.
 - **Footer-Gruppe:** `Hilfe und Sicherheit`.
-- **Verlinkung:** Nein, bis `/hilfe` tatsächlich existiert und abgenommen ist.
+- **Verlinkung:** Ja; die Route existiert, ist im Footer verlinkt und in der Sitemap enthalten. Die interaktive fachliche Abnahme bleibt Teil des Preview-Gates.
 
 #### Für Betriebe
 
@@ -217,8 +217,8 @@ Ziel-Footer aufgenommen werden, sobald sie in der Matrix als vorhanden und freig
 
 #### Daten korrigieren / Inhalt melden
 
-- **Route / Stand:** Zielroute `/daten-korrigieren`; fehlt. Korrekturen sind derzeit in Eintragen-
-  und Claim-Prozesse eingebettet.
+- **Route / Stand:** `/daten-korrigieren`; vorhanden. Die Seite bündelt die bestehenden Eintragen-
+  und Claim-Prozesse sowie einen betreuten Kontaktweg.
 - **Zweck / Zielgruppe:** Suchende und Betriebe sollen falsche, veraltete oder unzulässige Profilinhalte
   melden können.
 - **Fachlicher Owner:** Product Owner / Data Quality / Support.
@@ -229,7 +229,7 @@ Ziel-Footer aufgenommen werden, sobald sie in der Matrix als vorhanden und freig
 - **SEO / Indexierung:** `index, follow`, sobald eine substanzielle Service-Seite existiert; keine
   leere Formularroute in die Sitemap.
 - **Footer-Gruppe:** `Hilfe und Sicherheit`.
-- **Verlinkung:** Nein, bis Route und betreuter Prozess existieren.
+- **Verlinkung:** Ja; die Route existiert, ist im Footer verlinkt und in der Sitemap enthalten.
 
 #### Sicherheit und vertrauenswürdige Nutzung
 

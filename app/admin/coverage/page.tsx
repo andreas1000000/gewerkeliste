@@ -160,6 +160,7 @@ export default async function AdminCoveragePage({ searchParams }: PageProps) {
 
 function CandidateReviewCard({ candidate }: { candidate: RegionalCompanyCandidate }) {
   const locked = candidate.status === "promoted";
+  const readyForApproval = candidate.status === "ready_for_publish" && candidate.source_type === "official_website" && !candidate.duplicate_of_company_id && (candidate.overall_score || 0) >= 90 && (candidate.identity_confidence || 0) >= 75 && (candidate.trade_confidence || 0) >= 75;
 
   return (
     <form className="rounded-lg border border-line bg-white p-5 shadow-soft" action={updateRegionalCandidate}>
@@ -211,7 +212,7 @@ function CandidateReviewCard({ candidate }: { candidate: RegionalCompanyCandidat
         <label className="block">
           <span className="text-xs font-semibold uppercase tracking-normal text-muted">Status</span>
           <select className="mt-1 w-full rounded-md border border-line px-3 py-2 text-sm outline-none focus:border-brand disabled:bg-panel" defaultValue={candidate.status} disabled={locked} name="status">
-            {statuses.filter(([value]) => value).map(([value, label]) => (
+            {statuses.filter(([value]) => value && value !== "promoted").map(([value, label]) => (
               <option key={value} value={value}>
                 {label}
               </option>
@@ -224,7 +225,7 @@ function CandidateReviewCard({ candidate }: { candidate: RegionalCompanyCandidat
         <button className="rounded-md border border-line px-4 py-2 text-sm font-semibold text-ink hover:bg-panel disabled:cursor-not-allowed disabled:opacity-50" disabled={locked} type="submit">
           Korrektur speichern
         </button>
-        <button className="rounded-md border border-brand bg-white px-4 py-2 text-sm font-semibold text-brand hover:bg-panel disabled:cursor-not-allowed disabled:opacity-50" disabled={locked} formAction={requestAcceptRegionalCandidateApproval}>
+        <button className="rounded-md border border-brand bg-white px-4 py-2 text-sm font-semibold text-brand hover:bg-panel disabled:cursor-not-allowed disabled:opacity-50" disabled={locked || !readyForApproval} formAction={requestAcceptRegionalCandidateApproval}>
           Anlegen anfragen
         </button>
         <button className="rounded-md border border-yellow-300 px-4 py-2 text-sm font-semibold text-yellow-900 hover:bg-yellow-50 disabled:cursor-not-allowed disabled:opacity-50" disabled={locked} formAction={rejectRegionalCandidate}>
