@@ -103,8 +103,8 @@ export default async function AboutGewerkeListePage() {
               <p>Genau aus dieser Frage heraus entsteht GewerkeListe.com.</p>
             </div>
             <div className="mt-8 flex flex-wrap gap-3">
-              <BlueLink href="/betrieb-eintragen">{pageContent.primaryLabel}</BlueLink>
-              <OutlineLink href="/betrieb-eintragen">{pageContent.secondaryLabel}</OutlineLink>
+              <BlueLink href={pageContent.primaryHref as Route}>{pageContent.primaryLabel}</BlueLink>
+              <OutlineLink href={pageContent.secondaryHref as Route}>{pageContent.secondaryLabel}</OutlineLink>
             </div>
           </div>
 

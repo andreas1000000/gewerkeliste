@@ -132,7 +132,9 @@ export default async function HomePage() {
 
             <form id="directory-search" action="/suche" role="search" aria-label="Fachbetriebssuche" className="mt-8 max-w-5xl overflow-hidden rounded-2xl bg-white p-5 text-ink shadow-2xl sm:p-7">
               <div className="flex flex-wrap gap-2 border-b border-line pb-4 text-sm font-semibold">
-                <span className="rounded-full bg-[#e8f3ef] px-4 py-2 text-brand">{pageContent.primaryLabel}</span>
+                <Link className="rounded-full bg-[#e8f3ef] px-4 py-2 text-brand" href={pageContent.primaryHref as Route}>
+                  {pageContent.primaryLabel}
+                </Link>
                 <Link className="rounded-full px-4 py-2 text-muted hover:bg-[#f1f5f9] hover:text-brand" href={pageContent.secondaryHref as Route}>
                   {pageContent.secondaryLabel}
                 </Link>

@@ -60,6 +60,7 @@ export function normalizePageContent(pageKey: EditablePageKey, value: unknown): 
   const normalized: EditablePageContent = { ...defaults };
 
   for (const field of editableFields) {
+    if (pageKey === "prices" && (field === "eyebrow" || field === "title" || field === "intro")) continue;
     const fieldValue = candidate[field];
     if (typeof fieldValue !== "string" || !fieldValue.trim()) continue;
     if (field.endsWith("Href")) {

@@ -22,6 +22,13 @@ test("site content accepts only safe internal links", () => {
   assert.match(contentSource, /\\r\\n/);
 });
 
+test("pricing hero claims remain protected while internal button links are connected", async () => {
+  assert.match(contentSource, /pageKey === "prices"/);
+  assert.match(editorSource, /disabled=\{selectedPage\.key === "prices"\}/);
+  assert.match(homeSource, /href=\{pageContent\.primaryHref as Route\}/);
+  assert.match(pricesSource, /href=\{pageContent\.primaryHref as Route\}/);
+});
+
 test("site content storage is service-role-only", () => {
   assert.match(migrationSource, /revoke all privileges on public\.site_page_content from anon, authenticated/);
   assert.match(migrationSource, /grant select, insert, update, delete on public\.site_page_content to service_role/);
@@ -31,5 +38,5 @@ test("public pages read published content without replacing protected pricing lo
   assert.match(homeSource, /getPublishedPageContent\("home"\)/);
   assert.match(pricesSource, /getPublishedPageContent\("prices"\)/);
   assert.match(pricesSource, /VERIFIED_START_PROFILE/);
-  assert.match(pricesSource, /href="\/betrieb-eintragen"/);
+  assert.match(pricesSource, /href=\{pageContent\.primaryHref as Route\}/);
 });

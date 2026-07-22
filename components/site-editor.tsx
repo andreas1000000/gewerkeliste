@@ -12,6 +12,7 @@ type SiteEditorProps = {
 
 export function SiteEditor({ pages }: SiteEditorProps) {
   const [selectedKey, setSelectedKey] = useState<EditablePageKey>(pages[0]?.key || "home");
+  const [activeAction, setActiveAction] = useState<"draft" | "publish" | null>(null);
   const [drafts, setDrafts] = useState<Record<EditablePageKey, EditablePageContent>>(() =>
     Object.fromEntries(pages.map((page) => [page.key, page.draft])) as Record<EditablePageKey, EditablePageContent>,
   );
@@ -60,7 +61,7 @@ export function SiteEditor({ pages }: SiteEditorProps) {
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-action">Inhalt bearbeiten</p>
             <h2 className="mt-2 text-2xl font-semibold text-ink">{selectedPage.label}</h2>
-            <p className="mt-1 text-sm text-muted">Ändere nur die sichtbaren Texte und Button-Beschriftungen.</p>
+            <p className="mt-1 text-sm text-muted">Ändere sichtbare Texte und Button-Beschriftungen direkt. Die Kernaussagen der Preisseite bleiben geschützt.</p>
           </div>
           <div className="rounded-lg bg-panel px-3 py-2 text-right text-xs text-muted">
             <span className="block font-semibold text-ink">Preise bleibt aktiv</span>
@@ -72,9 +73,9 @@ export function SiteEditor({ pages }: SiteEditorProps) {
           <input type="hidden" name="page_key" value={selectedPage.key} />
           <input type="hidden" name="content_json" value={serializedDraft} readOnly />
 
-          <Field label="Kleine Überschrift" value={selectedDraft.eyebrow} onChange={(value) => updateDraft("eyebrow", value)} />
-          <TextField label="Hauptüberschrift" value={selectedDraft.title} onChange={(value) => updateDraft("title", value)} rows={3} />
-          <TextField label="Einleitung" value={selectedDraft.intro} onChange={(value) => updateDraft("intro", value)} rows={4} />
+          <Field label="Kleine Überschrift" value={selectedDraft.eyebrow} onChange={(value) => updateDraft("eyebrow", value)} disabled={selectedPage.key === "prices"} />
+          <TextField label="Hauptüberschrift" value={selectedDraft.title} onChange={(value) => updateDraft("title", value)} rows={3} disabled={selectedPage.key === "prices"} />
+          <TextField label="Einleitung" value={selectedDraft.intro} onChange={(value) => updateDraft("intro", value)} rows={4} disabled={selectedPage.key === "prices"} />
 
           <div className="grid gap-4 rounded-lg border border-line bg-panel p-4 sm:grid-cols-2">
             <p className="sm:col-span-2 text-sm font-semibold text-ink">Primärer Button</p>
@@ -90,13 +91,14 @@ export function SiteEditor({ pages }: SiteEditorProps) {
           </div>
 
           <div className="flex flex-wrap items-center gap-3 border-t border-line pt-5">
-            <SubmitButton />
+            <SubmitButton activeAction={activeAction} onClick={() => setActiveAction("draft")} />
             <button
               type="submit"
               formAction={publishSitePage}
+              onClick={() => setActiveAction("publish")}
               className="rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-white hover:bg-[#265a4d] disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <PublishButtonLabel />
+              <PublishButtonLabel activeAction={activeAction} />
             </button>
             <span className="text-xs leading-5 text-muted">Als Entwurf speichern prüft den Inhalt, veröffentlicht ihn aber noch nicht.</span>
           </div>
@@ -108,28 +110,30 @@ export function SiteEditor({ pages }: SiteEditorProps) {
   );
 }
 
-function Field({ label, value, onChange }: { label: string; value: string; onChange: (value: string) => void }) {
+function Field({ label, value, onChange, disabled = false }: { label: string; value: string; onChange: (value: string) => void; disabled?: boolean }) {
   return (
     <label className="grid gap-1.5 text-sm font-semibold text-ink">
       {label}
       <input
         value={value}
+        disabled={disabled}
         onChange={(event) => onChange(event.target.value)}
-        className="h-11 rounded-lg border border-line bg-white px-3 text-sm font-normal text-ink outline-none transition focus:border-action focus:ring-2 focus:ring-action/15"
+        className="h-11 rounded-lg border border-line bg-white px-3 text-sm font-normal text-ink outline-none transition focus:border-action focus:ring-2 focus:ring-action/15 disabled:cursor-not-allowed disabled:bg-panel disabled:text-muted"
       />
     </label>
   );
 }
 
-function TextField({ label, value, onChange, rows }: { label: string; value: string; onChange: (value: string) => void; rows: number }) {
+function TextField({ label, value, onChange, rows, disabled = false }: { label: string; value: string; onChange: (value: string) => void; rows: number; disabled?: boolean }) {
   return (
     <label className="grid gap-1.5 text-sm font-semibold text-ink">
       {label}
       <textarea
         value={value}
         rows={rows}
+        disabled={disabled}
         onChange={(event) => onChange(event.target.value)}
-        className="rounded-lg border border-line bg-white px-3 py-2.5 text-sm font-normal leading-6 text-ink outline-none transition focus:border-action focus:ring-2 focus:ring-action/15"
+        className="rounded-lg border border-line bg-white px-3 py-2.5 text-sm font-normal leading-6 text-ink outline-none transition focus:border-action focus:ring-2 focus:ring-action/15 disabled:cursor-not-allowed disabled:bg-panel disabled:text-muted"
       />
     </label>
   );
@@ -156,16 +160,16 @@ function EditorPreview({ content }: { content: EditablePageContent }) {
   );
 }
 
-function SubmitButton() {
+function SubmitButton({ activeAction, onClick }: { activeAction: "draft" | "publish" | null; onClick: () => void }) {
   const { pending } = useFormStatus();
   return (
-    <button type="submit" disabled={pending} className="rounded-lg border border-line bg-white px-4 py-2.5 text-sm font-semibold text-brand hover:bg-panel disabled:cursor-not-allowed disabled:opacity-60">
-      {pending ? "Speichert …" : "Entwurf speichern"}
+    <button type="submit" onClick={onClick} disabled={pending} className="rounded-lg border border-line bg-white px-4 py-2.5 text-sm font-semibold text-brand hover:bg-panel disabled:cursor-not-allowed disabled:opacity-60">
+      {pending && activeAction === "draft" ? "Speichert …" : "Entwurf speichern"}
     </button>
   );
 }
 
-function PublishButtonLabel() {
+function PublishButtonLabel({ activeAction }: { activeAction: "draft" | "publish" | null }) {
   const { pending } = useFormStatus();
-  return pending ? "Veröffentlicht …" : "Veröffentlichen";
+  return pending && activeAction === "publish" ? "Veröffentlicht …" : "Veröffentlichen";
 }
