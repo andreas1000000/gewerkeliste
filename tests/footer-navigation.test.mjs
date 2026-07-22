@@ -40,6 +40,7 @@ test("help and correction routes are included in the public sitemap", () => {
 
 test("public header makes the directory search the primary navigation", () => {
   assert.match(headerSource, /\{ label: "Suche", href: "\/suche", primary: true \}/);
+  assert.match(headerSource, /aria-label=\{item\.primary \? "GewerkeListe durchsuchen"/);
 });
 
 test("homepage presents the directory search before the supporting video", () => {

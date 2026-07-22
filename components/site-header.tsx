@@ -57,6 +57,7 @@ export function SiteHeader() {
                       : "hover:text-action"
                 }
                 href={item.href}
+                aria-label={item.primary ? "GewerkeListe durchsuchen" : undefined}
                 aria-current={active ? "page" : undefined}
               >
                 {item.label}
