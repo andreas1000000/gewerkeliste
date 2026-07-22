@@ -7,9 +7,10 @@ const pricingSource = await readFile(new URL("../app/preise/page.tsx", import.me
 const sitemapSource = await readFile(new URL("../app/sitemap.ts", import.meta.url), "utf8");
 
 test("keeps the public header navigation in the product-owner order", () => {
-  const items = [...headerSource.matchAll(/\{ label: "([^"]+)", href: "([^"]+)" \}/g)].map((match) => [match[1], match[2]]);
+  const items = [...headerSource.matchAll(/\{ label: "([^"]+)", href: "([^"]+)"(?:, primary: true)? \}/g)].map((match) => [match[1], match[2]]);
 
   assert.deepEqual(items, [
+    ["Suche", "/suche"],
     ["Gewerke", "/gewerke"],
     ["Betriebe", "/fuer-betriebe"],
     ["Preise", "/preise"],
