@@ -332,6 +332,25 @@ export async function getCompanyClaims() {
   return data as CompanyClaimWithCompany[];
 }
 
+export async function getCompanyClaimStatusCounts() {
+  const supabase = getSupabaseAdmin();
+  const { data, error } = await supabase.from("companies").select("claim_status, verified");
+
+  if (error) throw error;
+
+  return (data || []).reduce(
+    (counts, company) => {
+      counts.claimed += company.claim_status === "claimed" ? 1 : 0;
+      counts.pending += company.claim_status === "pending" ? 1 : 0;
+      counts.rejected += company.claim_status === "rejected" ? 1 : 0;
+      counts.unclaimed += company.claim_status === "unclaimed" ? 1 : 0;
+      counts.verified += company.verified ? 1 : 0;
+      return counts;
+    },
+    { claimed: 0, pending: 0, rejected: 0, unclaimed: 0, verified: 0 },
+  );
+}
+
 export async function getCompanySubmissions(params?: {
   status?: string;
   primaryTrade?: string;

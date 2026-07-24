@@ -243,7 +243,17 @@ async function submitClaimUnchecked(formData: FormData): Promise<CompanyFormStat
   if (submissionError) return { ok: false, message: submissionError.message };
 
   if (intent === "claim") {
-    await supabase.from("companies").update({ claim_status: "pending" }).eq("id", parsed.data.company_id).neq("claim_status", "claimed");
+    const { error: companyStatusError } = await supabase
+      .from("companies")
+      .update({ claim_status: "pending" })
+      .eq("id", parsed.data.company_id)
+      .neq("claim_status", "claimed");
+    if (companyStatusError) {
+      return {
+        ok: false,
+        message: "Die Anfrage wurde gespeichert, aber der Übernahmestatus konnte nicht aktualisiert werden. Bitte senden Sie sie nicht erneut; wir prüfen den Vorgang im Admin-Bereich.",
+      };
+    }
   }
 
   revalidatePath("/");

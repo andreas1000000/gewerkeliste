@@ -101,6 +101,7 @@ export default async function HomePage() {
     .filter((trade): trade is (typeof tradeTaxonomy)[number] => Boolean(trade));
   const latestCompanies = companies.slice(0, 3);
   const verifiedCount = companies.filter((company) => company.verified).length;
+  const claimedCount = companies.filter((company) => company.claim_status === "claimed").length;
   const regionCount = new Set(companies.map((company) => company.city)).size;
   const showRealMetrics = companies.length > 0 || tradeTaxonomy.length > 0;
 
@@ -426,7 +427,8 @@ export default async function HomePage() {
           {showRealMetrics ? (
             <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
               {companies.length > 0 ? <Metric label="Betriebe" value={companies.length} /> : null}
-              {verifiedCount > 0 ? <Metric label="Bestätigt" value={verifiedCount} /> : null}
+              {claimedCount > 0 ? <Metric label="Profile übernommen" value={claimedCount} /> : null}
+              {verifiedCount > 0 ? <Metric label="Daten bestätigt" value={verifiedCount} /> : null}
               {regionCount > 0 ? <Metric label="Regionen" value={regionCount} /> : null}
               <Metric label="Gewerke" value={tradeTaxonomy.length} />
             </div>
