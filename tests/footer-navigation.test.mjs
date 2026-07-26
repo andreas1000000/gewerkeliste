@@ -18,6 +18,7 @@ test("footer exposes only existing internal routes", () => {
     "/suche",
     "/gewerke",
     "/fuer-betriebe",
+    "/preise",
     "/betrieb-eintragen",
     "/eintrag-beanspruchen",
     "/hilfe",
@@ -39,18 +40,18 @@ test("help and correction routes are included in the public sitemap", () => {
 });
 
 test("public header makes the directory search the primary navigation", () => {
-  assert.match(headerSource, /\{ label: "Suche", href: "\/suche", primary: true \}/);
+  assert.match(headerSource, /\{ label: "Suchende", href: "\/suche", primary: true \}/);
   assert.match(headerSource, /aria-label=\{item\.primary \? "GewerkeListe durchsuchen"/);
-  assert.match(headerSource, /<form action="\/suche" role="search"/);
+  assert.match(headerSource, /<nav aria-label="Hauptnavigation"/);
 });
 
-test("homepage presents the directory search before the supporting video", () => {
-  const searchIndex = homeSource.indexOf("Fachbetriebe suchen");
-  const videoIndex = homeSource.indexOf("<video");
+test("homepage makes the directory search the central portal entry", () => {
+  const searchFormIndex = homeSource.indexOf('<form id="directory-search" action="/suche"');
 
-  assert.ok(searchIndex >= 0, "Homepage needs a prominent directory search entry.");
-  assert.ok(videoIndex >= 0, "Homepage should keep the supporting Baupraxis video.");
-  assert.ok(searchIndex < videoIndex, "Directory search must appear before the supporting video.");
+  assert.ok(searchFormIndex >= 0, "Homepage needs a prominent directory search entry.");
+  assert.match(homeSource, /Fachbetriebe finden, die zu Ihrem Projekt passen\./);
+  assert.match(homeSource, /<video[\s\S]*gewerkeliste-homepage-background\.mp4/);
+  assert.match(homeSource, /aria-label="Fachbetriebssuche"/);
 });
 
 async function collectPageRoutes(directory) {
