@@ -7,6 +7,7 @@ import { companySlug } from "@/lib/slug";
 import { normalizeSocialLink } from "@/lib/social-links";
 import { getSupabaseAdmin } from "@/lib/supabase";
 import { canonicalTradeSlug } from "@/lib/trade-taxonomy";
+import { requireAdminAction } from "@/lib/admin-action-auth";
 import type { CompanyPremiumSubmissionPayload, CompanySubmission } from "@/lib/types";
 
 type ApprovedCompany = {
@@ -29,6 +30,8 @@ type ExistingCompanyMatch = ApprovedCompany & {
 };
 
 export async function approveSubmission(formData: FormData) {
+  await requireAdminAction();
+
   const id = String(formData.get("id") || "");
   if (!id) redirect("/admin/submissions?error=missing-submission-id");
 
