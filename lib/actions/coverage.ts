@@ -25,6 +25,18 @@ export async function updateRegionalCandidate(formData: FormData) {
   };
 
   const supabase = getSupabaseAdmin();
+  const { data: currentCandidate, error: lookupError } = await supabase
+    .from("company_candidates")
+    .select("status,possible_website,source_type,overall_score,identity_confidence,trade_confidence,duplicate_of_company_id")
+    .eq("id", id)
+    .single();
+  if (lookupError) throw lookupError;
+  if (!currentCandidate || currentCandidate.status === "promoted") return;
+
+  if (status === "ready_for_publish" && !isPublishReadyCandidate(currentCandidate)) {
+    return;
+  }
+
   const { error } = await supabase.from("company_candidates").update(update).eq("id", id).neq("status", "promoted");
   if (error) throw error;
 
@@ -50,7 +62,25 @@ async function updateCandidateReviewStatus(candidateId: string, status: "pending
 }
 
 function isRegionalCandidateStatus(status: string) {
-  return ["discovered", "website_found", "enriched", "needs_review", "rejected", "promoted", "ready_for_publish"].includes(status);
+  return ["discovered", "website_found", "enriched", "needs_review", "rejected", "ready_for_publish"].includes(status);
+}
+
+function isPublishReadyCandidate(candidate: {
+  possible_website?: string | null;
+  source_type?: string | null;
+  overall_score?: number | null;
+  identity_confidence?: number | null;
+  trade_confidence?: number | null;
+  duplicate_of_company_id?: string | null;
+}) {
+  return Boolean(
+    candidate.possible_website &&
+      candidate.source_type === "official_website" &&
+      (candidate.overall_score || 0) >= 90 &&
+      (candidate.identity_confidence || 0) >= 75 &&
+      (candidate.trade_confidence || 0) >= 75 &&
+      !candidate.duplicate_of_company_id,
+  );
 }
 
 function getFormString(formData: FormData, key: string) {

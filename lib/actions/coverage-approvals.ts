@@ -43,10 +43,17 @@ async function requestRegionalCandidateApproval(formData: FormData, requestedAct
   const supabase = getSupabaseAdmin();
   const { data: candidate, error } = await supabase
     .from("company_candidates")
-    .select("id,name,city,postal_code,street,possible_trade,possible_website,phone,email,source_type,source_url,status,overall_score,identity_confidence,trade_confidence,duplicate_of_company_id")
+    .select("id,name,city,postal_code,street,possible_trade,possible_website,phone,email,source_type,source_url,status,overall_score,identity_confidence,trade_confidence,duplicate_of_company_id,raw_evidence")
     .eq("id", candidateId)
     .single();
   if (error || !candidate) throw error || new Error("Kandidat wurde nicht gefunden.");
+
+  if (requestedAction === "accept_regional_candidate" && !isPublishReadyCandidate(candidate)) {
+    throw new Error("Dieser Kandidat ist noch nicht publikationsreif. Bitte Website, Identität, Gewerk und Dublettenstatus prüfen.");
+  }
+  if (requestedAction === "delete_regional_candidate" && candidate.status === "promoted") {
+    throw new Error("Ein bereits übernommener Kandidat darf nicht über diesen Review-Pfad gelöscht werden.");
+  }
 
   const config = actionConfig[requestedAction];
   const payload = {
@@ -121,4 +128,24 @@ function getFormString(formData: FormData, key: string) {
 function nullableFormString(formData: FormData, key: string) {
   const value = getFormString(formData, key);
   return value ? value : null;
+}
+
+function isPublishReadyCandidate(candidate: {
+  status?: string | null;
+  possible_website?: string | null;
+  source_type?: string | null;
+  overall_score?: number | null;
+  identity_confidence?: number | null;
+  trade_confidence?: number | null;
+  duplicate_of_company_id?: string | null;
+}) {
+  return Boolean(
+    candidate.status === "ready_for_publish" &&
+      candidate.possible_website &&
+      candidate.source_type === "official_website" &&
+      (candidate.overall_score || 0) >= 90 &&
+      (candidate.identity_confidence || 0) >= 75 &&
+      (candidate.trade_confidence || 0) >= 75 &&
+      !candidate.duplicate_of_company_id,
+  );
 }

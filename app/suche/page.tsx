@@ -4,7 +4,7 @@ import type { Route } from "next";
 import { SiteHeader } from "@/components/site-header";
 import { ClaimBadge } from "@/components/status-badge";
 import { publicResultDescription, publicResultImage } from "@/lib/company-display";
-import { getPublicCompanies } from "@/lib/data/public-directory";
+import { getBusinessDirectoryCompanies, getPublicCompanies } from "@/lib/data/public-directory";
 import { resolvePilotMunicipalitySearch } from "@/lib/municipality-catalog";
 import { createTradeSearchEntry, normalizeSearchTerm, rankTradeEntries } from "@/lib/trade-search";
 import { isSupabaseConfigured } from "@/lib/supabase";
@@ -44,6 +44,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
         radiusKm,
         selectedTrade,
         selectedTradeSet,
+        exactMunicipality: Boolean(selectedMunicipality),
       })
     : [];
   const hasActiveSearch = Boolean(q || selectedTrade || selectedTradeSet.length || location);
@@ -222,6 +223,7 @@ async function getCompaniesForSearch({
   radiusKm,
   selectedTrade,
   selectedTradeSet,
+  exactMunicipality,
 }: {
   location?: string;
   q?: string;
@@ -229,11 +231,21 @@ async function getCompaniesForSearch({
   radiusKm: string;
   selectedTrade?: string;
   selectedTradeSet: string[];
+  exactMunicipality: boolean;
 }) {
   const tradeSlugs = selectedTradeSet.length ? selectedTradeSet : selectedTrade ? [selectedTrade] : queryTradeSlugs;
 
-  if (!tradeSlugs.length) {
+  if (!exactMunicipality && !q && !location && !tradeSlugs.length) {
     return getPublicCompanies({ query: q, location, radiusKm });
+  }
+
+  if (!exactMunicipality) {
+    return getBusinessDirectoryCompanies({
+      query: q,
+      tradeSlug: tradeSlugs.join(",") || undefined,
+      location,
+      limit: 50,
+    });
   }
 
   const results = await Promise.all(

@@ -30,6 +30,13 @@ async function submitClaimUnchecked(formData: FormData): Promise<CompanyFormStat
       fieldErrors: { is_authorized: "Berechtigung ist erforderlich." },
     };
   }
+  if (formData.get("consent_privacy") !== "on") {
+    return {
+      ok: false,
+      message: "Bitte bestaetigen Sie die Datenschutzerklaerung.",
+      fieldErrors: { consent_privacy: "Datenschutzbestätigung ist erforderlich." },
+    };
+  }
 
   const intent = String(formData.get("intent") || "claim") === "update" ? "update" : "claim";
   const companyId = String(formData.get("company_id") || "");
@@ -45,6 +52,35 @@ async function submitClaimUnchecked(formData: FormData): Promise<CompanyFormStat
   const supportContribution = String(formData.get("support_contribution") || "none");
   const supportCustomAmount = String(formData.get("support_custom_amount") || "");
   const supportInvoiceRequested = formData.get("support_invoice_requested") === "on";
+
+  if (intent === "claim") {
+    if (company.claim_status === "claimed") {
+      return { ok: false, message: "Dieser Betriebseintrag wurde bereits übernommen. Eine weitere Anfrage ist nicht erforderlich." };
+    }
+
+    if (company.claim_status === "pending") {
+      return { ok: false, message: "Für diesen Betrieb liegt bereits eine Übernahmeanfrage zur Prüfung vor." };
+    }
+
+    const { data: openClaim, error: openClaimError } = await supabase
+      .from("company_claims")
+      .select("id, status")
+      .eq("company_id", companyId)
+      .in("status", ["pending", "approved"])
+      .order("created_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (openClaimError) return { ok: false, message: openClaimError.message };
+    if (openClaim) {
+      return {
+        ok: false,
+        message: openClaim.status === "approved"
+          ? "Dieser Betriebseintrag wurde bereits übernommen. Eine weitere Anfrage ist nicht erforderlich."
+          : "Für diesen Betrieb liegt bereits eine Übernahmeanfrage zur Prüfung vor.",
+      };
+    }
+  }
 
   const parsed = claimSchema.safeParse({
     company_id: companyId,
