@@ -13,9 +13,7 @@ import {
   updatePlannerProfile as updatePlannerProfileAction,
 } from "@/lib/actions/planner";
 import {
-  approveClaim as approveClaimAction,
   approveResearchCandidate as approveResearchCandidateAction,
-  approveSubmission as approveSubmissionAction,
   createCompany as createCompanyAction,
   deleteCompany as deleteCompanyAction,
   deletePlannerContact as deletePlannerContactAction,
@@ -28,7 +26,10 @@ import {
   updateCompany as updateCompanyAction,
 } from "@/lib/actions/approval-required";
 import { submitBusinessEntry as submitBusinessEntryAction } from "@/lib/actions/business-entry";
+import { approveClaim as approveClaimAction } from "@/lib/actions/claim-approval";
 import { submitClaim as submitClaimAction } from "@/lib/actions/claims";
+import { approveSubmission as approveSubmissionAction } from "@/lib/actions/submissions";
+import { requireAdminAction } from "@/lib/admin-action-auth";
 import { parseTradeName } from "@/lib/validation";
 
 export async function importPlannerContacts(
@@ -99,6 +100,8 @@ export async function approveClaim(formData: FormData) {
 }
 
 export async function rejectClaim(formData: FormData) {
+  await requireAdminAction();
+
   const claimId = String(formData.get("claim_id") || "");
   if (!claimId) return;
 

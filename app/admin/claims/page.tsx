@@ -2,12 +2,18 @@ import Link from "next/link";
 import type { Route } from "next";
 import { Shell } from "@/components/shell";
 import { approveClaim, rejectClaim } from "@/lib/actions";
-import { getCompanyClaims } from "@/lib/data";
+import { getCompanyClaimStatusCounts, getCompanyClaims } from "@/lib/data";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminClaimsPage() {
-  const claims = await getCompanyClaims();
+  const [claims, companyStatusCounts] = await Promise.all([getCompanyClaims(), getCompanyClaimStatusCounts()]);
+  const claimCounts = {
+    total: claims.length,
+    pending: claims.filter((claim) => claim.status === "pending").length,
+    approved: claims.filter((claim) => claim.status === "approved").length,
+    rejected: claims.filter((claim) => claim.status === "rejected").length,
+  };
 
   return (
     <Shell>
@@ -21,6 +27,19 @@ export default async function AdminClaimsPage() {
         </Link>
       </div>
 
+      <p className="mb-6 max-w-4xl rounded-lg border border-[#d8e4ef] bg-[#fbfcff] px-4 py-3 text-sm leading-6 text-muted">
+        „Anfragen“ sind eingereichte Übernahmewünsche. „Profile übernommen“ ist der aktuelle Status im Firmenverzeichnis.
+        „Daten bestätigt“ beschreibt die Prüfung von Betriebsdaten – das ist nicht automatisch dasselbe wie eine Übernahme.
+      </p>
+
+      <section className="mb-6 grid gap-4 md:grid-cols-5">
+        <Metric label="Anfragen gesamt" value={claimCounts.total} />
+        <Metric label="Warten auf Prüfung" value={claimCounts.pending} />
+        <Metric label="Freigegeben" value={claimCounts.approved} />
+        <Metric label="Profile übernommen" value={companyStatusCounts.claimed} />
+        <Metric label="Daten bestätigt" value={companyStatusCounts.verified} />
+      </section>
+
       <div className="overflow-hidden rounded-lg border border-line bg-white shadow-soft">
         <table className="min-w-full border-collapse text-left text-sm">
           <thead className="bg-panel text-xs uppercase tracking-normal text-muted">
@@ -32,7 +51,14 @@ export default async function AdminClaimsPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-line">
-            {claims.map((claim) => (
+            {claims.length === 0 ? (
+              <tr>
+                <td colSpan={4} className="px-4 py-10 text-center text-sm leading-6 text-muted">
+                  Keine Claim-Anfragen gespeichert. Die Zahl „Profile übernommen“ wird separat aus den Firmenstatus gelesen;
+                  sie kann deshalb größer sein als die Zahl der aktuell gespeicherten Anfragen.
+                </td>
+              </tr>
+            ) : claims.map((claim) => (
               <tr key={claim.id} className="align-top">
                 <td className="px-4 py-4">
                   <div className="font-semibold text-ink">{claim.companies?.name || "Firma geloescht"}</div>
@@ -50,7 +76,7 @@ export default async function AdminClaimsPage() {
                   {claim.phone ? <div className="text-sm text-muted">{claim.phone}</div> : null}
                   <p className="mt-2 max-w-xl text-sm leading-6 text-ink">{claim.message}</p>
                 </td>
-                <td className="px-4 py-4 font-semibold text-ink">{claim.status}</td>
+                <td className="px-4 py-4 font-semibold text-ink">{claimStatusLabel(claim.status)}</td>
                 <td className="px-4 py-4">
                   {claim.status === "pending" && claim.companies ? (
                     <div className="flex justify-end gap-2">
@@ -75,4 +101,21 @@ export default async function AdminClaimsPage() {
       </div>
     </Shell>
   );
+}
+
+function Metric({ label, value }: { label: string; value: number }) {
+  return (
+    <div className="rounded-lg border border-line bg-white p-5 shadow-soft">
+      <div className="text-sm font-medium text-muted">{label}</div>
+      <div className="mt-2 text-3xl font-semibold text-ink">{value}</div>
+    </div>
+  );
+}
+
+function claimStatusLabel(status: string) {
+  return {
+    pending: "Offen",
+    approved: "Freigegeben",
+    rejected: "Abgelehnt",
+  }[status] || status;
 }

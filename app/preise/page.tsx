@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import type { Route } from "next";
 import Link from "next/link";
 import { SiteHeader } from "@/components/site-header";
+import { getPublishedPageContent } from "@/lib/data/site-pages";
 import {
   BASIS_FEATURES,
   BASIS_PROFILE,
@@ -31,20 +33,21 @@ const verifiedAvailabilityCopy = VERIFIED_START_PROFILE.orderingEnabled
   ? "Das verifizierte Startprofil ist aktuell verfügbar."
   : "Das verifizierte Startprofil wird freigeschaltet, sobald alle zugesagten Funktionen vollständig verfügbar und geprüft sind. Aktuell ist es noch nicht buchbar.";
 
-export default function PricingPage() {
+export default async function PricingPage() {
+  const pageContent = await getPublishedPageContent("prices");
+
   return (
     <main className="min-h-screen bg-[#f7f8fb] text-ink">
       <SiteHeader />
 
       <section className="border-b border-line bg-white">
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
-          <p className="text-sm font-semibold uppercase tracking-normal text-brand">Preise</p>
+          <p className="text-sm font-semibold uppercase tracking-normal text-brand">{pageContent.eyebrow}</p>
           <h1 className="mt-3 max-w-4xl text-4xl font-semibold tracking-normal text-brand sm:text-5xl">
-            Sichtbarkeit bleibt kostenlos. Vertrauen braucht klare Leistungen.
+            {pageContent.title}
           </h1>
           <p className="mt-6 max-w-3xl text-lg leading-8 text-[#30415f]">
-            GewerkeListe.com trennt das dauerhaft kostenlose Basisprofil von einem späteren verifizierten Startprofil.
-            Die fachliche Auffindbarkeit und das organische Ranking hängen nicht von einer Zahlung ab.
+            {pageContent.intro}
           </p>
 
           <aside className="mt-8 max-w-4xl rounded-lg border border-[#d8e4ef] bg-[#fbfcff] p-5" role="note">
@@ -55,9 +58,9 @@ export default function PricingPage() {
           <div className="mt-8">
             <Link
               className="inline-flex min-h-11 items-center justify-center rounded-md bg-action px-5 text-sm font-semibold text-white hover:bg-brand"
-              href="/betrieb-eintragen"
+              href={pageContent.primaryHref as Route}
             >
-              Kostenloses Basisprofil eintragen
+              {pageContent.primaryLabel}
             </Link>
           </div>
         </div>

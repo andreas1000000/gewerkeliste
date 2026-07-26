@@ -6,15 +6,7 @@ function approvalRequiredError() {
   return new Error(APPROVAL_REQUIRED_MESSAGE);
 }
 
-export async function approveClaim(_formData: FormData): Promise<never> {
-  throw approvalRequiredError();
-}
-
 export async function approveResearchCandidate(_formData: FormData): Promise<never> {
-  throw approvalRequiredError();
-}
-
-export async function approveSubmission(_formData: FormData): Promise<never> {
   throw approvalRequiredError();
 }
 

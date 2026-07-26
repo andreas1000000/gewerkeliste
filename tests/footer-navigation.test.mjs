@@ -9,6 +9,7 @@ const appRoot = join(repositoryRoot, "app");
 const footerSource = await readFile(join(repositoryRoot, "components", "legal-footer.tsx"), "utf8");
 const headerSource = await readFile(join(repositoryRoot, "components", "site-header.tsx"), "utf8");
 const homeSource = await readFile(join(repositoryRoot, "app", "page.tsx"), "utf8");
+const siteContentSource = await readFile(join(repositoryRoot, "lib", "site-page-content.ts"), "utf8");
 const sitemapSource = await readFile(join(repositoryRoot, "app", "sitemap.ts"), "utf8");
 const footerLinks = [...footerSource.matchAll(/href="(\/[^\"]+)"/g)].map((match) => match[1]);
 const appRoutes = new Set(await collectPageRoutes(appRoot));
@@ -49,7 +50,8 @@ test("homepage makes the directory search the central portal entry", () => {
   const searchFormIndex = homeSource.indexOf('<form id="directory-search" action="/suche"');
 
   assert.ok(searchFormIndex >= 0, "Homepage needs a prominent directory search entry.");
-  assert.match(homeSource, /Fachbetriebe finden, die zu Ihrem Projekt passen\./);
+  assert.match(homeSource, /getPublishedPageContent\("home"\)/);
+  assert.match(siteContentSource, /Fachbetriebe finden, die zu Ihrem Projekt passen\./);
   assert.match(homeSource, /<video[\s\S]*gewerkeliste-homepage-background\.mp4/);
   assert.match(homeSource, /aria-label="Fachbetriebssuche"/);
 });

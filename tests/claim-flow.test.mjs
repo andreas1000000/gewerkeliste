@@ -3,6 +3,8 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const actionSource = await readFile(new URL("../lib/actions/claims.ts", import.meta.url), "utf8");
+const approvalSource = await readFile(new URL("../lib/actions/claim-approval.ts", import.meta.url), "utf8");
+const adminClaimsSource = await readFile(new URL("../app/admin/claims/page.tsx", import.meta.url), "utf8");
 const assistantSource = await readFile(new URL("../components/claim-assistant.tsx", import.meta.url), "utf8");
 const fallbackSource = await readFile(new URL("../components/claim-form.tsx", import.meta.url), "utf8");
 
@@ -37,4 +39,17 @@ test("rejecting the last pending claim reopens the company entry for a new reque
   assert.match(actionsSource, /\.from\("company_claims"\)\n    \.select\("id, company_id, status"\)/);
   assert.match(actionsSource, /\.eq\("status", "pending"\)\n      \.neq\("id", claimId\)/);
   assert.match(actionsSource, /\.update\(\{ claim_status: "rejected" \}\)/);
+});
+
+test("claim approval is admin-protected and synchronizes both statuses", () => {
+  assert.match(approvalSource, /requireAdminAction\(\)/);
+  assert.match(approvalSource, /\.update\(\{ claim_status: "claimed" \}\)/);
+  assert.match(approvalSource, /status: "approved", decided_at/);
+});
+
+test("claim admin view distinguishes requests from profile status", () => {
+  assert.match(adminClaimsSource, /Anfragen gesamt/);
+  assert.match(adminClaimsSource, /Profile übernommen/);
+  assert.match(adminClaimsSource, /Daten bestätigt/);
+  assert.match(adminClaimsSource, /Keine Claim-Anfragen gespeichert/);
 });
