@@ -182,7 +182,29 @@ function parseArgs(argv) {
 async function readPullRequestBody(eventPath) {
   if (!eventPath) return "";
   const event = JSON.parse(await readFile(eventPath, "utf8"));
-  return event.pull_request?.body || "";
+  const eventBody = event.pull_request?.body || "";
+  if (eventBody) return eventBody;
+
+  const token = process.env.GITHUB_TOKEN;
+  const repository = process.env.GITHUB_REPOSITORY;
+  const pullRequestNumber = event.pull_request?.number;
+  if (!token || !repository || !pullRequestNumber) return "";
+
+  try {
+    const apiBase = process.env.GITHUB_API_URL || "https://api.github.com";
+    const response = await fetch(`${apiBase}/repos/${repository}/pulls/${pullRequestNumber}`, {
+      headers: {
+        Accept: "application/vnd.github+json",
+        Authorization: `Bearer ${token}`,
+        "X-GitHub-Api-Version": "2022-11-28",
+      },
+    });
+    if (!response.ok) return "";
+    const pullRequest = await response.json();
+    return pullRequest.body || "";
+  } catch {
+    return "";
+  }
 }
 
 function changedFilesFromGit(baseSha, headSha) {
