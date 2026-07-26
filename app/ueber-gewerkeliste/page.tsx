@@ -4,6 +4,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { getPublishedPageContent } from "@/lib/data/site-pages";
+import { getPageSection } from "@/lib/site-page-content";
 
 export const metadata: Metadata = {
   title: "Warum GewerkeListe.com entsteht | Über uns",
@@ -23,49 +24,18 @@ const trustItems = [
   "Aus der Region Rosenheim",
 ];
 
-const transparencyQuestions = [
-  "Welche Betriebe gibt es?",
-  "Wo sind sie tätig?",
-  "Welche Leistungen bieten sie an?",
-  "Welche Spezialisierungen haben sie?",
-  "Wie können Auftraggeber sie erreichen?",
-  "Welche Betriebe fehlen noch?",
-];
-
-const benefits = [
-  "Auftraggeber finden schneller passende Betriebe.",
-  "Planer sparen Suchaufwand.",
-  "Bauleiter bekommen bessere Übersicht.",
-  "Betriebe werden mit ihren tatsächlichen Leistungen sichtbarer.",
-  "Regionale Kapazitäten können besser genutzt werden.",
-  "Unnötige Wege und ineffiziente Suche werden reduziert.",
-];
-
-const audiences = [
-  "Handwerksbetriebe",
-  "Bauleiter",
-  "Architekten",
-  "Planer",
-  "Projektentwickler",
-  "Bauherren",
-  "Hausverwaltungen",
-  "Kommunen",
-  "Unternehmen mit Bauprojekten",
-];
-
-const monetizationExamples = [
-  "Verifizierung",
-  "Referenzprojekte",
-  "Bildergalerien",
-  "Unternehmensvorstellungen",
-  "Verfügbarkeiten",
-  "Matching",
-  "Ausschreibungen",
-  "professionelle Werkzeuge für Planer und Auftraggeber",
-];
-
 export default async function AboutGewerkeListePage() {
   const pageContent = await getPublishedPageContent("about");
+  const trustSection = getPageSection(pageContent, "about-trust");
+  const problemSection = getPageSection(pageContent, "about-problem");
+  const observationSection = getPageSection(pageContent, "about-observation");
+  const positioningSection = getPageSection(pageContent, "about-positioning");
+  const boundarySection = getPageSection(pageContent, "about-boundary");
+  const benefitSection = getPageSection(pageContent, "about-benefit");
+  const buildSection = getPageSection(pageContent, "about-build");
+  const financeSection = getPageSection(pageContent, "about-finance");
+  const personalSection = getPageSection(pageContent, "about-personal");
+  const joinSection = getPageSection(pageContent, "about-join");
 
   return (
     <main className="min-h-screen bg-[#f7f8fb] text-ink">
@@ -132,218 +102,128 @@ export default async function AboutGewerkeListePage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <h2 className="text-2xl font-semibold text-brand">Gebaut von jemandem, der den Bau kennt.</h2>
+      {trustSection?.enabled ? <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+        <h2 className="text-2xl font-semibold text-brand">{trustSection.title}</h2>
         <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {trustItems.map((item) => (
-            <Fact key={item}>{item}</Fact>
+          {(trustSection.items.length ? trustSection.items : trustItems.map((item) => ({ label: item, detail: "" }))).map((item) => (
+            <Fact key={item.label}>{item.label}</Fact>
           ))}
         </div>
-      </section>
+      </section> : null}
 
-      <TwoColumnSection
-        eyebrow="Das Problem"
-        title="Der Markt ist nicht leer. Er ist nur schlecht sichtbar."
-        body={
-          <>
-            <p>Auf dem Bau fehlt nicht nur Personal. Oft fehlt vor allem Übersicht.</p>
-            <p>
-              Viele Auftraggeber suchen passende Betriebe. Viele Betriebe leisten gute Arbeit. Viele Spezialisten sind
-              regional vorhanden. Und trotzdem finden beide Seiten häufig nicht zusammen.
-            </p>
-            <p>
-              Dann wird telefoniert, herumgefragt, weiterempfohlen, gesucht und improvisiert. Große Büros fragen kleine
-              Netzwerke. Bauleiter fragen andere Bauleiter. Bauherren suchen über Google. Gute Betriebe bleiben
-              unsichtbar, wenn sie nicht zufällig genannt werden.
-            </p>
-            <p>Das kostet Zeit, Geld, Energie und oft auch Baufortschritt.</p>
-          </>
-        }
+      {problemSection?.enabled ? <TwoColumnSection
+        eyebrow={problemSection.eyebrow}
+        title={problemSection.title}
+        body={<>{problemSection.body.split("\n\n").map((paragraph) => <p key={paragraph}>{paragraph}</p>)}</>}
         aside={
           <Card>
             <h3 className="text-lg font-semibold text-ink">Woran es häufig scheitert</h3>
             <div className="mt-4 grid gap-3">
-              {["fehlende Übersicht", "verstreute Informationen", "unklare Spezialisierungen", "schwer erkennbare Einsatzgebiete"].map(
-                (item) => (
-                  <Fact key={item}>{item}</Fact>
+              {problemSection.items.map((item) => (
+                  <Fact key={item.label}>{item.label}</Fact>
                 ),
               )}
             </div>
           </Card>
         }
-      />
+      /> : null}
 
-      <TwoColumnSection
-        eyebrow="Beobachtung aus der Praxis"
-        title="Die entscheidende Frage lautet fast immer: Wer kann das wirklich?"
-        body={
-          <>
-            <p>Bei Bauprojekten geht es selten nur um ein Gewerk. Es geht um konkrete Leistungen.</p>
-            <p>
-              Nicht nur Gartenbau, sondern zum Beispiel Natursteinmauern, Granitpflaster, Entwässerungsrinnen,
-              Außenanlagen, Stützwände oder Hofbefestigungen.
-            </p>
-            <p>
-              Nicht nur Elektro, sondern PV, Zähleranlagen, KNX, Baustrom, Ladeinfrastruktur oder
-              Industrieinstallationen.
-            </p>
-            <p>
-              Nicht nur Metallbau, sondern Treppen, Geländer, Loftwände, Tore, Sonderkonstruktionen oder
-              Edelstahlverarbeitung.
-            </p>
-            <p className="font-semibold text-action">
-              GewerkeListe.com soll genau diese Leistungstiefe sichtbar machen. Deshalb darf ein Betrieb nicht künstlich
-              auf wenige Leistungen begrenzt werden.
-            </p>
-          </>
-        }
+      {observationSection?.enabled ? <TwoColumnSection
+        eyebrow={observationSection.eyebrow}
+        title={observationSection.title}
+        body={<>{observationSection.body.split("\n\n").map((paragraph, index) => <p key={paragraph} className={index === observationSection.body.split("\n\n").length - 1 ? "font-semibold text-action" : undefined}>{paragraph}</p>)}</>}
         aside={
           <Card>
             <h3 className="text-lg font-semibold text-ink">Was sichtbar werden soll</h3>
             <div className="mt-4 grid gap-3">
-              {["Gewerke", "Leistungen", "Spezialisierungen", "Tätigkeitsgebiet", "Kontaktwege", "Betriebsstatus"].map((item) => (
-                <Fact key={item}>{item}</Fact>
+              {observationSection.items.map((item) => (
+                <Fact key={item.label}>{item.label}</Fact>
               ))}
             </div>
           </Card>
         }
-      />
+      /> : null}
 
-      <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      {positioningSection?.enabled ? <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="rounded-lg border border-line bg-white p-6 shadow-soft sm:p-8">
-          <p className="text-sm font-semibold uppercase tracking-normal text-brand">Was anders werden soll</p>
-          <h2 className="mt-2 text-3xl font-semibold text-brand">Nicht der billigste Betrieb. Der passende Betrieb.</h2>
-          <div className="mt-5 max-w-4xl space-y-4 text-base leading-7 text-ink">
-            <p>GewerkeListe.com soll keine Plattform werden, die Handwerker gegeneinander ausspielt.</p>
-            <p>Es geht nicht darum, Preise zu drücken. Es geht darum, den Markt besser auffindbar zu machen.</p>
-            <p>
-              Ein guter Betrieb soll gefunden werden, weil er die passende Leistung in der passenden Region anbietet.
-              Ein Auftraggeber soll schneller erkennen, wer für sein Vorhaben grundsätzlich infrage kommt. Ein Planer
-              oder Bauleiter soll nicht jedes Mal bei null anfangen müssen.
-            </p>
-          </div>
+          <p className="text-sm font-semibold uppercase tracking-normal text-brand">{positioningSection.eyebrow}</p>
+          <h2 className="mt-2 text-3xl font-semibold text-brand">{positioningSection.title}</h2>
+          <div className="mt-5 max-w-4xl space-y-4 whitespace-pre-line text-base leading-7 text-ink">{positioningSection.body}</div>
         </div>
       </section>
+      : null}
 
-      <TwoColumnSection
-        eyebrow="Klare Abgrenzung"
-        title="Kein Lead-Portal. Keine Kontaktbörse gegen Gebühr. Keine Preisschlacht."
-        body={
-          <>
-            <p>
-              Viele bestehende Plattformen leben davon, Kontakte zu verkaufen oder Betriebe in Konkurrenz um einzelne
-              Anfragen zu bringen.
-            </p>
-            <p>GewerkeListe.com verfolgt einen anderen Ansatz. Die Plattform soll zuerst Transparenz schaffen.</p>
-            <p>Das Ziel ist nicht, den Markt auszupressen. Das Ziel ist, ihn besser zu ordnen.</p>
-          </>
-        }
+      {boundarySection?.enabled ? <TwoColumnSection
+        eyebrow={boundarySection.eyebrow}
+        title={boundarySection.title}
+        body={<>{boundarySection.body.split("\n\n").map((paragraph) => <p key={paragraph}>{paragraph}</p>)}</>}
         aside={
           <Card>
             <h3 className="text-lg font-semibold text-ink">Transparenz heißt konkret</h3>
             <div className="mt-4 grid gap-3">
-              {transparencyQuestions.map((item) => (
-                <Fact key={item}>{item}</Fact>
+              {boundarySection.items.map((item) => (
+                <Fact key={item.label}>{item.label}</Fact>
               ))}
             </div>
           </Card>
         }
-      />
+      /> : null}
 
-      <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      {benefitSection?.enabled ? <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="rounded-lg border border-line bg-white p-6 shadow-soft sm:p-8">
-          <p className="text-sm font-semibold uppercase tracking-normal text-brand">Gesellschaftlicher Nutzen</p>
-          <h2 className="mt-2 text-3xl font-semibold text-brand">
-            Weniger Zufall. Weniger Suchaufwand. Bessere Bauprojekte.
-          </h2>
-          <p className="mt-5 max-w-4xl text-base leading-7 text-ink">
-            Wenn der Markt transparenter wird, profitieren alle. GewerkeListe.com soll dazu beitragen, dass Bauprojekte
-            einfacher, schneller und besser vorbereitet werden können.
-          </p>
+          <p className="text-sm font-semibold uppercase tracking-normal text-brand">{benefitSection.eyebrow}</p>
+          <h2 className="mt-2 text-3xl font-semibold text-brand">{benefitSection.title}</h2>
+          <p className="mt-5 max-w-4xl whitespace-pre-line text-base leading-7 text-ink">{benefitSection.body}</p>
           <div className="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {benefits.map((item) => (
-              <Fact key={item}>{item}</Fact>
+            {benefitSection.items.map((item) => (
+              <Fact key={item.label}>{item.label}</Fact>
             ))}
           </div>
         </div>
-      </section>
+      </section> : null}
 
-      <TwoColumnSection
-        eyebrow="Aufbauphase"
-        title="Wir bauen das pragmatisch auf."
-        body={
-          <>
-            <p>GewerkeListe.com befindet sich im Aufbau.</p>
-            <p>
-              Die Plattform startet bewusst einfach: Betriebe sichtbar machen, Leistungen erfassen, Regionen
-              strukturieren und Suchenden eine bessere Übersicht geben.
-            </p>
-            <p>Nicht perfekt am ersten Tag. Aber nützlich von Anfang an.</p>
-            <p className="font-semibold text-action">
-              Mit jedem Betrieb, jedem Hinweis und jeder Verbesserung wird die Plattform wertvoller.
-            </p>
-          </>
-        }
+      {buildSection?.enabled ? <TwoColumnSection
+        eyebrow={buildSection.eyebrow}
+        title={buildSection.title}
+        body={<>{buildSection.body.split("\n\n").map((paragraph, index) => <p key={paragraph} className={index === buildSection.body.split("\n\n").length - 1 ? "font-semibold text-action" : undefined}>{paragraph}</p>)}</>}
         aside={
           <Card>
             <h3 className="text-lg font-semibold text-ink">Gebaut für</h3>
             <div className="mt-4 flex flex-wrap gap-2">
-              {audiences.map((audience) => (
-                <span key={audience} className="rounded-full border border-line bg-panel px-3 py-2 text-sm font-semibold text-ink">
-                  {audience}
+              {buildSection.items.map((item) => (
+                <span key={item.label} className="rounded-full border border-line bg-panel px-3 py-2 text-sm font-semibold text-ink">
+                  {item.label}
                 </span>
               ))}
             </div>
           </Card>
         }
-      />
+      /> : null}
 
-      <TwoColumnSection
-        eyebrow="Finanzierung und Fairness"
-        title="Kostenlos starten. Echten Mehrwert später ausbauen."
-        body={
-          <>
-            <p>Der Basiseintrag soll niedrigschwellig bleiben, damit möglichst viele Betriebe sichtbar werden können.</p>
-            <p>
-              Der Aufbau einer guten Plattform kostet trotzdem Geld: Entwicklung, Hosting, Datenpflege, Prüfung,
-              Verbesserung und Support.
-            </p>
-            <p>
-              Später können zusätzliche Funktionen entstehen, wenn sie echten Mehrwert schaffen. Wichtig bleibt:
-              Grundlegende Sichtbarkeit und das tatsächliche Leistungsspektrum eines Betriebs dürfen nicht künstlich
-              versteckt werden.
-            </p>
-          </>
-        }
+      {financeSection?.enabled ? <TwoColumnSection
+        eyebrow={financeSection.eyebrow}
+        title={financeSection.title}
+        body={<>{financeSection.body.split("\n\n").map((paragraph) => <p key={paragraph}>{paragraph}</p>)}</>}
         aside={
           <Card>
             <h3 className="text-lg font-semibold text-ink">Möglicher Zusatznutzen</h3>
             <div className="mt-4 grid gap-3">
-              {monetizationExamples.map((item) => (
-                <Fact key={item}>{item}</Fact>
+              {financeSection.items.map((item) => (
+                <Fact key={item.label}>{item.label}</Fact>
               ))}
             </div>
           </Card>
         }
-      />
+      /> : null}
 
-      <section className="mx-auto grid max-w-7xl gap-5 px-4 py-6 sm:px-6 lg:grid-cols-[minmax(0,1fr)_420px] lg:px-8">
+      {personalSection?.enabled ? <section className="mx-auto grid max-w-7xl gap-5 px-4 py-6 sm:px-6 lg:grid-cols-[minmax(0,1fr)_420px] lg:px-8">
         <Card>
-          <p className="text-sm font-semibold uppercase tracking-normal text-brand">Persönlich</p>
-          <h2 className="mt-2 text-3xl font-semibold text-brand">Warum ich das mache.</h2>
-          <div className="mt-5 space-y-4 text-base leading-7 text-ink">
-            <p>Ich habe selbst auf dem Bau gearbeitet. Ich kenne Baustellen nicht nur aus Besprechungsräumen.</p>
-            <p>Später habe ich Bauingenieurwesen studiert und auf Auftraggeberseite viele Projekte begleitet.</p>
-            <p>
-              Dabei habe ich immer wieder gesehen, wie viel Zeit verloren geht, nur weil passende Betriebe schwer zu
-              finden sind.
-            </p>
-            <p>Diese Lücke möchte ich schließen. Nicht theoretisch. Nicht kompliziert. Sondern pragmatisch, aus der Praxis heraus und Schritt für Schritt.</p>
-          </div>
+          <p className="text-sm font-semibold uppercase tracking-normal text-brand">{personalSection.eyebrow}</p>
+          <h2 className="mt-2 text-3xl font-semibold text-brand">{personalSection.title}</h2>
+          <div className="mt-5 space-y-4 whitespace-pre-line text-base leading-7 text-ink">{personalSection.body}</div>
           <div className="mt-6 rounded-lg border border-line bg-panel p-5">
-            <p className="text-base font-semibold text-brand">Andreas Moser</p>
-            <p className="mt-1 text-sm text-muted">Gelernter Maurer | Bauingenieur | Bauherrenvertreter</p>
-            <p className="mt-1 text-sm text-muted">Gründer von GewerkeListe.com</p>
+            <p className="text-base font-semibold text-brand">{personalSection.items[0]?.label || "Andreas Moser"}</p>
+            <p className="mt-1 text-sm text-muted">{personalSection.items[0]?.detail}</p>
           </div>
         </Card>
 
@@ -354,22 +234,18 @@ export default async function AboutGewerkeListePage() {
             nur, weil zufällig jemand ihre Telefonnummer kennt.
           </p>
         </Card>
-      </section>
+      </section> : null}
 
-      <section className="mx-auto max-w-7xl px-4 pb-12 pt-6 sm:px-6 lg:px-8">
+      {joinSection?.enabled ? <section className="mx-auto max-w-7xl px-4 pb-12 pt-6 sm:px-6 lg:px-8">
         <div className="rounded-lg bg-[#082a63] p-6 text-white shadow-soft sm:p-8 lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-8">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-normal text-blue-100">Mitmachen</p>
-            <h2 className="mt-2 text-3xl font-semibold">Hilf mit, die GewerkeListe besser zu machen.</h2>
-            <p className="mt-4 max-w-3xl text-sm leading-6 text-blue-50">
-              Eine gute GewerkeListe entsteht nicht am Schreibtisch allein. Sie entsteht durch Hinweise aus der Praxis.
-              Wenn ein Betrieb fehlt, ein Gewerk nicht sauber erfasst ist oder eine Leistung besser beschrieben werden
-              sollte, freue ich mich über Rückmeldung.
-            </p>
+            <p className="text-sm font-semibold uppercase tracking-normal text-blue-100">{joinSection.eyebrow}</p>
+            <h2 className="mt-2 text-3xl font-semibold">{joinSection.title}</h2>
+            <p className="mt-4 max-w-3xl whitespace-pre-line text-sm leading-6 text-blue-50">{joinSection.body}</p>
           </div>
           <div className="mt-6 grid gap-3 lg:mt-0">
-            <WhiteLink href="/betrieb-eintragen">Betrieb eintragen</WhiteLink>
-            <WhiteOutlineLink href="/betrieb-eintragen">Fehlenden Betrieb melden</WhiteOutlineLink>
+            <WhiteLink href={(joinSection.primaryHref || "/betrieb-eintragen") as Route}>{joinSection.primaryLabel || "Betrieb eintragen"}</WhiteLink>
+            <WhiteOutlineLink href={(joinSection.secondaryHref || "/betrieb-eintragen") as Route}>{joinSection.secondaryLabel || "Fehlenden Betrieb melden"}</WhiteOutlineLink>
             <a
               className="inline-flex min-h-11 items-center justify-center rounded-md border border-white/45 px-5 text-sm font-semibold text-white hover:bg-white/10"
               href="mailto:kontakt@gewerkeliste.com?subject=Feedback%20zu%20GewerkeListe.com"
@@ -378,7 +254,7 @@ export default async function AboutGewerkeListePage() {
             </a>
           </div>
         </div>
-      </section>
+      </section> : null}
     </main>
   );
 }
