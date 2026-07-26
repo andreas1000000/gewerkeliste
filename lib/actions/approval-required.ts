@@ -10,10 +10,6 @@ export async function approveResearchCandidate(_formData: FormData): Promise<nev
   throw approvalRequiredError();
 }
 
-export async function approveSubmission(_formData: FormData): Promise<never> {
-  throw approvalRequiredError();
-}
-
 export async function createCompany(_formData: FormData): Promise<never> {
   throw approvalRequiredError();
 }

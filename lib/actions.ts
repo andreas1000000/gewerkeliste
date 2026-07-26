@@ -14,7 +14,6 @@ import {
 } from "@/lib/actions/planner";
 import {
   approveResearchCandidate as approveResearchCandidateAction,
-  approveSubmission as approveSubmissionAction,
   createCompany as createCompanyAction,
   deleteCompany as deleteCompanyAction,
   deletePlannerContact as deletePlannerContactAction,
@@ -29,6 +28,7 @@ import {
 import { submitBusinessEntry as submitBusinessEntryAction } from "@/lib/actions/business-entry";
 import { approveClaim as approveClaimAction } from "@/lib/actions/claim-approval";
 import { submitClaim as submitClaimAction } from "@/lib/actions/claims";
+import { approveSubmission as approveSubmissionAction } from "@/lib/actions/submissions";
 import { requireAdminAction } from "@/lib/admin-action-auth";
 import { parseTradeName } from "@/lib/validation";
 
