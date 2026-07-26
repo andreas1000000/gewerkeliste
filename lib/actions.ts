@@ -15,7 +15,6 @@ import {
 import {
   approveClaim as approveClaimAction,
   approveResearchCandidate as approveResearchCandidateAction,
-  approveSubmission as approveSubmissionAction,
   createCompany as createCompanyAction,
   deleteCompany as deleteCompanyAction,
   deletePlannerContact as deletePlannerContactAction,
@@ -28,6 +27,7 @@ import {
   updateCompany as updateCompanyAction,
 } from "@/lib/actions/approval-required";
 import { submitBusinessEntry as submitBusinessEntryAction } from "@/lib/actions/business-entry";
+import { approveSubmission as approveSubmissionAction } from "@/lib/actions/submissions";
 import { submitClaim as submitClaimAction } from "@/lib/actions/claims";
 import { parseTradeName } from "@/lib/validation";
 
