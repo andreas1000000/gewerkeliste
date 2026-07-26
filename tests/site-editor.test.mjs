@@ -17,6 +17,17 @@ test("site editor provides draft, publish and preview controls", () => {
   assert.match(editorPageSource, /20260722180000_site_page_content\.sql/);
 });
 
+test("site editor exposes complete core-page sections and visibility controls", () => {
+  assert.match(editorSource, /Seitenbereiche/);
+  assert.match(editorSource, /Sichtbar/);
+  assert.match(editorSource, /Listen und Karten/);
+  assert.match(contentSource, /home-benefits/);
+  assert.match(contentSource, /about-problem/);
+  assert.match(contentSource, /about-finance/);
+  assert.match(contentSource, /prices-comparison/);
+  assert.match(homeSource, /getPageSection\(pageContent, "home-benefits"\)/);
+});
+
 test("site content accepts only safe internal links", () => {
   assert.match(contentSource, /startsWith\("\/"\)/);
   assert.match(contentSource, /startsWith\("\/\/"\)/);

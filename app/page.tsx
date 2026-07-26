@@ -5,6 +5,7 @@ import { ServiceAreaPreview } from "@/components/map/service-area-preview";
 import { SiteHeader } from "@/components/site-header";
 import { getPublicCompanies } from "@/lib/data/public-directory";
 import { getPublishedPageContent } from "@/lib/data/site-pages";
+import { getPageSection } from "@/lib/site-page-content";
 import type { ServiceAreaGeoJson } from "@/lib/geo/types";
 import { isSupabaseConfigured } from "@/lib/supabase";
 import { tradeTaxonomy } from "@/lib/trade-taxonomy";
@@ -29,16 +30,6 @@ const benefits = [
     title: "Region und Wirkungskreis einordnen",
     text: "Nicht nur Sitz und Radius zählen. GewerkeListe.com macht sichtbar, in welchen Regionen ein Betrieb fachlich relevant ist.",
   },
-];
-
-const registerFields = [
-  "Gewerk",
-  "Ort und Region",
-  "angebotene Leistungen",
-  "Wirkungskreis und Tätigkeitsgebiet",
-  "Kontakt",
-  "Verifizierungsstatus ohne Qualitätsgarantie",
-  "Referenzen, soweit vorhanden",
 ];
 
 const comparisons = [
@@ -103,6 +94,16 @@ export default async function HomePage() {
   const verifiedCount = companies.filter((company) => company.verified).length;
   const regionCount = new Set(companies.map((company) => company.city)).size;
   const showRealMetrics = companies.length > 0 || tradeTaxonomy.length > 0;
+  const benefitsSection = getPageSection(pageContent, "home-benefits");
+  const marketSection = getPageSection(pageContent, "home-market");
+  const audiencesSection = getPageSection(pageContent, "home-audiences");
+  const projectsSection = getPageSection(pageContent, "home-projects");
+  const tradesSection = getPageSection(pageContent, "home-trades");
+  const serviceAreaSection = getPageSection(pageContent, "home-service-area");
+  const businessSection = getPageSection(pageContent, "home-business");
+  const comparisonSection = getPageSection(pageContent, "home-comparison");
+  const proofSection = getPageSection(pageContent, "home-proof");
+  const closingSection = getPageSection(pageContent, "home-closing");
 
   return (
     <main className="min-h-screen bg-[#f7f8fb] text-ink">
@@ -191,46 +192,40 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <h2 className="text-2xl font-semibold text-[#07173d]">Schneller zum passenden Fachbetrieb.</h2>
+      {benefitsSection?.enabled ? <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <h2 className="text-2xl font-semibold text-[#07173d]">{benefitsSection.title}</h2>
         <div className="mt-5 grid gap-4 lg:grid-cols-3">
-          {benefits.map((benefit) => (
-            <Card key={benefit.title}>
-              <h3 className="text-lg font-semibold text-ink">{benefit.title}</h3>
-              <p className="mt-3 text-sm leading-6 text-muted">{benefit.text}</p>
+          {(benefitsSection.items.length ? benefitsSection.items : benefits.map((benefit) => ({ label: benefit.title, detail: benefit.text }))).map((benefit) => (
+            <Card key={benefit.label}>
+              <h3 className="text-lg font-semibold text-ink">{benefit.label}</h3>
+              <p className="mt-3 text-sm leading-6 text-muted">{benefit.detail}</p>
             </Card>
           ))}
         </div>
-      </section>
+      </section> : null}
 
-      <section className="mx-auto grid max-w-7xl gap-5 px-4 py-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_420px] lg:px-8">
+      {marketSection?.enabled ? <section className="mx-auto grid max-w-7xl gap-5 px-4 py-4 sm:px-6 lg:grid-cols-[minmax(0,1fr)_420px] lg:px-8">
         <Card>
           <h2 className="text-2xl font-semibold text-[#07173d]">
-            Der Markt ist nicht leer. Er ist schlecht sortiert.
+            {marketSection.title}
           </h2>
-          <p className="mt-4 text-base leading-7 text-ink">
-            In der Baupraxis geht viel Zeit verloren, weil Informationen zu Fachbetrieben verstreut sind: Website,
-            Empfehlung, Branchenbuch, Suchmaschine oder persönliche Kontaktliste. GewerkeListe.com bringt diese
-            Informationen in eine fachliche B2B-Suchlogik vor Ausschreibung, Anfrage und Vergabe.
-          </p>
+          <p className="mt-4 whitespace-pre-line text-base leading-7 text-ink">{marketSection.body}</p>
         </Card>
         <Card>
           <div className="grid gap-3 sm:grid-cols-2">
-            {registerFields.map((field) => (
-              <CheckLine key={field}>{field}</CheckLine>
+            {marketSection.items.map((item) => (
+              <CheckLine key={item.label}>{item.detail ? `${item.label}: ${item.detail}` : item.label}</CheckLine>
             ))}
           </div>
         </Card>
-      </section>
+      </section> : null}
 
-      <section className="mx-auto grid max-w-7xl gap-5 px-4 py-4 sm:px-6 lg:grid-cols-2 lg:px-8">
+      {audiencesSection?.enabled ? <section className="mx-auto grid max-w-7xl gap-5 px-4 py-4 sm:px-6 lg:grid-cols-2 lg:px-8">
         <Card>
-          <h2 className="text-2xl font-semibold text-[#07173d]">Für Planer, Bauleiter und Auftraggeber</h2>
-          <Step number="1" text="Gewerk und Ort eingeben" />
-          <Step number="2" text="Leistung, Spezialisierung und Region einordnen" />
-          <Step number="3" text="passende Betriebe direkt kontaktieren" />
+          <h2 className="text-2xl font-semibold text-[#07173d]">{audiencesSection.title}</h2>
+          {audiencesSection.items.map((item) => <Step key={item.label} number={item.label} text={item.detail} />)}
           <div className="mt-6">
-            <BlueLink href="/suche">Fachbetrieb suchen</BlueLink>
+            <BlueLink href={(audiencesSection.primaryHref || "/suche") as Route}>{audiencesSection.primaryLabel || "Fachbetrieb suchen"}</BlueLink>
           </div>
         </Card>
         <Card>
@@ -245,36 +240,29 @@ export default async function HomePage() {
             <BlueLink href="/eintrag-beanspruchen">Eintrag beanspruchen</BlueLink>
           </div>
         </Card>
-      </section>
+      </section> : null}
 
-      <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      {projectsSection?.enabled ? <section className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         <div className="rounded-lg border border-line bg-white p-6 shadow-soft sm:p-8 lg:grid lg:grid-cols-[minmax(0,1fr)_320px] lg:gap-8">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-normal text-brand">Für Bauprojekte</p>
-            <h2 className="mt-2 text-3xl font-semibold text-[#07173d]">Finde Betriebe, die zur Aufgabe und zur Region passen.</h2>
-            <p className="mt-4 text-base font-semibold leading-7 text-ink">
-              GewerkeListe.com ordnet Leistungen, Standorte und Wirkungskreise so, dass Projektbeteiligte schneller
-              eine belastbare Vorauswahl treffen können.
-            </p>
-            <p className="mt-3 max-w-3xl text-sm leading-6 text-muted">
-              Der Wert entsteht nicht durch Druck oder Preiskampf, sondern durch bessere Marktübersicht: welches Gewerk,
-              welche Leistung, welche Region, welcher Kontaktweg.
-            </p>
+            <p className="text-sm font-semibold uppercase tracking-normal text-brand">{projectsSection.eyebrow}</p>
+            <h2 className="mt-2 text-3xl font-semibold text-[#07173d]">{projectsSection.title}</h2>
+            <p className="mt-4 whitespace-pre-line text-base font-semibold leading-7 text-ink">{projectsSection.body}</p>
           </div>
           <div className="mt-6 flex items-center lg:mt-0 lg:justify-end">
-            <BlueLink href="/suche">Gewerk suchen</BlueLink>
+            <BlueLink href={(projectsSection.primaryHref || "/suche") as Route}>{projectsSection.primaryLabel || "Gewerk suchen"}</BlueLink>
           </div>
         </div>
-      </section>
+      </section> : null}
 
-      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      {tradesSection?.enabled ? <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div>
-            <h2 className="text-2xl font-semibold text-[#07173d]">Gewerke entdecken</h2>
-            <p className="mt-2 text-sm text-muted">Wichtige Baugewerke als strukturierter Einstieg in die Suche.</p>
+            <h2 className="text-2xl font-semibold text-[#07173d]">{tradesSection.title}</h2>
+            <p className="mt-2 text-sm text-muted">{tradesSection.body}</p>
           </div>
-          <Link className="text-sm font-semibold text-[#1f5fd4] hover:underline" href={"/gewerke" as Route}>
-            Alle Gewerke anzeigen
+          <Link className="text-sm font-semibold text-[#1f5fd4] hover:underline" href={(tradesSection.primaryHref || "/gewerke") as Route}>
+            {tradesSection.primaryLabel || "Alle Gewerke anzeigen"}
           </Link>
         </div>
         <div className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -288,29 +276,19 @@ export default async function HomePage() {
             </Link>
           ))}
         </div>
-      </section>
+      </section> : null}
 
-      <section className="mx-auto grid max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_480px] lg:items-center lg:px-8">
+      {serviceAreaSection?.enabled ? <section className="mx-auto grid max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_480px] lg:items-center lg:px-8">
         <div className="rounded-lg border border-line bg-white p-6 shadow-soft sm:p-8">
-          <p className="text-sm font-semibold uppercase tracking-normal text-brand">Wirkungskreis-Suche</p>
-          <h2 className="mt-2 text-3xl font-semibold text-[#07173d]">Nicht nur Standort. Wirkungskreis.</h2>
-          <p className="mt-4 text-base leading-7 text-ink">
-            Handwerksbetriebe arbeiten nicht in perfekten Kreisen. GewerkeListe macht sichtbar, in welchen Regionen,
-            Orten und Projektgebieten Betriebe tatsächlich aktiv sein wollen.
-          </p>
+          <p className="text-sm font-semibold uppercase tracking-normal text-brand">{serviceAreaSection.eyebrow}</p>
+          <h2 className="mt-2 text-3xl font-semibold text-[#07173d]">{serviceAreaSection.title}</h2>
+          <p className="mt-4 whitespace-pre-line text-base leading-7 text-ink">{serviceAreaSection.body}</p>
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
-            <CheckLine>Firmenstandort als Punkt</CheckLine>
-            <CheckLine>Einsatzgebiet als Wirkungskreis</CheckLine>
-            <CheckLine>später frei markierbar mit Karte</CheckLine>
-            <CheckLine>geprüft vor Veröffentlichung</CheckLine>
+            {serviceAreaSection.items.map((item) => <CheckLine key={item.label}>{item.label}</CheckLine>)}
           </div>
-          <p className="mt-5 text-sm leading-6 text-muted">
-            Karten- und Wirkungskreisfunktionen werden schrittweise ausgebaut. Wirkungskreise können vom Betrieb
-            angegeben oder aus Quellen abgeleitet und geprüft werden.
-          </p>
           <div className="mt-6 flex flex-wrap gap-3">
-            <BlueLink href="/suche">Gewerke suchen</BlueLink>
-            <OutlineLink href="/betrieb-eintragen">Betrieb eintragen</OutlineLink>
+            <BlueLink href={(serviceAreaSection.primaryHref || "/suche") as Route}>{serviceAreaSection.primaryLabel || "Gewerke suchen"}</BlueLink>
+            <OutlineLink href={(serviceAreaSection.secondaryHref || "/betrieb-eintragen") as Route}>{serviceAreaSection.secondaryLabel || "Betrieb eintragen"}</OutlineLink>
           </div>
         </div>
         <ServiceAreaPreview
@@ -320,27 +298,16 @@ export default async function HomePage() {
           status="draft"
           type="manual_drawn"
         />
-      </section>
+      </section> : null}
 
-      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+      {businessSection?.enabled ? <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
         <div className="rounded-lg bg-[#082a63] p-6 text-white shadow-soft sm:p-8 lg:grid lg:grid-cols-[minmax(0,1fr)_360px] lg:gap-8">
           <div>
-            <h2 className="text-2xl font-semibold">Ihr Betrieb. Ihre Leistungen. Ihr Tätigkeitsgebiet.</h2>
-            <p className="mt-4 max-w-3xl text-sm leading-6 text-blue-50">
-              Ein Betriebseintrag zeigt sachlich, welche Leistungen Ihr Betrieb anbietet, wo Sie tätig sind und wie
-              Auftraggeber Sie erreichen können. Die vollständige Nennung von Gewerken, Leistungen und Spezialisierungen
-              gehört zur Grundsichtbarkeit und wird nicht künstlich begrenzt.
-            </p>
+            <h2 className="text-2xl font-semibold">{businessSection.title}</h2>
+            <p className="mt-4 max-w-3xl whitespace-pre-line text-sm leading-6 text-blue-50">{businessSection.body}</p>
             <div className="mt-5 grid gap-2 sm:grid-cols-2">
-              <WhiteCheck>Betriebsdaten bestätigen</WhiteCheck>
-              <WhiteCheck>Leistungsbreite vollständig darstellen</WhiteCheck>
-              <WhiteCheck>Wirkungskreis festlegen</WhiteCheck>
-              <WhiteCheck>Kontaktwege aktuell halten</WhiteCheck>
+              {businessSection.items.map((item) => <WhiteCheck key={item.label}>{item.label}</WhiteCheck>)}
             </div>
-            <p className="mt-5 text-sm leading-6 text-blue-50">
-              GewerkeListe.com ist kein System für Preiskampf und verkauft keine einzelnen Anfragen. Ziel ist eine
-              professionelle Daten- und Vertrauensschicht für echte Baugewerke.
-            </p>
           </div>
           <div className="mt-6 rounded-lg bg-white p-5 text-ink lg:mt-0">
             <h3 className="text-lg font-semibold text-[#07173d]">Ist Ihr Betrieb schon gelistet?</h3>
@@ -348,12 +315,12 @@ export default async function HomePage() {
               Suchen Sie Ihren Betrieb und übernehmen Sie den Eintrag, wenn die Daten bestätigt werden sollen.
             </p>
             <div className="mt-5 grid gap-3">
-              <BlueLink href="/eintrag-beanspruchen">Eintrag beanspruchen</BlueLink>
-              <OutlineLink href="/betrieb-eintragen">Betrieb eintragen</OutlineLink>
+              <BlueLink href={(businessSection.primaryHref || "/eintrag-beanspruchen") as Route}>{businessSection.primaryLabel || "Eintrag beanspruchen"}</BlueLink>
+              <OutlineLink href={(businessSection.secondaryHref || "/betrieb-eintragen") as Route}>{businessSection.secondaryLabel || "Betrieb eintragen"}</OutlineLink>
             </div>
           </div>
         </div>
-      </section>
+      </section> : null}
 
       <section className="mx-auto grid max-w-7xl gap-5 px-4 py-6 sm:px-6 lg:grid-cols-3 lg:px-8">
         <Card>
@@ -374,18 +341,16 @@ export default async function HomePage() {
         </Card>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
-        <h2 className="text-2xl font-semibold text-[#07173d]">Was GewerkeListe.com anders macht</h2>
+      {comparisonSection?.enabled ? <section className="mx-auto max-w-7xl px-4 py-4 sm:px-6 lg:px-8">
+        <h2 className="text-2xl font-semibold text-[#07173d]">{comparisonSection.title}</h2>
         <div className="mt-5 grid gap-4 lg:grid-cols-3">
-          {comparisons.map((item) => (
-            <Card key={item.title}>
-              <h3 className="text-lg font-semibold text-ink">{item.title}</h3>
+          {(comparisonSection.items.length ? comparisonSection.items : comparisons.map((item) => ({ label: item.title, detail: item.items.join(" · ") }))).map((item, index) => (
+            <Card key={item.label}>
+              <h3 className="text-lg font-semibold text-ink">{item.label}</h3>
               <ul className="mt-4 grid gap-2 text-sm text-muted">
-                {item.items.map((point) => (
+                {item.detail.split(" · ").filter(Boolean).map((point) => (
                   <li key={point}>
-                    <span className={`mr-2 font-semibold ${item.positive ? "text-brand" : "text-accent"}`}>
-                      {item.positive ? "✓" : "×"}
-                    </span>
+                    <span className={`mr-2 font-semibold ${index === 2 ? "text-brand" : "text-accent"}`}>{index === 2 ? "✓" : "×"}</span>
                     {point}
                   </li>
                 ))}
@@ -393,28 +358,22 @@ export default async function HomePage() {
             </Card>
           ))}
         </div>
-      </section>
+      </section> : null}
 
-      <section className="mx-auto grid max-w-7xl gap-5 px-4 py-10 sm:px-6 lg:grid-cols-3 lg:px-8">
+      {proofSection?.enabled ? <section className="mx-auto grid max-w-7xl gap-5 px-4 py-10 sm:px-6 lg:grid-cols-3 lg:px-8">
         <Card>
-          <h2 className="text-xl font-semibold text-[#07173d]">Bestätigte Betriebsdaten schaffen Vertrauen.</h2>
-          <p className="mt-4 text-sm leading-6 text-muted">
-            Ein verifizierter Eintrag zeigt, dass Betriebsdaten übernommen und bestätigt wurden. Das ist keine
-            Qualitätsgarantie, sondern ein Signal für nachvollziehbare Daten und aktuelle Kontaktwege.
-          </p>
+          <h2 className="text-xl font-semibold text-[#07173d]">{proofSection.title}</h2>
+          <p className="mt-4 whitespace-pre-line text-sm leading-6 text-muted">{proofSection.body}</p>
         </Card>
         <Card>
-          <h2 className="text-xl font-semibold text-[#07173d]">Aus echter Baupraxis entstanden.</h2>
-          <p className="mt-4 text-sm leading-6 text-muted">
-            GewerkeListe.com wurde von Andreas Moser gegründet. Er ist gelernter Maurer, Bauingenieur und kennt die Suche
-            nach passenden Fachbetrieben aus der Baupraxis.
-          </p>
+          <h2 className="text-xl font-semibold text-[#07173d]">{proofSection.items[0]?.label || "Aus echter Baupraxis entstanden."}</h2>
+          <p className="mt-4 text-sm leading-6 text-muted">{proofSection.items[0]?.detail}</p>
           <Link className="mt-5 inline-flex text-sm font-semibold text-[#1f5fd4] hover:underline" href={"/ueber-gewerkeliste" as Route}>
             Mehr über GewerkeListe.com
           </Link>
         </Card>
         <Card>
-          <h2 className="text-xl font-semibold text-[#07173d]">Aufbauphase</h2>
+          <h2 className="text-xl font-semibold text-[#07173d]">{proofSection.items[1]?.label || "Aufbauphase"}</h2>
           {latestCompanies.length > 0 ? (
             <div className="mt-4 grid gap-3">
               {latestCompanies.map((company) => (
@@ -427,10 +386,7 @@ export default async function HomePage() {
               ))}
             </div>
           ) : (
-            <p className="mt-4 text-sm leading-6 text-muted">
-              Aufbau startet im Raum Rosenheim/Chiemgau. Das Register wächst Region für Region, Gewerk für Gewerk und
-              Betrieb für Betrieb.
-            </p>
+            <p className="mt-4 text-sm leading-6 text-muted">{proofSection.items[1]?.detail}</p>
           )}
           {showRealMetrics ? (
             <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
@@ -441,21 +397,19 @@ export default async function HomePage() {
             </div>
           ) : null}
         </Card>
-      </section>
+      </section> : null}
 
-      <section className="mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
+      {closingSection?.enabled ? <section className="mx-auto max-w-7xl px-4 pb-12 sm:px-6 lg:px-8">
         <div className="rounded-lg border border-line bg-white p-6 text-center shadow-soft sm:p-8">
-          <h2 className="text-3xl font-semibold text-[#07173d]">Suchen, finden, einordnen.</h2>
-          <p className="mx-auto mt-4 max-w-2xl text-sm leading-6 text-muted">
-            Starten Sie mit Gewerk und Ort – oder übernehmen Sie den Eintrag Ihres Betriebs.
-          </p>
+          <h2 className="text-3xl font-semibold text-[#07173d]">{closingSection.title}</h2>
+          <p className="mx-auto mt-4 max-w-2xl whitespace-pre-line text-sm leading-6 text-muted">{closingSection.body}</p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
-            <BlueLink href="/suche">Fachbetrieb suchen</BlueLink>
-            <OutlineLink href="/eintrag-beanspruchen">Eintrag beanspruchen</OutlineLink>
+            <BlueLink href={(closingSection.primaryHref || "/suche") as Route}>{closingSection.primaryLabel || "Fachbetrieb suchen"}</BlueLink>
+            <OutlineLink href={(closingSection.secondaryHref || "/eintrag-beanspruchen") as Route}>{closingSection.secondaryLabel || "Eintrag beanspruchen"}</OutlineLink>
             <OutlineLink href="/betrieb-eintragen">Betrieb eintragen</OutlineLink>
           </div>
         </div>
-      </section>
+      </section> : null}
 
       <script
         type="application/ld+json"
