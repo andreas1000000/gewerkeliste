@@ -1,8 +1,21 @@
 .next
 node_modules
-.env
-.env.local
-.env.*.local
+# Local environment files and secrets. Keep only explicitly safe templates tracked.
+.env*
+!.env.example
+!.env.template
+
+# Local credentials, certificates and private keys.
+*.pem
+*.key
+*.p12
+*.pfx
+credentials/
+secrets/
+credentials.json
+service-account*.json
+*_credentials.json
+
 work
 outputs
 *.log
